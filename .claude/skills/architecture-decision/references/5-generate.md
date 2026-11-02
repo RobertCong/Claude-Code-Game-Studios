@@ -1,20 +1,20 @@
-# /architecture-decision — Step 5: Generate the ADR
+# /architecture-decision — 第 5 步：生成 ADR
 
-> Part of `/architecture-decision`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> 属于 `/architecture-decision`。`SKILL.md` 指明了何时读取此文件；它所解析的
+> 设置以及其后续标题下的规则在这里同样适用。
 
-## 5. Generate the ADR
+## 5. 生成 ADR
 
-**In this file:**
+**本文件包含：**
 
-- The ADR template
-- 5.5 Engine Specialist Validation
-- 5.6 Technical Director Strategic Review, with the review mode check
-- 5.7 GDD Sync Check: found, none found, could not check
-- Write approval
-- Update Architecture Registry, and the registry append logic
+- ADR 模板
+- 5.5 引擎专家验证
+- 5.6 技术总监战略评审，以及评审模式检查
+- 5.7 GDD 同步检查：找到、未找到、无法检查
+- 写入批准
+- 更新架构注册表，以及注册表追加逻辑
 
-Following this format:
+遵循以下格式：
 
 ```markdown
 # ADR-[NNNN]: [Title]
@@ -141,42 +141,40 @@ to implement it.]
 - [Links to related design documents]
 ```
 
-**Always write the Layer row.** An ADR with no Layer row counts as critical
-(Foundation) wherever it is read, so at `standard` its advisory items become
-blockers. The value is the ADR's own layer, how early in the build it must
-exist: the layer `docs/architecture/architecture.md`'s layer map gives the
-system this decision governs. With no layer map, or no system in it, ask the
-user, with the four values as options. Never take it from an epic that
-references the ADR, and never reuse a `Domain` value (the template's note under
-Engine Compatibility says why).
+**始终写入 Layer 行。** 没有 Layer 行的 ADR 无论在哪里读取都会被算作关键
+（Foundation），因此在 `standard` 下其建议项会变成
+阻塞项。该值是 ADR 自身的层级，即它必须在构建中多早存在：
+`docs/architecture/architecture.md` 的层级映射为此决策所治理的系统
+指定的层级。如果没有层级映射，或其没有该系统的条目，询问
+用户，并以四个值作为选项。绝不要从引用该 ADR 的史诗中取它，
+也绝不重用 `Domain` 值（模板在 Engine Compatibility 下方的说明解释了原因）。
 
-5.5. **Engine Specialist Validation** — Before saving, spawn the **primary engine specialist** via `Agent` to validate the drafted ADR:
-   - Resolve the primary specialist: `<engine>-specialist` derived from `engine.name` in `project.yaml` (Godot→`godot-specialist`, Unity→`unity-specialist`, Unreal→`unreal-specialist`); if `engine.name` is absent or empty, read the Primary line of the `## Engine Specialists` section in `.claude/docs/technical-preferences.md`
-   - If no engine is configured (neither source yields an engine), skip this step **Record ``Engine validation: NOT ASSESSED — no engine configured (`engine.name` unset in `project.yaml`)`` in this run's output.** A skipped check that says nothing is indistinguishable from a check that passed; the reader cannot tell engine guidance was never sought.
-   - Spawn `subagent_type: [primary specialist]` with: the ADR's Engine Compatibility section, Decision section, Key Interfaces, and the engine reference docs path. Ask them to:
-     1. Confirm the proposed approach is idiomatic for the pinned engine version
-     2. Flag any APIs or patterns that are deprecated or changed post-training-cutoff
-     3. Identify engine-specific risks or gotchas not captured in the current ADR draft
-   - If the specialist identifies a **blocking issue** (wrong API, deprecated approach, engine version incompatibility): revise the Decision and Engine Compatibility sections accordingly, then confirm the changes with the user before proceeding
-   - If the specialist finds **minor notes** only: incorporate them into the ADR's Risks subsection
+5.5. **引擎专家验证** —— 在保存之前，通过 `Agent` 生成**主引擎专家**来验证起草的 ADR：
+   - 解析主专家：由 `project.yaml` 中的 `engine.name` 推导 `<engine>-specialist`（Godot→`godot-specialist`，Unity→`unity-specialist`，Unreal→`unreal-specialist`）；如果 `engine.name` 缺失或为空，读取 `.claude/docs/technical-preferences.md` 中 `## Engine Specialists` 章节的 Primary 行
+   - 如果未配置引擎（两个来源都未产出引擎），跳过此步，**在本次运行的输出中记录 ``Engine validation: NOT ASSESSED — no engine configured (`engine.name` unset in `project.yaml`)``。** 一项跳过却不作声明的检查与一项通过的检查无法区分；读者无法知道从未寻求过引擎指导。
+   - 生成 `subagent_type: [primary specialist]`，传入：ADR 的 Engine Compatibility 章节、Decision 章节、Key Interfaces，以及引擎参考文档路径。请他们：
+     1. 确认所提议的方法对于锁定版本的引擎是地道的
+     2. 标出任何已弃用或在训练截止后发生变更的 API 或模式
+     3. 识别当前 ADR 草案中未捕获的引擎专属风险或陷阱
+   - 如果专家识别出**阻塞问题**（错误的 API、已弃用的方法、引擎版本不兼容）：相应地修订 Decision 和 Engine Compatibility 章节，然后在继续前与用户确认更改
+   - 如果专家只发现**次要说明**：将它们纳入 ADR 的 Risks 小节
 
-**Review mode check** — apply before spawning TD-ADR:
-- `solo` → skip. Note: "TD-ADR skipped — Solo mode." Proceed to Step 5.7 (GDD sync check).
-- `lean` → skip (not a PHASE-GATE). Note: "TD-ADR skipped — Lean mode." Proceed to Step 5.7 (GDD sync check).
-- `full` → spawn as normal.
+**评审模式检查** —— 在生成 TD-ADR 之前应用：
+- `solo` → 跳过。注明："TD-ADR skipped — Solo mode." 进入第 5.7 步（GDD 同步检查）。
+- `lean` → 跳过（不是 PHASE-GATE）。注明："TD-ADR skipped — Lean mode." 进入第 5.7 步（GDD 同步检查）。
+- `full` → 照常生成。
 
-5.6. **Technical Director Strategic Review** — After the engine specialist validation, spawn `technical-director` via `Agent` using gate **TD-ADR** (`.claude/docs/director-gates/td-adr.md`):
-   - Pass: the ADR file path (or draft content), engine version, domain, any existing ADRs in the same domain
-   - The TD validates architectural coherence (is this decision consistent with the whole system?) — distinct from the engine specialist's API-level check
-   - On CONCERNS: show them to the user verbatim and ask with the standard options from `director-gates.md` — `Revise flagged items` / `Accept and proceed` / `Discuss further`. Revise the flagged Decision or Alternatives sections only on `Revise flagged items`.
-   - On REJECT: show the blockers verbatim and revise the Decision or Alternatives sections before proceeding.
-   - A revised draft still reaches the user through the write approval below; nothing is written before it. A `NOT ASSESSED` answer is not an approval — name the missing input (`director-gates.md`).
+5.6. **技术总监战略评审** —— 在引擎专家验证之后，使用质量闸门 **TD-ADR**（`.claude/docs/director-gates/td-adr.md`）通过 `Agent` 生成 `technical-director`：
+   - 传入：ADR 文件路径（或草案内容）、引擎版本、领域、同一领域中的任何现有 ADR
+   - TD 验证架构一致性（此决策是否与整个系统一致？）——区别于引擎专家的 API 级检查
+   - 遇到 CONCERNS 时：逐字向用户展示，并使用 `director-gates.md` 中的标准选项询问——`Revise flagged items` / `Accept and proceed` / `Discuss further`。仅在 `Revise flagged items` 时修订被标出的 Decision 或 Alternatives 章节。
+   - 遇到 REJECT 时：逐字展示阻塞项，并在继续前修订 Decision 或 Alternatives 章节。
+   - 修订后的草案仍会通过下面的写入批准到达用户；在此之前不会写入任何内容。`NOT ASSESSED` 回答不是批准——要指明缺失的输入（`director-gates.md`）。
 
-5.7. **GDD Sync Check** — Before presenting the write approval, scan all GDDs
-referenced in the "GDD Requirements Addressed" section for naming inconsistencies
-with the ADR's Key Interfaces and Decision sections (renamed signals, API methods,
-or data types). If any are found, surface them as a **prominent warning block**
-immediately before the write approval — not as a footnote:
+5.7. **GDD 同步检查** —— 在呈现写入批准之前，扫描 "GDD Requirements Addressed" 章节中引用的所有 GDD，
+   检查其与 ADR 的 Key Interfaces 和 Decision 章节是否存在命名不一致
+   （重命名的信号、API 方法或数据类型）。如果发现任何不一致，在写入批准之前
+   立即将其作为**醒目的警告块**呈现——而不是脚注：
 
 ```
 ⚠️ GDD SYNC REQUIRED
@@ -187,48 +185,46 @@ The GDD must be updated before or alongside writing this ADR to prevent
 developers reading the GDD from implementing the wrong interface.
 ```
 
-**This check has three outcomes, not two.** The two above are "found" and "none
-found"; the third is **could not check**, which must never take the silent
-branch and render like a clean result.
+**此检查有三种结果，而不是两种。** 上面两种是 "找到" 和 "未找到"；第三种是**无法检查**，
+它绝不能走静默分支、渲染得像一个干净结果。
 
-- **None found** — print one line, do not stay silent:
+- **未找到** —— 打印一行，不要沉默：
   `GDD sync: checked [N] referenced GDD(s), no naming inconsistencies.`
-  A silent pass is indistinguishable from a check that never ran, and this one
-  guards against developers implementing the wrong interface from a stale GDD.
-- **Could not check** — the ADR has no `GDD Requirements Addressed` section, it
-  names no GDDs, or a named GDD does not exist on disk. Print:
+  静默通过无法与从未运行的检查区分，而这一项
+  防止开发者从过时 GDD 实现错误接口。
+- **无法检查** —— ADR 没有 `GDD Requirements Addressed` 章节、
+  未点名任何 GDD，或点名的 GDD 在磁盘上不存在。打印：
   `GDD sync: NOT ASSESSED — [which reason, and which files]`
-  Do **not** treat an ADR that references no GDDs as one whose GDDs are
-  consistent. Nothing was compared.
+  **不要**把没有引用任何 GDD 的 ADR 当作其 GDD 一致的 ADR。
+  什么都没比较。
+- 只有警告块本身是条件性的；检查始终报告。
 
-Only the warning block itself is conditional; the check always reports.
+5. **写入批准** —— 使用 `AskUserQuestion`：
 
-5. **Write approval** — Use `AskUserQuestion`:
+如果发现了 GDD 同步问题：
+- "ADR 草案已完成。你希望如何继续？"
+  - [A] 同一次操作中写入 ADR + 更新 GDD
+  - [B] 只写入 ADR —— 我手动更新 GDD
+  - [C] 还不是 —— 我需要进一步审阅
 
-If GDD sync issues were found:
-- "ADR draft is complete. How would you like to proceed?"
-  - [A] Write ADR + update GDD in the same pass
-  - [B] Write ADR only — I'll update the GDD manually
-  - [C] Not yet — I need to review further
+如果没有 GDD 同步问题：
+- "ADR 草案已完成。可以写入吗？"
+  - [A] 将 ADR 写入 `docs/architecture/adr-[NNNN]-[slug].md`
+  - [B] 还不是 —— 我需要进一步审阅
 
-If no GDD sync issues:
-- "ADR draft is complete. May I write it?"
-  - [A] Write ADR to `docs/architecture/adr-[NNNN]-[slug].md`
-  - [B] Not yet — I need to review further
+如果对任一写入选项回答是，则写入文件，必要时创建目录。
+对于带 GDD 更新的选项 [A]：还要更新 GDD 文件以使用新名称。
 
-If yes to any write option, write the file, creating the directory if needed.
-For option [A] with GDD update: also update the GDD file(s) to use the new names.
+6. **更新架构注册表**
 
-6. **Update Architecture Registry**
+扫描已写入的 ADR，找出应注册的新架构立场：
+- 它声称拥有的状态
+- 它定义的接口契约（信号签名、方法 API）
+- 它声称的性能预算
+- 它明确做出的 API 选择
+- 它禁止的模式（Consequences → Negative 或显式的 "do not use X"）
 
-Scan the written ADR for new architectural stances that should be registered:
-- State it claims ownership of
-- Interface contracts it defines (signal signatures, method APIs)
-- Performance budget it claims
-- API choices it makes explicitly
-- Patterns it bans (Consequences → Negative or explicit "do not use X")
-
-Present candidates:
+呈现候选项：
 ```
 Registry candidates from this ADR:
   NEW state ownership:      player_stamina → stamina-system
@@ -238,25 +234,25 @@ Registry candidates from this ADR:
   EXISTING (referenced_by update only): player_health → already registered ✅
 ```
 
-**Registry append logic**: When writing to `docs/registry/architecture.yaml`, do NOT assume sections are empty. The file may already have entries from previous ADRs written in this session. Before each Edit call:
-1. Read the current state of `docs/registry/architecture.yaml`
-2. Find the correct section (state_ownership, interfaces, forbidden_patterns, api_decisions)
-3. If the section is still the empty list (`state_ownership: []`), replace `[]` with the first entry: the key alone on its line, the entry below it indented two spaces as in the file's commented example. An entry appended after `[]` makes the file invalid YAML. Otherwise append the new entry AFTER the last existing entry in that section
-4. If the section has entries already, use the closing content of the last entry as the `old_string` anchor, and append the new entry after it
+**注册表追加逻辑**：写入 `docs/registry/architecture.yaml` 时，不要假设章节为空。该文件可能已包含本会话中先前 ADR 写入的条目。每次 Edit 调用之前：
+1. 读取 `docs/registry/architecture.yaml` 的当前状态
+2. 找到正确的章节（state_ownership、interfaces、forbidden_patterns、api_decisions）
+3. 如果该章节仍为空列表（`state_ownership: []`），将 `[]` 替换为第一个条目：键单独占一行，条目在其下方按文件注释示例的格式缩进两个空格。在 `[]` 之后追加条目会使文件成为无效 YAML。否则，将新条目追加到该章节最后一个现有条目之后
+4. 如果章节已有条目，使用最后一个条目的结尾内容作为 `old_string` 锚点，并在其后追加新条目
 
-**BLOCKING — do not write to `docs/registry/architecture.yaml` without explicit user approval.**
+**BLOCKING —— 未经用户明确批准，不要写入 `docs/registry/architecture.yaml`。**
 
-Ask using `AskUserQuestion`:
+使用 `AskUserQuestion` 询问：
 - "May I update `docs/registry/architecture.yaml` with these [N] new stances?"
-  - Options: "Yes — update the registry", "Not yet — I want to review the candidates", "Skip registry update"
+  - 选项："Yes — update the registry"、"Not yet — I want to review the candidates"、"Skip registry update"
 
-Only proceed if the user selects yes. If yes: append new entries. Never modify existing entries — if a stance is
-changing, set the old entry to `status: "superseded_by: ADR-[NNNN]"` and add the new entry. Keep the quotes:
-unquoted, the second colon makes the file invalid YAML.
+仅在用户选择是时才继续。若是：追加新条目。绝不修改现有条目——如果某条立场
+正在变更，将旧条目设为 `status: "superseded_by: ADR-[NNNN]"` 并添加新条目。保留引号：
+不加引号时，第二个冒号会使文件成为无效 YAML。
 
-After writing, run `bash .claude/scripts/registry.sh validate` and fix every row about an entry this write added
-or changed (a DUPLICATE, STATUS or LAYOUT row, an UNQUOTED row (quote the value it names), or a PATH_MISSING row for a path it named) before you go on; name
-rows about other entries to the user rather than fixing them unasked. If the script is missing or prints nothing,
-say the registry check did not run, then re-read the entries you wrote against the rules in the file's header.
+写入后，运行 `bash .claude/scripts/registry.sh validate`，并在继续之前修复所有关于本次写入新增
+或变更条目的行（DUPLICATE、STATUS 或 LAYOUT 行，UNQUOTED 行（为其点名的值加引号），或其所点名路径的 PATH_MISSING 行）；
+对于涉及其他条目的行，向用户点名说明，而不是未经请求就去修复。如果脚本缺失或不打印任何内容，
+说明注册表检查未运行，然后对照文件头部的规则重新读取你写入的条目。
 
 ---

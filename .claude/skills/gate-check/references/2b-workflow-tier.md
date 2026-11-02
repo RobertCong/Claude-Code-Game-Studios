@@ -1,128 +1,123 @@
-# /gate-check — Section 2b: Workflow Tier Adjustment
+# /gate-check —— 第 2b 节：工作流层级调整
 
-> Part of `/gate-check`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> 属于 `/gate-check` 的一部分。`SKILL.md` 会指明何时读取本文件；它
+> 解析出的设置及其后续各标题下的规则在此仍然适用。
 
-## 2b. Workflow Tier Adjustment
+## 2b. 工作流层级调整
 
-**In this file:**
+**本文件包含：**
 
-- How to apply a gate file's tier reductions
-- `qa.level` and the test items; the smoke check is the floor
-- A gate with no required artifacts left is NOT ASSESSED, with one exception
+- 如何应用闸门文件的层级削减
+- `qa.level` 与测试项；冒烟检查是底线
+- 没有剩余必需产出物的闸门为 NOT ASSESSED，但有一个例外
 - `performance.enforce`
-- Per-system overrides (`workflow_overrides.system_overrides`), and the additive overrides
+- 按系统覆盖（`workflow_overrides.system_overrides`），以及叠加式覆盖
 
-Each gate file carries its own tier reductions (see Section 2). Two rules apply
-across all of them:
+每个闸门文件都带有自己的层级削减（见第 2 节）。有两条规则适用于所有闸门：
 
-> **How to apply:** run the loaded gate's checklist, then apply that file's tier
-> reduction for the tier resolved in Section 1. **drop** = not checked at this
-> tier; **→ recommended** = absent surfaces as CONCERNS, never a Blocker; items
-> not named keep their baseline status. Reductions only ever *relax* a
-> requirement — the only thing that adds one is `workflow_overrides` (below).
+> **如何应用：** 先运行已加载闸门的清单，再对第 1 节解析出的层级应用该
+> 文件的层级削减。**drop** = 本层级不检查；**→ recommended** = 缺失时呈现为
+> CONCERNS，绝不算阻塞项；未点名的条目保持其基线状态。削减只会*放宽*
+> 要求——唯一会新增要求的是 `workflow_overrides`（见下文）。
 >
-> **`qa.level` (Section 1) further relaxes the test items independently of the
-> tier:** at `qa.level: minimal` the test-evidence / unit-test items become
-> non-required at every workflow tier (so even `workflow: full` does not require
-> them); the Section 3 `testing.strict` check is then a no-op.
+> **`qa.level`（第 1 节）会独立于层级进一步放宽测试项：** 在
+> `qa.level: minimal` 下，测试证据 / 单元测试项在每个工作流层级都变为
+> 非必需（因此即便 `workflow: full` 也不要求它们）；第 3 节的
+> `testing.strict` 检查随之成为空操作。
 >
-> **It relaxes tests, not the look.** A UI story's retained screenshots, and a
-> Visual/Feel story's screenshots plus lead sign-off, are required at every
-> `qa.level` wherever the gate file asks for story evidence
-> (`.claude/docs/coding-standards.md`: tests are waived at `minimal`, the look
-> is not).
+> **它放宽的是测试，不是观感。** 只要闸门文件要求用户故事证据，
+> UI 用户故事的留存截图，以及 Visual/Feel 用户故事的截图加主管签核，
+> 在每个 `qa.level` 下都是必需的
+> （`.claude/docs/coding-standards.md`：测试在 `minimal` 下被豁免，但观感
+> 不是）。
 >
-> **The smoke check is excluded from that relaxation, and is the floor.**
-> `qa.level` relaxes *per-story test evidence*; a smoke check is **build health**,
-> not story evidence, and the two are already held apart on exactly this basis in
-> `.claude/docs/coding-standards.md` ("`/smoke-check` is a build-health gate, not
-> a per-story evidence gate ... This divergence is intentional"). So a gate file
-> that requires a smoke report keeps requiring it at every `qa.level`.
+> **冒烟检查不在该放宽范围内，它就是底线。**
+> `qa.level` 放宽的是*逐故事的测试证据*；冒烟检查是**构建健康度**，
+> 不是用户故事证据，二者在 `.claude/docs/coding-standards.md` 中正是依据这一
+> 区别被分开的（“`/smoke-check` 是构建健康度闸门，不是
+> 逐故事证据闸门……这种差异是有意为之”）。因此，要求冒烟报告的闸门文件
+> 在每个 `qa.level` 下都继续要求它。
 >
-> Without that exclusion the Production → Polish gate would have **zero
-> required artifacts at `rigor: minimal`** and could not fail on artifacts by
-> construction: `minimal` reduces the gate to the smoke check alone, `qa.level`
-> would then drop the smoke check too, and one `modes.rigor` setting fires both.
+> 若没有这一排除，Production → Polish 闸门在 `rigor: minimal` 下将
+> **没有任何必需产出物**，从而在构造上不可能因产出物而失败：
+> `minimal` 把闸门削减到只剩冒烟检查，`qa.level` 随后又会把冒烟检查也拿掉，
+> 而这两者由同一个 `modes.rigor` 设置同时触发。
 
-> **A gate with no required artifacts left must say so, and may not return
-> PASS.** After applying the tier reduction and the `qa.level` relaxation, count
-> what remains required. If the count is zero, report
-> **NOT ASSESSED** naming both reducers and the gate — *"Production → Polish at
-> `workflow: minimal` + `qa.level: minimal` leaves no required artifact; this
-> gate verified nothing"* — rather than a PASS earned by having nothing to check.
-> Per `.claude/rules/skill-authoring.md` obligation 1, a run that could not
-> assess its scope has not established that the scope is good, and obligation 3
-> requires the emptiness to be visible in the output rather than inferable from
-> a silent green.
+> **没有剩余必需产出物的闸门必须说明这一点，且不得返回 PASS。**
+> 在应用层级削减和 `qa.level` 放宽之后，统计还剩多少必需项。如果计数为
+> 零，就报告 **NOT ASSESSED**，并同时点名两个削减机制和该闸门——
+> *“`workflow: minimal` + `qa.level: minimal` 下的 Production → Polish
+> 没有留下任何必需产出物；本闸门未核实任何内容”*——而不是让
+> 一个因为无可检查而得的 PASS 通过。按照 `.claude/rules/skill-authoring.md`
+> 的第 1 条义务，无法评估自身范围的运行并未确认范围良好，而第 3 条义务
+> 要求这种空无必须在输出中可见，而不是从一个沉默的绿灯中推断出来。
 >
-> **The one exception: a gate its tier reference file marks "not applicable" at
-> this tier** (Systems Design → Technical Setup at `workflow: minimal`). That is
-> not a gate with nothing left to check but a transition the tier does not have:
-> it PASSes with that file's note, printed in the report. The director panel
-> does not run for it — note "Director Panel skipped — gate not applicable at
-> `workflow: [tier]`" — and the Section 6 stage write still asks first.
+> **唯一的例外：层级参考文件把某闸门标记为在本层级“不适用”**
+> （`workflow: minimal` 下的 Systems Design → Technical Setup）。那不是
+> 无物可查的闸门，而是该层级不存在的一次跃迁：
+> 它按该文件的说明以 PASS 结束，并在报告中打印该说明。总监面板
+> 不会为它运行——注明“已跳过总监面板——闸门在
+> `workflow: [tier]` 下不适用”——第 6 节的阶段写入仍会先询问。
 >
-> **`performance.enforce` is likewise independent of the tier, and a tier
-> reduction never suppresses it.** The performance check in Section 3 runs at
-> every workflow tier, and `block` makes a breach a Blocker at every workflow
-> tier. Do **not** read a gate file's *"everything else drops"* as dropping it:
-> `off` is the only thing that makes budgets informational, and it is a
-> deliberate choice the user makes on the same key.
+> **`performance.enforce` 同样独立于层级，层级削减绝不会压制它。**
+> 第 3 节中的性能检查在每个工作流层级都会运行，而 `block` 会让违规
+> 在每个工作流层级都成为阻塞项。**不要**把闸门文件里的
+> *“其余全部取消”* 读成把性能检查也取消：
+> `off` 是唯一能让预算变成参考信息的设置，而它是用户在同一键上
+> 主动做出的选择。
 >
-> This matters most on a `rigor: minimal` project: the Polish gate's `minimal`
-> reduction drops everything outside its floor, and "Performance is within
-> budget" sits in that dropped remainder. Run the check anyway.
+> 这在 `rigor: minimal` 项目上影响最大：Polish 闸门的 `minimal`
+> 削减会把底线之外的一切取消，而“性能在预算内”正属于被取消的
+> 剩余部分。无论如何都要运行该检查。
 
-### Per-system overrides (`workflow_overrides.system_overrides`)
+### 按系统覆盖（`workflow_overrides.system_overrides`）
 
-Independent of the project-level tier above, and applied **only** on the gates
-that validate MVP GDDs (Systems Design → Technical Setup, and the GDD-completeness
-checks at Pre-Production → Production). For each system, resolve its effective
-tier:
+独立于上述项目级层级，且**仅**在那些校验 MVP GDD 的闸门上应用
+（Systems Design → Technical Setup，以及 Pre-Production → Production 中的
+GDD 完整性检查）。对每个系统，解析其有效层级：
 
-1. If the block's `system_overrides` lists `<system>` → that tier
-2. Else the project-level `workflow`
+1. 如果该块的 `system_overrides` 列出了 `<system>` → 使用该层级
+2. 否则使用项目级 `workflow`
 
-**Before applying any of them, check the block the other way round: does every
-KEY match a system?** `<system>` is the GDD filename stem
-(`.claude/docs/workflow-modes.md`), so for each key in `system_overrides`, look
-for `design/gdd/<key>.md`. Any key with no matching stem is reported, naming the
-key and listing the stems that do exist:
+**在应用其中任何一项之前，请反过来检查这个块：每个 KEY 都对应一个系统吗？**
+`<system>` 是 GDD 的文件名主干
+（`.claude/docs/workflow-modes.md`），因此对 `system_overrides` 中的每个键，
+在 `design/gdd/<key>.md` 中查找。任何找不到匹配主干的键都会被报告，
+并点名该键及实际存在的主干列表：
 
 > `system_overrides key 'no-such-system' matches no GDD in design/gdd/. Available stems: combat, inventory, forge-heat-system. This override is doing nothing.`
 
-Surface it as a **CONCERNS**-level finding, not a Blocker — the project is still
-gateable, but an override the user believes is in force and is not is exactly how
-a documented escape hatch silently stops working.
+把它作为 **CONCERNS** 级别的发现项呈现，而不是阻塞项——项目仍可通过
+闸门，但一个用户以为生效、实际并未生效的覆盖，正是
+有文档记录的兜底出口悄悄失效的方式。
 
-This is the rule in `.claude/docs/workflow-modes.md`: a key that matches no
-system is an error, not a no-op. The story skills resolve only in the system →
-override direction, so an orphan key is invisible to them; `/gate-check`, which
-resolves the whole block, is where it is caught.
+这就是 `.claude/docs/workflow-modes.md` 中的规则：匹配不到任何系统的键
+是错误，而不是空操作。用户故事类的技能只按系统 → 覆盖的方向解析，
+因此孤儿键对它们不可见；`/gate-check` 会解析整个块，所以它是
+发现该问题的地方。
 
-Validate each GDD against its own effective tier's section count:
+按每个 GDD 自身有效层级的章节数进行校验：
 
-- A system pinned **higher** than the project (e.g. `system_overrides.combat:
-  full` on a `standard` project) **blocks the gate** until that system's GDD
-  meets the higher bar (combat → all 8 sections). This is the one case where a
-  per-system setting makes the gate *stricter* than the project tier.
-- A system pinned **lower** (e.g. `inventory: minimal`) relaxes only that system
-  — its GDD is checked at the lower tier; every other system stays at the project
-  level. A system pinned **`minimal` imposes no GDD section requirement at all**
-  (`minimal` = "game brief replaces GDDs" — `.claude/docs/workflow-modes.md`): it
-  never blocks the gate on a missing or incomplete GDD. Do not invent an
-  "acceptance-criteria-only" floor for it — there is none.
+- 被钉在**高于**项目层级的系统（例如 `standard` 项目中的
+  `system_overrides.combat: full`）在该系统的 GDD 满足更高标准
+  （combat → 全部 8 个章节）之前会**阻塞闸门**。这是按系统设置
+  让闸门比项目层级*更严格*的唯一情形。
+- 被钉在**较低**层级的系统（例如 `inventory: minimal`）只放宽该系统
+  ——其 GDD 按较低层级检查；其他所有系统仍保持项目
+  层级。被钉为 **`minimal` 的系统完全不施加 GDD 章节要求**
+  （`minimal` = “游戏简报取代 GDD”——`.claude/docs/workflow-modes.md`）：
+  它绝不会因 GDD 缺失或不完整而阻塞闸门。不要为它发明一个
+  “仅验收标准”的底线——并不存在这样的底线。
 
-> **Additive overrides (the only things that make the gate stricter).**
-> - `workflow_overrides.art_bible_strict: true` forces the complete (9-section)
->   art bible at the Technical Setup → Pre-Production and Pre-Production →
->   Production gates regardless of tier or whether visual-asset stories exist.
-> - `workflow_overrides.edge_cases: true` and `workflow_overrides.tuning_knobs:
->   true` force those GDD sections required when validating GDD completeness,
->   additive on top of the resolved tier (e.g. at `standard`, `tuning_knobs: true`
->   makes the otherwise-optional Tuning Knobs section blocking). These never
->   relax — a `false` value is the default/no-op, never a way to drop a section
->   the tier already requires.
+> **叠加式覆盖（唯一会让闸门更严格的东西）。**
+> - `workflow_overrides.art_bible_strict: true` 会在 Technical Setup → Pre-Production
+>   和 Pre-Production → Production 闸门上强制要求完整的（9 章节）
+>   美术圣经，无论层级如何、也无论是否存在视觉资源用户故事。
+> - `workflow_overrides.edge_cases: true` 与 `workflow_overrides.tuning_knobs:
+>   true` 会在校验 GDD 完整性时强制要求相应 GDD 章节，
+>   在解析出的层级之上叠加（例如在 `standard` 下，`tuning_knobs: true`
+>   会让本可选的 Tuning Knobs 章节变为阻塞）。这些绝不
+>   放宽——`false` 值是默认值/空操作，绝不是去掉某个
+>   层级已要求章节的手段。
 
 ---

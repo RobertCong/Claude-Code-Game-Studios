@@ -1,34 +1,34 @@
-# Unity 6.3 — UI Module Reference
+# Unity 6.3 — UI 模块参考
 
 **Last verified:** 2026-02-13
-**Knowledge Gap:** Unity 6 UI Toolkit is production-ready for runtime UI
+**Knowledge Gap:** Unity 6 的 UI Toolkit 已可用于生产环境的运行时 UI
 
 ---
 
-## Overview
+## 概述
 
-Unity 6 UI systems:
-- **UI Toolkit** (RECOMMENDED): Modern, performant, HTML/CSS-like (production-ready in Unity 6)
-- **UGUI (Canvas)**: Legacy system, still supported but not recommended for new projects
-- **IMGUI**: Editor-only, deprecated for runtime UI
+Unity 6 UI 系统：
+- **UI Toolkit**（推荐）：现代、性能良好、类似 HTML/CSS（Unity 6 中已生产就绪）
+- **UGUI (Canvas)**：旧版系统，仍受支持，但不推荐用于新项目
+- **IMGUI**：仅限编辑器，运行时 UI 已弃用
 
 ---
 
-## UI Toolkit (Modern UI)
+## UI Toolkit（现代 UI）
 
-### Setup UI Document
+### 设置 UI Document
 
-1. Create UXML (UI structure):
+1. 创建 UXML（UI 结构）：
    - `Assets > Create > UI Toolkit > UI Document`
-2. Create USS (styling):
+2. 创建 USS（样式）：
    - `Assets > Create > UI Toolkit > StyleSheet`
-3. Add to scene:
+3. 添加到场景：
    - `GameObject > UI Toolkit > UI Document`
-   - Assign UXML to `UIDocument > Source Asset`
+   - 将 UXML 分配到 `UIDocument > Source Asset`
 
 ---
 
-### UXML (UI Structure)
+### UXML（UI 结构）
 
 ```xml
 <!-- MainMenu.uxml -->
@@ -44,7 +44,7 @@ Unity 6 UI systems:
 
 ---
 
-### USS (Styling)
+### USS（样式）
 
 ```css
 /* MainMenu.uss */
@@ -77,7 +77,7 @@ Button:hover {
 
 ---
 
-### C# Scripting (UI Toolkit)
+### C# 脚本（UI Toolkit）
 
 ```csharp
 using UnityEngine;
@@ -112,7 +112,7 @@ public class MainMenu : MonoBehaviour {
 
 ---
 
-### Common UI Elements
+### 常用 UI 元素
 
 ```csharp
 // Label (text display)
@@ -143,7 +143,7 @@ dropdown.value = "Normal";
 
 ---
 
-### Dynamic UI Creation (No UXML)
+### 动态创建 UI（不使用 UXML）
 
 ```csharp
 void CreateUI() {
@@ -164,7 +164,7 @@ void CreateUI() {
 
 ---
 
-### USS Flexbox Layout
+### USS Flexbox 布局
 
 ```css
 /* Horizontal layout */
@@ -191,9 +191,9 @@ void CreateUI() {
 
 ---
 
-## UGUI (Legacy Canvas UI)
+## UGUI（旧版 Canvas UI）
 
-### Basic Setup (Still Works in Unity 6)
+### 基本设置（Unity 6 中仍然可用）
 
 ```csharp
 // GameObject > UI > Canvas (creates Canvas, EventSystem)
@@ -209,7 +209,7 @@ void CreateUI() {
 
 ---
 
-### UGUI Scripting
+### UGUI 脚本
 
 ```csharp
 using UnityEngine;
@@ -244,7 +244,7 @@ public class LegacyUI : MonoBehaviour {
 
 ---
 
-### TextMeshPro (Better Text Rendering)
+### TextMeshPro（更好的文本渲染）
 
 ```csharp
 // Install: Window > TextMeshPro > Import TMP Essential Resources
@@ -260,9 +260,9 @@ tmpText.color = Color.white;
 
 ---
 
-## Canvas Settings (UGUI)
+## Canvas 设置（UGUI）
 
-### Render Modes
+### 渲染模式
 
 ```csharp
 // Screen Space - Overlay: UI rendered on top of everything (no camera needed)
@@ -270,7 +270,7 @@ tmpText.color = Color.white;
 // World Space: UI in 3D world (e.g., floating health bars)
 ```
 
-### Canvas Scaler (Responsive UI)
+### Canvas Scaler（响应式 UI）
 
 ```csharp
 // UI Scale Mode:
@@ -285,7 +285,7 @@ tmpText.color = Color.white;
 
 ---
 
-## Layout Groups (UGUI)
+## 布局组（UGUI）
 
 ### Horizontal Layout Group
 
@@ -308,31 +308,31 @@ tmpText.color = Color.white;
 
 ---
 
-## Performance (UI Toolkit vs UGUI)
+## 性能（UI Toolkit vs UGUI）
 
-### UI Toolkit Advantages
-- ✅ Faster rendering (retained mode)
-- ✅ Better for complex UIs with many elements
-- ✅ Easier styling (CSS-like)
-- ✅ Better for dynamic UIs
+### UI Toolkit 优势
+- ✅ 渲染更快（保留模式）
+- ✅ 更适合包含大量元素的复杂 UI
+- ✅ 样式更简单（类似 CSS）
+- ✅ 更适合动态 UI
 
-### UGUI Advantages
-- ✅ More mature, widely documented
-- ✅ Better integration with Unity Editor
-- ✅ Easier for beginners
+### UGUI 优势
+- ✅ 更成熟，文档更丰富
+- ✅ 与 Unity 编辑器集成更好
+- ✅ 对初学者更友好
 
 ---
 
-## Common Patterns
+## 常见模式
 
-### Health Bar (UI Toolkit)
+### 血条（UI Toolkit）
 
 ```csharp
 var healthBar = root.Q<VisualElement>("health-bar");
 healthBar.style.width = new StyleLength(new Length(healthPercent, LengthUnit.Percent));
 ```
 
-### Health Bar (UGUI)
+### 血条（UGUI）
 
 ```csharp
 public Image healthBarImage;
@@ -344,7 +344,7 @@ void UpdateHealth(float percent) {
 
 ---
 
-### Fade In/Out (UI Toolkit)
+### 淡入/淡出（UI Toolkit）
 
 ```csharp
 IEnumerator FadeIn(VisualElement element, float duration) {
@@ -359,19 +359,19 @@ IEnumerator FadeIn(VisualElement element, float duration) {
 
 ---
 
-## Debugging
+## 调试
 
 ### UI Toolkit Debugger
 - `Window > UI Toolkit > Debugger`
-- Inspect element hierarchy, styles, layout
+- 检查元素层级、样式、布局
 
-### UGUI Event System Debugger
-- Select EventSystem in Hierarchy
-- Inspector shows active input module, raycast info
+### UGUI 事件系统调试器
+- 在 Hierarchy 中选择 EventSystem
+- 检视面板显示活动输入模块、射线检测信息
 
 ---
 
-## Sources
+## 来源
 - https://docs.unity3d.com/6000.0/Documentation/Manual/UIElements.html
 - https://docs.unity3d.com/Packages/com.unity.ui@2.0/manual/index.html
 - https://docs.unity3d.com/Packages/com.unity.ugui@2.0/manual/index.html

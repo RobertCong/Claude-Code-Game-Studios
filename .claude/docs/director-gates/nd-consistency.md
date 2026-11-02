@@ -1,24 +1,22 @@
-> Gate definition. The spawning skill passes this file's path to the director agent; the AGENT reads it — the parent session should not.
+> 质量闸门定义。发起调用的技能会把本文件路径传给总监代理；由该 AGENT 读取——父会话不应读取。
 
-# ND-CONSISTENCY — Narrative Director Consistency Check
+# ND-CONSISTENCY — 叙事总监一致性检查
 
-Agent: `narrative-director` | Model tier: session (inherit)
+Agent：`narrative-director` | 模型层级：session（继承）
 
-**Trigger**: After writer deliverables (dialogue, lore, item descriptions) are
-authored, or when a design decision has narrative implications
+**触发时机**：文案交付物（对话、世界设定、物品描述）编写完成之后，或某项设计
+决策带有叙事影响时
 
-**Context to pass**:
-- Document or content file path(s)
-- Narrative bible or tone guide path (if exists)
-- Relevant world-building rules
-- Character or faction profiles affected
+**需传入的上下文**：
+- 文档或内容文件路径
+- 叙事圣经或语气指南路径（如存在）
+- 相关世界观构建规则
+- 受影响的角色或阵营档案
 
-**Prompt**:
-> "Review this narrative content for internal consistency and adherence to
-> established world rules. Are character voices consistent with their established
-> profiles? Does the lore contradict any established facts? Is the tone consistent
-> with the game's narrative direction? Return APPROVE, CONCERNS [specific
-> inconsistencies to fix], or REJECT [contradictions that break the narrative
-> foundation]."
+**提示词**：
+> "审查这些叙事内容的内部一致性及其对既定世界规则的遵循情况。角色声线是否与其
+> 既定档案一致？世界设定是否与任何既定事实相矛盾？语气是否与游戏叙事方向一致？
+> 返回 APPROVE、CONCERNS [需要修复的具体不一致之处]，或 REJECT [破坏叙事根基的
+> 矛盾]。"
 
-**Verdicts**: APPROVE / CONCERNS / REJECT
+**结论**：APPROVE / CONCERNS / REJECT

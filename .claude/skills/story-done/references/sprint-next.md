@@ -1,10 +1,9 @@
-# Phase 8: The next story when a sprint plan exists
+# Phase 8: 存在冲刺计划时的下一个用户故事
 
-Read only when `production/sprints/` holds a sprint plan.
+仅当 `production/sprints/` 中有冲刺计划时读取。
 
-1. Read the newest sprint plan in `production/sprints/`.
-2. Find the stories that are Ready or Not Started, not waiting on an unfinished
-   story, and in the Must Have or Should Have tier.
+1. 读取 `production/sprints/` 中最新的冲刺计划。
+2. 找出处于 Ready 或 Not Started、未等待未完成用户故事、且位于 Must Have 或 Should Have 层级的用户故事。
 
 ```
 ### Next Up
@@ -15,7 +14,7 @@ The following stories are ready to pick up:
 Run `/story-readiness [path]` to confirm a story is ready before starting.
 ```
 
-**Every Must Have story Complete or Blocked:** print the close-out sequence.
+**所有 Must Have 用户故事均为 Complete 或 Blocked：** 打印收尾序列。
 
 ```
 ### Sprint Close-Out Sequence
@@ -28,11 +27,8 @@ All Must Have stories are complete. QA sign-off is required before advancing.
 5. `/sprint-plan new` — the next sprint
 ```
 
-Should Have stories still unstarted: list them beside the sequence, so the user can
-close the sprint now or pull in more work.
+仍有未启动的 Should Have 用户故事：在序列旁列出它们，以便用户现在关闭冲刺或拉入更多工作。
 
-**No story ready, Must Have stories still In Progress:** "No more stories ready to
-start — [N] Must Have stories still in progress. Finish those before the sprint
-close-out."
+**没有用户故事就绪、Must Have 用户故事仍在 In Progress：**"No more stories ready to start — [N] Must Have stories still in progress. Finish those before the sprint close-out."
 
-The checkpoint's **Next step** names the same story or step the user is shown.
+检查点的 **Next step** 指明向用户展示的同一用户故事或步骤。

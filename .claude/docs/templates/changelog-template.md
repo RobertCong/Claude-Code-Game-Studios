@@ -3,27 +3,26 @@
 **Release Date**: [Date]
 
 ## New Features
-- **[Feature Name]**: [Player-friendly description of what they can now do
-  and why it is exciting. Focus on the experience, not the implementation.]
+- **[Feature Name]**：[面向玩家的描述，说明他们现在能做什么
+  以及为何令人兴奋。聚焦体验，而非实现。]
 
 ## Improvements
-- **[What improved]**: [How this makes the game better for the player.
-  Be specific but avoid jargon.]
+- **[What improved]**：[这如何让游戏对玩家更好。
+  要具体，但避免术语。]
 
 ## Bug Fixes
-- Fixed an issue where [describe what the player experienced, not what was
-  wrong in the code]
-- Fixed [player-visible symptom]
+- 修复了以下问题：[描述玩家经历的体验，而非代码中的错误]
+- 修复了 [玩家可见的症状]
 
 ## Balance Changes
-- [What changed in player-understandable terms and the design intent.
-  Example: "Healing potions now restore 50 HP (up from 30) -- we felt
-  players needed more recovery options in late-game encounters."]
+- [以玩家能理解的方式说明改动及设计意图。
+  例如：「治疗药水现在恢复 50 点生命值（此前为 30）——我们认为
+  玩家在后期遭遇战中需要更多恢复手段。」]
 
 ## Known Issues
-- We are aware of [issue description in player terms] and are working on a
-  fix. [Workaround if one exists.]
+- 我们已知悉 [以玩家视角描述的问题] 并正在修复。
+  [若有规避方法则写明。]
 
 ---
-Thank you for playing! Your feedback helps us make the game better.
-Report issues at [link].
+感谢游玩！你的反馈帮助我们让游戏变得更好。
+请在 [link] 报告问题。

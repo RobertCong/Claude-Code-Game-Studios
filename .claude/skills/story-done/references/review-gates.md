@@ -1,53 +1,39 @@
-# Phase 6: Review gates at review mode full
+# Phase 6: review 模式为 full 时的评审闸门
 
-Read only when the `review_gate` line says `skill-gates=run`. Run both gates before
-the Phase 7 report. Each agent reads its own gate file; do not read it here.
+仅当 `review_gate` 行显示 `skill-gates=run` 时读取。在 Phase 7 报告之前运行两个闸门。每个代理读取各自的闸门文件；不要在此处读取它。
 
 ## QL-TEST-COVERAGE
 
-Skip it at `qa.level: minimal` (note `QL-TEST-COVERAGE skipped — qa.level minimal`)
-and for a Config/Data story (no code tests).
+在 `qa.level: minimal` 下跳过它（注明 `QL-TEST-COVERAGE skipped — qa.level minimal`），对 Config/Data 用户故事也跳过（没有代码测试）。
 
-Hand the review to the `qa-lead` agent with gate **QL-TEST-COVERAGE**. Brief:
+将评审交给 `qa-lead` 代理，闸门为 **QL-TEST-COVERAGE**。简报：
 
-- **Objective:** judge whether the story's tests cover what was specified, not
-  only whether the files exist.
-- **Give it:** the story path and type; the test files Phase 4 found (exact paths,
-  or "none found"); the story's `## QA Test Cases` and `## Acceptance Criteria`;
-  the GDD's acceptance criteria and edge cases for the system, or "no GDD for this
-  system" (at `workflow: minimal` the story's own criteria are the spec).
-- **Return:** ADEQUATE, GAPS, INADEQUATE, or NOT ASSESSED naming a missing input,
-  with the gaps listed.
-- **Boundaries:** it writes no file.
+- **目标：** 判断用户故事的测试是否覆盖了所规定的内容，而不仅仅是文件是否存在。
+- **提供给它：** 用户故事路径与类型；Phase 4 找到的测试文件（确切路径，或"none found"）；用户故事的 `## QA Test Cases` 和 `## Acceptance Criteria`；该系统 GDD 的验收标准和边界情况，或"no GDD for this system"（在 `workflow: minimal` 下，用户故事自己的标准即为规格）。
+- **返回：** ADEQUATE、GAPS、INADEQUATE，或指出缺失输入的 NOT ASSESSED，并列出缺口。
+- **边界：** 不写入任何文件。
 
-Act on the verdict:
+根据结论采取行动：
 
-- **ADEQUATE:** go on.
-- **GAPS:** ADVISORY — "QA lead found coverage gaps: [list]. The story can close;
-  address them in a follow-up story."
-- **INADEQUATE:** BLOCKING — "critical logic is untested: [list]."
-- **NOT ASSESSED:** never ADEQUATE. Supply the input and run it again, or carry it
-  to the verdict, where it keeps the story at best NOT ASSESSED.
+- **ADEQUATE：** 继续。
+- **GAPS：** ADVISORY — "QA lead found coverage gaps: [list]. The story can close; address them in a follow-up story."
+- **INADEQUATE：** BLOCKING — "critical logic is untested: [list]."
+- **NOT ASSESSED：** 绝不视为 ADEQUATE。补充输入后再次运行，或将其带入结论，此时用户故事最多停留在 NOT ASSESSED。
 
 ## LP-CODE-REVIEW
 
-No implementation file yet: skip it, note `LP-CODE-REVIEW skipped — no
-implementation files found`, and Reviewed by is `self, no independent review`.
+尚无实现文件：跳过它，注明 `LP-CODE-REVIEW skipped — no implementation files found`，Reviewed by 为 `self, no independent review`。
 
-Hand the review to the `lead-programmer` agent with gate **LP-CODE-REVIEW**. Brief:
+将评审交给 `lead-programmer` 代理，闸门为 **LP-CODE-REVIEW**。简报：
 
-- **Objective:** review the story's implementation against its GDD section and
-  governing ADR.
-- **Give it:** the implementation file paths, the story path, the GDD path and
-  section, the ADR path. It reads the GDD and ADR by section, never whole.
-- **Return:** APPROVE, CONCERNS, REJECT, or NOT ASSESSED naming a missing input.
-- **Boundaries:** it edits no file.
+- **目标：** 对照用户故事的 GDD 章节和所管辖的 ADR 评审其实现。
+- **提供给它：** 实现文件路径、用户故事路径、GDD 路径与章节、ADR 路径。它按章节读取 GDD 和 ADR，绝不整篇读取。
+- **返回：** APPROVE、CONCERNS、REJECT，或指出缺失输入的 NOT ASSESSED。
+- **边界：** 不编辑任何文件。
 
-Act on the verdict:
+根据结论采取行动：
 
-- **APPROVE:** Reviewed by is `lead-programmer`.
-- **CONCERNS:** ask: "The lead programmer raised concerns. How do you want to go
-  on?" Options: Revise the flagged issues / Accept and go on / Discuss further.
-- **REJECT:** no COMPLETE verdict until the issues are fixed.
-- **NOT ASSESSED:** never APPROVE. Supply the input and run it again, or carry it
-  to the verdict, where it keeps the story at best NOT ASSESSED.
+- **APPROVE：** Reviewed by 为 `lead-programmer`。
+- **CONCERNS：** 询问："The lead programmer raised concerns. How do you want to go on?" 选项：Revise the flagged issues / Accept and go on / Discuss further。
+- **REJECT：** 在问题修复之前不给出 COMPLETE 结论。
+- **NOT ASSESSED：** 绝不视为 APPROVE。补充输入后再次运行，或将其带入结论，此时用户故事最多停留在 NOT ASSESSED。

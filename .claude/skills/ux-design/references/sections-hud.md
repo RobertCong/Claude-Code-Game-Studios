@@ -1,155 +1,151 @@
-> Section-authoring guidance, loaded by `/ux-design` for the ACTIVE MODE ONLY.
-> Never load the other two — one mode applies per invocation.
+> 小节撰写指导，由 `/ux-design` 仅在当前活动模式下加载。
+> 绝不要加载另外两个文件 — 每次调用只适用一种模式。
 
-# Section Guidance — HUD Design Mode
+# 小节撰写指导 — HUD 设计模式
 
-**In this file:**
+**本文件包含：**
 
-- Section A: HUD Philosophy
-- Section B: Information Architecture
-- Section C: Layout Zones
-- Section D: HUD Element Specifications
-- Sections E–L: HUD States, Information Hierarchy, Visual Budget, Feedback & Notification, Platform Adaptation, Accessibility, Tuning Knobs, Acceptance Criteria
+- Section A：HUD 理念
+- Section B：信息架构
+- Section C：布局区域
+- Section D：HUD 元素规格
+- Sections E–L：HUD 状态、信息层级、视觉预算、反馈与通知、平台适配、无障碍、可调参数、验收标准
 
-HUD design follows a different order from UX spec mode. Begin with philosophy;
-do not touch layout until the information architecture is complete.
+HUD 设计遵循与 UX 规格模式不同的顺序。从理念开始；
+在信息架构完成之前，不要触碰布局。
 
-#### Section A: HUD Philosophy
+#### Section A：HUD 理念
 
-Ask the user to describe the game's relationship with on-screen information in
-1-2 sentences.
+请用户用 1-2 句话描述游戏与屏幕信息之间的关系。
 
-Offer framing examples to help:
-- "Nearly HUD-free — atmosphere requires unobstructed immersion (e.g., Hollow Knight, Firewatch)"
-- "Minimal but present — only critical information visible, everything else contextual (e.g., Dark Souls)"
-- "Information-dense — all decision-relevant data always visible (e.g., Diablo IV, StarCraft II)"
-- "Adaptive — HUD density responds to combat state, exploration mode, menus (e.g., God of War)"
+提供一些框定示例以帮助用户：
+- “几乎无 HUD — 氛围需要不受阻挡的沉浸感（例如 Hollow Knight、Firewatch）”
+- “极简但存在 — 只显示关键信息，其余一切情境化（例如 Dark Souls）”
+- “信息密集 — 所有与决策相关的数据始终可见（例如 Diablo IV、StarCraft II）”
+- “自适应 — HUD 密度随战斗状态、探索模式、菜单而变化（例如 God of War）”
 
-This philosophy becomes the design constraint for every subsequent HUD decision.
-If a proposed element conflicts with the stated philosophy, surface that conflict.
+这一理念会成为后续每一项 HUD 决策的设计约束。
+如果某个提议的元素与所述理念冲突，请明确指出该冲突。
 
 ---
 
-#### Section B: Information Architecture
+#### Section B：信息架构
 
-Complete this before any layout work. Do not skip it.
+在任何布局工作之前完成本节。不要跳过。
 
-**Step 1 — Full information inventory**:
-Pull all information from GDD UI Requirements sections gathered in Phase 2.
-Present the full list: "These are all the things your game systems say they need
-to communicate to the player on screen."
+**Step 1 — 完整信息清单**：
+从 Phase 2 收集的所有 GDD UI 要求小节中提取全部信息。
+呈现完整列表：“这些就是你的游戏系统声称需要在屏幕上向玩家传达的所有内容。”
 
-**Step 2 — Categorization**:
-For each item, ask the user to categorize it:
+**Step 2 — 分类**：
+对每一项，请用户对其进行分类：
 
-| Category | Description |
+| 类别 | 说明 |
 |----------|-------------|
-| **Must Show** | Always visible, player needs it for core decisions |
-| **Contextual** | Visible only when relevant (in combat, near interactable, etc.) |
-| **On Demand** | Player must actively request it (toggle, hold button) |
-| **Hidden** | Communicated through world/audio, never on-screen text |
+| **必须显示（Must Show）** | 始终可见，玩家做出核心决策所需 |
+| **情境显示（Contextual）** | 仅在相关时可见（战斗中、靠近可交互物时等） |
+| **按需显示（On Demand）** | 玩家必须主动请求（切换、按住按键） |
+| **隐藏（Hidden）** | 通过世界/音频传达，从不使用屏幕文字 |
 
-Use `AskUserQuestion` to step through items in groups of 3-4, not all at once.
-This is the most consequential design decision in the HUD — do not rush it.
+使用 `AskUserQuestion` 以每组 3-4 个的方式逐项处理，不要一次全部处理。
+这是 HUD 中最关键的设计决策 — 不要急于求成。
 
-**Conflict check**: If the information philosophy (Section A) says "nearly HUD-free"
-but the Must Show list is growing long, surface the conflict explicitly:
-> "The current Must Show list has [N] items. That may conflict with the HUD-free
-> philosophy. Options: reduce the Must Show list, revise the philosophy, or define
-> a hybrid approach where HUD is absent in exploration and present in combat."
-
----
-
-#### Section C: Layout Zones
-
-Only after the information architecture is approved, design layout zones.
-
-Base layout on:
-- Which items are Must Show (they drive the permanent zone decisions)
-- Where player attention naturally goes during gameplay (center-screen for action games,
-  corners for strategy games)
-- Platform and aspect ratio targets
-
-Offer 2-3 zone arrangements. Include rationale based on the HUD philosophy and the
-categorization from Section B.
+**冲突检查**：如果信息理念（Section A）说的是“几乎无 HUD”，
+但必须显示列表却越来越长，请明确指出冲突：
+> “当前的必须显示列表有 [N] 项。这可能与无 HUD 的理念冲突。选项：缩减必须显示
+> 列表、修订理念，或定义一种混合方案，即在探索时没有 HUD、在战斗时显示 HUD。”
 
 ---
 
-#### Section D: HUD Element Specifications
+#### Section C：布局区域
 
-For each element in the layout, specify:
-- Element name and category (Must Show / Contextual / On Demand)
-- Content displayed
-- Visual form (bar, number, icon, counter, map)
-- Update behavior (real-time, event-driven, player-queried)
-- Contextual trigger (if not always visible)
-- Animation behavior (does it pulse when low? Fade in? Slam in?)
+只有在信息架构获得批准之后，才设计布局区域。
 
-Work element by element. Reference the interaction pattern library if relevant patterns
-exist for status displays, resource bars, or cooldown indicators.
+布局基于：
+- 哪些项目属于必须显示（它们驱动永久区域决策）
+- 玩家在游玩时注意力自然流向何处（动作游戏为屏幕中央，
+  策略游戏为四角）
+- 平台与宽高比目标
+
+提供 2-3 种区域排布方案。包含基于 HUD 理念和 Section B
+分类的理由说明。
 
 ---
 
-#### Sections E–L: HUD States, Information Hierarchy, Visual Budget, Feedback & Notification, Platform Adaptation, Accessibility, Tuning Knobs, Acceptance Criteria
+#### Section D：HUD 元素规格
 
-These parallel the UX spec's States, Interaction, and Accessibility sections.
-The guidance you need is below — **do not load `sections-ux-spec.md`; one mode
-file applies per invocation.** For the HUD, apply it as follows.
+对布局中的每个元素，明确：
+- 元素名称与类别（Must Show / Contextual / On Demand）
+- 显示的内容
+- 视觉形式（条、数字、图标、计数器、地图）
+- 更新行为（实时、事件驱动、玩家查询）
+- 情境触发条件（如果不是始终可见）
+- 动画行为（低值时脉冲？淡入？猛冲入场？）
 
-**HUD States by Gameplay Context (states over time).** Cover at least
-exploration, combat, dialogue/cutscene and paused — `/ux-review` checks for all
-four. Beyond the happy path, capture what changes the HUD mid-gameplay and present
-it as a table for approval:
+逐元素处理。如果存在与状态显示、资源条或冷却指示器相关的模式，
+请参考交互模式库。
 
-| State / Variant | Trigger | What Changes |
+---
+
+#### Sections E–L：HUD 状态、信息层级、视觉预算、反馈与通知、平台适配、无障碍、可调参数、验收标准
+
+这些小节与 UX 规格中的状态、交互和无障碍小节相对应。
+你需要的指导如下 — **不要加载 `sections-ux-spec.md`；每次调用只适用一个模式
+文件。** 对 HUD，按如下方式应用。
+
+**按玩法情境划分的 HUD 状态（随时间的状态）。** 至少覆盖
+探索、战斗、对话/过场动画和暂停 — `/ux-review` 会检查全部
+四项。除正常路径之外，记录在游玩过程中改变 HUD 的因素，并以
+表格形式呈现以供批准：
+
+| 状态 / 变体 | 触发条件 | 变化内容 |
 |-----------------|---------|--------------|
-| Default | Normal play | — |
-| Low-resource | Health/ammo/etc. below threshold | [element pulses, recolors, …] |
-| Empty / no-data | Element has nothing to show | [hidden, or placeholder] |
+| 默认 | 正常游玩 | — |
+| 低资源 | 生命值/弹药等低于阈值 | [元素脉冲、变色……] |
+| 空 / 无数据 | 元素无内容可显示 | [隐藏，或显示占位符] |
 | [etc.] | [trigger] | [changes] |
 
-Ask specifically: what causes the HUD to change density mid-gameplay
-(combat vs. exploration), and what fades, pulses, or slams in on each transition?
+具体询问：什么会导致 HUD 在游玩过程中改变密度
+（战斗 vs. 探索），以及每次转换时有哪些元素淡入、脉冲或猛冲入场？
 
-**Information Hierarchy.** Give every element in HUD Element Specifications a
-priority tier — MUST KEEP, SHOULD KEEP, CAN HIDE or ALWAYS HIDE — with the reason,
-and what carries its information when it is hidden (a sound, a diegetic cue, or
-nothing). This is the order the Visual Budget below drops elements in.
+**信息层级。** 为 HUD 元素规格中的每个元素给出
+优先级层级 — MUST KEEP、SHOULD KEEP、CAN HIDE 或 ALWAYS HIDE — 并说明理由，
+以及它被隐藏时由什么承载其信息（音效、著内提示（diegetic cue），
+或什么都没有）。这就是下方视觉预算丢弃元素的顺序。
 
-**Visual Budget.** State the maximum number of simultaneous HUD elements and
-the maximum share of the screen the HUD may cover, and which elements are dropped
-first when a state would exceed it.
+**视觉预算。** 说明同时显示的 HUD 元素最大数量、
+HUD 可覆盖的屏幕最大比例，以及当某种状态会超出限制时，
+首先丢弃哪些元素。
 
-**Feedback & Notification Systems.** One row per transient notification type
-(pickup, XP gain, objective update, achievement) — trigger system, screen position,
-duration, max simultaneous, priority and **queue behavior**: what happens when two
-arrive at once, which are held during combat, and which are never queued.
-`/ux-review` checks that every notification has queue/priority behavior defined.
+**反馈与通知系统。** 每种瞬时通知类型（拾取、XP 获取、目标更新、成就）
+一行 — 触发系统、屏幕位置、持续时间、最大同时数量、优先级以及
+**queue behavior**：同时到达两个通知时会发生什么、哪些在战斗中被
+暂缓、哪些从不排队。
+`/ux-review` 会检查每个通知是否定义了排队/优先级行为。
 
-**Platform Adaptation.** Does mobile/console require different element sizes or
-positions? Note per-platform overrides — touch targets, safe-area insets, and
-whether any element moves or is dropped on a given platform.
+**平台适配。** 移动端/主机是否需要不同的元素尺寸或
+位置？注明各平台的覆盖项 — 触摸目标、安全区内边距，以及
+在给定平台上是否有元素移动或被丢弃。
 
-**Accessibility.** Cross-reference `design/accessibility-requirements.md` if it
-exists, then walk this checklist for the HUD:
-- Gamepad/keyboard focus order for any interactive HUD element
-- Text contrast and minimum readable font sizes at gameplay distance
-- Color-independent communication (no state conveyed by color alone — a
-  low-health cue must not be red-only)
-- Reduced-motion alternative for any pulsing/flashing HUD animation
-- Screen-reader considerations for non-text indicators
+**无障碍。** 如果存在 `design/accessibility-requirements.md`，请交叉引用，
+然后针对 HUD 走查以下清单：
+- 任何可交互 HUD 元素的手柄/键盘焦点顺序
+- 游玩距离下的文本对比度与最小可读字号
+- 不依赖颜色的信息传达（不得仅用颜色传达状态 —
+  低生命值提示不能只是红色）
+- 任何脉冲/闪烁 HUD 动画的减少动态效果替代方案
+- 非文本指示器的屏幕阅读器考量
 
-If no accessibility tier has been defined for this project, note the gap in the
-HUD design's Open Questions section (WCAG-AA is a reasonable baseline) and
-continue without stopping.
+如果本项目尚未定义无障碍级别，请在 HUD 设计的
+待解决问题小节中记录该缺口（WCAG-AA 是合理的基线），
+然后继续，不要停下。
 
-**Tuning Knobs.** List every player-adjustable HUD setting — overall scale,
-opacity, per-element show/hide, subtitle size — with its range and default.
+**可调参数。** 列出所有玩家可调整的 HUD 设置 — 整体缩放、
+不透明度、逐元素显示/隐藏、字幕大小 — 及其范围和默认值。
 
-**Acceptance Criteria.** At least 5 checkbox criteria a QA tester can verify
-without reading another document — `/story-done` closes HUD stories against
-them. Cover at least: safe-zone margins on every target platform, the correct
-elements in each gameplay context above, the visual budget (screen share in
-exploration and in combat), one accessibility criterion for the committed tier,
-and notification queueing. Section 12 of `.claude/docs/templates/hud-design.md`
-has worked examples.
+**验收标准。** 至少 5 条 QA 测试人员无需阅读另一份文档即可
+验证的复选框标准 — `/story-done` 依据它们关闭 HUD 用户故事。至少覆盖：
+每个目标平台上的安全区边距、上述每种玩法情境中正确的
+元素、视觉预算（探索和战斗中的屏幕占比）、针对所承诺级别的
+一项无障碍标准，以及通知排队。`.claude/docs/templates/hud-design.md` 的
+第 12 节有完整示例。

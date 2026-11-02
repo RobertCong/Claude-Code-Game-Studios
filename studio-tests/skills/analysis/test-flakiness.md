@@ -2,201 +2,176 @@
 
 ## Skill Summary
 
-`/test-flakiness` finds flaky tests from the results of multiple CI or local
-test runs. It takes a log path, `scan` (all available result files — JUnit XML
-from gdUnit4 in `reports/` or saved into `test-results/`, NUnit XML from Unity in
-`test-results/`, Unreal automation logs in `Saved/Logs/`), or `registry` (remediation guidance for tests already in the
-quarantine section of `tests/regression-suite.md`). With no result data it lists
-three ways to get some and stops to ask. It builds a per-test history across
-runs, classifies each test that both passed and failed by fail rate — >25% High
-(quarantine immediately), 5–25% Moderate (fix directly, do not quarantine yet),
-1–5% Low (monitor) — and names a likely cause and fix direction from its cause
-table, using Grep on the test file. With fewer than 3 runs, every finding is
-"suspected", not "confirmed", whatever its fail rate, and nothing is quarantined;
-the summary table's Confidence column says which. It asks separately "May I update the quarantine
-section of `tests/regression-suite.md`…?" and "May I write a full flakiness
-report to `production/qa/flakiness-report-[date].md`?", appends quarantine
-entries without removing existing ones, and never deletes test files. No
-director gates are invoked. Verdicts: COMPLETE (report written) or BLOCKED
-(user declined write).
+`/test-flakiness` 从多次 CI 或本地测试运行的结果中发现不稳定（flaky）测试。它接受日志路径、`scan`（所有可用的结果文件——`reports/` 中或保存到 `test-results/` 的 gdUnit4 JUnit XML、`test-results/` 中来自 Unity 的 NUnit XML、`Saved/Logs/` 中的 Unreal 自动化日志），或 `registry`（针对已在 `tests/regression-suite.md` 隔离区章节中的测试提供修复指引）。没有结果数据时，它列出三种获取数据的方式并停下来询问。它构建跨运行的逐测试历史，按失败率对既有通过又有失败的每个测试分类——>25% 为 High（立即隔离），5–25% 为 Moderate（直接修复，暂不隔离），1–5% 为 Low（监控）——并根据其原因表点名可能原因和修复方向，使用 Grep 检索测试文件。运行次数少于 3 次时，无论失败率如何，每个发现项都是「suspected」而不是「confirmed」，且不隔离任何测试；摘要表的 Confidence 列会说明是哪一种。它分别询问「May I update the quarantine section of `tests/regression-suite.md`…?」和「May I write a full flakiness report to `production/qa/flakiness-report-[date].md`?」，追加隔离条目而不移除现有条目，且从不删除测试文件。不调用任何总监质量闸门。结论：COMPLETE（已写入报告）或 BLOCKED（用户拒绝写入）。
 
 ---
 
 ## Static Assertions (Structural)
 
-Checked against the SKILL.md by `/skill-test spec` — no fixture needed.
+由 `/skill-test spec` 对照 SKILL.md 检查——无需夹具。
 
-- [ ] Has required frontmatter fields: `name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`
-- [ ] Has ≥2 phase headings
-- [ ] Contains verdict keywords: COMPLETE, BLOCKED, and the flakiness tiers High / Moderate / Low
-- [ ] Contains "May I" write language for `tests/regression-suite.md` and `production/qa/flakiness-report-[date].md`
-- [ ] Has a next-step handoff (Section 7: add skip annotations, schedule fixes before the release gate)
+- [ ] 具有必需的前置元数据（frontmatter）字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具有 ≥2 个阶段标题
+- [ ] 包含结论关键词：COMPLETE、BLOCKED，以及不稳定层级 High / Moderate / Low
+- [ ] 包含针对 `tests/regression-suite.md` 和 `production/qa/flakiness-report-[date].md` 的「May I」写入措辞
+- [ ] 具有下一步交接（Section 7：添加跳过标注、在发布质量闸门之前安排修复）
 
 ---
 
 ## Director Gate Checks
 
-None. Flakiness detection is an advisory quality skill; no gates are invoked.
+无。不稳定检测是建议性质量技能；不调用任何质量闸门（gate）。
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非某个用例自己的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见 `studio-tests/CLAUDE.md` § Fixture defaults。
 
 ---
 
 ## Test Cases
 
-### Case 1: Happy Path — High flakiness from JUnit history, quarantined on approval
+### Case 1: 正常路径 — 从 JUnit 历史发现 High 不稳定，经批准后隔离
 
 **Fixture:**
-- `project.yaml`: `engine.name: godot`; `modes.automation` unset (collaborative)
-- `test-results/` holds 6 gdUnit4 JUnit XML files from 6 runs of the same commit
-- `test_loot_drop_rolls_rare_item` fails in 2 of the 6 runs (33%); the other 40 tests pass in all 6
-- `tests/unit/loot/loot_drop_test.gd` calls `randf()` with no seed
-- `tests/regression-suite.md` has a Quarantined Tests table with 1 existing entry
+- `project.yaml`：`engine.name: godot`；`modes.automation` 未设置（collaborative）
+- `test-results/` 存放 6 个 gdUnit4 JUnit XML 文件，来自同一提交的 6 次运行
+- `test_loot_drop_rolls_rare_item` 在 6 次运行中的 2 次失败（33%）；其他 40 个测试在全部 6 次中通过
+- `tests/unit/loot/loot_drop_test.gd` 调用 `randf()` 且未设种子
+- `tests/regression-suite.md` 有一个 Quarantined Tests 表，包含 1 条现有条目
 
 **Input:** `/test-flakiness scan`
 
 **Expected behavior:**
-1. Skill finds the XML files in `test-results/` and parses `<testcase name=` and `<failure` / `<error` entries
-2. Skill builds `test_id → [run1 … run6]` and finds one test with both outcomes
-3. 33% is above 25% over 6 runs → **High** flakiness, Confidence confirmed → quarantine immediately
-4. Grep of `loot_drop_test.gd` finds `randf` → likely cause Random seed; fix direction: pass an explicit seed
-5. The quarantine recommendation names gdUnit4's GDScript skip parameters (`_do_skip := true`, `_skip_reason := "flaky: ..."`) as the way to skip it
-6. Summary shows Runs analysed 6, Tests tracked 41, the flaky test with a 33% fail rate, and 40 tests with consistent results
-7. Skill asks "May I update the quarantine section of `tests/regression-suite.md` with the flaky tests found?" and, separately, "May I write a full flakiness report to `production/qa/flakiness-report-[date].md`?"
-8. On approval, the new entry is appended with `Edit`; the existing entry stays
+1. 技能在 `test-results/` 中找到 XML 文件，并解析 `<testcase name=` 和 `<failure` / `<error` 条目
+2. 技能构建 `test_id → [run1 … run6]`，发现一个测试同时有两种结果
+3. 6 次运行中 33% 高于 25% → **High** 不稳定，Confidence 为 confirmed → 立即隔离
+4. 对 `loot_drop_test.gd` 的 Grep 找到 `randf` → 可能原因为 Random seed；修复方向：传入显式种子
+5. 隔离建议点名 gdUnit4 的 GDScript 跳过参数（`_do_skip := true`、`_skip_reason := "flaky: ..."`）作为跳过方式
+6. 摘要显示分析运行次数 6、跟踪测试数 41、该不稳定测试的失败率为 33%，以及 40 个结果一致的测试
+7. 技能询问「May I update the quarantine section of `tests/regression-suite.md` with the flaky tests found?」，并另外询问「May I write a full flakiness report to `production/qa/flakiness-report-[date].md`?」
+8. 批准后，新条目用 `Edit` 追加；现有条目保留
 9. Verdict: **COMPLETE** — flakiness report written
 
 **Assertions:**
-- [ ] JUnit XML results in `test-results/` are parsed per test across all 6 runs
-- [ ] The flaky test is named with its fail rate, Confidence confirmed, and classified High → quarantine
-- [ ] The skip mechanism named is gdUnit4's `_do_skip` / `_skip_reason` parameter pair, not an invented flag
-- [ ] The likely cause is Random seed, with the explicit-seed fix direction
-- [ ] The two writes are asked about separately, each before it happens
-- [ ] The quarantine entry is appended and the existing entry is not removed
-- [ ] Verdict is COMPLETE
+- [ ] `test-results/` 中的 JUnit XML 结果按测试跨全部 6 次运行解析
+- [ ] 该不稳定测试被点名并给出失败率，Confidence 为 confirmed，分类为 High → 隔离
+- [ ] 点名的跳过机制是 gdUnit4 的 `_do_skip` / `_skip_reason` 参数对，而不是臆造的标志
+- [ ] 可能原因为 Random seed，修复方向为显式种子
+- [ ] 两次写入分别询问，且各自先于实际发生
+- [ ] 隔离条目被追加，现有条目未被移除
+- [ ] 结论为 COMPLETE
 
 ---
 
-### Case 2: Moderate Flakiness — Fix directly, do not quarantine
+### Case 2: 中等不稳定 — 直接修复，不隔离
 
 **Fixture:**
-- `project.yaml`: `engine.name: godot`
-- `test-results/` holds 20 JUnit XML files from 20 runs of the same commit
-- `test_physics_bounce_height_matches_spec` fails in 3 of 20 runs (15%)
-- The test asserts `bounce_height == 0.5`
+- `project.yaml`：`engine.name: godot`
+- `test-results/` 存放 20 个 JUnit XML 文件，来自同一提交的 20 次运行
+- `test_physics_bounce_height_matches_spec` 在 20 次运行中的 3 次失败（15%）
+- 该测试断言 `bounce_height == 0.5`
 
 **Input:** `/test-flakiness scan`
 
 **Expected behavior:**
-1. Skill computes a 15% fail rate → **Moderate** flakiness
-2. Grep of the test file finds a float equality comparison → likely cause Floating point
-3. Recommendation: "This test is intermittently unreliable… Do not quarantine yet — fix the test directly", with the fix direction of an epsilon comparison (`is_equal_approx`)
+1. 技能计算失败率为 15% → **Moderate** 不稳定
+2. 对测试文件的 Grep 发现浮点相等比较 → 可能原因为 Floating point
+3. 建议：「This test is intermittently unreliable… Do not quarantine yet — fix the test directly」，修复方向为 epsilon 比较（`is_equal_approx`）
 
 **Assertions:**
-- [ ] A 15% fail rate is classified Moderate
-- [ ] The recommendation is to fix directly, not to quarantine
-- [ ] The cause is Floating point and the fix names an epsilon comparison such as `is_equal_approx`
+- [ ] 15% 的失败率被分类为 Moderate
+- [ ] 建议为直接修复，而不是隔离
+- [ ] 原因为 Floating point，且修复点名 `is_equal_approx` 之类的 epsilon 比较
 
 ---
 
-### Case 3: No Result Data — List options and stop
+### Case 3: 无结果数据 — 列出选项并停止
 
 **Fixture:**
-- No `test-results/` directory, no `.github/` directory, no `Saved/Logs/`
-- No log path is given
+- 没有 `test-results/` 目录、没有 `.github/` 目录、没有 `Saved/Logs/`
+- 未给出日志路径
 
 **Input:** `/test-flakiness scan`
 
 **Expected behavior:**
-1. Skill finds no CI or local result data
-2. Skill prints "No CI log data found…" with the three options: run the suite at least 3 times and collect logs; save a CI log to `test-results/`; run `/test-flakiness registry`
-3. Skill stops and asks the user which option to pursue
-4. No flakiness table is produced and nothing is written
+1. 技能未找到任何 CI 或本地结果数据
+2. 技能打印「No CI log data found…」并给出三个选项：至少运行测试套件 3 次并收集日志；将 CI 日志保存到 `test-results/`；运行 `/test-flakiness registry`
+3. 技能停止并询问用户选择哪条路
+4. 不产出不稳定表，也不写入任何内容
 
 **Assertions:**
-- [ ] Output states no CI log data was found
-- [ ] All three options are listed, including `/test-flakiness registry`
-- [ ] Skill stops to ask instead of reporting a clean result
-- [ ] No files are written
+- [ ] 输出说明未找到 CI 日志数据
+- [ ] 三个选项全部列出，包括 `/test-flakiness registry`
+- [ ] 技能停下来询问，而不是报告干净结果
+- [ ] 不写入任何文件
 
 ---
 
-### Case 4: Too Few Runs — Suspected, not confirmed
+### Case 4: 运行次数过少 — 为 suspected，而非 confirmed
 
 **Fixture:**
-- `project.yaml`: `engine.name: godot`
-- `test-results/` holds only 2 JUnit XML files, from 2 runs of the same commit
-- `test_save_roundtrip_preserves_inventory` passes in one run and fails in the other
+- `project.yaml`：`engine.name: godot`
+- `test-results/` 只有 2 个 JUnit XML 文件，来自同一提交的 2 次运行
+- `test_save_roundtrip_preserves_inventory` 在 1 次运行中通过、另 1 次失败
 
 **Input:** `/test-flakiness scan`
 
 **Expected behavior:**
-1. Skill parses both files and finds the test with both outcomes — a 50% fail rate
-2. With fewer than 3 runs, the finding is flagged "suspected", not "confirmed": the summary table's Confidence reads suspected, and the High tier's quarantine-immediately does not apply
-3. The test is not quarantined; the recommendation is to collect more runs before acting
-4. Skill asks whether more run data is available
-5. The Data Limitations section notes that fewer than 5 runs were available, so confidence is low
+1. 技能解析两个文件，发现该测试同时有两种结果——失败率 50%
+2. 运行次数少于 3 次时，发现项被标记为「suspected」而不是「confirmed」：摘要表的 Confidence 显示 suspected，且 High 层级的「立即隔离」不适用
+3. 该测试不被隔离；建议在采取行动前收集更多运行数据
+4. 技能询问是否有更多运行数据可用
+5. Data Limitations 章节注明可用运行次数少于 5 次，因此置信度低
 
 **Assertions:**
-- [ ] The finding is labelled suspected, not confirmed, in the summary table's Confidence column
-- [ ] The 50% fail rate does not trigger quarantine — no skip is recommended, and any regression-suite note marks the test suspected
-- [ ] Skill asks whether more run data is available
-- [ ] Data Limitations states that fewer than 5 runs were analysed
+- [ ] 在摘要表的 Confidence 列中，该发现项被标记为 suspected，而不是 confirmed
+- [ ] 50% 的失败率不触发隔离——不建议跳过，任何回归套件记录都将该测试标记为 suspected
+- [ ] 技能询问是否有更多运行数据可用
+- [ ] Data Limitations 说明分析的运行次数少于 5 次
 
 ---
 
-### Case 5: Registry Mode in Full Review Mode — Guidance for known quarantined tests, no gates
+### Case 5: 完整评审模式下的 registry 模式 — 为已知隔离测试提供指引，无质量闸门
 
 **Fixture:**
-- `project.yaml`: `modes.review_mode: full`
-- `tests/regression-suite.md` Quarantined Tests table lists `test_ai_path_recalc_avoids_blocked_tile` (reason: timing) and `test_scene_load_spawns_player` (reason: scene not ready)
+- `project.yaml`：`modes.review_mode: full`
+- `tests/regression-suite.md` 的 Quarantined Tests 表列出 `test_ai_path_recalc_avoids_blocked_tile`（原因：timing）和 `test_scene_load_spawns_player`（原因：scene not ready）
 
 **Input:** `/test-flakiness registry`
 
 **Expected behavior:**
-1. Skill reads the quarantine section of `tests/regression-suite.md`
-2. For each quarantined test it gives remediation guidance from the cause table: Timing / async → explicit await or synchronisation instead of time-based delays; Scene/prefab load race → await one frame after instantiation (`await get_tree().process_frame`)
-3. No director gate is invoked regardless of review mode
-4. Existing quarantine entries are not removed and no test file is deleted or edited by the skill
+1. 技能读取 `tests/regression-suite.md` 的隔离区章节
+2. 对每个被隔离的测试，它从原因表给出修复指引：Timing / async → 使用显式 await 或同步，而不是基于时间的延迟；Scene/prefab load race → 在实例化后等待一帧（`await get_tree().process_frame`）
+3. 无论评审模式如何，都不调用总监质量闸门
+4. 现有隔离条目不被移除，技能也不删除或编辑任何测试文件
 
 **Assertions:**
-- [ ] The quarantine section of `tests/regression-suite.md` is the input
-- [ ] Each quarantined test gets a fix direction matching its cause
-- [ ] No director gate is invoked in any review mode
-- [ ] No quarantine entry is removed and no test file is deleted
+- [ ] 输入是 `tests/regression-suite.md` 的隔离区章节
+- [ ] 每个被隔离的测试都得到与其原因匹配的修复方向
+- [ ] 在任何评审模式下都不调用总监质量闸门
+- [ ] 不删除任何隔离条目，也不删除任何测试文件
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Locates result data (`test-results/` XML, `Saved/Logs/`, or a given log path) before analysis; with none, lists the three options and stops to ask
-- [ ] Classifies tests with both outcomes by fail rate: >25% High (quarantine), 5–25% Moderate (fix, do not quarantine), 1–5% Low (monitor)
-- [ ] Names a likely cause and fix direction from the cause table, using Grep on the test file
-- [ ] Counts a test as flaky only when it both passed and failed across runs with no code change between them
-- [ ] With fewer than 3 runs, flags findings as suspected, not confirmed, in the summary's Confidence column, and quarantines nothing
-- [ ] Asks separately before updating `tests/regression-suite.md` and before writing `production/qa/flakiness-report-[date].md`
-- [ ] Appends quarantine entries, never removes existing ones, and never deletes test files
-- [ ] No director gates are invoked
-- [ ] Ends with COMPLETE on write or BLOCKED on decline; with no result data it lists the three options and stops to ask instead (Case 3), never reporting a clean result
+- [ ] 在分析前定位结果数据（`test-results/` XML、`Saved/Logs/` 或给定日志路径）；没有时列出三个选项并停下来询问
+- [ ] 按失败率对同时有两种结果的测试分类：>25% High（隔离）、5–25% Moderate（修复，不隔离）、1–5% Low（监控）
+- [ ] 从原因表点名可能原因和修复方向，使用 Grep 检索测试文件
+- [ ] 仅当测试在运行之间没有代码改动却既通过又失败时，才将其计为不稳定
+- [ ] 运行次数少于 3 次时，在摘要的 Confidence 列中将发现项标记为 suspected 而不是 confirmed，且不隔离任何测试
+- [ ] 在更新 `tests/regression-suite.md` 之前和写入 `production/qa/flakiness-report-[date].md` 之前分别询问
+- [ ] 追加隔离条目，从不移除现有条目，也从不删除测试文件
+- [ ] 不调用任何总监质量闸门
+- [ ] 写入时以 COMPLETE 结束，拒绝时以 BLOCKED 结束；没有结果数据时列出三个选项并停下来询问（Case 3），绝不报告干净结果
 
 ---
 
 ## Coverage Notes
 
-- The no-argument path (run `scan` when CI logs are accessible, else
-  `registry`) is not tested here.
-- Unity NUnit XML follows the same flow as Case 1, read from `<test-case`
-  elements and their `result` attribute; not tested separately.
-- Unreal differs and is not tested here: its results are plain-text
-  `Result={Success}` / `Result={Fail}` lines in `Saved/Logs/` (each test prints
-  `Test Completed. Result={<status>}`), and its skip
-  mechanism is NOT SOURCEABLE, so a quarantined Unreal test is logged and the
-  user is asked how their CI excludes it. The same applies to gdUnit4 C# tests.
-- The Low tier (1–5%) needs 20 or more runs to reach and is not tested.
+- 无参数路径（CI 日志可访问时运行 `scan`，否则运行 `registry`）此处未测试。
+- Unity NUnit XML 遵循与 Case 1 相同的流程，从 `<test-case` 元素及其 `result` 属性读取；未单独测试。
+- Unreal 有所不同且此处未测试：其结果在 `Saved/Logs/` 中是纯文本的 `Result={Success}` / `Result={Fail}` 行（每个测试打印 `Test Completed. Result={<status>}`），且其跳过机制为 NOT SOURCEABLE，因此被隔离的 Unreal 测试会被记录，并询问用户其 CI 如何排除它。gdUnit4 的 C# 测试同样如此。
+- Low 层级（1–5%）需要 20 次或更多运行才能达到，未测试。

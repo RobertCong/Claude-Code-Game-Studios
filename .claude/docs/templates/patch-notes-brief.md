@@ -1,15 +1,15 @@
 # Patch [Version] — [Title]
 
 **New**
-- [Feature 1]
-- [Feature 2]
+- [功能 1]
+- [功能 2]
 
 **Changes**
-- [Balance/mechanic change with before → after values]
+- [平衡性/机制改动，附改动前 → 改动后的数值]
 
 **Fixes**
-- [Bug fix 1]
-- [Bug fix 2]
+- [缺陷修复 1]
+- [缺陷修复 2]
 
 **Known Issues**
-- [Issue 1]
+- [问题 1]

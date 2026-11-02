@@ -1,16 +1,15 @@
-# /smoke-check — Phase 5: Generate Report
+# /smoke-check — Phase 5: 生成报告
 
-> Part of `/smoke-check`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> 属于 `/smoke-check`。`SKILL.md` 指明何时读取本文件；它解析出的设置以及其后各标题下的规则在此同样适用。
 
-## Phase 5: Generate Report
+## Phase 5: 生成报告
 
-**In this file:**
+**本文件包含：**
 
-- The report template, with the verdict rules
-- `NOT ASSESSED` and where it ranks
+- 报告模板，及结论规则
+- `NOT ASSESSED` 及其排序位置
 
-Assemble the full smoke check report:
+组装完整的冒烟检查报告：
 
 ````markdown
 ## Smoke Check Report
@@ -150,16 +149,8 @@ Any platform with one or more FAIL checks contributes to the overall FAIL verdic
 Batch 3 not checked)`. A quick run can pass; it never reads as a full one.]
 ````
 
-**`NOT ASSESSED` — the build nobody could check.** Rank: it **outranks PASS and
-PASS WITH WARNINGS** and **ranks below FAIL**. A suite that never ran has not
-shown the build is healthy; a suite that ran and failed is the more actionable
-finding and must not be demoted behind one that did not run.
+**`NOT ASSESSED` — 无人能检查的构建。** 排序：它**高于 PASS 和 PASS WITH WARNINGS**，且**低于 FAIL**。从未运行的套件没有证明构建是健康的；运行过并失败的套件是更可操作的发现，绝不能被排到一个未运行的套件之后。
 
-The rule below — **never treat NOT RUN as an automatic FAIL** — still holds:
-NOT ASSESSED is not a FAIL, and it ranks below one. But an unrun suite never
-resolves to a *pass* verdict while waiting for a confirmation that may never
-come. Confirmed NOT RUN (the developer reports the
-result from their own IDE or CI) still lands at PASS WITH WARNINGS, because
-somebody did look.
+下面的规则 — **绝不把 NOT RUN 视为自动 FAIL** — 仍然成立：NOT ASSESSED 不是 FAIL，且排序低于 FAIL。但未运行的套件绝不会在等待一个可能永远不来的确认时变成*通过*结论。已确认的 NOT RUN（开发者报告来自自己 IDE 或 CI 的结果）仍落在 PASS WITH WARNINGS，因为确实有人看过。
 
 ---

@@ -1,80 +1,80 @@
 # Agent Test Spec: technical-artist
 
 ## Agent Summary
-Domain: Shaders, VFX, rendering optimization, art pipeline tools, and visual performance.
-Does NOT own: art style decisions or color palette (art-director), gameplay code (gameplay-programmer).
-No gate IDs assigned.
+领域：着色器、VFX、渲染优化、美术流水线工具与视觉性能。
+不负责：美术风格决策或调色板（art-director）、玩法代码（gameplay-programmer）。
+未分配质量闸门（gate）ID。
 
 ---
 
 ## Static Assertions (Structural)
 
-- [ ] `description:` field is present and domain-specific (references shaders / VFX / rendering)
-- [ ] `tools:` list includes Read, Write, Edit, Bash, Glob, Grep
-- [ ] Model tier is `inherit` — frontmatter `model:` reads exactly `inherit` (tiers: `.claude/docs/model-tiers.md`)
-- [ ] Agent definition does not claim authority over art style direction or gameplay logic
+- [ ] `description:` 字段存在且与领域特定（提及着色器 / VFX / 渲染）
+- [ ] `tools:` 列表包含 Read、Write、Edit、Bash、Glob、Grep
+- [ ] 模型档位为 `inherit` — frontmatter `model:` 的值恰为 `inherit`（档位说明：`.claude/docs/model-tiers.md`）
+- [ ] 代理定义未声称对美术风格方向或玩法逻辑拥有权限
 
 ---
 
 ## Test Cases
 
-### Case 1: In-domain request — appropriate output
-**Input:** "Create a dissolve effect shader for enemy death sequences."
+### Case 1: 域内请求 — 合适的输出
+**Input:** “为敌人死亡序列创建一个溶解效果着色器。”
 **Expected behavior:**
-- Proposes the approach (shader structure, exposed parameters) before implementing, and asks "May I write this to [filepath]?" before writing
-- Produces shader code or a Shader Graph node spec appropriate to the configured engine (Godot shading language / Unity Shader Graph / Unreal Material Blueprint)
-- Exposes the dissolve driver as a documented shader parameter (e.g., a `dissolve_amount` uniform, 0.0–1.0, thresholding a noise texture) and documents each parameter's visual effect
-- States the effect's performance budget (e.g., texture samples, shader instruction count)
-- Leaves the look of the effect (edge color, glow) to art-director rather than deciding it
-- Output is engine-version-aware (checks version reference if post-cutoff APIs are needed)
+- 在实现前提出方案（着色器结构、暴露的参数），并在写入前询问“May I write this to [filepath]?”
+- 产出适配所配置引擎的着色器代码或 Shader Graph 节点规格（Godot 着色语言 / Unity Shader Graph / Unreal Material Blueprint）
+- 将溶解驱动作为有文档的着色器参数暴露（例如 `dissolve_amount` uniform，0.0–1.0，对噪声纹理做阈值处理），并记录每个参数的视觉效果
+- 说明该效果的性能预算（例如纹理采样数、着色器指令数）
+- 将效果外观（边缘颜色、辉光）留给 art-director，而不是自行决定
+- 输出感知引擎版本（若需要截止后 API 则检查版本参考）
 
-### Case 2: Out-of-domain request — redirects correctly
-**Input:** "Define the art bible color palette: primary, secondary, and accent colors for the UI."
+### Case 2: 域外请求 — 正确重定向
+**Input:** “定义美术圣经的调色板：用于 UI 的主色、辅色与强调色。”
 **Expected behavior:**
-- Does NOT produce color palette decisions or art direction documents
-- Explicitly states that art style decisions belong to `art-director`
-- Redirects the request to `art-director`
-- Any follow-up it offers is implementation on its side — e.g., a color-grading or palette LUT shader once art-director has decided the palette — with no palette values chosen by it
+- 不产出调色板决策或美术方向文档
+- 明确说明美术风格决策属于 `art-director`
+- 将请求重定向给 `art-director`
+- 其提供的任何后续工作都是自身侧的实现——例如在 art-director 确定调色板后的调色或调色板 LUT 着色器——不包含它选定的调色板值
 
-### Case 3: Performance warning — GPU particle count
-**Input:** "The VFX system is triggering a GPU particle count warning at 50,000 particles in the explosion pool."
+### Case 3: 性能警告 — GPU 粒子数
+**Input:** “VFX 系统在爆炸池达到 50,000 个粒子时触发 GPU 粒子数警告。”
 **Expected behavior:**
-- Produces an optimization spec addressing the specific warning
-- Proposes concrete strategies: particle budget caps per emitter, LOD-based particle reduction, GPU instancing, or switching to mesh-based VFX for distant effects
-- Sets an explicit particle-count budget for the explosion effect and states the visual-quality cost of each strategy (e.g., as documented quality tiers)
-- Flags any visible change to the explosion's look for art-director rather than deciding it
-- Does NOT change gameplay behavior of the explosion (delegates any gameplay impact to gameplay-programmer)
+- 产出针对该具体警告的优化规格
+- 提出具体策略：每个发射器的粒子预算上限、基于 LOD 的粒子削减、GPU 实例化，或对远景效果改用基于网格的 VFX
+- 为爆炸效果设定明确的粒子数预算，并说明各策略的视觉质量代价（例如以有文档的质量档位表示）
+- 将爆炸外观的任何可见变化标记给 art-director，而不是自行决定
+- 不改变爆炸的玩法行为（任何玩法影响都委派给 gameplay-programmer）
 
-### Case 4: Engine version compatibility
-**Input:** "Use the new texture sampler API for the water shader."
+### Case 4: 引擎版本兼容性
+**Input:** “为水面着色器使用新的纹理采样器 API。”
 **Expected behavior:**
-- Checks the engine version reference (e.g., `docs/engine-reference/godot/VERSION.md`) before suggesting any API
-- Flags if the requested API is post-cutoff (e.g., Godot 4.4+ texture type changes)
-- Provides the correct syntax for the project's pinned engine version
-- If uncertain about post-cutoff behavior, explicitly states the uncertainty and directs to verified docs
+- 在建议任何 API 前检查引擎版本参考（例如 `docs/engine-reference/godot/VERSION.md`）
+- 标记所请求 API 是否为截止后（例如 Godot 4.4+ 纹理类型变更）
+- 提供适用于项目锁定引擎版本的正确语法
+- 若对截止后行为不确定，明确说明不确定性并指向已验证文档
 
-### Case 5: Context pass — uses performance budget
-**Input:** Performance budget provided in context: 2ms GPU budget for the forest, max 200 draw calls per frame. Request: "Optimize the forest rendering system."
+### Case 5: 上下文传递 — 使用性能预算
+**Input:** 上下文中提供性能预算：森林场景 2ms GPU 预算，每帧最多 200 次绘制调用。请求：“优化森林渲染系统。”
 **Expected behavior:**
-- Treats the 2ms GPU budget and 200 draw call limit from the provided context as the budgets it enforces — no other numbers substituted
-- Proposes rendering optimizations (LOD, occlusion, batching, atlasing), each tied to the budget it targets (e.g., "batching reduces draw calls from 340 to ~180, within the 200 limit")
-- Calls out any optimization that helps one budget at the other's expense (e.g., merged meshes cut draw calls but can defeat occlusion and raise GPU time past 2ms) instead of presenting it as a free win
-- Proposes the approach before implementing and asks before writing files
+- 将所提供上下文中的 2ms GPU 预算与 200 次绘制调用上限视为其执行的预算——不替换为其他数值
+- 提出渲染优化（LOD、遮挡剔除、批处理、图集），每项都与其目标预算挂钩（例如“批处理将绘制调用从 340 降至约 180，处于 200 上限内”）
+- 指出任何以另一预算为代价帮助某一预算的优化（例如合并网格减少绘制调用，但可能破坏遮挡剔除并使 GPU 时间超过 2ms），而不是将其呈现为无代价收益
+- 在实现前提出方案，并在写入文件前询问
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Stays within declared domain (shaders, VFX, rendering optimization, art pipeline)
-- [ ] Redirects art style decisions to art-director
-- [ ] Returns structured findings (shader code, optimization specs with metrics, node graphs)
-- [ ] Does not modify gameplay code files without explicit delegation
-- [ ] Checks engine version reference before suggesting post-cutoff APIs
-- [ ] Ties each proposed optimization to the per-category budget it serves (draw calls, particle count, shader instructions, texture memory, overdraw)
+- [ ] 保持在声明的领域内（着色器、VFX、渲染优化、美术流水线）
+- [ ] 将美术风格决策重定向给 art-director
+- [ ] 返回结构化发现（着色器代码、带指标的优化规格、节点图）
+- [ ] 未经明确委派，不修改玩法代码文件
+- [ ] 在建议截止后 API 前检查引擎版本参考
+- [ ] 将每项拟议优化与其服务的分类预算挂钩（绘制调用、粒子数、着色器指令、纹理内存、过度绘制）
 
 ---
 
 ## Coverage Notes
-- Dissolve shader (Case 1) should include a visual test reference in `production/qa/evidence/`
-- Engine version check (Case 4) confirms the agent treats VERSION.md as authoritative
-- Performance budget case (Case 5) verifies the agent reads and applies provided context numbers
+- 溶解着色器（Case 1）应在 `production/qa/evidence/` 中包含视觉测试参考
+- 引擎版本检查（Case 4）确认代理将 VERSION.md 视为权威
+- 性能预算用例（Case 5）验证代理读取并应用所提供上下文中的数值

@@ -1,24 +1,22 @@
-> Gate definition. The spawning skill passes this file's path to the director agent; the AGENT reads it — the parent session should not.
+> 质量闸门定义。发起调用的技能会把本文件路径传给总监代理；由该 AGENT 读取——父会话不应读取。
 
-# CD-NARRATIVE — Narrative Consistency Check
+# CD-NARRATIVE — 叙事一致性检查
 
-Agent: `creative-director` | Model tier: Opus | Domain: Vision, pillars, player experience
+Agent：`creative-director` | 模型层级：session（继承） | 领域：愿景、支柱、玩家体验
 
-**Trigger**: Invoked directly, after narrative GDDs, lore documents, dialogue specs
-or world-building documents are authored — no skill spawns it; `/team-narrative`
-runs its own review, ND-CONSISTENCY
+**触发时机**：直接调用，在叙事 GDD、世界设定文档、对话规格或世界观构建文档
+编写完成之后——没有技能会发起它；`/team-narrative` 运行自己的评审
+ND-CONSISTENCY
 
-**Context to pass**:
-- Document file path(s)
-- Game pillars
-- Narrative direction brief or tone guide (if exists at `design/narrative/`)
-- Any existing lore that the new document references
+**需传入的上下文**：
+- 文档文件路径
+- 游戏支柱
+- 叙事方向简报或语气指南（如存在于 `design/narrative/`）
+- 新文档所引用的任何既有世界设定
 
-**Prompt**:
-> "Review this narrative content for consistency with the game's pillars and
-> established world rules. Does the tone match the game's established voice? Are
-> there contradictions with existing lore or world-building? Does the content serve
-> the player experience pillar? Return APPROVE, CONCERNS [specific inconsistencies],
-> or REJECT [contradictions that break world coherence]."
+**提示词**：
+> "审查这些叙事内容是否与游戏支柱及既定世界规则一致。语气是否匹配游戏既定
+> 声线？是否与既有世界设定或世界观构建相矛盾？内容是否服务玩家体验支柱？返回
+> APPROVE、CONCERNS [具体不一致之处]，或 REJECT [破坏世界连贯性的矛盾]。"
 
-**Verdicts**: APPROVE / CONCERNS / REJECT
+**结论**：APPROVE / CONCERNS / REJECT

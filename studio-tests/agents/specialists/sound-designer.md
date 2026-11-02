@@ -1,83 +1,83 @@
 # Agent Test Spec: sound-designer
 
 ## Agent Summary
-Domain: SFX specs, audio events, mixing parameters, and sound category definitions.
-Does NOT own: music composition direction (audio-director), code implementation of audio systems.
-No gate IDs assigned.
+领域：音效（SFX）规格、音频事件、混音参数与声音类别定义。
+不负责：音乐创作方向（audio-director）、音频系统的代码实现。
+未分配质量闸门（gate）ID。
 
 ---
 
 ## Static Assertions (Structural)
 
-- [ ] `description:` field is present and domain-specific (references SFX / audio events / mixing)
-- [ ] `tools:` list includes Read, Write, Edit, Glob, Grep — does NOT include engine code execution tools
-- [ ] Model tier is `inherit` — frontmatter `model:` reads exactly `inherit` (tiers: `.claude/docs/model-tiers.md`)
-- [ ] Agent definition does not claim authority over music direction or audio code implementation, and names `audio-director` as the owner of music direction and composition
+- [ ] `description:` 字段存在且与领域特定（提及音效 / 音频事件 / 混音）
+- [ ] `tools:` 列表包含 Read、Write、Edit、Glob、Grep —— 不包含引擎代码执行工具
+- [ ] 模型档位为 `inherit` — frontmatter `model:` 的值恰为 `inherit`（档位说明：`.claude/docs/model-tiers.md`）
+- [ ] 代理定义未声称对音乐方向或音频代码实现拥有权限，并点名 `audio-director` 为音乐方向与作曲的所有者
 
 ---
 
 ## Test Cases
 
-### Case 1: In-domain request — appropriate output
-**Input:** "Create an SFX spec for a sword swing attack."
+### Case 1: 域内请求 — 合适的输出
+**Input:** “为剑挥砍攻击创建一份音效（SFX）规格。”
 **Expected behavior:**
-- Produces a complete SFX spec sheet including:
-  - Description, reference sounds, frequency character, and duration
-  - Volume range and spatial properties
-  - Variation plan: number of variants, pitch randomization range (e.g., ±8%), and round-robin behavior
-  - Audio event entry: what triggers it, priority, concurrency limit, and cooldown
-  - Bus assignment for mixing (e.g., the combat SFX bus)
-- Event name follows the project audio naming convention if one is established (e.g., `sfx_combat_sword_swing`)
-- Does NOT create the audio files or write engine code; asks before writing the spec to a file
+- 产出完整的音效规格表，包括：
+  - 描述、参考声音、频率特征与时值
+  - 音量范围与空间属性
+  - 变化方案：变体数量、音高随机范围（例如 ±8%）以及轮询行为
+  - 音频事件条目：触发条件、优先级、并发上限与冷却
+  - 用于混音的母线分配（例如战斗音效母线）
+- 如果项目已建立音频命名规范，事件名遵循该规范（例如 `sfx_combat_sword_swing`）
+- 不创建音频文件或编写引擎代码；在将规格写入文件前先询问
 
-### Case 2: Out-of-domain request — redirects correctly
-**Input:** "Compose a looping ambient music track for the forest level."
+### Case 2: 域外请求 — 正确重定向
+**Input:** “为森林关卡创作一段循环环境配乐。”
 **Expected behavior:**
-- Does NOT produce music composition direction or a music brief, and does not create the audio itself
-- Explicitly states that music direction belongs to `audio-director`
-- Redirects the request to `audio-director`
-- Anything it offers in place of the track is from its own domain — e.g., an ambience layer spec for the forest (base layer, detail sounds such as wind and wildlife, one-shots, transitions) to complement the music once its direction is set — never a music brief
+- 不产出音乐创作方向或音乐简报，也不创建音频本身
+- 明确说明音乐方向属于 `audio-director`
+- 将请求重定向给 `audio-director`
+- 其替代配乐提供的任何内容都来自自身领域——例如森林环境层规格（基础层、风和野生动物等细节音、单次音、过渡），在音乐方向确定后与之互补——绝不是音乐简报
 
-### Case 3: Dynamic parameter — falloff curve spec
-**Input:** "The sword swing SFX needs distance falloff so it sounds different across the arena."
+### Case 3: 动态参数 — 衰减曲线规格
+**Input:** “剑挥砍音效需要距离衰减，使其在竞技场不同位置听起来不同。”
 **Expected behavior:**
-- Documents the event's spatial properties for distance:
-  - Parameter name (e.g., `distance` or `listener_distance`)
-  - Falloff curve type (e.g., logarithmic, linear, custom)
-  - Near/far distance thresholds with corresponding volume and high-frequency attenuation values
-- Asks about behavior the request leaves unspecified (e.g., occlusion by arena geometry) rather than assuming it
-- Does NOT write the audio engine integration code or change the audio middleware configuration
+- 记录事件的空间距离属性：
+  - 参数名（例如 `distance` 或 `listener_distance`）
+  - 衰减曲线类型（例如对数、线性、自定义）
+  - 近/远距离阈值及相应音量与高频衰减值
+- 询问请求中未明确的行为（例如竞技场几何遮挡），而不是假设
+- 不编写音频引擎集成代码或更改音频中间件配置
 
-### Case 4: Naming convention conflict
-**Input:** "Add a new SFX event called `SWORD_HIT_1` for the melee system." [Context includes the audio-director's naming convention: `[category]_[context]_[name]_[variant]`, e.g., `sfx_combat_sword_swing_01`.]
+### Case 4: 命名规范冲突
+**Input:** “为近战系统添加一个名为 `SWORD_HIT_1` 的新音效事件。” [上下文包含 audio-director 的命名规范：`[category]_[context]_[name]_[variant]`，例如 `sfx_combat_sword_swing_01`。]
 **Expected behavior:**
-- Identifies that `SWORD_HIT_1` deviates from the naming convention in context
-- Does NOT silently register the non-conforming name
-- Flags the deviation explicitly with a compliant alternative (e.g., `sfx_combat_sword_hit_01`), naming `audio-director` as the owner of the convention
-- Adds the event only once the user confirms the corrected name (or an explicit exception)
+- 识别 `SWORD_HIT_1` 偏离上下文中的命名规范
+- 不静默注册不合规名称
+- 明确标记偏差，并给出合规替代（例如 `sfx_combat_sword_hit_01`），点名 `audio-director` 为规范所有者
+- 仅在用户确认更正后的名称（或明确例外）后添加事件
 
-### Case 5: Context pass — uses audio style guide
-**Input:** Audio style guide provided in context specifying: "gritty, grounded, no reverb tails over 1.5s, reference: The Witcher 3 combat audio." Request: "Create SFX specs for the full melee combat suite."
+### Case 5: 上下文传递 — 使用音频风格指南
+**Input:** 上下文中提供音频风格指南，规定：“粗粝、扎根现实、混响尾音不超过 1.5 秒，参考：The Witcher 3 的战斗音频。”请求：“为整套近战战斗内容创建音效规格。”
 **Expected behavior:**
-- References the "gritty, grounded" tone descriptor in the spec rationale
-- Caps all reverb tail specifications at 1.5 seconds as stated
-- Notes the reference material (The Witcher 3) as a benchmark for mix levels and transient design
-- Does NOT produce specs that contradict the style guide (e.g., no ethereal or heavily reverb-processed specs); where a sound seems to need something the guide rules out, flags it for audio-director instead of deciding the sonic palette itself
+- 在规格理由中引用“粗粝、扎根现实”的音色描述
+- 按所述将所有混响尾音规格限制在 1.5 秒
+- 将参考资料（The Witcher 3）记为混音电平与瞬态设计的基准
+- 不产出与风格指南矛盾的规格（例如没有空灵或重度混响处理的规格）；当某个声音似乎需要指南排除的要素时，标记给 audio-director，而不是自行决定声音调色板
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Stays within declared domain (SFX specs, event definitions, mixing parameters)
-- [ ] Redirects music direction requests to audio-director
-- [ ] Returns structured SFX specs (description, volume range, spatial properties, variants and pitch range, trigger/priority/concurrency, bus)
-- [ ] Does not produce code for audio system implementation
-- [ ] Flags deviations from an established naming convention or design doc explicitly rather than silently accepting non-conforming names
-- [ ] References provided style guides and constraints in all spec output
+- [ ] 保持在声明的领域内（音效规格、事件定义、混音参数）
+- [ ] 将音乐方向请求重定向给 audio-director
+- [ ] 返回结构化音效规格（描述、音量范围、空间属性、变体与音高范围、触发/优先级/并发、母线）
+- [ ] 不产出音频系统实现的代码
+- [ ] 明确标记偏离既定命名规范或设计文档之处，而不是静默接受不合规名称
+- [ ] 在所有规格输出中引用所提供风格指南与约束
 
 ---
 
 ## Coverage Notes
-- SFX spec format (Case 1) should match whatever event schema the audio middleware (Wwise/FMOD/built-in) requires
-- Falloff curve (Case 3) verifies the agent produces implementation-ready parameter specs
-- Style guide compliance (Case 5) confirms the agent reads provided context and constrains output accordingly
+- 音效规格格式（Case 1）应与音频中间件（Wwise/FMOD/内置）要求的任何事件模式匹配
+- 衰减曲线（Case 3）验证代理产出可直接用于实现的参数规格
+- 风格指南合规性（Case 5）确认代理读取所提供上下文并据此约束输出

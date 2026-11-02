@@ -1,6 +1,6 @@
 ---
 name: soak-test
-description: "Soak test protocol for extended play — what to observe and log for slow leaks, fatigue, late-appearing edge cases."
+description: "针对长时间游玩的浸泡测试（soak test）协议——观察并记录缓慢泄漏、疲劳感以及后期出现的边界情况。"
 argument-hint: "[duration: 30m | 1h | 2h | 4h] [focus: memory | stability | balance | all]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Bash(bash "*/.claude/skills/soak-test/../../hooks/yaml-helper.sh" resolve_config *)
@@ -9,159 +9,141 @@ model: sonnet
 
 !`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow`
 
-**Automation mode**: Resolve `modes.automation` (`project.local.yaml` →
-`project.yaml` → default `collaborative`). Every `AskUserQuestion` call and
-every file write follows `.claude/docs/automation-modes.md`
-(collaborative asks always · guided major-only · autonomous logs and proceeds;
-`automation_always_ask` categories always prompt).
+**自动化模式**：解析 `modes.automation`（`project.local.yaml` →
+`project.yaml` → 默认 `collaborative`）。每次 `AskUserQuestion` 调用与
+每次文件写入都遵循 `.claude/docs/automation-modes.md`
+（协作模式总是询问 · 引导模式仅大项询问 · 自主模式记录后继续；
+`automation_always_ask` 类别始终提示）。
 
-# Soak Test
+# 浸泡测试（Soak Test）
 
-A soak test (also called an endurance test) is an extended play session run
-with specific observation goals. Unlike a smoke check (broad critical path,
-~10 min) or a single-feature playtest (~30 min), a soak test runs for **30
-minutes to several hours** to surface:
+浸泡测试（也称耐久测试）是一次带有明确观察目标的长时间游玩会话。不同于冒烟检查（覆盖广泛关键路径，约 10 分钟）或单功能试玩测试（约 30 分钟），浸泡测试会运行 **30 分钟到数小时**，以暴露：
 
-- **Memory leaks** — gradual heap growth that only appears after scene transitions
-- **Performance drift** — frame time degradation that worsens over time
-- **State accumulation bugs** — issues that only appear after N repetitions
-  of a mechanic (inventory full, score overflow, AI state corruption)
-- **Fun fatigue** — mechanics that feel good in a first session but grow
-  repetitive over extended play
-- **Content exhaustion** — the point where players run out of novel content
+- **内存泄漏** —— 仅在场景切换后才出现的渐进式堆增长
+- **性能漂移** —— 随时间推移不断恶化的帧时间降级
+- **状态累积缺陷** —— 仅在某个机制重复 N 次后才出现的问题（背包已满、分数溢出、AI 状态损坏）
+- **乐趣疲劳** —— 首次游玩时手感良好、但长时间游玩后变得重复的机制
+- **内容枯竭** —— 玩家耗尽新颖内容的临界点
 
-**This skill generates the observation protocol and analysis harness — the
-human does the actual playing.**
+**本技能生成观察协议与分析工具——实际游玩由人类完成。**
 
-**Output:** `production/qa/soak-test-[date]-[duration].md`
+**输出：** `production/qa/soak-test-[date]-[duration].md`
 
-**When to run:**
-- Polish phase — before `/gate-check release`
-- After fixing a memory or stability issue (regression soak)
-- When extended play has not been formally tracked
+**何时运行：**
+- Polish 阶段——在 `/gate-check release` 之前
+- 修复内存或稳定性问题之后（回归浸泡测试）
+- 长时间游玩尚未被正式跟踪时
 
 ---
 
-## 1. Parse Arguments
+## 1. 解析参数
 
-**Duration** (default: `1h`):
-- `30m` — short soak; suitable for testing a single mechanic or scene
-- `1h` — standard soak; covers most common leak categories
-- `2h` — extended soak; recommended for first full Polish soak
-- `4h` — deep soak; required for games with long session design (RPGs, sims)
+**时长**（默认：`1h`）：
+- `30m` —— 短时浸泡；适合测试单个机制或场景
+- `1h` —— 标准浸泡；覆盖大多数常见泄漏类别
+- `2h` —— 延长浸泡；推荐用于首次完整 Polish 浸泡测试
+- `4h` —— 深度浸泡；长会话设计的游戏（RPG、模拟类）必需
 
-**Focus** (default: `all`):
-- `memory` — focus on heap size, object count, leak patterns
-- `stability` — focus on crash/freeze/hang detection
-- `balance` — focus on fun fatigue, content exhaustion, difficulty perception
-- `all` — all of the above
-
----
-
-## 2. Load Context
-
-Read:
-- `project.yaml` — `engine.name` (for engine-specific memory monitoring
-  guidance) and `performance.*` budgets (memory ceiling, target FPS); for any
-  key absent or empty (including when `project.yaml` has no `performance` or
-  `engine` block), fall back to `.claude/docs/technical-preferences.md`
-- `design/gdd/game-concept.md` — intended session length (for comparison against
-  soak duration), core loop description (or `design/game-brief.md`, the one-page
-  brief that replaces it at `rigor: minimal` — core loop, and session length only
-  if its "Who it's for" line states one). Read it by section: find the headings you
-  need with the Grep tool (pattern `^#`, content mode) and Read those ranges
-  with offset and limit.
-- Most recent file in `production/qa/playtests/` — prior playtest findings
-  (to avoid re-documenting known issues)
-- Most recent file in `production/qa/qa-plan-*.md` — current sprint test coverage
-  (to understand what has been formally tested vs. what the soak covers)
-
-Note any performance budget targets (`performance.*` from `project.yaml`, else `.claude/docs/technical-preferences.md`):
-- Memory ceiling: [N MB, or "not set"]
-- Target FPS: [N, or "not set"]
-- Frame budget: [N ms, or "not set"]
+**重点**（默认：`all`）：
+- `memory` —— 关注堆大小、对象数量、泄漏模式
+- `stability` —— 关注崩溃/冻结/卡死检测
+- `balance` —— 关注乐趣疲劳、内容枯竭、难度感知
+- `all` —— 以上全部
 
 ---
 
-## 3. Define Observation Checkpoints
+## 2. 加载上下文
 
-Based on duration, generate timed checkpoints:
+读取：
+- `project.yaml` —— `engine.name`（用于引擎特定的内存监控
+  指引）与 `performance.*` 预算（内存上限、目标 FPS）；对任何
+  缺失或为空键（包括 `project.yaml` 没有 `performance` 或
+  `engine` 块的情况），回退到 `.claude/docs/technical-preferences.md`
+- `design/gdd/game-concept.md` —— 预期会话时长（用于与
+  浸泡时长对比）、核心循环描述（或 `design/game-brief.md`，即在 `rigor: minimal` 下替代它的一页简报——核心循环，以及仅当其中 "Who it's for" 一行说明时才取会话时长）。按章节读取：用 Grep 工具查找需要的标题（pattern `^#`，content 模式），再用 offset 与 limit 读取相应范围。
+- `production/qa/playtests/` 中最新文件——既往试玩测试发现
+  （以避免重复记录已知问题）
+- `production/qa/qa-plan-*.md` 中最新文件——当前冲刺测试覆盖
+  （用于了解哪些已被正式测试、哪些由浸泡测试覆盖）
 
-**30m soak**: T+0, T+10, T+20, T+30
-**1h soak**: T+0, T+15, T+30, T+45, T+60
-**2h soak**: T+0, T+20, T+40, T+60, T+80, T+100, T+120
-**4h soak**: T+0, T+30, T+60, T+90, T+120, T+180, T+240
-
-At each checkpoint, the observer records the observation items defined in
-Phase 4.
-
----
-
-## 4. Generate the Soak Test Protocol
-
-### Memory / Stability observation items (if focus = memory or all)
-
-Engine-specific monitoring guidance.
-
-> **Record the unit the tool shows; never convert, and never assume one.**
-> A soak test looks for **growth**, so every threshold below is a *ratio or a
-> delta against this session's own T+0 baseline* — which is unit-agnostic and
-> stays correct however the editor reports the number. Write the unit down at
-> T+0 exactly as displayed and use it consistently for the rest of the run.
-
-> **NOT SOURCEABLE — the tool, panel and counter names below are not covered by
-> `docs/engine-reference/`**: Godot's Debugger → Monitors and its memory
-> counters, Unity's Memory Profiler and its fields, Unreal's `stat memory`. Mark
-> them so in the protocol: they are pointers for the tester to confirm in their
-> own editor at T+0, not verified paths. If no memory tool can be found, nothing
-> was measured, and the Verdict section's NOT ASSESSED applies.
-
-**Godot 4:**
-- Open Debugger → Monitors tab; track `Memory → Static Memory` and
-  `Object Count → Objects` across checkpoints
-- Record: Static Memory (**unit as displayed**), Object Count, Orphan Nodes count
-- Alert threshold: Memory growth > 20% from T+0 after the first 15 minutes
-  (some growth on load is expected; sustained growth indicates a leak)
-- **Orphan Nodes is the one absolute number worth watching**: it should return to
-  its T+0 value after a scene unload. A ratio hides that; a non-zero floor that
-  keeps rising is a leak regardless of units
-
-**Unity:**
-- Open Memory Profiler (Window → Analysis → Memory Profiler)
-- Record: Total Reserved Memory, GC Allocated, Object Count at each checkpoint
-  (**units as displayed**)
-- Alert threshold: GC Allocated growing monotonically across 3+ checkpoints —
-  a monotonicity check, deliberately unit-free
-
-**Unreal Engine:**
-- Use `stat memory` console command at each checkpoint
-- Record: Physical Memory Used, Physical Memory Available (**units as displayed**)
-- Alert threshold: Physical Memory Used growth **> 20% over the full soak**,
-  measured against this run's T+0. An absolute threshold such as "> 50MB"
-  silently assumes both the unit *and* a project scale — 50MB is a rounding
-  error for one game and a catastrophe for another
-
-### Stability observation items (if focus = stability or all)
-
-At each checkpoint, note:
-- [ ] No crash, hang, or freeze occurred since last checkpoint
-- [ ] Frame rate still within target budget ([target FPS] fps)
-- [ ] Audio still playing correctly (no desync or silence)
-- [ ] All HUD elements still rendering correctly
-- [ ] Input responding as expected (no input loss or lag spike)
-
-### Balance / fatigue observation items (if focus = balance or all)
-
-Collect subjective observations at each checkpoint:
-- [ ] Core mechanic still feels rewarding (Y/N)
-- [ ] Perceived difficulty level: [too easy / appropriate / too hard]
-- [ ] Any "I've seen this before" moments since last checkpoint? (novel content exhaustion)
-- [ ] Any moment of frustration since last checkpoint? Note cause.
-- [ ] Any moment of peak engagement since last checkpoint? Note cause.
+记下任何性能预算目标（`performance.*` 取自 `project.yaml`，否则 `.claude/docs/technical-preferences.md`）：
+- 内存上限：[N MB，或 "not set"]
+- 目标 FPS：[N，或 "not set"]
+- 帧预算：[N ms，或 "not set"]
 
 ---
 
-## 5. Generate the Protocol Document
+## 3. 定义观察检查点
+
+根据时长生成定时检查点：
+
+**30m 浸泡**：T+0, T+10, T+20, T+30
+**1h 浸泡**：T+0, T+15, T+30, T+45, T+60
+**2h 浸泡**：T+0, T+20, T+40, T+60, T+80, T+100, T+120
+**4h 浸泡**：T+0, T+30, T+60, T+90, T+120, T+180, T+240
+
+在每个检查点，观察者记录 Phase 4 中定义的观察项。
+
+---
+
+## 4. 生成浸泡测试协议
+
+### 内存 / 稳定性观察项（若 focus = memory 或 all）
+
+引擎特定的监控指引。
+
+> **记录工具显示的数值单位；绝不换算，也绝不假设单位。**
+> 浸泡测试关注的是**增长**，因此下文每个阈值都是*相对本次会话自身 T+0 基线的比值或差值*——这与单位无关，无论编辑器如何报告数字都保持正确。在 T+0 时按显示原样写下单位，并在本次运行剩余部分一致使用。
+
+> **无法溯源（NOT SOURCEABLE）——下文中的工具、面板与计数器名称未被
+> `docs/engine-reference/` 覆盖**：Godot 的 Debugger → Monitors 及其内存
+> 计数器、Unity 的 Memory Profiler 及其字段、Unreal 的 `stat memory`。请在协议中如此标注：它们是指向性线索，供测试者在 T+0 时于自己的编辑器中确认，而非已验证路径。若找不到任何内存工具，则未测量任何内容，Verdict 部分的 NOT ASSESSED 适用。
+
+**Godot 4：**
+- 打开 Debugger → Monitors 标签页；在各检查点跟踪 `Memory → Static Memory` 与
+  `Object Count → Objects`
+- 记录：Static Memory（**按显示的单位**）、Object Count、Orphan Nodes 数量
+- 告警阈值：前 15 分钟后内存相对 T+0 增长 > 20%
+  （加载时有些增长是预期的；持续增长表明泄漏）
+- **Orphan Nodes 是唯一值得关注的绝对数字**：场景卸载后它应回到
+  T+0 的值。比值会掩盖这一点；一个持续上升的非零下限无论单位如何都是泄漏
+
+**Unity：**
+- 打开 Memory Profiler（Window → Analysis → Memory Profiler）
+- 在每个检查点记录：Total Reserved Memory、GC Allocated、Object Count
+  （**按显示的单位**）
+- 告警阈值：GC Allocated 在 3 个以上检查点间单调增长——
+  这是单调性检查，刻意不依赖单位
+
+**Unreal Engine：**
+- 在每个检查点使用 `stat memory` 控制台命令
+- 记录：Physical Memory Used、Physical Memory Available（**按显示的单位**）
+- 告警阈值：Physical Memory Used **在整个浸泡期间增长 > 20%**，
+  以本次运行的 T+0 为基准。诸如 "> 50MB" 的绝对阈值
+  隐含假定了单位*以及*项目规模——50MB 对一款游戏是舍入
+  误差，对另一款却是灾难
+
+### 稳定性观察项（若 focus = stability 或 all）
+
+在每个检查点记下：
+- [ ] 自上个检查点以来未发生崩溃、卡死或冻结
+- [ ] 帧率仍在目标预算内（[target FPS] fps）
+- [ ] 音频仍正常播放（无失步或静音）
+- [ ] 所有 HUD 元素仍正确渲染
+- [ ] 输入响应符合预期（无输入丢失或延迟尖峰）
+
+### 平衡性 / 疲劳观察项（若 focus = balance 或 all）
+
+在每个检查点收集主观观察：
+- [ ] 核心机制仍让人觉得有回报（Y/N）
+- [ ] 感知难度层级：[too easy / appropriate / too hard]
+- [ ] 自上个检查点以来是否有"这我见过"的时刻？（新颖内容枯竭）
+- [ ] 自上个检查点以来是否有沮丧时刻？记录原因。
+- [ ] 自上个检查点以来是否有投入度峰值时刻？记录原因。
+
+---
+
+## 5. 生成协议文档
 
 ```markdown
 # Soak Test Protocol
@@ -300,34 +282,34 @@ for — say how far it got and which checkpoints were never reached
 
 ---
 
-## 6. Write Output
+## 6. 写入输出
 
-Present the protocol summary in conversation, then ask:
+在对话中展示协议摘要，然后询问：
 
-"May I write this soak test protocol to
-`production/qa/soak-test-[date]-[duration].md`?"
+"我可以把这份浸泡测试协议写入
+`production/qa/soak-test-[date]-[duration].md` 吗？"
 
-Write only after approval.
+仅在批准后写入。
 
-After writing:
+写入后：
 
-"Protocol written. To run the soak:
-1. Open the file and follow the Pre-Session Setup checklist
-2. Record each checkpoint as you play
-3. Complete the Post-Session Analysis section when done
-4. File bugs from 'Issues Found' to `production/qa/bugs/`
-5. Run `/bug-triage sprint` after the session to integrate any S1/S2 issues (at `workflow: minimal`, which has no sprints: `/bug-triage full`)
+"协议已写入。要运行浸泡测试：
+1. 打开该文件并按照 Pre-Session Setup 检查清单执行
+2. 游玩时记录每个检查点
+3. 完成后填写 Post-Session Analysis 章节
+4. 将 'Issues Found' 中的缺陷提交到 `production/qa/bugs/`
+5. 会话结束后运行 `/bug-triage sprint`，将任何 S1/S2 问题纳入（在 `workflow: minimal` 下没有冲刺：使用 `/bug-triage full`）
 
-If the verdict is FAIL, run `/smoke-check` again after fixing the issues."
+若结论为 FAIL，修复问题后再次运行 `/smoke-check`。"
 
 ---
 
-## Collaborative Protocol
+## 协作协议（Collaborative Protocol）
 
-- **This skill generates a protocol — humans run it** — never attempt to
-  run a soak test automatically. The observations require a human observer.
-- **Duration should match the game's session design** — a 5-minute game
-  doesn't need a 4h soak; a city-builder might. Use judgment and ask if unclear.
-- **First soak should be `all` focus** — narrow focus (memory-only) is for
-  regression soaks after a specific fix, not the first pass
-- **Ask before writing** — always confirm before creating the protocol file
+- **本技能生成协议——由人类执行**——绝不尝试自动运行
+  浸泡测试。观察项需要人类观察者。
+- **时长应匹配游戏的会话设计**——5 分钟的游戏
+  不需要 4 小时浸泡；城市建造类游戏可能需要。自行判断，不清楚时询问。
+- **首次浸泡测试应采用 `all` 重点**——窄重点（仅内存）用于
+  特定修复后的回归浸泡，不适合首次运行
+- **写入前先询问**——创建协议文件前始终确认

@@ -1,23 +1,22 @@
-> Gate definition. The spawning skill passes this file's path to the director agent; the AGENT reads it — the parent session should not.
+> 质量闸门定义。发起调用的技能会把本文件路径传给总监代理；由该 AGENT 读取——父会话不应读取。
 
-# LP-CODE-REVIEW — Lead Programmer Code Review
+# LP-CODE-REVIEW — 主程序代码评审
 
-Agent: `lead-programmer` | Model tier: Sonnet
+Agent：`lead-programmer` | 模型层级：session（继承）
 
-**Trigger**: After a dev story is implemented (`/dev-story`, `/story-done`), or
-as part of `/code-review`
+**触发时机**：开发用户故事实现完成后（`/dev-story`、`/story-done`），或作为
+`/code-review` 的一部分
 
-**Context to pass**:
-- Implementation file paths
-- Story file path (for acceptance criteria)
-- Relevant GDD section
-- ADR that governs this system
+**需传入的上下文**：
+- 实现文件路径
+- 用户故事文件路径（用于验收标准）
+- 相关 GDD 章节
+- 管辖本系统的 ADR
 
-**Prompt**:
-> "Review this implementation against the story acceptance criteria and governing
-> ADR. Does the code match the architecture boundary definitions? Are there
-> violations of the coding standards or forbidden patterns? Is the public API
-> testable and documented? Are there any correctness issues against the GDD rules?
-> Return APPROVE, CONCERNS [specific issues], or REJECT [must be revised before merge]."
+**提示词**：
+> "对照用户故事验收标准与管辖 ADR 审查这份实现。代码是否符合架构边界定义？是否
+> 存在违反编码规范或违禁模式之处？公共 API 是否可测试且有文档？对照 GDD 规则是否
+> 存在任何正确性问题？返回 APPROVE、CONCERNS [具体问题]，或 REJECT [必须修订后
+> 才能合并]。"
 
-**Verdicts**: APPROVE / CONCERNS / REJECT
+**结论**：APPROVE / CONCERNS / REJECT

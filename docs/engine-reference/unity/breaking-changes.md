@@ -1,13 +1,12 @@
-# Unity 6.3 LTS — Breaking Changes
+# Unity 6.3 LTS — 破坏性变更
 
 **Last verified:** 2026-02-13
 
-This document tracks breaking API changes and behavioral differences between Unity 2022 LTS
-(likely in model training) and Unity 6.3 LTS (current version). Organized by risk level.
+本文档记录了 Unity 2022 LTS（可能存在于模型训练数据中）与 Unity 6.3 LTS（当前版本）之间的破坏性 API 变更和行为差异。按风险等级组织。
 
-## HIGH RISK — Will Break Existing Code
+## HIGH RISK — 会破坏现有代码
 
-### Entities/DOTS API Complete Overhaul
+### Entities/DOTS API 全面重构
 **Versions:** Entities 1.0+ (Unity 6.0+)
 
 ```csharp
@@ -31,11 +30,11 @@ public partial struct DamageSystem : ISystem {
 }
 ```
 
-**Migration:** Follow Unity's ECS migration guide. Major architectural changes required.
+**Migration:** 遵循 Unity 的 ECS 迁移指南。需要进行重大的架构变更。
 
 ---
 
-### Input System — Legacy Input Deprecated
+### Input System — 旧版 Input 已弃用
 **Versions:** Unity 6.0+
 
 ```csharp
@@ -47,11 +46,11 @@ using UnityEngine.InputSystem;
 if (Keyboard.current.spaceKey.wasPressedThisFrame) { }
 ```
 
-**Migration:** Install Input System package, replace all `Input.*` calls with new API.
+**Migration:** 安装 Input System 包，用新 API 替换所有 `Input.*` 调用。
 
 ---
 
-### URP/HDRP Renderer Feature API Changes
+### URP/HDRP Renderer Feature API 变更
 **Versions:** Unity 6.0+
 
 ```csharp
@@ -62,17 +61,16 @@ public override void Execute(ScriptableRenderContext context, ref RenderingData 
 public override void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
 ```
 
-**Migration:** Update custom render passes to use RenderGraph API.
+**Migration:** 将自定义渲染通道更新为使用 RenderGraph API。
 
 ---
 
-## MEDIUM RISK — Behavioral Changes
+## MEDIUM RISK — 行为变更
 
-### Addressables — Asset Loading Returns
+### Addressables — 资源加载返回值
 **Versions:** Unity 6.2+
 
-Asset loading failures now throw exceptions by default instead of returning null.
-Add proper exception handling or use `TryLoad` variants.
+资源加载失败现在默认抛出异常，而不是返回 null。请添加适当的异常处理，或使用 `TryLoad` 变体。
 
 ```csharp
 // ❌ OLD: Silent null on failure
@@ -90,62 +88,61 @@ try {
 
 ---
 
-### Physics — Default Solver Iterations Changed
+### Physics — 默认求解器迭代次数变更
 **Versions:** Unity 6.0+
 
-Default solver iterations increased for better stability.
-Check `Physics.defaultSolverIterations` if you rely on old behavior.
+默认求解器迭代次数已提高，以获得更好的稳定性。如果你依赖旧行为，请检查 `Physics.defaultSolverIterations`。
 
 ---
 
-## LOW RISK — Deprecations (Still Functional)
+## LOW RISK — 弃用（仍可用）
 
-### UGUI (Legacy UI)
-**Status:** Deprecated but supported
+### UGUI（旧版 UI）
+**Status:** 已弃用但受支持
 **Replacement:** UI Toolkit
 
-UGUI still works but UI Toolkit is recommended for new projects.
+UGUI 仍然可用，但新项目推荐使用 UI Toolkit。
 
 ---
 
-### Legacy Particle System
-**Status:** Deprecated
+### 旧版粒子系统
+**Status:** 已弃用
 **Replacement:** Visual Effect Graph (VFX Graph)
 
 ---
 
-### Old Animation System
-**Status:** Deprecated
+### 旧版动画系统
+**Status:** 已弃用
 **Replacement:** Animator Controller (Mecanim)
 
 ---
 
-## Platform-Specific Breaking Changes
+## 平台特定的破坏性变更
 
 ### WebGL
-- **Unity 6.0+**: WebGPU is now the default (WebGL 2.0 fallback available)
-- Update shaders for WebGPU compatibility
+- **Unity 6.0+**：WebGPU 现在是默认选项（可回退到 WebGL 2.0）
+- 更新着色器以兼容 WebGPU
 
 ### Android
-- **Unity 6.0+**: Minimum API level raised to 24 (Android 7.0)
+- **Unity 6.0+**：最低 API 级别提升至 24（Android 7.0）
 
 ### iOS
-- **Unity 6.0+**: Minimum deployment target raised to iOS 13
+- **Unity 6.0+**：最低部署目标提升至 iOS 13
 
 ---
 
-## Migration Checklist
+## 迁移检查清单
 
-When upgrading from 2022 LTS to Unity 6.3 LTS:
+从 2022 LTS 升级到 Unity 6.3 LTS 时：
 
-- [ ] Audit all DOTS/ECS code (complete rewrite likely needed)
-- [ ] Replace `Input` class with Input System package
-- [ ] Update custom render passes to RenderGraph API
-- [ ] Add exception handling to Addressables calls
-- [ ] Test physics behavior (solver iterations changed)
-- [ ] Consider migrating UGUI to UI Toolkit for new UI
-- [ ] Update WebGL shaders for WebGPU
-- [ ] Verify minimum platform versions (Android/iOS)
+- [ ] 审查所有 DOTS/ECS 代码（很可能需要完全重写）
+- [ ] 用 Input System 包替换 `Input` 类
+- [ ] 将自定义渲染通道更新为 RenderGraph API
+- [ ] 为 Addressables 调用添加异常处理
+- [ ] 测试物理行为（求解器迭代次数已变更）
+- [ ] 考虑将新 UI 从 UGUI 迁移到 UI Toolkit
+- [ ] 更新 WebGL 着色器以支持 WebGPU
+- [ ] 核实最低平台版本（Android/iOS）
 
 ---
 

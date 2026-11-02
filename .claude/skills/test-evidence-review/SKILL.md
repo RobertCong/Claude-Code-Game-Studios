@@ -1,6 +1,6 @@
 ---
 name: test-evidence-review
-description: "Quality review of test files and evidence — goes beyond existence, evaluates assertion coverage. ADEQUATE/INCOMPLETE/MISSING/NOT ASSESSED per story."
+description: "对测试文件与证据进行质量评审 —— 不止于检查是否存在，还评估断言覆盖率。按用户故事给出 ADEQUATE/INCOMPLETE/MISSING/NOT ASSESSED 结论。"
 argument-hint: "[story-path | sprint | system-name]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Bash(bash "*/.claude/skills/test-evidence-review/../../hooks/yaml-helper.sh" resolve_config *), Bash(bash .claude/scripts/review-receipts.sh check *)
@@ -9,271 +9,267 @@ model: sonnet
 
 !`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow,qa.level,testing.strict`
 
-**Automation mode**: Resolve `modes.automation` (`project.local.yaml` →
-`project.yaml` → default `collaborative`). Every `AskUserQuestion` call and
-every file write follows `.claude/docs/automation-modes.md`
-(collaborative asks always · guided major-only · autonomous logs and proceeds;
-`automation_always_ask` categories always prompt).
+**自动化模式**：解析 `modes.automation`（`project.local.yaml` →
+`project.yaml` → 默认 `collaborative`）。每次 `AskUserQuestion` 调用和
+每次文件写入都遵循 `.claude/docs/automation-modes.md`
+（collaborative 总是询问 · guided 仅重大事项询问 · autonomous 记录后继续；
+`automation_always_ask` 类别始终提示）。
 
-**`qa.level` and `testing.strict`** (resolved above) decide what this review may
-call a blocker — the same rules `/story-done` closes stories by, so a BLOCKING
-item here is one that would stop `/story-done`:
-- **`qa.level: minimal`** waives tests. A Logic, Integration or Config/Data story
-  with no test evidence (for Config/Data, no smoke report) is
-  `WAIVED (qa.level: minimal)` — not MISSING — and raises no BLOCKING item; a
-  test that does exist is still reviewed, but its gaps are ADVISORY. Visual/Feel and UI evidence (the retained screenshots, and the
-  Visual/Feel sign-off) is never waived.
-- **Gate level per story type**: take `testing.strict.<type>` from the resolved
-  block (Logic→`logic`, Integration→`integration`, Visual/Feel→`visual`,
-  UI→`ui`, Config/Data→`config`): `true` → BLOCKING, `false` → ADVISORY, `unset`
-  → a plain-boolean `testing.strict: true|false` (legacy form) applies to every
-  type; else the Default Gate Level in `.claude/docs/coding-standards.md`
-  (BLOCKING for Logic, Integration, Visual/Feel and UI; ADVISORY for
-  Config/Data). Every "BLOCKING" below means that story type's gate level.
+**`qa.level` 和 `testing.strict`**（已在上方解析）决定本次评审可以把什么
+称为阻塞项 —— 与 `/story-done` 关闭用户故事所依据的规则相同，因此这里的
+BLOCKING 项就是会阻止 `/story-done` 的项：
+- **`qa.level: minimal`** 免测。Logic、Integration 或 Config/Data 类型的用户故事
+  没有测试证据（Config/Data 则指没有冒烟测试报告）时，结论为
+  `WAIVED (qa.level: minimal)` —— 而不是 MISSING —— 且不产生 BLOCKING 项；
+  确实存在的测试仍会被评审，但其缺陷记为 ADVISORY。Visual/Feel 与 UI 证据（保留的
+  截图，以及 Visual/Feel 的签核）永不豁免。
+- **按用户故事类型的闸门级别**：从已解析配置块中读取 `testing.strict.<type>`
+  （Logic→`logic`，Integration→`integration`，Visual/Feel→`visual`，
+  UI→`ui`，Config/Data→`config`）：`true` → BLOCKING，`false` → ADVISORY，`unset`
+  → 则适用纯布尔形式的 `testing.strict: true|false`（旧式写法）于所有
+  类型；否则使用 `.claude/docs/coding-standards.md` 中的默认闸门级别
+  （Logic、Integration、Visual/Feel 和 UI 为 BLOCKING；Config/Data 为
+  ADVISORY）。下文所有 "BLOCKING" 均指该用户故事类型的闸门级别。
 
-# Test Evidence Review
+# 测试证据评审
 
-`/smoke-check` verifies that test files **exist** and **pass**. This skill
-goes further — it reviews the **quality** of those tests and evidence documents.
-A test file that exists and passes may still leave critical behaviour uncovered.
-A manual evidence doc that exists may lack the sign-offs required for closure.
+`/smoke-check` 验证测试文件**存在**且**通过**。本技能更进一层 —— 它评审这些测试
+和证据文档的**质量**。一个存在且通过的测试文件仍可能留下未被覆盖的关键行为。
+一份存在的手工证据文档可能缺少关闭所需的签核。
 
-**Output:** Summary report (in conversation) + optional `production/qa/evidence-review-[date].md`
+**输出**：摘要报告（在对话中）+ 可选的 `production/qa/evidence-review-[date].md`
 
-**When to run:**
-- Before QA hand-off sign-off (`/team-qa` Phase 5)
-- On any story where test quality is in question
-- As part of milestone review for Logic and Integration story quality audit
-
----
-
-## 1. Parse Arguments
-
-**Modes:**
-- `/test-evidence-review [story-path]` — review a single story's evidence
-- `/test-evidence-review sprint` — review all stories in the current sprint
-- `/test-evidence-review [system-name]` — review all stories in an epic/system
-- No argument — ask which scope: "Single story", "Current sprint", "A system"
+**何时运行**：
+- 在 QA 交接签核之前（`/team-qa` Phase 5）
+- 对任何测试质量存疑的用户故事
+- 作为里程碑评审的一部分，用于 Logic 与 Integration 用户故事的质量审计
 
 ---
 
-## 2. Load Stories in Scope
+## 1. 解析参数
 
-Based on the argument:
+**模式：**
+- `/test-evidence-review [story-path]` —— 评审单个用户故事的证据
+- `/test-evidence-review sprint` —— 评审当前冲刺中的所有用户故事
+- `/test-evidence-review [system-name]` —— 评审某个史诗/系统中的所有用户故事
+- 无参数 —— 询问范围："单个用户故事"、"当前冲刺"、"某个系统"
 
-**Single story**: Read the story file directly. Extract: Story Type, Test
-Evidence section, story slug, system name.
+---
 
-**Sprint**: Read the most recently modified file in `production/sprints/`; extract
-the list of story file paths from the sprint plan.
+## 2. 加载范围内的用户故事
 
-**System**: Glob `production/epics/[system-name]/story-*.md`.
+根据参数：
 
-> **If the resolved scope contains ZERO stories, stop here.** Report
-> `NOT ASSESSED — no stories in scope`, name which scope was searched and which
-> path was empty, and route: no sprint file → `/sprint-plan new` (at `workflow: minimal`,
-> which has no sprints, `/test-evidence-review [epic-slug]` instead); a sprint plan
-> listing no stories → `/create-stories [epic-slug]`; a `[system-name]` glob that
-> matched nothing → name the glob. Do not continue to Section 3.
+**单个用户故事**：直接读取用户故事文件。提取：Story Type、Test
+Evidence 部分、用户故事标识（slug）、系统名称。
+
+**冲刺**：读取 `production/sprints/` 中最近修改的文件；提取
+冲刺计划中的用户故事文件路径列表。
+
+**系统**：Glob `production/epics/[system-name]/story-*.md`。
+
+> **如果解析出的范围内没有任何用户故事，就此停止。** 报告
+> `NOT ASSESSED — no stories in scope`，说明搜索了哪个范围、哪个
+> 路径为空，并给出路由：没有冲刺文件 → `/sprint-plan new`（在 `workflow: minimal` 下
+> 没有冲刺，改用 `/test-evidence-review [epic-slug]`）；冲刺计划
+> 未列出任何用户故事 → `/create-stories [epic-slug]`；`[system-name]` glob
+> 无匹配 → 报出该 glob。不要继续到第 3 节。
 >
-> **Guard the empty scope, not just the per-story unknown.** The verdict
-> vocabulary here — ADEQUATE / INCOMPLETE / MISSING — needs a "could not check"
-> value, or an unverifiable story acquires a verdict claiming somebody verified
-> it; that is what `NOT ASSESSED` is for. **But giving the per-story unknown a
-> home does nothing for the empty-scope unknown.** With no stories
-> the Section 6 report renders an empty Summary table and ends
-> `BLOCKING items: 0 / ADVISORY items: 0` — which reads as *everything reviewed,
-> all fine*. This skill gates story closure, and `coding-standards.md` marks Logic,
-> Integration, Visual/Feel and UI evidence BLOCKING, so a false-clean closes stories nobody
-> reviewed.
+> **要守护空范围，而不只是单个用户故事的未知。** 这里的结论
+> 词汇 —— ADEQUATE / INCOMPLETE / MISSING —— 需要一个"无法检查"的
+> 取值，否则一个无法核实的用户故事就会获得一个声称已有人核实
+> 它的结论；这正是 `NOT ASSESSED` 的用途。**但为单个用户故事的未知提供
+> 归宿，对空范围的未知毫无帮助。** 没有用户故事时，
+> 第 6 节的报告会渲染出空的 Summary 表并以
+> `BLOCKING items: 0 / ADVISORY items: 0` 结尾 —— 读起来像是 *全部已评审，
+> 一切正常*。本技能是用户故事关闭的闸门，而 `coding-standards.md` 将 Logic、
+> Integration、Visual/Feel 和 UI 证据标记为 BLOCKING，因此虚假的干净结果会关闭无人
+> 评审过的用户故事。
 
-For the resulting story set, collect the fields below with **targeted section
-greps, not a full read of each story**:
+对得到的用户故事集合，用**针对性的分段 grep，而非完整读取每个用户故事**来收集以下字段：
 ```
 Grep pattern="## Test Evidence" glob="production/epics/**/story-*.md" output_mode="content" -A 8
 Grep pattern="## Acceptance Criteria" glob="production/epics/**/story-*.md" output_mode="content" -A 15
 ```
-- **Story Type** (Logic / Integration / Visual/Feel / UI / Config/Data) and the
-  stated evidence path — both live under `## Test Evidence`, so the first grep's
-  `-A 8` captures them.
-- Acceptance Criteria list — the `## Acceptance Criteria` block from the second grep.
-- Story slug (from the file name) and System (from the directory path) — no read.
-Full-read a story only when its Test Evidence section is missing or ambiguous.
-(In Sprint mode, scope the globs to the sprint plan's story paths.)
+- **Story Type**（Logic / Integration / Visual/Feel / UI / Config/Data）以及
+  声明的证据路径 —— 两者都在 `## Test Evidence` 下，因此第一次 grep 的
+  `-A 8` 会捕获它们。
+- Acceptance Criteria 列表 —— 来自第二次 grep 的 `## Acceptance Criteria` 块。
+- 用户故事标识（slug，来自文件名）和 System（来自目录路径）—— 无需读取。
+仅当某个用户故事的 Test Evidence 部分缺失或歧义时才完整读取它。
+（在冲刺模式下，将 glob 限定为冲刺计划中的用户故事路径。）
 
 ---
 
-## 3. Locate Evidence Files
+## 3. 定位证据文件
 
-For each story, find the evidence. **Check the story's stated evidence path first**
-— the one Section 2 captured from its `## Test Evidence` section. If it exists, use
-it. Fall back to searching only when no path is stated or it is not found:
+对每个用户故事查找证据。**先检查用户故事声明的证据路径**
+—— 即第 2 节从其 `## Test Evidence` 部分捕获的那一个。如果它存在，就用
+它。仅当未声明路径或未找到时才回退到搜索：
 
-**Logic stories**: search the engine's unit-test root — `tests/unit/[system]/`
-(Godot), `Assets/Tests/EditMode/` (Unity), `Source/<Module>/Private/Tests/`
-(Unreal); see `.claude/docs/directory-structure.md` — for a file whose name
-contains the story slug or its system. Test files are named per
-`.claude/rules/test-standards.md`, not necessarily `[story-slug]_test.*`.
+**Logic 用户故事**：搜索引擎的单元测试根目录 —— `tests/unit/[system]/`
+（Godot）、`Assets/Tests/EditMode/`（Unity）、`Source/<Module>/Private/Tests/`
+（Unreal）；参见 `.claude/docs/directory-structure.md` —— 查找文件名
+包含用户故事标识或其系统名的文件。测试文件的命名遵循
+`.claude/rules/test-standards.md`，不一定叫 `[story-slug]_test.*`。
 
-**Integration stories**: the same, under the integration root (`tests/integration/[system]/`,
-`Assets/Tests/PlayMode/`, or Unreal's test root)
-  - Also check `production/qa/playtests/` for playtest records mentioning the story
+**Integration 用户故事**：同上，位于集成测试根目录（`tests/integration/[system]/`、
+`Assets/Tests/PlayMode/` 或 Unreal 的测试根目录）
+  - 还要检查 `production/qa/playtests/` 中提及该用户故事的试玩测试记录
 
-**Visual/Feel and UI stories**: Glob `production/qa/evidence/` for a retained image
-(`*.png`, `*.jpg`, `*.gif`) belonging to this story, and for
+**Visual/Feel 和 UI 用户故事**：对 `production/qa/evidence/` 执行 Glob，查找属于该
+用户故事的保留图片（`*.png`、`*.jpg`、`*.gif`），以及
 `[story-slug]-evidence.*`
 
-**Config/Data stories**: Glob `production/qa/smoke-*.md` (any smoke check report)
+**Config/Data 用户故事**：Glob `production/qa/smoke-*.md`（任何冒烟检查报告）
 
-Note what was found (path) or not found (gap) for each story.
-
----
-
-## 4. Review Automated Test Quality (Logic / Integration)
-
-For each test file found, read it and evaluate:
-
-### Assertion coverage
-
-Count the number of distinct assertions (lines containing assert, expect,
-check, verify, or engine-specific assertion patterns). Low assertion count is
-a quality signal — a test that makes only 1 assertion per test function may
-not cover the range of expected behaviour.
-
-Thresholds:
-- **3+ assertions per test function** → normal
-- **1-2 assertions per test function** → note as potentially thin
-- **0 assertions** (test exists but no asserts) → flag as BLOCKING (the story
-  type's gate level; ADVISORY at `qa.level: minimal`) — the test passes
-  vacuously and proves nothing
-
-### Edge case coverage
-
-For each acceptance criterion in the story that contains a number, threshold,
-or "when X happens" conditional: check whether a test function name or
-test body references that specific case.
-
-Heuristics:
-- Grep test file for "zero", "max", "null", "empty", "min", "invalid",
-  "boundary", "edge" — presence of any is a positive signal
-- If the story has a Formulas section with specific bounds: check whether
-  tests exercise at minimum/maximum values
-
-### Naming quality
-
-Test function names should describe: the scenario + the expected result.
-Pattern per engine (`.claude/rules/test-standards.md`): Godot
-`test_[scenario]_[expected]`, Unity `[Scenario]_[Expected]`, Unreal
-`<Project>.[System].[Scenario]`.
-
-Flag functions named generically (`test_1`, `test_run`, `testBasic`) as
-**naming issues** — they make failures harder to diagnose.
-
-### Formula traceability
-
-For Logic stories where the GDD has a Formulas section: check that the test
-file contains at least one test whose name or comment references the formula
-name or a formula value. A test that exercises a formula without mentioning
-it by name is harder to maintain when the formula changes.
+记录每个用户故事找到了什么（路径）或没找到什么（缺口）。
 
 ---
 
-## 5. Review Manual Evidence Quality (Visual/Feel / UI)
+## 4. 评审自动化测试质量（Logic / Integration）
 
-For each evidence document found, read it and evaluate the checks below.
+对找到的每个测试文件，读取并评估：
 
-**A UI story needs no evidence document.** When it has none, its retained
-screenshots are the evidence: apply only Screenshot / artefact completeness (an
-image of each screen the story changes — a screen a criterion only navigates to,
-such as the title screen after Quit, needs none of its own) and Date coverage (the images'
-dates). A UI story is ADEQUATE on those two — never INCOMPLETE for lacking a doc,
-its criterion linkage or a sign-off.
+### 断言覆盖率
 
-### Criterion linkage
+统计不同断言的数量（包含 assert、expect、
+check、verify 或引擎特有断言模式的行）。断言数量低是一个
+质量信号 —— 每个测试函数只做 1 个断言的测试可能
+未覆盖预期行为的范围。
 
-The evidence doc should reference each acceptance criterion from the story.
-Check: does the evidence doc contain each criterion (or a clear rephrasing)?
-Missing criteria mean a criterion was never verified.
+阈值：
+- **每个测试函数 3+ 个断言** → 正常
+- **每个测试函数 1-2 个断言** → 记为可能薄弱
+- **0 个断言**（测试存在但无断言）→ 标记为 BLOCKING（该用户故事
+  类型的闸门级别；在 `qa.level: minimal` 下为 ADVISORY）—— 该测试只是
+  空转通过，证明不了任何东西
 
-### Sign-off completeness
+### 边界用例覆盖
 
-What closes the story follows the evidence table in
-`.claude/docs/coding-standards.md` — the same rule `/story-done` applies, at every
-`qa.level`:
-- **Visual/Feel**: the evidence doc (from the test-evidence template) must have
-  every sign-off row `[x] Approved`. A blank or missing row is INCOMPLETE.
-- **UI**: no sign-off is required — the retained screenshots close it. Note a
-  sign-off if one exists; never mark a UI story INCOMPLETE for lacking one.
+对用户故事中每一个包含数字、阈值
+或"当 X 发生时"条件的验收标准：检查是否有测试函数名或
+测试体引用了该特定情况。
 
-### Screenshot / artefact completeness
+启发式方法：
+- 在测试文件中 Grep "zero"、"max"、"null"、"empty"、"min"、"invalid"、
+  "boundary"、"edge" —— 出现任一项都是积极信号
+- 如果用户故事有带具体边界的 Formulas 部分：检查
+  测试是否覆盖最小值/最大值
 
-For Visual/Feel stories: Glob `production/qa/evidence/` for a retained image
-(`*.png`, `*.jpg`, `*.gif`) belonging to this story. A doc that describes a
-visual check but retains no image is INCOMPLETE — this gate is BLOCKING by
-default, and a description is an assertion rather than evidence.
+### 命名质量
 
-For UI stories: require the same retained screenshot of each screen touched.
-A walkthrough log is welcome but not required.
+测试函数名应描述：场景 + 预期结果。
+各引擎的模式（`.claude/rules/test-standards.md`）：Godot
+`test_[scenario]_[expected]`，Unity `[Scenario]_[Expected]`，Unreal
+`<Project>.[System].[Scenario]`。
 
-### Evidence older than its code
+将命名笼统的函数（`test_1`、`test_run`、`testBasic`）标记为
+**命名问题** —— 它们使失败更难诊断。
 
-For each story with a retained image, run
-`bash .claude/scripts/review-receipts.sh check production/qa/evidence/[story-slug]/stamp.txt`.
-List each `CHANGED:` or `GONE:` file as POTENTIALLY STALE — it changed after the
-evidence was captured. `RECEIPT: NONE`: say "no stamp" and use the date check
-below. A report line only: it never changes the story's verdict.
+### 公式可追溯性
 
-### Date coverage
-
-Evidence doc should have a date. If the date is earlier than the story's
-last major change (heuristic: compare against sprint start date from the sprint
-plan), flag as POTENTIALLY STALE — the evidence may not cover the final
-implementation.
+对于 GDD 中有 Formulas 部分的 Logic 用户故事：检查测试
+文件是否至少包含一个测试，其名称或注释引用了公式
+名称或某个公式值。一个执行了公式却未指明其名称的
+测试，在公式变化时更难维护。
 
 ---
 
-## 6. Build the Review Report
+## 5. 评审手工证据质量（Visual/Feel / UI）
 
-For each story, assign a verdict:
+对找到的每份证据文档，读取并评估以下检查项。
 
-| Verdict | Meaning |
+**UI 用户故事不需要证据文档。** 当它没有时，其保留的
+截图就是证据：只应用 截图/产出物完整性（用户故事更改的每个屏幕
+都应有一张图片 —— 某个验收标准只是导航到的屏幕，
+例如退出后的标题画面，不需要自己的图片）和 日期覆盖（图片的
+日期）。UI 用户故事在这两项上即为 ADEQUATE —— 绝不因缺少文档、
+标准关联或签核而为 INCOMPLETE。
+
+### 标准关联
+
+证据文档应引用用户故事中的每一条验收标准。
+检查：证据文档是否包含每一条标准（或清晰的改述）？
+缺失的标准意味着某条标准从未被验证。
+
+### 签核完整性
+
+什么能关闭用户故事遵循
+`.claude/docs/coding-standards.md` 中的证据表 —— 与 `/story-done` 在每种
+`qa.level` 下应用的规则相同：
+- **Visual/Feel**：证据文档（来自 test-evidence 模板）必须有
+  每一行签核为 `[x] Approved`。空白或缺失的行即为 INCOMPLETE。
+- **UI**：不需要签核 —— 保留的截图即可关闭它。若存在签核则
+  记下；绝不因缺少签核而将 UI 用户故事标记为 INCOMPLETE。
+
+### 截图/产出物完整性
+
+对于 Visual/Feel 用户故事：对 `production/qa/evidence/` 执行 Glob，查找属于该
+用户故事的保留图片（`*.png`、`*.jpg`、`*.gif`）。描述了视觉检查
+但没有保留任何图片的文档为 INCOMPLETE —— 该闸门默认是 BLOCKING，
+而描述只是断言而非证据。
+
+对于 UI 用户故事：要求对涉及的每个屏幕都有同样保留的截图。
+走查日志受欢迎但非必需。
+
+### 证据早于其代码
+
+对每个有保留图片的用户故事，运行
+`bash .claude/scripts/review-receipts.sh check production/qa/evidence/[story-slug]/stamp.txt`。
+将每个 `CHANGED:` 或 `GONE:` 文件列为 POTENTIALLY STALE —— 它在证据
+捕获之后发生了更改。`RECEIPT: NONE`：说明"无时间戳"并使用下面的日期检查。
+这仅是报告中的一行：它从不改变用户故事的结论。
+
+### 日期覆盖
+
+证据文档应有日期。如果日期早于用户故事的
+最后一次重大更改（启发式：与冲刺计划中的冲刺开始日期
+比较），标记为 POTENTIALLY STALE —— 证据可能未覆盖最终
+实现。
+
+---
+
+## 6. 构建评审报告
+
+对每个用户故事给出结论：
+
+| 结论 | 含义 |
 |---------|---------|
-| **ADEQUATE** | Test/evidence exists, passes quality checks, all criteria covered |
-| **INCOMPLETE** | Test/evidence exists but has quality gaps (thin assertions, missing sign-offs) |
-| **MISSING** | No test or evidence found for a story type that requires it at this `qa.level` |
-| **NOT ASSESSED** | The review could not be performed for this story — see below |
-| **WAIVED (qa.level: minimal)** | A Logic, Integration or Config/Data story with no test evidence at `qa.level: minimal` — tests are not required, so nothing is missing; name it as waived |
+| **ADEQUATE** | 测试/证据存在，通过质量检查，覆盖所有标准 |
+| **INCOMPLETE** | 测试/证据存在但有质量缺口（断言薄弱、缺少签核） |
+| **MISSING** | 某类用户故事在该 `qa.level` 下要求证据，但未找到任何测试或证据 |
+| **NOT ASSESSED** | 无法对该用户故事进行评审 —— 见下文 |
+| **WAIVED (qa.level: minimal)** | 在 `qa.level: minimal` 下无测试证据的 Logic、Integration 或 Config/Data 用户故事 —— 不要求测试，因此没有缺失；将其记为已豁免 |
 
-> **`NOT ASSESSED` is required, and it is not a softer `MISSING`.**
-> The other three verdicts all presume the review actually ran. `MISSING` means
-> *I looked and there was nothing there* — a real, reportable failure. It must
-> never be used for *I could not look*, which is not a finding about the story
-> at all. Use `NOT ASSESSED` when:
+> **`NOT ASSESSED` 是必需的，它不是更温和的 `MISSING`。**
+> 其他三种结论都预设评审实际发生了。`MISSING` 意味着
+> *我去看了，但那里什么都没有* —— 一个真实的、可报告的失败。它绝
+> 不能用于 *我无法查看*，这根本不是关于用户故事的发现。在以下情况使用 `NOT ASSESSED`：
 >
-> - the story's **type cannot be determined**, so the required evidence is
->   unknown (the type→evidence mapping in `.claude/docs/coding-standards.md` is
->   what makes any other verdict meaningful);
-> - the evidence path is named but **unreadable or outside this run's scope**;
-> - the story file itself could not be parsed.
+> - 用户故事的**类型无法确定**，因此所需证据
+>   未知（`.claude/docs/coding-standards.md` 中的类型→证据映射
+>   正是使任何其他结论有意义的基础）；
+> - 证据路径已指明但**不可读或超出本次运行范围**；
+> - 用户故事文件本身无法解析。
 >
-> **Say which of those it was, per story.** A reader cannot act on a bare
-> `NOT ASSESSED`, and the whole point of separating it from `MISSING` is that
-> the two have different fixes: one needs a test written, the other needs the
-> reviewer given access or the story classified.
+> **按用户故事说明属于上述哪种情况。** 读者无法对光秃秃的
+> `NOT ASSESSED` 采取行动，而将其与 `MISSING` 区分的全部意义在于
+> 二者有不同的修复方式：一个需要编写测试，另一个需要给
+> 评审者访问权限或对用户故事进行分类。
 
-The overall sprint/system verdict is the worst story verdict present, and
-**`NOT ASSESSED` outranks `ADEQUATE`**: a run that could not assess part of its
-scope has not established that the scope is adequate. It does not outrank
-`INCOMPLETE` or `MISSING` — a known failure is more actionable than an unknown,
-and demoting a real failure behind an access problem would bury it. `WAIVED`
-ranks below `ADEQUATE`: the overall verdict reads WAIVED only when every story
-in scope was waived, and the report names each waived story either way.
+冲刺/系统的总体结论取范围内最差的用户故事结论，且
+**`NOT ASSESSED` 高于 `ADEQUATE`**：一次无法评估其部分
+范围的运行并未确立该范围是充分的。它不高于
+`INCOMPLETE` 或 `MISSING` —— 已知的失败比未知更可操作，
+把一个真实失败降级到访问问题之后会掩埋它。`WAIVED`
+低于 `ADEQUATE`：只有当范围内每个用户故事都被豁免时总体结论才读作 WAIVED，
+无论哪种情况报告都会列出每个被豁免的用户故事。
 
-> Why this matters: evidence review **gates story completion**, and
-> `coding-standards.md` makes Logic, Integration, Visual/Feel and UI evidence BLOCKING. A verdict
-> vocabulary with no way to express "I could not check" forces every unknown
-> into one of three claims about the story — which is how a story nobody
-> verified acquires a verdict that says somebody did.
+> 为什么这很重要：证据评审判定**用户故事的完成**，而
+> `coding-standards.md` 将 Logic、Integration、Visual/Feel 和 UI 证据设为 BLOCKING。一种无法表达"我无法检查"的结论
+> 词汇，会迫使每个未知项落入关于该用户故事的三种断言之一 —— 这正是
+> 一个无人核实过的用户故事获得"某人核实过"结论的方式。
 
 ```markdown
 ## Test Evidence Review
@@ -326,35 +322,35 @@ in scope was waived, and the report names each waived story either way.
 
 ---
 
-## 7. Write Output (Optional)
+## 7. 写出输出（可选）
 
-Present the report in conversation.
+在对话中呈现报告。
 
-Ask: "May I write this test evidence review to
-`production/qa/evidence-review-[date].md`?"
+询问："我可以将这份测试证据评审写入
+`production/qa/evidence-review-[date].md` 吗？"
 
-This is optional — the report is useful standalone. Write only if the user
-wants a persistent record.
+这是可选的 —— 报告单独使用也有价值。仅在用户
+需要持久记录时才写入。
 
-After the report:
+报告之后：
 
-- For BLOCKING items: "These must be resolved before `/story-done` can mark the
-  story Complete. Would you like to address any of them now?"
-- For thin assertions: "Consider running `/test-helpers [system]` to see
-  scaffolded assertion patterns for common cases."
-- For missing sign-offs: "Manual sign-off is required from [role]. Share
-  `[evidence-path]` with them to complete sign-off."
+- 对于 BLOCKING 项："这些必须在 `/story-done` 能将用户故事标记为
+  Complete 之前解决。你希望现在处理其中任何一项吗？"
+- 对于薄弱断言："考虑运行 `/test-helpers [system]`，查看
+  常见场景的脚手架断言模式。"
+- 对于缺少签核："需要 [role] 进行手工签核。将
+  `[evidence-path]` 分享给他们以完成签核。"
 
-Verdict: **COMPLETE** — evidence review finished. Use CONCERNS if BLOCKING items were found.
+结论：**COMPLETE** —— 证据评审完成。若发现 BLOCKING 项则使用 CONCERNS。
 
 ---
 
-## Collaborative Protocol
+## 协作协议
 
-- **Report quality issues, do not fix them** — this skill reads and evaluates;
-  it does not modify test files or evidence documents
-- **ADEQUATE means adequate for shipping, not perfect** — avoid nitpicking
-  tests that are functioning and comprehensive enough to give confidence
-- **BLOCKING vs. ADVISORY distinction is important** — only flag BLOCKING when
-  the gap leaves a story criterion genuinely unverified
-- **Ask before writing** — the report file is optional; always confirm before writing
+- **报告质量问题，不要修复它们** —— 本技能只读取和评估；
+  它不修改测试文件或证据文档
+- **ADEQUATE 意味着足以发布，而非完美** —— 不要对
+  运作正常且足够全面、能给予信心的测试吹毛求疵
+- **BLOCKING 与 ADVISORY 的区分很重要** —— 只有当缺口
+  确实使某条用户故事标准未被验证时才标记 BLOCKING
+- **写入前先询问** —— 报告文件是可选的；写入前始终确认

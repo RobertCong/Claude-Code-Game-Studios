@@ -2,61 +2,57 @@
 
 ## Skill Summary
 
-`/asset-spec` turns one target's visual needs into asset specs with AI generation
-prompts. The argument names a target — `system:<name>`, `level:<name>` or
-`character:<name>` (an `entity:` entry from the inventory is read like a
-character) — plus an optional `--review full|lean|solo`. It reads the art bible
-at `design/art/art-bible.md` (and stops if it is missing, unless the minimal-path
-exception applies), `performance.*` and `naming.*` from `project.yaml`, and the
-target's source doc. It confirms the identified asset list with the user, drafts
-one `ASSET-NNN` block per asset, and after approval writes **one file per target**
-to `design/assets/specs/[target-name]-assets.md`, then updates
-`design/assets/asset-manifest.md`. Asset IDs run sequentially across the whole
-project. A re-run for a target whose spec file exists updates that file in place
-(existing blocks and IDs kept, new assets appended) after "May I update".
+`/asset-spec` 把一个目标对象的视觉需求转化为带 AI 生成提示词的资源规格。
+参数指定一个目标 —— `system:<name>`、`level:<name>` 或
+`character:<name>`（资源清单（inventory）中的 `entity:` 条目按角色读取）——
+外加可选的 `--review full|lean|solo`。它读取 `design/art/art-bible.md` 中的美术圣经
+（若缺失则停止，除非适用最小路径例外）、`project.yaml` 中的 `performance.*` 与
+`naming.*`，以及目标对象的源文档。它会与用户确认识别出的资源清单，为每个资源
+起草一个 `ASSET-NNN` 区块，并在获得批准后把 **每个目标一个文件** 写入
+`design/assets/specs/[target-name]-assets.md`，然后更新
+`design/assets/asset-manifest.md`。资源 ID 在整个项目中按顺序递增。对已存在
+规格文件的目标重新运行时，会在 "May I update" 之后原地更新该文件（保留已有
+区块与 ID，追加新资源）。
 
-The resolved review mode decides who drafts: `full` spawns `art-director` and
-`technical-artist` in parallel, `lean` spawns `art-director` only, `solo` (the
-default, via `modes.rigor: minimal`) spawns no agents; `full` is also what
-`modes.rigor: full` resolves to. Every skipped agent is announced by name in
-the output. These are drafting consultations, not gates. The skill produces an
-artifact, not a judgement, so it has no run verdict; it closes with an
-`AskUserQuestion` offering the next target or `/asset-audit`.
+解析出的评审模式决定由谁起草：`full` 并行派生 `art-director` 与
+`technical-artist`，`lean` 只派生 `art-director`，`solo`（默认，经
+`modes.rigor: minimal`）不派生任何代理；`modes.rigor: full` 也解析为 `full`。
+每个被跳过的代理都会在输出中按名称声明。这些是起草咨询，不是质量闸门（gate）。
+该技能产出一个产出物，而不是判断，因此没有运行结论（verdict）；它以一个
+`AskUserQuestion` 收尾，提供下一个目标或 `/asset-audit`。
 
 ---
 
 ## Static Assertions (Structural)
 
-Checked against the SKILL.md by `/skill-test spec` — no fixture needed.
+由 `/skill-test spec` 对照 SKILL.md 检查 —— 无需夹具。
 
-- [ ] Has required frontmatter fields: `name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`
-- [ ] Has ≥2 phase headings
-- [ ] Check 3 passes on the `BLOCKED` keyword of its Error Recovery Protocol; the skill has no run verdict by design (artifact producer), and the run closes with "Asset specs complete for **[target]**. What's next?"
-- [ ] Contains "May I write" language for the spec file and "May I update" for the manifest
-- [ ] Has a next-step handoff (`/asset-spec [next-context]`, `/asset-audit`)
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 至少有 2 个阶段标题
+- [ ] 对其错误恢复协议的 `BLOCKED` 关键字执行检查 3 通过；该技能按设计没有运行结论（产出物生产者），运行以 "Asset specs complete for **[target]**. What's next?" 收尾
+- [ ] 对规格文件包含 "May I write" 措辞，对清单包含 "May I update"
+- [ ] 具备下一步交接（`/asset-spec [next-context]`、`/asset-audit`）
 
 ---
 
 ## Director Gate Checks
 
-No gate IDs and no `/gate-check`. The review mode controls drafting agents only:
+没有闸门 ID，也没有 `/gate-check`。评审模式只控制起草代理：
 
-- **Full mode** (what `modes.rigor: full` resolves to): `art-director` and
-  `technical-artist` spawned in parallel
-- **Lean mode**: `art-director` only; the output says "technical-artist skipped —
+- **Full mode**（`modes.rigor: full` 解析所得）：并行派生 `art-director` 与
+  `technical-artist`
+- **Lean mode**：只派生 `art-director`；输出会说明 "technical-artist skipped —
   Lean mode: technical constraints not validated."
-- **Solo mode** (default at `modes.rigor: minimal`): no agents; the main session
-  derives specs from the art bible, and the output names both skipped agents and
-  says technical constraints were not validated
+- **Solo mode**（`modes.rigor: minimal` 下的默认值）：不派生任何代理；主会话
+  从美术圣经推导规格，输出会点名两个被跳过的代理，并说明技术约束未经验证
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非用例自身的夹具另有说明，每个用例的 `project.yaml` 都设置
+`modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有
+`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
 
 ---
 
@@ -65,199 +61,197 @@ Fixture defaults.
 ### Case 1: Happy Path — Character spec in lean mode
 
 **Fixture:**
-- `project.yaml` sets `modes.rigor: standard` (review mode resolves to `lean`) and
-  has `performance.*` and `naming.*` values
-- `design/art/art-bible.md` exists with Shape Language, Color System and Section 8 Asset Standards
-- `design/narrative/characters/goblin-enemy.md` exists with a visual description
-- No `design/assets/asset-manifest.md`
+- `project.yaml` 设置 `modes.rigor: standard`（评审模式解析为 `lean`），并
+  具有 `performance.*` 与 `naming.*` 的值
+- `design/art/art-bible.md` 存在，含 Shape Language、Color System 与 Section 8 Asset Standards
+- `design/narrative/characters/goblin-enemy.md` 存在，含视觉描述
+- 没有 `design/assets/asset-manifest.md`
 
 **Input:** `/asset-spec character:goblin-enemy`
 
 **Expected behavior:**
-1. Skill reads the art bible, project config and the character doc before asking anything
-2. Skill presents the context summary ("Asset Spec: Character — goblin-enemy")
-3. Phase 2 identifies the character's assets (sprite sheets such as idle, walk,
-   attack, death; portrait; ability VFX; UI icon), shows them grouped by category,
-   and asks via `AskUserQuestion` before speccing
-4. Lean mode: spawns `art-director` only, and says so: "technical-artist skipped —
+1. 技能在询问任何内容之前先读取美术圣经、项目配置与角色文档
+2. 技能呈现上下文摘要（"Asset Spec: Character — goblin-enemy"）
+3. 阶段 2 识别该角色的资源（idle、walk、attack、death 等精灵图集；
+   portrait；技能 VFX；UI 图标），按类别分组展示，并在编写规格前通过
+   `AskUserQuestion` 询问
+4. Lean 模式：只派生 `art-director`，并如此说明："technical-artist skipped —
    Lean mode: technical constraints not validated."
-5. Phase 4 presents one `ASSET-NNN` block per asset with the field table
-   (Category, Dimensions, Format, Naming, Polycount, Texture Res), Visual
-   Description, Art Bible Anchors citing sections, Generation Prompt, and `Status: Needed`
-6. After approval asks "May I write the spec to `design/assets/specs/goblin-enemy-assets.md`?"
-7. Creates the manifest after asking "May I update `design/assets/asset-manifest.md`?";
-   IDs start at `ASSET-001`
-8. Phase 6 `AskUserQuestion` offers another target or `/asset-audit`
+5. 阶段 4 为每个资源呈现一个 `ASSET-NNN` 区块，含字段表
+   （Category、Dimensions、Format、Naming、Polycount、Texture Res）、Visual
+   Description、引用相关章节的 Art Bible Anchors、Generation Prompt 以及 `Status: Needed`
+6. 批准后询问 "May I write the spec to `design/assets/specs/goblin-enemy-assets.md`?"
+7. 在询问 "May I update `design/assets/asset-manifest.md`?" 之后创建清单；
+   ID 从 `ASSET-001` 开始
+8. 阶段 6 的 `AskUserQuestion` 提供另一个目标或 `/asset-audit`
 
 **Assertions:**
-- [ ] Asset list is confirmed with `AskUserQuestion` before any spec is generated
-- [ ] Only `art-director` is spawned (no `technical-artist` in lean mode)
-- [ ] The output names `technical-artist` as skipped and says technical constraints were not validated
-- [ ] Each asset block has the field table, Art Bible Anchors (by section), a Generation Prompt and `Status: Needed`
-- [ ] "May I write" names `design/assets/specs/goblin-enemy-assets.md`
-- [ ] Manifest is created with a Progress Summary and IDs starting at `ASSET-001`
-- [ ] Phase 6 offers `/asset-audit` among the next steps
+- [ ] 在生成任何规格之前，资源清单通过 `AskUserQuestion` 得到确认
+- [ ] 只派生 `art-director`（lean 模式下没有 `technical-artist`）
+- [ ] 输出点名 `technical-artist` 被跳过，并说明技术约束未经验证
+- [ ] 每个资源区块都含字段表、按章节引用的 Art Bible Anchors、Generation Prompt 与 `Status: Needed`
+- [ ] "May I write" 中指明 `design/assets/specs/goblin-enemy-assets.md`
+- [ ] 清单被创建，含 Progress Summary，且 ID 从 `ASSET-001` 开始
+- [ ] 阶段 6 在下一步选项中提供 `/asset-audit`
 
 ---
 
 ### Case 2: No Art Bible — Skill stops before speccing
 
 **Fixture:**
-- `project.yaml` sets `modes.rigor: standard`
-- `design/gdd/combat.md` exists with a Visual/Audio Requirements section
-- `design/art/art-bible.md` does NOT exist
-- `design/game-brief.md` does NOT exist
+- `project.yaml` 设置 `modes.rigor: standard`
+- `design/gdd/combat.md` 存在，含 Visual/Audio Requirements 章节
+- `design/art/art-bible.md` 不存在
+- `design/game-brief.md` 不存在
 
 **Input:** `/asset-spec system:combat`
 
 **Expected behavior:**
-1. Phase 1 reads for `design/art/art-bible.md` and finds nothing
-2. The minimal-path exception does not apply (no game brief)
-3. Skill stops with: "No art bible found. Run `/art-bible` first — asset specs are
+1. 阶段 1 查找 `design/art/art-bible.md`，未找到
+2. 最小路径例外不适用（没有游戏简报）
+3. 技能停止并提示："No art bible found. Run `/art-bible` first — asset specs are
    anchored to the art bible's visual rules and asset standards."
-4. No asset identification, no agents, no files
+4. 不做资源识别，不派生代理，不写文件
 
 **Assertions:**
-- [ ] The "No art bible found. Run `/art-bible` first" message is shown
-- [ ] No asset list is presented and no `Agent` call is made
-- [ ] No spec file or manifest is written
-- [ ] Specs are not generated with invented style rules
+- [ ] 显示 "No art bible found. Run `/art-bible` first" 消息
+- [ ] 不呈现资源清单，也不发起 `Agent` 调用
+- [ ] 不写入任何规格文件或清单
+- [ ] 不用凭空编造的风格规则生成规格
 
 ---
 
 ### Case 3: Manifest Already Exists — IDs continue and shared assets are reused
 
 **Fixture:**
-- `project.yaml` sets `modes.rigor: standard`; art bible exists
-- `design/assets/asset-manifest.md` exists; the highest ID is `ASSET-014`, and
-  `ASSET-012` (Generic Hit Spark) is specced for the Combat system in
+- `project.yaml` 设置 `modes.rigor: standard`；美术圣经存在
+- `design/assets/asset-manifest.md` 存在；最高 ID 为 `ASSET-014`，且
+  `ASSET-012`（Generic Hit Spark）已为 Combat 系统写规格到
   `design/assets/specs/combat-assets.md`
-- `design/gdd/tower-defense.md` Visual/Audio section lists a hit spark and a tower-build VFX
+- `design/gdd/tower-defense.md` 的 Visual/Audio 章节列出一个命中火花与一个建塔 VFX
 
 **Input:** `/asset-spec system:tower-defense`
 
 **Expected behavior:**
-1. Skill reads the manifest and globs `design/assets/specs/*.md` for shareable assets
-2. Context summary lists the shared asset found in another spec
-3. The hit spark reuses `ASSET-012` instead of creating a duplicate, with a note like
+1. 技能读取清单，并 glob `design/assets/specs/*.md` 查找可共享资源
+2. 上下文摘要列出在其他规格中找到的共享资源
+3. 命中火花复用 `ASSET-012` 而不创建重复项，并附注如
    "ASSET-012 (Generic Hit Spark) already specced for Combat system. Reusing for Tower Defense"
-4. The new tower-build VFX is numbered `ASSET-015`
-5. After "May I write" for `design/assets/specs/tower-defense-assets.md`, the skill asks
-   "May I update `design/assets/asset-manifest.md`?", appends a Tower Defense context
-   block, and updates the Progress Summary counts
+4. 新的建塔 VFX 编号为 `ASSET-015`
+5. 在针对 `design/assets/specs/tower-defense-assets.md` 的 "May I write" 之后，技能询问
+   "May I update `design/assets/asset-manifest.md`?"，追加一个 Tower Defense 上下文
+   区块，并更新 Progress Summary 计数
 
 **Assertions:**
-- [ ] The hit spark references `ASSET-012`; no duplicate hit-spark spec is created
-- [ ] The new asset's ID is `ASSET-015` (project-wide sequence, not restarted per target)
-- [ ] The manifest is appended to, not recreated, after a "May I update" ask
-- [ ] Progress Summary counts are updated
+- [ ] 命中火花引用 `ASSET-012`；不创建重复的命中火花规格
+- [ ] 新资源的 ID 为 `ASSET-015`（项目级序列，不按目标重启）
+- [ ] 在 "May I update" 询问之后，清单是追加而非重建
+- [ ] Progress Summary 计数被更新
 
 ---
 
 ### Case 4: Several Assets in One Target — One file, per-asset revision before write
 
 **Fixture:**
-- `project.yaml` sets `modes.rigor: standard`; art bible exists; no manifest
-- `design/gdd/combat.md` Visual/Audio section names a hit-spark VFX, a floating
-  damage number (UI) and a hit sound (audio)
+- `project.yaml` 设置 `modes.rigor: standard`；美术圣经存在；无清单
+- `design/gdd/combat.md` 的 Visual/Audio 章节列出命中火花 VFX、浮动的
+  伤害数字（UI）与命中音效（audio）
 
 **Input:** `/asset-spec system:combat`
 
 **Expected behavior:**
-1. Phase 2 lists all three assets grouped under VFX, UI and Audio and asks the user to confirm
-2. Phase 4 presents `ASSET-001` to `ASSET-003`; the audio asset carries a
-   description of its sonic character and no image generation prompt
-3. User picks `[B] Revise a specific asset` for the damage number; the skill revises
-   it inline and re-presents without re-spawning agents
-4. User approves all; the skill asks "May I write" **once**, for
-   `design/assets/specs/combat-assets.md`, which holds all three assets
+1. 阶段 2 列出全部三个资源，分别归入 VFX、UI 与 Audio，并请用户确认
+2. 阶段 4 呈现 `ASSET-001` 至 `ASSET-003`；音频资源包含其音色特征的
+   描述，且没有图像生成提示词
+3. 用户为伤害数字选择 `[B] Revise a specific asset`；技能就地修改它并
+   重新呈现，不重新派生代理
+4. 用户批准全部；技能只询问 **一次** "May I write"，目标为
+   `design/assets/specs/combat-assets.md`，其中包含全部三个资源
 
 **Assertions:**
-- [ ] One "May I write" ask covers all three assets in one file (not one ask or file per asset)
-- [ ] The audio asset has no image generation prompt
-- [ ] The minor revision does not re-spawn `art-director`
-- [ ] All three `ASSET-NNN` blocks are in `design/assets/specs/combat-assets.md`
+- [ ] 一次 "May I write" 询问覆盖同一文件中的全部三个资源（不是每个资源一次询问或一个文件）
+- [ ] 音频资源没有图像生成提示词
+- [ ] 次要修改不重新派生 `art-director`
+- [ ] 全部三个 `ASSET-NNN` 区块都在 `design/assets/specs/combat-assets.md` 中
 
 ---
 
 ### Case 5: Director Gate Check — Solo default, brief instead of art bible
 
 **Fixture:**
-- `project.yaml` has no `modes` block (review mode resolves to `solo` via `modes.rigor: minimal`)
-- `design/game-brief.md` exists with an Art & audio direction line
-- No `design/art/art-bible.md`
-- No character profile for `hero` in `design/narrative/` or `design/assets/entity-inventory.md`
+- `project.yaml` 没有 `modes` 区块（评审模式经 `modes.rigor: minimal` 解析为 `solo`）
+- `design/game-brief.md` 存在，含一行 Art & audio direction
+- 没有 `design/art/art-bible.md`
+- `design/narrative/` 或 `design/assets/entity-inventory.md` 中没有 `hero` 的角色档案
 
 **Input:** `/asset-spec character:hero`
 
 **Expected behavior:**
-1. The minimal-path exception applies: the skill does not stop, and states at the top
+1. 最小路径例外适用：技能不停止，并在顶部声明
    "Anchored to the brief's one-line art direction; there is no art bible, so colour,
    shape and asset-standard rules below are proposals, not constraints."
-2. `/art-bible` is offered once, as optional
-3. No profile found → `AskUserQuestion`: "No profile found for **hero**. Describe it
-   briefly" with Describe / Skip / Stop options
-4. Solo mode: no `Agent` calls; the output announces "art-director and
+2. `/art-bible` 作为可选项提供一次
+3. 未找到档案 → `AskUserQuestion`："No profile found for **hero**. Describe it
+   briefly"，选项为 Describe / Skip / Stop
+4. Solo 模式：没有 `Agent` 调用；输出声明 "art-director and
    technical-artist skipped — Solo mode: specs derived in this session; technical
    constraints not validated."
-5. No gate IDs appear and `/gate-check` is not invoked
+5. 不出现闸门 ID，也不调用 `/gate-check`
 
 **Assertions:**
-- [ ] Skill continues without an art bible and says the specs are anchored to the brief
-- [ ] Missing profile triggers the "Describe it briefly" question rather than a failure
-- [ ] No `art-director` or `technical-artist` is spawned
-- [ ] Both skipped agents are named in the output, which says technical constraints were not validated
-- [ ] If the spec is written, its header names `design/game-brief.md` as the art direction (no `> **Art Bible**:` line), each asset carries a `**Brief anchor:**` line instead of Art Bible Anchors, and no Art Bible section or §8 tier is cited
-- [ ] No gate IDs appear — the skip note names agents, not gates
+- [ ] 技能在没有美术圣经的情况下继续，并说明规格锚定于简报
+- [ ] 缺少档案触发 "Describe it briefly" 询问，而不是失败
+- [ ] 不派生 `art-director` 或 `technical-artist`
+- [ ] 两个被跳过的代理都在输出中点名，且输出说明技术约束未经验证
+- [ ] 若写出规格，其头部把 `design/game-brief.md` 命名为美术方向来源（没有 `> **Art Bible**:` 行），每个资源携带 `**Brief anchor:**` 行而非 Art Bible Anchors，且不引用任何 Art Bible 章节或 §8 层级
+- [ ] 不出现闸门 ID —— 跳过说明点名的是代理，不是闸门
 
 ---
 
 ### Case 6: Re-run on an Existing Spec — Updated in place, not overwritten
 
 **Fixture:**
-- `project.yaml` sets `modes.rigor: standard`; art bible exists
-- `design/assets/specs/goblin-enemy-assets.md` exists with `ASSET-001` to
-  `ASSET-004` (idle, walk and attack sprites; portrait); the manifest's highest ID
-  is `ASSET-009`
-- `design/narrative/characters/goblin-enemy.md` has since gained a charge-attack
-  ability
+- `project.yaml` 设置 `modes.rigor: standard`；美术圣经存在
+- `design/assets/specs/goblin-enemy-assets.md` 存在，含 `ASSET-001` 至
+  `ASSET-004`（idle、walk、attack 精灵图；portrait）；清单的最高 ID
+  为 `ASSET-009`
+- `design/narrative/characters/goblin-enemy.md` 此后新增了一项冲锋攻击
+  能力
 
 **Input:** `/asset-spec character:goblin-enemy`
 
 **Expected behavior:**
-1. Phase 1 reads the existing spec file for this target as well as the character doc
-2. Phase 2 proposes only what is new — the charge-attack sprite and its VFX — and
-   confirms the list with the user
-3. The new assets are numbered `ASSET-010` and `ASSET-011` (project-wide sequence)
-4. The skill shows what changes, then asks "May I update
-   `design/assets/specs/goblin-enemy-assets.md`?" — not "May I write"
-5. `ASSET-001` to `ASSET-004` are kept unchanged in the file; the new blocks are appended
+1. 阶段 1 读取该目标的现有规格文件以及角色文档
+2. 阶段 2 只提出新增内容 —— 冲锋攻击精灵图及其 VFX —— 并与用户
+   确认该清单
+3. 新资源的编号为 `ASSET-010` 与 `ASSET-011`（项目级序列）
+4. 技能展示变更内容，然后询问 "May I update
+   `design/assets/specs/goblin-enemy-assets.md`?" —— 而不是 "May I write"
+5. `ASSET-001` 至 `ASSET-004` 在文件中保持不变；新块被追加
 
 **Assertions:**
-- [ ] The existing spec file is detected and read before the asset list is proposed
-- [ ] The ask is "May I update", naming the existing file
-- [ ] Existing blocks and IDs are preserved; the file is not overwritten wholesale
-- [ ] New assets continue the project-wide ID sequence (`ASSET-010`, `ASSET-011`)
+- [ ] 在提出资源清单之前，检测并读取现有规格文件
+- [ ] 询问为 "May I update"，并指明现有文件
+- [ ] 保留已有区块与 ID；文件不被整体覆盖
+- [ ] 新资源延续项目级 ID 序列（`ASSET-010`、`ASSET-011`）
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Reads the art bible, project config and source doc before asking the user anything
-- [ ] Never specs assets before the user confirms the asset list
-- [ ] Spawns agents strictly per the resolved review mode (`--review` overrides for one run), and names every skipped agent in the output
-- [ ] Surfaces any art-director / technical-artist conflict instead of silently resolving it
-- [ ] Asks "May I write" before a new spec file, "May I update" before changing an existing one, and "May I update" before the manifest
-- [ ] Assigns asset IDs sequentially across the project, reading the manifest first
+- [ ] 在询问用户任何内容之前读取美术圣经、项目配置与源文档
+- [ ] 在用户确认资源清单之前绝不为资源编写规格
+- [ ] 严格按照解析出的评审模式派生代理（`--review` 对单次运行覆盖），并在输出中点名每个被跳过的代理
+- [ ] 暴露任何 art-director / technical-artist 冲突，而不是静默解决
+- [ ] 新规格文件前询问 "May I write"，修改现有文件前询问 "May I update"，更新清单前询问 "May I update"
+- [ ] 先读取清单，再在整个项目中按顺序分配资源 ID
 
 ---
 
 ## Coverage Notes
 
-- The no-argument flow (pick the next "Needed" item from
-  `design/assets/entity-inventory.md`, or build the inventory in Phase 0b) is not
-  separately tested.
-- `level:` targets and full-mode parallel spawning with a surfaced
-  art-director / technical-artist conflict are not separately tested.
-- Agent BLOCKED handling (Error Recovery Protocol: always produce a partial spec)
-  is not separately tested.
+- 无参数流程（从 `design/assets/entity-inventory.md` 中选择下一个 "Needed" 项，
+  或在阶段 0b 构建清单）未被单独测试。
+- `level:` 目标以及带暴露出的 art-director / technical-artist 冲突的 full 模式
+  并行派生未被单独测试。
+- 代理 BLOCKED 处理（错误恢复协议：始终产出部分规格）未被单独测试。

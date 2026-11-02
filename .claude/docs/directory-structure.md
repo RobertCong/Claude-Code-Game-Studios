@@ -1,4 +1,4 @@
-# Directory Structure
+# 目录结构
 
 ```text
 /
@@ -19,28 +19,24 @@
 └── studio-tests/                # QA for the skills/agents themselves — /skill-test, /skill-improve
 ```
 
-## The code root is engine-specific
+## 代码根目录因引擎而异
 
-**Two of the three supported engines will not build a project whose code sits in
-`src/`.** This is not a style preference — it is a hard constraint of the engine's
-own toolchain:
+**三个受支持引擎中有两个无法构建代码位于 `src/` 的项目。** 这不是风格偏好 —— 而是引擎自身工具链的硬性约束：
 
-| `engine.name` | Code root | Why it cannot be `src/` |
+| `engine.name` | 代码根目录 | 为什么不能是 `src/` |
 |---|---|---|
-| **Godot** | `src/` | No constraint — Godot loads from `res://` anywhere under the project root. |
-| **Unity** | `Assets/` | Unity compiles **only** `Assets/` and `Packages/`. Code outside them is invisible to the compiler. |
-| **Unreal** | `Source/<Module>/` | UnrealBuildTool discovers modules under `Source/`; content lives in `Content/`. A module elsewhere is not built. |
+| **Godot** | `src/` | 无约束 —— Godot 会从项目根目录下的任意位置通过 `res://` 加载。 |
+| **Unity** | `Assets/` | Unity **只**编译 `Assets/` 和 `Packages/`。它们之外的代码对编译器不可见。 |
+| **Unreal** | `Source/<Module>/` | UnrealBuildTool 在 `Source/` 下发现模块；内容位于 `Content/`。位于其他位置的模块不会被构建。 |
 
-**Resolve the code root from `engine.name` before writing any source file.** A
-path shown as `src/…` alone is a Godot example: read it as *"the code root"* and
-substitute the row above. `src/` is the table's Godot row, not a universal path.
+**在写入任何源文件之前，先从 `engine.name` 解析出代码根目录。** 仅以 `src/…` 形式显示的路径是 Godot 示例：应把它读作*「代码根目录」*，并代入上表中的对应行。`src/` 是表中的 Godot 行，不是通用路径。
 
-**Tests follow the same rule** — the same compilers decide what they see:
+**测试遵循同样的规则** —— 同样的编译器决定它们能看到什么：
 
-| `engine.name` | Test root | Anywhere else |
+| `engine.name` | 测试根目录 | 其他位置 |
 |---|---|---|
-| **Godot** | `tests/unit/`, `tests/integration/` | — |
-| **Unity** | `Assets/Tests/EditMode/`, `Assets/Tests/PlayMode/` | not compiled: "0 tests, Passed" |
-| **Unreal** | `Source/<Module>/Private/Tests/` | not built: "No automation tests matched" |
+| **Godot** | `tests/unit/`、`tests/integration/` | — |
+| **Unity** | `Assets/Tests/EditMode/`、`Assets/Tests/PlayMode/` | 不会被编译："0 tests, Passed" |
+| **Unreal** | `Source/<Module>/Private/Tests/` | 不会被构建："No automation tests matched" |
 
-Read `tests/unit/[system]/` (or `integration/`) anywhere as the test root plus `[System]/`.
+在任何地方都把 `tests/unit/[system]/`（或 `integration/`）理解为测试根目录加上 `[System]/`。

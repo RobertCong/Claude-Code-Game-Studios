@@ -10,88 +10,88 @@
 
 | Aspect | Detail |
 | ---- | ---- |
-| **Full Name** | [Official faction name] |
-| **Common Name** | [What people call them] |
+| **Full Name** | [阵营正式名称] |
+| **Common Name** | [人们如何称呼他们] |
 | **Type** | [Nation / Guild / Cult / Corporation / Tribe / etc.] |
-| **Alignment** | [Not D&D alignment — their moral complexity in 1 sentence] |
-| **Symbol** | [Description of their emblem/flag/sigil] |
-| **Colors** | [Primary and secondary colors associated with this faction] |
-| **Motto** | [Their defining phrase or creed] |
+| **Alignment** | [不是 D&D 阵营——用一句话说明其道德复杂性] |
+| **Symbol** | [其徽记/旗帜/纹章的描述] |
+| **Colors** | [与该阵营关联的主色与辅色] |
+| **Motto** | [其标志性口号或信条] |
 
 ---
 
 ## Overview
 
-[2-3 paragraphs describing who this faction is, what they want, and why they
-matter to the game world. Write as if briefing someone who knows nothing.]
+[用 2-3 段描述该阵营是谁、他们想要什么，以及他们为何对游戏世界
+重要。写作时假定读者对此一无所知，就像在做简报。]
 
 ---
 
 ## History
 
 ### Origin
-[How did this faction form? What event or need brought them together?]
+[该阵营如何形成？是什么事件或需求让他们走到一起？]
 
 ### Key Historical Events
-1. **[Event Name]** ([Date/Era]): [What happened and how it shaped the faction]
-2. **[Event Name]** ([Date/Era]): [Impact]
-3. **[Event Name]** ([Date/Era]): [Impact]
+1. **[Event Name]**（[Date/Era]）：[发生了什么，以及如何塑造了该阵营]
+2. **[Event Name]**（[Date/Era]）：[影响]
+3. **[Event Name]**（[Date/Era]）：[影响]
 
 ### Current State
-[Where is this faction now? Are they ascendant, declining, stable, fractured?]
+[该阵营如今处于什么状态？正在崛起、衰落、稳定，还是分裂？]
 
 ---
 
 ## Beliefs and Values
 
 ### Core Beliefs
-- [Belief 1 — what they hold as fundamental truth]
-- [Belief 2]
-- [Belief 3]
+- [信念 1 —— 他们视为根本真理的内容]
+- [信念 2]
+- [信念 3]
 
 ### What They Value
-- [Value 1 — what they reward and respect]
-- [Value 2]
+- [价值 1 —— 他们奖励与尊重什么]
+- [价值 2]
 
 ### What They Despise
-- [Thing 1 — what they punish or reject]
-- [Thing 2]
+- [事物 1 —— 他们惩罚或排斥什么]
+- [事物 2]
 
 ---
 
 ## Structure and Leadership
 
 ### Hierarchy
-[How is the faction organized? Military ranks? Council of elders? Meritocracy?
-Describe the power structure.]
+[该阵营如何组织？军衔制？长老议会？精英制？
+描述其权力结构。]
 
 ### Key Figures
 | Name | Role | Personality | Motivation |
 | ---- | ---- | ---- | ---- |
-| [Leader] | [Title] | [2-3 adjectives] | [What drives them] |
-| [Second] | [Title] | [Personality] | [Motivation] |
-| [Notable] | [Title] | [Personality] | [Motivation] |
+| [Leader] | [Title] | [2-3 个形容词] | [什么驱动着他们] |
+| [Second] | [Title] | [性格] | [动机] |
+| [Notable] | [Title] | [性格] | [动机] |
 
 ### Membership
-- **How to join**: [Birth? Initiation? Purchase? Invitation?]
-- **How to leave**: [Can they? What happens?]
-- **Population**: [Rough size and composition]
+- **How to join**: [出生？入会仪式？购买？受邀？]
+- **How to leave**: [可以离开吗？会发生什么？]
+- **Population**: [大致规模与构成]
 
 ---
 
 ## Territory and Resources
 
 ### Holdings
-[Where does this faction control territory? What are their key locations?]
+[该阵营控制哪些领土？关键地点有哪些？]
 
 ### Resources
-- **Primary resource**: [What they have abundance of]
-- **Scarcity**: [What they lack and need]
-- **Trade goods**: [What they export/sell]
+- **Primary resource**: [他们拥有丰富的资源]
+- **Scarcity**: [他们缺乏并需要的资源]
+- **Trade goods**: [他们出口/出售的商品]
 
 ### Military Strength
-[How powerful are they? Standing army? Special forces? Magical capabilities?
-Technology level?]
+[他们有多强大？常备军？特种部队？魔法能力？
+科技水平？]
 
 ---
 
@@ -99,9 +99,9 @@ Technology level?]
 
 | Faction | Relationship | Reason | Trend |
 | ---- | ---- | ---- | ---- |
-| [Faction A] | [Allied / Friendly / Neutral / Tense / Hostile / War] | [Why] | [Improving / Stable / Deteriorating] |
-| [Faction B] | [Relationship] | [Why] | [Trend] |
-| [Player] | [Starting disposition] | [Why] | [Player-influenced] |
+| [Faction A] | [Allied / Friendly / Neutral / Tense / Hostile / War] | [原因] | [Improving / Stable / Deteriorating] |
+| [Faction B] | [Relationship] | [原因] | [Trend] |
+| [Player] | [初始态度] | [原因] | [受玩家影响] |
 
 ---
 
@@ -109,58 +109,58 @@ Technology level?]
 
 | Tier | Points | Benefits | Requirements |
 | ---- | ---- | ---- | ---- |
-| Hostile | [-1000 to -500] | [Attacked on sight] | [Betrayal, war crimes] |
-| Unfriendly | [-500 to -100] | [No services, higher prices] | [Opposing actions] |
-| Neutral | [-100 to 100] | [Basic services] | [Default] |
-| Friendly | [100 to 500] | [Discounts, quests] | [Complete tasks] |
-| Honored | [500 to 1000] | [Unique items, areas, abilities] | [Major questline] |
-| Exalted | [1000+] | [Best rewards, title, housing] | [Full faction commitment] |
+| Hostile | [-1000 to -500] | [见面即攻击] | [背叛、战争罪行] |
+| Unfriendly | [-500 to -100] | [不提供服务，价格更高] | [敌对行为] |
+| Neutral | [-100 to 100] | [基础服务] | [默认] |
+| Friendly | [100 to 500] | [折扣、任务] | [完成任务] |
+| Honored | [500 to 1000] | [独特物品、区域、能力] | [主要任务线] |
+| Exalted | [1000+] | [最佳奖励、称号、住所] | [完全效忠该阵营] |
 
 ---
 
 ## Gameplay Role
 
 ### Player Interaction
-[How does the player encounter and interact with this faction? Quests?
-Trading? Combat? Diplomacy?]
+[玩家如何遇到并与该阵营互动？任务？
+交易？战斗？外交？]
 
 ### Unique Mechanics
-[Does this faction introduce any unique gameplay mechanics? Crafting recipes?
-Combat styles? Magic systems?]
+[该阵营是否引入了独特的玩法机制？制作配方？
+战斗风格？魔法系统？]
 
 ### Questlines
-[Brief overview of the major questlines associated with this faction.]
+[简要概述与该阵营相关的主要任务线。]
 
 ---
 
 ## Aesthetic Guide
 
 ### Architecture
-[What do their buildings look like? Materials, shapes, scale.]
+[他们的建筑是什么样？材质、形状、尺度。]
 
 ### Clothing/Armor
-[What do members wear? Identifying visual elements.]
+[成员穿什么？可识别的视觉元素。]
 
 ### Technology/Magic Level
-[What tools, weapons, and abilities do they use?]
+[他们使用什么工具、武器与能力？]
 
 ### Audio Palette
-[What sounds are associated with this faction? Musical themes, ambient sounds.]
+[哪些声音与该阵营关联？音乐主题、环境音。]
 
 ---
 
 ## Lore Consistency Notes
 
-- **Canon level**: [Core / Extended / Flavor — how important is this to the main story?]
-- **Contradictions to watch**: [Any potential conflicts with other lore]
-- **Open questions**: [Things not yet decided about this faction]
-- **Off-limits**: [Things that must NOT be true about this faction]
+- **Canon level**: [Core / Extended / Flavor —— 这对主线故事有多重要？]
+- **Contradictions to watch**: [与其他设定可能存在的冲突]
+- **Open questions**: [关于该阵营尚未决定的事项]
+- **Off-limits**: [关于该阵营**绝不能**成立的内容]
 
 ---
 
 ## Dependencies
 
-- Related factions: [List factions that interact with this one]
-- Related areas: [Levels/regions where this faction appears]
-- Related questlines: [Story arcs involving this faction]
+- Related factions: [列出与该阵营互动的阵营]
+- Related areas: [该阵营出现的关卡/区域]
+- Related questlines: [涉及该阵营的故事线]
 - Affects: [economy, combat encounters, narrative branches]

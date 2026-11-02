@@ -2,249 +2,224 @@
 
 ## Skill Summary
 
-`/ux-design` authors UX documents section by section. The argument picks the
-mode and output file: `hud` → `design/ux/hud.md`; `patterns` →
-`design/ux/interaction-patterns.md`; `accessibility` →
-`design/accessibility-requirements.md` (the only mode that writes outside
-`design/ux/`); any other value → a screen/flow spec at `design/ux/[kebab-name].md`.
-With no argument it asks "What are we designing today?" instead of failing.
+`/ux-design` 逐节编写 UX 文档。参数决定模式和输出文件：`hud` → `design/ux/hud.md`；`patterns` → `design/ux/interaction-patterns.md`；`accessibility` → `design/accessibility-requirements.md`（唯一在 `design/ux/` 之外写入的模式）；其他任何值 → `design/ux/[kebab-name].md` 处的屏幕/流程规格。无参数时，它询问 “What are we designing today?”，而不是报错。
 
-Phase 2 reads context before asking anything: the game concept (or game brief),
-the player journey, GDD UI Requirements, existing UX specs, the pattern library
-catalog, the art bible, accessibility requirements, and the input methods from
-the `project.yaml` `platform` block. If the output file already exists, the
-skill enters retrofit mode and fills only Empty or Placeholder sections.
-Otherwise it asks "May I create the skeleton file at [path]?" and writes the
-mode's skeleton.
+Phase 2 在询问任何内容之前先读取上下文：游戏概念（或游戏简报）、玩家旅程、GDD 的 UI Requirements、现有 UX 规格、模式库目录、美术设定集、无障碍需求，以及 `project.yaml` `platform` 块中的输入方式。如果输出文件已存在，技能进入 retrofit 模式，只填充 Empty 或 Placeholder 小节。否则它询问 “May I create the skeleton file at [path]?” 并写入该模式的骨架。
 
-Each section then runs Context → Questions → Options → Decision → Draft →
-Approval → Write: "Does this capture the [section name] correctly?", then "May I
-write the [section name] section to `[filepath]`?", then an Edit replacing the
-placeholder. Of the per-mode guidance files, only the active mode's is loaded,
-and a template guide is read one section at a time. After a
-cross-reference check, the handoff says the spec must pass `/ux-review` and
-ends with verdict `COMPLETE`. There are no director gates.
+随后每个小节运行 Context → Questions → Options → Decision → Draft → Approval → Write：“Does this capture the [section name] correctly?”，然后 “May I write the [section name] section to `[filepath]`?”，再用 Edit 替换占位符。在各模式的指导文件中，只加载当前模式的那一份，模板指南则一次读取一个小节。经过交叉引用检查后，交接说明规格必须通过 `/ux-review`，并以结论 `COMPLETE` 结束。没有总监质量闸门（director gate）。
 
 ---
 
 ## Static Assertions (Structural)
 
-Checked against the SKILL.md by `/skill-test spec` — no fixture needed.
+由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] Has required frontmatter fields: `name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`
-- [ ] Has ≥2 phase headings
-- [ ] Contains verdict keyword: `COMPLETE`
-- [ ] Contains "May I write" language per section, and "May I create" for the skeleton
-- [ ] Has a next-step handoff (`/ux-review` to validate the completed spec)
-- [ ] Documents the four modes and their output paths, including `design/accessibility-requirements.md` for `accessibility`
+- [ ] 具有必填的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 至少包含 2 个阶段标题
+- [ ] 包含结论关键词：`COMPLETE`
+- [ ] 包含每个小节的 “May I write” 用语，以及针对骨架的 “May I create”
+- [ ] 包含下一步交接（用 `/ux-review` 验证已完成的规格）
+- [ ] 记录四种模式及其输出路径，包括 `accessibility` 对应的 `design/accessibility-requirements.md`
 
 ---
 
 ## Director Gate Checks
 
-None. `/ux-design` resolves only `automation`, `workflow` and `docs.density`
-(not `review_mode`) and spawns no director gate. `/ux-review` is the separate
-validation step. Specialists (`art-director`, `ui-programmer`, `game-designer`,
-`narrative-director`) may be consulted for sub-topics; their output is presented
-to the user, and this session owns every file write.
+无。`/ux-design` 只解析 `automation`、`workflow` 和 `docs.density`（不解析 `review_mode`），也不启动总监闸门。`/ux-review` 是单独的验证步骤。可就子主题咨询专家（`art-director`、`ui-programmer`、`game-designer`、`narrative-director`）；其输出会呈现给用户，且本会话负责所有文件写入。
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非某个案例自身的 Fixture 另有说明，每个案例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见 `studio-tests/CLAUDE.md` § Fixture defaults。
 
 ---
 
 ## Test Cases
 
-### Case 1: Happy Path — New HUD design
+### Case 1: 正常路径 — 新的 HUD 设计
 
 **Fixture:**
-- No `design/ux/hud.md`
-- `design/gdd/combat.md` and `design/gdd/stamina.md` have `## UI Requirements` sections; `design/gdd/save-system.md` has none
-- `project.yaml` has a `platform` block (`targets: [PC]`, `gamepad_support: Full`)
-- `design/gdd/game-concept.md` and `design/player-journey.md` exist
+- 没有 `design/ux/hud.md`
+- `design/gdd/combat.md` 和 `design/gdd/stamina.md` 有 `## UI Requirements` 小节；`design/gdd/save-system.md` 没有
+- `project.yaml` 有 `platform` 块（`targets: [PC]`、`gamepad_support: Full`）
+- `design/gdd/game-concept.md` 和 `design/player-journey.md` 存在
 
 **Input:** `/ux-design hud`
 
 **Expected behavior:**
-1. Mode is HUD design; output file `design/ux/hud.md`
-2. UI Requirements are collected with one Grep across `design/gdd/*.md`; the skill counts the three system GDDs — `game-concept.md` sits in `design/gdd/` but is not one — lists `save-system.md` as unmatched, and confirms with the user it is headless before excluding it
-3. Input methods are derived from the `platform` block (keyboard/mouse and gamepad) — the user is not asked
-4. The context summary is shown, then "Anything else I should read before we start, or shall we proceed?"
-5. No existing file, so: "May I create the skeleton file at `design/ux/hud.md`?" — on yes, writes the HUD skeleton and updates `production/session-state/active.md`. The skeleton carries every section `/ux-review`'s HUD checklist requires, so the finished spec can pass that review
-6. Phase 4 reads `.claude/skills/ux-design/references/sections-hud.md` and never the other two per-mode files (`sections-ux-spec.md`, `sections-patterns.md`); if a section needs depth, the HUD design guide is read one section at a time, never whole
-7. Each section: draft → "Does this capture the [section name] correctly?" → "May I write the [section name] section to `design/ux/hud.md`?" → Edit replacing that section's placeholder
-8. Phase 5 presents the Cross-Reference Check results
-9. Phase 6 states the spec should be validated with `/ux-review` before implementation, then asks with four options (run `/ux-review` now / design another screen / update the pattern library / stop); verdict `COMPLETE`
+1. 模式为 HUD 设计；输出文件为 `design/ux/hud.md`
+2. UI Requirements 通过对 `design/gdd/*.md` 的一次 Grep 收集；技能统计三份系统 GDD——`game-concept.md` 位于 `design/gdd/` 但不属于系统 GDD——将 `save-system.md` 列为未匹配，并在排除它之前与用户确认它是无界面（headless）的
+3. 输入方式从 `platform` 块推导（键盘/鼠标和手柄）——不询问用户
+4. 展示上下文摘要，然后询问 “Anything else I should read before we start, or shall we proceed?”
+5. 没有现有文件，因此询问：“May I create the skeleton file at `design/ux/hud.md`?”——用户同意后，写入 HUD 骨架并更新 `production/session-state/active.md`。骨架包含 `/ux-review` 的 HUD 检查清单要求的所有小节，使完成的规格能够通过该评审
+6. Phase 4 读取 `.claude/skills/ux-design/references/sections-hud.md`，绝不读取另外两份按模式的指导文件（`sections-ux-spec.md`、`sections-patterns.md`）；若某个小节需要深入，HUD 设计指南会一次读取一个小节，绝不整份读取
+7. 每个小节：起草 → “Does this capture the [section name] correctly?” → “May I write the [section name] section to `design/ux/hud.md`?” → 用 Edit 替换该小节的占位符
+8. Phase 5 展示交叉引用检查（Cross-Reference Check）结果
+9. Phase 6 说明规格在实现前应用 `/ux-review` 验证，然后以四个选项询问（立即运行 `/ux-review` / 设计另一个屏幕 / 更新模式库 / 停止）；结论 `COMPLETE`
 
 **Assertions:**
-- [ ] A GDD without a UI Requirements section is listed and confirmed with the user, not silently excluded
-- [ ] `game-concept.md` is not counted as a system GDD, so it is not listed as unmatched
-- [ ] Input methods come from the `project.yaml` `platform` block, without asking the user
-- [ ] The skeleton is written only after the "May I create the skeleton file at `design/ux/hud.md`?" approval
-- [ ] The HUD skeleton includes the sections `/ux-review` Phase 3B checks for: HUD Philosophy, Information Architecture, Layout Zones, HUD element specifications, HUD States by Gameplay Context, Information Hierarchy, Visual Budget, Feedback & Notification Systems, Platform Adaptation, Tuning Knobs, Acceptance Criteria
-- [ ] Of the three per-mode guidance files only `sections-hud.md` is loaded, and no guide is read whole
-- [ ] Each section is approved and then gets its own "May I write the [section name] section…" ask before it is written
-- [ ] The handoff names `/ux-review` as required before implementation, and the verdict is `COMPLETE`
+- [ ] 没有 UI Requirements 小节的 GDD 会被列出并与用户确认，而不是静默排除
+- [ ] `game-concept.md` 不计为系统 GDD，因此不会被列为未匹配
+- [ ] 输入方式来自 `project.yaml` 的 `platform` 块，不询问用户
+- [ ] 骨架只在 “May I create the skeleton file at `design/ux/hud.md`?” 批准之后写入
+- [ ] HUD 骨架包含 `/ux-review` Phase 3B 检查的所有小节：HUD Philosophy、Information Architecture、Layout Zones、HUD element specifications、HUD States by Gameplay Context、Information Hierarchy、Visual Budget、Feedback & Notification Systems、Platform Adaptation、Tuning Knobs、Acceptance Criteria
+- [ ] 在三份按模式的指导文件中，只加载 `sections-hud.md`，且不整份读取任何指南
+- [ ] 每个小节先获批，然后在写入前单独询问 “May I write the [section name] section…”
+- [ ] 交接说明实现前必须运行 `/ux-review`，且结论为 `COMPLETE`
 
 ---
 
-### Case 2: Existing Document — Retrofit of incomplete sections only
+### Case 2: 已有文档 — 仅对不完整小节执行 retrofit
 
 **Fixture:**
-- Scenario (a): `design/ux/main-menu.md` exists, built from the UX spec skeleton; Purpose & Player Need, Player Context on Arrival, Navigation Position and Entry & Exit Points have real content; every other section is `[To be designed]`
-- Scenario (b): `design/accessibility-requirements.md` exists, built from the accessibility skeleton; Accessibility Tier Definition commits the Standard tier; every other section is `[To be designed]`
+- Scenario (a)：`design/ux/main-menu.md` 存在，基于 UX 规格骨架构建；Purpose & Player Need、Player Context on Arrival、Navigation Position 和 Entry & Exit Points 有实际内容；其他每个小节均为 `[To be designed]`
+- Scenario (b)：`design/accessibility-requirements.md` 存在，基于无障碍骨架构建；Accessibility Tier Definition 承诺 Standard 层级；其他每个小节均为 `[To be designed]`
 
 **Input:** (a) `/ux-design main-menu` (b) `/ux-design accessibility`
 
 **Expected behavior:**
-1. Before any skeleton step, the skill Globs the output path — in (b) `design/accessibility-requirements.md`, not a path under `design/ux/` — and finds the file
-2. It reads the file, classifies each section as Complete / Empty / Placeholder, and shows the status table, ending "I'll work on the [N] incomplete sections only — existing content will not be overwritten."
-3. Skeleton creation is skipped
-4. Phase 4 authors only the Empty/Placeholder sections, filling each placeholder in place with Edit after its "May I write" approval
-5. (a) The four complete sections are not changed; (b) the committed tier is not changed
+1. 在任何骨架步骤之前，技能用 glob 匹配输出路径——在 (b) 中是 `design/accessibility-requirements.md`，而不是 `design/ux/` 下的路径——并找到该文件
+2. 它读取文件，将每个小节分类为 Complete / Empty / Placeholder，展示状态表，并以 “I'll work on the [N] incomplete sections only — existing content will not be overwritten.” 结尾
+3. 跳过骨架创建
+4. Phase 4 只编写 Empty/Placeholder 小节，在获得 “May I write” 批准后用 Edit 就地填充每个占位符
+5. (a) 四个完整小节不变；(b) 已承诺的层级不变
 
 **Assertions:**
-- [ ] The existing file is detected and no skeleton is written
-- [ ] The status table and the "incomplete sections only" message are shown before authoring
-- [ ] Only Empty or Placeholder sections are authored; complete sections are not overwritten
-- [ ] Each filled section is written with Edit after its own "May I write" approval
-- [ ] (a) The status table rows use the section names of the UX spec skeleton (e.g., `Purpose & Player Need`, `Layout Specification`, `States & Variants`, `Input Method Completeness Checklist`)
-- [ ] (b) The status table rows use the accessibility skeleton's section names (e.g., `Accessibility Tier Definition`, `Visual Accessibility`, `Motor Accessibility`), and the file stays at `design/accessibility-requirements.md`
+- [ ] 检测到现有文件，不写入骨架
+- [ ] 在编写之前展示状态表和 “incomplete sections only” 消息
+- [ ] 仅编写 Empty 或 Placeholder 小节；完整小节不被覆盖
+- [ ] 每个填充的小节都在各自的 “May I write” 批准之后用 Edit 写入
+- [ ] (a) 状态表各行使用 UX 规格骨架的小节名称（例如 `Purpose & Player Need`、`Layout Specification`、`States & Variants`、`Input Method Completeness Checklist`）
+- [ ] (b) 状态表各行使用无障碍骨架的小节名称（例如 `Accessibility Tier Definition`、`Visual Accessibility`、`Motor Accessibility`），且文件保持在 `design/accessibility-requirements.md`
 
 ---
 
-### Case 3: Missing Context — No game concept and no player journey
+### Case 3: 上下文缺失 — 没有游戏概念，也没有玩家旅程
 
 **Fixture:**
-- No `design/gdd/game-concept.md` and no `design/game-brief.md`
-- No `design/player-journey.md`
-- No `design/ux/inventory.md`
+- 没有 `design/gdd/game-concept.md`，也没有 `design/game-brief.md`
+- 没有 `design/player-journey.md`
+- 没有 `design/ux/inventory.md`
 
 **Input:** `/ux-design inventory`
 
 **Expected behavior:**
-1. The skill warns: "No game concept found. Run `/brainstorm` first to establish the game's foundation before designing UX." and continues only if the user asks
-2. It notes the missing journey: "No player journey map found at `design/player-journey.md`. Designing without it means we'll be making assumptions about player context…"
-3. The context summary shows "Journey phase(s): unknown — no journey map"
-4. The spec's Open Questions section records: "Player journey map not yet created. Author it from the template at `.claude/docs/templates/player-journey.md`…"
-5. The skill never tells the user to run `/ux-design` Phase 2b to create the journey map
+1. 技能警告：“No game concept found. Run `/brainstorm` first to establish the game's foundation before designing UX.”，并且只有在用户要求时才继续
+2. 它指出缺少旅程：“No player journey map found at `design/player-journey.md`. Designing without it means we'll be making assumptions about player context…”
+3. 上下文摘要显示 “Journey phase(s): unknown — no journey map”
+4. 规格的 Open Questions 小节记录：“Player journey map not yet created. Author it from the template at `.claude/docs/templates/player-journey.md`…”
+5. 技能绝不告诉用户去运行 `/ux-design` Phase 2b 来创建旅程图
 
 **Assertions:**
-- [ ] The missing concept produces the `/brainstorm` warning, and the skill proceeds only on the user's say-so
-- [ ] The missing player journey is noted in the conversation and recorded in Open Questions with the template path
-- [ ] The remediation points at the template, never back at `/ux-design`
-- [ ] The context summary marks the journey phase as unknown
+- [ ] 缺少游戏概念时产生 `/brainstorm` 警告，且技能只有在用户同意后才继续
+- [ ] 在对话中指出缺少玩家旅程，并在 Open Questions 中连同模板路径一起记录
+- [ ] 补救措施指向模板，绝不指回 `/ux-design`
+- [ ] 上下文摘要将旅程阶段标记为未知
 
 ---
 
-### Case 4: No Argument Provided — Ask instead of failing
+### Case 4: 未提供参数 — 询问而不是失败
 
 **Fixture:**
-- No argument
-- Neither `design/ux/main-menu.md` nor `design/accessibility-requirements.md` exists, so both scenarios author fresh files
-- Scenario (a): the user types "Main Menu"
-- Scenario (b): the user picks "The project-wide accessibility requirements"
+- 没有参数
+- `design/ux/main-menu.md` 和 `design/accessibility-requirements.md` 都不存在，因此两种场景都会新建文件
+- Scenario (a)：用户输入 “Main Menu”
+- Scenario (b)：用户选择 “The project-wide accessibility requirements”
 
 **Input:** `/ux-design`
 
 **Expected behavior:**
-1. The skill does not fail; it asks "What are we designing today?" with: "A specific screen or flow (I'll name it)", "The game HUD", "The interaction pattern library", "The project-wide accessibility requirements", "I'm not sure — help me figure it out"
-2. (a) The name is normalized to kebab-case; the output file is `design/ux/main-menu.md`
-3. (b) The output file is `design/accessibility-requirements.md`, and the skeleton ask names that path, not a path under `design/ux/`
-4. (b) The Accessibility Tier Definition section is authored first
-5. No file is created before the skeleton approval
+1. 技能不会失败；它询问 “What are we designing today?”，选项为：“A specific screen or flow (I'll name it)”、“The game HUD”、“The interaction pattern library”、“The project-wide accessibility requirements”、“I'm not sure — help me figure it out”
+2. (a) 名称被规范化为 kebab-case；输出文件为 `design/ux/main-menu.md`
+3. (b) 输出文件为 `design/accessibility-requirements.md`，骨架询问指明该路径，而不是 `design/ux/` 下的路径
+4. (b) 首先编写 Accessibility Tier Definition 小节
+5. 在骨架获批之前不创建任何文件
 
 **Assertions:**
-- [ ] No usage error; the "What are we designing today?" question is asked with the five options
-- [ ] (a) A typed screen name becomes a kebab-case filename under `design/ux/`
-- [ ] (b) Accessibility mode writes to `design/accessibility-requirements.md`
-- [ ] (b) The tier definition is authored before the other accessibility sections
-- [ ] No file is written before the skeleton approval
+- [ ] 不出现用法错误；询问 “What are we designing today?” 并提供五个选项
+- [ ] (a) 输入的屏幕名称会转换为 `design/ux/` 下的 kebab-case 文件名
+- [ ] (b) 无障碍模式写入 `design/accessibility-requirements.md`
+- [ ] (b) 层级定义先于其他无障碍小节编写
+- [ ] 在骨架获批之前不写入任何文件
 
 ---
 
-### Case 5: No Director Gate — `/ux-review` is the separate review
+### Case 5: 无总监闸门 — `/ux-review` 是单独的评审
 
 **Fixture:**
-- `project.yaml` has `modes.review_mode: full` and a `platform` block (`targets: [PC, Console]`, `gamepad_support: Full`)
-- No `design/ux/settings-menu.md`
+- `project.yaml` 中 `modes.review_mode: full`，并有 `platform` 块（`targets: [PC, Console]`、`gamepad_support: Full`）
+- 没有 `design/ux/settings-menu.md`
 
 **Input:** `/ux-design settings-menu`
 
 **Expected behavior:**
-1. The skill authors the screen spec as usual; the review mode is not resolved and nothing branches on it
-2. The UX spec skeleton's header carries `> **Platform Target**:` filled from Phase 2h — PC and Console, keyboard/mouse and gamepad — the line `/ux-review` checks for
-3. No director gate agent is spawned, and no gate ID or skip note appears
-4. If a specialist is consulted (e.g., `ui-programmer` on feasibility), its output is shown to the user, and the session — not the agent — writes the file
-5. The run ends with the `/ux-review` statement and verdict `COMPLETE`
+1. 技能照常编写屏幕规格；不解析评审模式，也没有任何分支依赖它
+2. UX 规格骨架的头部包含从 Phase 2h 填入的 `> **Platform Target**:`——PC 和 Console、键盘/鼠标和手柄——这是 `/ux-review` 检查的行
+3. 不启动任何总监闸门代理，也不出现闸门 ID 或跳过说明
+4. 若咨询了专家（例如就可行性咨询 `ui-programmer`），其输出会展示给用户，并由本会话——而不是代理——写入文件
+5. 运行以 `/ux-review` 说明和结论 `COMPLETE` 结束
 
 **Assertions:**
-- [ ] The skeleton header's Platform Target line names the targets and input methods from the `platform` block
-- [ ] No director gate is invoked and no gate skip messages appear
-- [ ] `modes.review_mode: full` does not change the skill's behavior
-- [ ] Specialist output is presented to the user; agents never write files
-- [ ] The verdict is `COMPLETE`, with `/ux-review` named as the validation step
+- [ ] 骨架头部的 Platform Target 行使用 `platform` 块中的目标和输入方式
+- [ ] 不调用任何总监闸门，也不出现闸门跳过消息
+- [ ] `modes.review_mode: full` 不会改变技能的行为
+- [ ] 专家输出会呈现给用户；代理绝不写入文件
+- [ ] 结论为 `COMPLETE`，并指明 `/ux-review` 为验证步骤
 
 ---
 
-### Case 6: Handoff — names the Production gate and what the review requirement depends on
+### Case 6: 交接 — 指明 Production 闸门以及评审要求取决于什么
 
 **Fixture:**
-- `modes.rigor: standard` (pinned: the handoff states how the Production gate treats
-  `/ux-review` per workflow tier, and `standard` is the tier where it is recommended)
-- A screen spec `design/ux/settings-menu.md` whose sections are all approved and
-  written; the Cross-Reference Check has run
-- Variant: the user picks "Design another screen first, then review all specs together"
+- `modes.rigor: standard`（固定：交接说明 Production 闸门如何按工作流层级对待
+  `/ux-review`，而 `standard` 正是推荐运行它的层级）
+- 一份屏幕规格 `design/ux/settings-menu.md`，其所有小节都已批准并
+  写入；交叉引用检查已运行
+- 变体：用户选择 “Design another screen first, then review all specs together”
 
-**Input:** `/ux-design settings-menu` (continuing to the handoff)
+**Input:** `/ux-design settings-menu`（继续到交接）
 
 **Expected behavior:**
-1. Phase 6 updates `production/session-state/active.md`
-2. Before offering options, it states: "This spec should be validated with
+1. Phase 6 更新 `production/session-state/active.md`
+2. 在提供选项之前，它说明：“This spec should be validated with
    `/ux-review` before it enters the implementation pipeline. The Production gate
    (`/gate-check production`) requires all key screen specs to have passed
-   `/ux-review` at `workflow: full` (recommended at `standard`)."
-3. It then asks "Run `/ux-review [filename]` now, or do something else first?" with
-   four options (run now / design another screen / update the pattern library / stop)
-4. Variant: it adds "Reminder: run `/ux-review` on all completed specs before
-   running `/gate-check production`."
-5. The closing next steps include running `/gate-check production` once all key
-   screens have approved UX specs
-6. Verdict: `COMPLETE`
+   `/ux-review` at `workflow: full` (recommended at `standard`).”
+3. 随后询问 “Run `/ux-review [filename]` now, or do something else first?”，
+   提供四个选项（立即运行 / 设计另一个屏幕 / 更新模式库 / 停止）
+4. 变体：它会补充 “Reminder: run `/ux-review` on all completed specs before
+   running `/gate-check production`.”
+5. 收尾的下一步包括：在所有关键屏幕都有已批准的 UX 规格后运行
+   `/gate-check production`
+6. 结论：`COMPLETE`
 
 **Assertions:**
-- [ ] The handoff names `/gate-check production` as the gate that depends on `/ux-review`, not only `/ux-review` itself
-- [ ] It says the requirement is `workflow: full` and only recommended at `standard`, so a `standard` project is not told the review is mandatory
-- [ ] The statement comes before the options question
-- [ ] Variant — the "Design another screen first" pick adds the reminder naming `/gate-check production`
-- [ ] The next steps list `/gate-check production` after the screens' specs are approved
-- [ ] The verdict is `COMPLETE`
+- [ ] 交接指明 `/gate-check production` 是依赖 `/ux-review` 的闸门，而不只是 `/ux-review` 本身
+- [ ] 说明该要求在 `workflow: full` 下适用、在 `standard` 下仅为推荐，因此不会告诉 `standard` 项目该评审是强制性的
+- [ ] 该说明出现在选项问题之前
+- [ ] 变体——选择 “Design another screen first” 时会补充指明 `/gate-check production` 的提醒
+- [ ] 下一步在屏幕规格获批后列出 `/gate-check production`
+- [ ] 结论为 `COMPLETE`
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Once the mode is known — with no argument, the mode question comes first (Case 4) — reads context before asking the user anything else
-- [ ] Checks for an existing output file before creating a skeleton; retrofit fills only Empty or Placeholder sections
-- [ ] The skeleton is created only after "May I create the skeleton file at [path]?"
-- [ ] Sections are drafted one at a time; each is approved, then "May I write the [section name] section to `[filepath]`?" is asked before the write
-- [ ] Loads the per-mode guidance file for the active mode and never the other two; a template guide is read one section at a time, never whole
-- [ ] Ends with the `/ux-review` handoff and verdict `COMPLETE`
+- [ ] 一旦知道模式——无参数时，模式问题最先出现（Case 4）——在询问用户其他任何内容之前读取上下文
+- [ ] 在创建骨架之前检查是否存在输出文件；retrofit 只填充 Empty 或 Placeholder 小节
+- [ ] 骨架只在 “May I create the skeleton file at [path]?” 之后创建
+- [ ] 小节逐节起草；每个小节先获批，然后在写入前询问 “May I write the [section name] section to `[filepath]`?”
+- [ ] 加载当前模式的按模式指导文件，绝不加载另外两份；模板指南一次读取一个小节，绝不整份读取
+- [ ] 以 `/ux-review` 交接和结论 `COMPLETE` 结尾
 
 ---
 
 ## Coverage Notes
 
-- Pattern-library mode (`patterns`) is not fixture-tested.
-- The input-methods question when neither `project.yaml` nor
-  `technical-preferences.md` configures the platform is not tested.
-- The Phase 5 prompt for a pattern not yet in the pattern library is not
-  individually tested.
-- `guided` and `autonomous` automation modes, `docs.density` depth, and
-  recovery after an interrupted session are not tested.
+- 模式库模式（`patterns`）未做 fixture 测试。
+- 当 `project.yaml` 和 `technical-preferences.md` 都未配置平台时的
+  输入方式询问未测试。
+- Phase 5 对尚未进入模式库的模式给出的提示未单独测试。
+- `guided` 和 `autonomous` 自动化模式、`docs.density` 深度，以及
+  会话中断后的恢复未测试。

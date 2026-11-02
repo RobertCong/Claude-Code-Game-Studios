@@ -1,119 +1,61 @@
-# /smoke-check — Phase 2: Run Automated Tests
+# /smoke-check — Phase 2: 运行自动化测试
 
-> Part of `/smoke-check`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> 属于 `/smoke-check`。`SKILL.md` 指明何时读取本文件；它解析出的设置以及其后各标题下的规则在此同样适用。
 
-## Phase 2: Run Automated Tests
+## Phase 2: 运行自动化测试
 
-**In this file:**
+**本文件包含：**
 
-- `commands.test` first
+- 优先使用 `commands.test`
 - Godot 4
-- Unity: Edit Mode, then Play Mode as a second run
-- Unreal Engine: build first, commands per OS, macOS
-- Unknown engine / not configured
-- Test runner not available here
-- Build check (the WAIVED path only)
+- Unity：先 Edit Mode，再以第二次运行执行 Play Mode
+- Unreal Engine：先构建，按操作系统给出命令，macOS
+- 未知引擎 / 未配置
+- 此处测试运行器不可用
+- 构建检查（仅 WAIVED 路径）
 
-**Run `commands.test` from `project.yaml` when it is set** — it is the
-project's own test command, the one `/setup-engine` wrote and CI runs. Use the
-per-engine default below only when `commands.test` is absent, and say in the
-report which of the two you ran. Wrap it in a timeout (`timeout 900 …`): **a
-timeout (exit 124) is a gate FAILURE, never a pass** — the run never completed
-and nothing was verified. macOS has no `timeout`: use `gtimeout 900 …` from
-Homebrew's `coreutils` (same exit 124), or, with nothing installed,
-`perl -e 'alarm shift; exec @ARGV' 900 …`, which exits 142 when time runs out —
-a FAILURE the same way. Then read the result for the engine. On every engine
-one outcome looks like success and is not; each is named below.
+**当 `project.yaml` 中设置了 `commands.test` 时，运行它** — 这是项目自己的测试命令，即 `/setup-engine` 写入并由 CI 运行的那条。仅在 `commands.test` 缺失时才使用下面按引擎的默认值，并在报告中说明你运行的是两者中的哪一个。用超时包装它（`timeout 900 …`）：**超时（退出码 124）是闸门失败，绝不是通过** — 运行从未完成，什么都没验证。macOS 没有 `timeout`：使用 Homebrew `coreutils` 的 `gtimeout 900 …`（同样退出码 124），或者，若什么都没安装，使用 `perl -e 'alarm shift; exec @ARGV' 900 …`，它在时间耗尽时以 142 退出 — 同样视为失败。然后根据引擎读取结果。在每种引擎上，都有一种结果看起来像成功其实不是；下面逐一指出。
 
-**Godot 4** — first check that `addons/gdUnit4/bin/GdUnitCmdTool.gd` exists —
-the folder has a **capital U**. If it does not, report
-`NOT ASSESSED — gdUnit4 not installed at addons/gdUnit4/` instead of running
-anything. Then import, whether you run `commands.test` or the
-default. A fresh clone has no `.godot/` class cache, and without it gdUnit4's
-runner does not load; a cache that predates a new `class_name` fails valid
-code with 105. The import takes seconds when nothing changed (`godot` below is
-the executable Phase 1 step 3 resolved):
+**Godot 4** — 先检查 `addons/gdUnit4/bin/GdUnitCmdTool.gd` 是否存在 — 文件夹名是**大写 U**。若不存在，报告 `NOT ASSESSED — gdUnit4 not installed at addons/gdUnit4/` 而不是运行任何东西。然后执行导入，无论你运行的是 `commands.test` 还是默认命令。新克隆的项目没有 `.godot/` 类缓存，缺少它 gdUnit4 的运行器不会加载；而一个早于新 `class_name` 的缓存会以 105 让有效代码失败。无变化时导入只需几秒（下面的 `godot` 即 Phase 1 第 3 步解析出的可执行文件）：
 ```bash
 godot --headless --path . --import
 godot --headless -s -d --remote-debug tcp://127.0.0.1:0 res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a res://tests --ignoreHeadlessMode 2>&1
 ```
-gdUnit4's exit code gives the verdict (run on 6.1.3 and 6.2.2):
-- **0** — every test passed: PASS. **But exit 0 over zero tests is not a pass:**
-  gdUnit4 aborts and still exits 0, so if the output says `No test cases found`,
-  the verdict is `NOT ASSESSED — no tests found`.
-- **101** — every test passed but a test leaked nodes (orphans): PASS WITH
-  WARNINGS, naming the orphan count from the output. Not a failure.
-- **100** — a test failed: FAIL. **105** — a test script does not parse: FAIL.
-- **103** — gdUnit4 refused to run headless (`--ignoreHeadlessMode` missing);
-  **104** — Godot older than 4.3: `NOT ASSESSED`, with that reason.
-- **1** — Godot's own error: `GdUnitCmdTool.gd` did not load (`Failed to load
-  script`), so no test ran. Usually the import above was skipped; after it,
-  exit 1 is a FAIL.
+gdUnit4 的退出码给出结论（在 6.1.3 和 6.2.2 上运行过）：
+- **0** — 所有测试通过：PASS。**但零测试的退出码 0 不是通过：** gdUnit4 会中止却仍以 0 退出，因此若输出显示 `No test cases found`，结论为 `NOT ASSESSED — no tests found`。
+- **101** — 所有测试通过但有测试泄漏了节点（孤儿节点）：PASS WITH WARNINGS，从输出中指出孤儿节点数。不是失败。
+- **100** — 有测试失败：FAIL。**105** — 测试脚本无法解析：FAIL。
+- **103** — gdUnit4 拒绝无头运行（缺少 `--ignoreHeadlessMode`）；**104** — Godot 低于 4.3：`NOT ASSESSED`，并附上该原因。
+- **1** — Godot 自身错误：`GdUnitCmdTool.gd` 未加载（`Failed to load script`），因此没有测试运行。通常是跳过了上面的导入；在导入之后，退出码 1 为 FAIL。
 
-Every run opens with two `ERROR:` lines about the remote port
-(`127.0.0.1:0`) — that is the `--remote-debug` flag working, not a failure.
-Never drop the flag: without it a script error opens Godot's interactive
-debugger and the run hangs at a `debug>` prompt until the timeout.
+每次运行开头都会有两行关于远程端口的 `ERROR:`（`127.0.0.1:0`）— 那是 `--remote-debug` 标志在起作用，不是失败。绝不要去掉该标志：没有它，脚本错误会打开 Godot 的交互式调试器，运行会卡在 `debug>` 提示符直到超时。
 
-**Unity:**
-Unity **can** run tests headlessly via shell. Do not skip to reading artifacts.
+**Unity：**
+Unity **可以**通过 shell 无头运行测试。不要跳到读取产出物。
 
-First confirm the Unity Test Framework is installed. A project without it does
-not fail cleanly — it **hangs** until something kills it:
+先确认 Unity Test Framework 已安装。没有它的项目不会干净地失败 — 它会**挂起**直到被杀死：
 ```bash
 grep -q 'com.unity.test-framework' Packages/manifest.json && echo present || echo ABSENT
 ```
-If ABSENT, report `NOT ASSESSED — Unity Test Framework not installed` and
-give the one-line fix (add `com.unity.test-framework` to `Packages/manifest.json`).
-**Do not fall through to reading stale artifacts** — an unknown-age XML
-reported as a pass is worse than no gate.
+若为 ABSENT，报告 `NOT ASSESSED — Unity Test Framework not installed` 并给出一行修复方法（将 `com.unity.test-framework` 添加到 `Packages/manifest.json`）。**不要退而读取过期的产出物** — 把一个不清楚年代的 XML 报告为通过，比没有闸门更糟。
 
-If present, the default is (the **editor** executable — `Unity` on `PATH` may be
-Unity's separate CLI). Delete the old results file first, whether you run
-`commands.test` or this default:
+若存在，默认命令为（**编辑器**可执行文件 — `PATH` 上的 `Unity` 可能是 Unity 的独立 CLI）。先删除旧结果文件，无论你运行的是 `commands.test` 还是此默认命令：
 ```bash
 rm -f test-results/editmode.xml
 timeout 900 "<Unity editor>" -batchmode -runTests -projectPath . -testPlatform EditMode -testResults test-results/editmode.xml
 ```
-Exit 0 when every test passes, 2 on a failure. **Exit 1 or 3 is a FAIL**: 1
-means the project did not compile (the editor log has the `error CS…` lines),
-3 that the run itself failed; 4 (an unknown `-testPlatform`) or any other
-non-zero exit is a FAIL too. A compile error writes no results file — which
-is why the old one is deleted first: left in place, the last run's pass is read
-as this run's. After any exit, no results file is a FAIL. Parse the `<test-run>`
-element of the results file for `testcasecount`, `passed` and `failed`. **`testcasecount="0"`
-is NOT ASSESSED, never a pass**: tests outside `Assets/` are never compiled, and
-Unity then reports `result="Passed"` with exit 0 over zero tests.
+所有测试通过时退出 0，失败时退出 2。**退出码 1 或 3 为 FAIL**：1 表示项目未编译通过（编辑器日志中有 `error CS…` 行），3 表示运行本身失败；4（未知的 `-testPlatform`）或任何其他非零退出码也是 FAIL。编译错误不会写结果文件 — 这就是先删除旧文件的原因：若保留，上一次运行的通过会被读成本次运行的。任何退出之后，若没有结果文件即为 FAIL。解析结果文件中的 `<test-run>` 元素以获取 `testcasecount`、`passed` 和 `failed`。**`testcasecount="0"` 是 NOT ASSESSED，绝不是通过**：`Assets/` 之外的测试永远不会被编译，而 Unity 随后会在零测试上报告 `result="Passed"` 并以 0 退出。
 
-**Play Mode is a second run.** `-testPlatform EditMode` — this default, and
-`commands.test` as `/setup-engine` writes it — never runs the integration tests
-`/test-setup` scaffolds under `Assets/Tests/PlayMode/`. When that folder holds a
-test file and the command you ran did not already pass `-testPlatform PlayMode`,
-run Play Mode the same way, into its own results file, and read it by the same
-rules:
+**Play Mode 是第二次运行。** `-testPlatform EditMode` — 此默认值，以及 `/setup-engine` 写入的 `commands.test` — 从不运行 `/test-setup` 在 `Assets/Tests/PlayMode/` 下搭建的集成测试。当该文件夹中有测试文件，且你运行的命令尚未传入 `-testPlatform PlayMode` 时，以同样方式运行 Play Mode，写入各自的结果文件，并按同样的规则读取：
 ```bash
 rm -f test-results/playmode.xml
 timeout 900 "<Unity editor>" -batchmode -runTests -projectPath . -testPlatform PlayMode -testResults test-results/playmode.xml
 ```
-Report each platform on its own line — `EditMode: PASS (12/12)`,
-`PlayMode: FAIL (1 failure)`. A Play Mode run that could not be made is
-reported by name, `PlayMode: NOT RUN — [reason]`: the Edit Mode result does not
-cover those tests, so it cannot make the automated-test row a PASS.
+每个平台各占一行报告 — `EditMode: PASS (12/12)`、`PlayMode: FAIL (1 failure)`。无法完成的 Play Mode 运行按名称报告，`PlayMode: NOT RUN — [reason]`：Edit Mode 的结果不覆盖那些测试，因此它无法让自动化测试行成为 PASS。
 
-**Unreal Engine** — build the editor target first, whether you then run
-`commands.test` or the default. `Binaries/` is not committed, and without a
-built game module the editor stops with "The game module could not be found",
-exit 1, before running any test. The build is incremental — seconds when
-nothing changed; a failed build is a FAIL.
+**Unreal Engine** — 先构建编辑器目标，无论你随后运行 `commands.test` 还是默认命令。`Binaries/` 不会被提交，没有已构建的游戏模块，编辑器会在运行任何测试之前以 "The game module could not be found" 退出，退出码 1。构建是增量的 — 无变化时只需几秒；构建失败即为 FAIL。
 
-**Pick the commands for this machine** with `uname -s`: `Linux` → Linux,
-`Darwin` → macOS, anything else (`MINGW*`, `MSYS*`, `CYGWIN*`) → Windows. The
-Windows forms below were run on UE 5.7; the Linux and macOS forms come from
-Epic's documentation — `docs/engine-reference/unreal/current-best-practices.md`,
-"Command Line", has them with their sources. On Windows use
-`UnrealBuildTool.exe`, not `Build.bat`: run from bash, `Build.bat` fails on an
-engine path with spaces.
+**用 `uname -s` 为这台机器选择命令**：`Linux` → Linux，`Darwin` → macOS，其他（`MINGW*`、`MSYS*`、`CYGWIN*`）→ Windows。下面的 Windows 形式在 UE 5.7 上运行过；Linux 和 macOS 形式来自 Epic 的文档 — `docs/engine-reference/unreal/current-best-practices.md` 的 "Command Line" 一节有这些命令及其来源。在 Windows 上使用 `UnrealBuildTool.exe`，而非 `Build.bat`：在 bash 中运行时，`Build.bat` 会在含空格的引擎路径上失败。
 ```bash
 # Windows
 timeout 1800 "<UE root>/Engine/Binaries/DotNET/UnrealBuildTool/UnrealBuildTool.exe" <Project>Editor Win64 Development -Project="$(pwd -W 2>/dev/null || pwd)/<Project>.uproject" 2>&1
@@ -122,82 +64,36 @@ timeout 1800 "<UE root>/Engine/Build/BatchFiles/Linux/Build.sh" <Project>Editor 
 # macOS (timeout: see the macOS note above)
 gtimeout 1800 "<UE root>/Engine/Build/BatchFiles/Mac/Build.sh" <Project>Editor Mac Development -Project="$(pwd -W 2>/dev/null || pwd)/<Project>.uproject" 2>&1
 ```
-Then the default. Keep `-stdout -FullStdOutLogOutput`; when `commands.test`
-lacks them, add them to the command for this run only: without them the editor
-prints nothing, and the lines below are only in `Saved/Logs/<Project>.log`.
-Give the project as an **absolute** path — when `commands.test` passes a
-relative one, run it with the absolute path instead: UE 5.7
-does not find a relative `<Project>.uproject` and exits 1 (`Project file not
-found`). `$(pwd -W 2>/dev/null || pwd)` gives the `C:/…` form in Git Bash and
-the plain path elsewhere; `$PWD` alone fails when `MSYS_NO_PATHCONV` is set.
-Either way, say in the report what you changed and tell the user to fix
-`commands.test` in `project.yaml` — never edit `project.yaml` without asking.
-`<Project>.` in the filter is the root the tests are named under: the project
-name, or the distinct root `/setup-engine` chose when the project's name is
-also an engine area — read one test's name string under
-`Source/*/Private/Tests/` if unsure.
+然后是默认命令。保留 `-stdout -FullStdOutLogOutput`；当 `commands.test` 缺少它们时，仅为本次运行将其加入命令：没有它们编辑器什么都不打印，而下面的行只存在于 `Saved/Logs/<Project>.log`。以**绝对**路径给出项目 — 当 `commands.test` 传入相对路径时，改用绝对路径运行：UE 5.7 找不到相对的 `<Project>.uproject` 并以 1 退出（`Project file not found`）。`$(pwd -W 2>/dev/null || pwd)` 在 Git Bash 中给出 `C:/…` 形式，在其他位置给出普通路径；当设置了 `MSYS_NO_PATHCONV` 时，单用 `$PWD` 会失败。无论哪种情况，都要在报告中说明你改了什么，并告知用户去修正 `project.yaml` 中的 `commands.test` — 绝不未经询问就编辑 `project.yaml`。过滤器中的 `<Project>.` 是测试命名所在的根：项目名，或当项目名同时也是一个引擎领域时 `/setup-engine` 选取的独立根 — 若不确定，读取 `Source/*/Private/Tests/` 下某个测试的名称字符串。
 ```bash
 # Windows
 timeout 1800 "<UE root>/Engine/Binaries/Win64/UnrealEditor-Cmd.exe" "$(pwd -W 2>/dev/null || pwd)/<Project>.uproject" -ExecCmds="Automation RunTests <Project>.; Quit" -unattended -nullrhi -stdout -FullStdOutLogOutput 2>&1
 # Linux
 timeout 1800 "<UE root>/Engine/Binaries/Linux/UnrealEditor" "$(pwd -W 2>/dev/null || pwd)/<Project>.uproject" -ExecCmds="Automation RunTests <Project>.; Quit" -unattended -nullrhi -stdout -FullStdOutLogOutput 2>&1
 ```
-**macOS has no sourced test command.** Epic documents only the
-`UnrealEditor.app` bundle, not a command-line editor inside it. Run a
-`commands.test` the user has set and confirmed; with none, report
-`NOT ASSESSED — Unreal test command on macOS not sourced; set commands.test to the editor command you use`
-instead of guessing a path.
-Read the output, not the exit code: a failing test and a run that matched nothing both exit 255.
-- `Result={Fail}` on any line → FAIL.
-- `No automation tests matched` → `NOT ASSESSED — no tests found` (tests
-  outside `Source/<Module>/` are never built), not FAIL.
-- Exit 0 with `Result={Success}` lines → PASS.
-- Any other non-zero exit (`Project file not found`, `The game module … could
-  not be found`) → FAIL: no test ran. The exception: the editor never started (exit 126 or 127, `command not found`) — that is the runner not being
-  available, below, and `NOT ASSESSED`.
+**macOS 没有可引用的测试命令。** Epic 只记录了 `UnrealEditor.app` 包，未记录其中的命令行编辑器。运行用户已设置并确认的 `commands.test`；若没有，报告 `NOT ASSESSED — Unreal test command on macOS not sourced; set commands.test to the editor command you use`，而不是猜测路径。
+读取输出，而不是退出码：失败测试和没有匹配到任何内容的运行都以 255 退出。
+- 任何行出现 `Result={Fail}` → FAIL。
+- `No automation tests matched` → `NOT ASSESSED — no tests found`（`Source/<Module>/` 之外的测试永远不会被构建），不是 FAIL。
+- 退出 0 且出现 `Result={Success}` 行 → PASS。
+- 任何其他非零退出（`Project file not found`、`The game module … could not be found`）→ FAIL：没有测试运行。例外：编辑器从未启动（退出 126 或 127，`command not found`）— 那是运行器不可用，见下文，为 `NOT ASSESSED`。
 
-**Unknown engine / not configured:**
-"Engine not configured in `project.yaml` or
-`.claude/docs/technical-preferences.md`. Run `/setup-engine` to specify the
-engine, then re-run `/smoke-check`."
+**未知引擎 / 未配置：**
+"Engine not configured in `project.yaml` or `.claude/docs/technical-preferences.md`. Run `/setup-engine` to specify the engine, then re-run `/smoke-check`."
 
-**If the test runner is not available in this environment** (no editor
-executable resolved in Phase 1 step 3, runner script not found, etc.), report
-clearly:
+**如果测试运行器在此环境中不可用**（Phase 1 第 3 步未解析出编辑器可执行文件、找不到运行器脚本等），请清楚地报告：
 
-"Automated tests could not be executed — engine executable not found (checked
-`commands.test`, `engine.path` and `PATH`; set `engine.path`, or put the
-editor's full path in `commands.test`). Status will be recorded as NOT RUN.
-Confirm test results from your local IDE
-or CI pipeline. Until you do, the verdict is NOT ASSESSED — not FAIL, and not
-a pass either: nothing has been observed about this build yet."
+"Automated tests could not be executed — engine executable not found (checked `commands.test`, `engine.path` and `PATH`; set `engine.path`, or put the editor's full path in `commands.test`). Status will be recorded as NOT RUN. Confirm test results from your local IDE or CI pipeline. Until you do, the verdict is NOT ASSESSED — not FAIL, and not a pass either: nothing has been observed about this build yet."
 
-Do not treat NOT RUN as an automatic FAIL. Record it, and let the developer's
-manual confirmation in Phase 4 resolve it. Until that confirmation arrives the
-verdict is **NOT ASSESSED** (see the verdict rules in Phase 5), which ranks
-above both pass values and below FAIL. An unrun suite is not a healthy build; it
-is an unknown one, and the two need different follow-ups.
+不要将 NOT RUN 视为自动 FAIL。记录它，让开发者在 Phase 4 中的手动确认来解决它。在确认到来之前，结论是 **NOT ASSESSED**（见 Phase 5 的结论规则），它排序在两个通过值之上、FAIL 之下。未运行的套件不是健康的构建；它是不明的构建，两者需要不同的后续处理。
 
-Parse runner output and extract:
-- Total tests run
-- Passing count
-- Failing count
-- Names of any failing tests (up to 10; if more, note the count)
-- Any crash or error output from the runner itself
+解析运行器输出并提取：
+- 运行的测试总数
+- 通过数
+- 失败数
+- 任何失败测试的名称（最多 10 个；若更多，注明数量）
+- 运行器自身输出的任何崩溃或错误信息
 
-**Build check — the WAIVED path only** (`qa.level: minimal`, no game tests;
-Phase 1 step 1). With no suite to run, run the project's own boot check:
-`commands.smoke` when set, else `commands.build` when set, with the executable
-Phase 1 step 3 resolved, under the same timeout rules (`timeout 900`, or
-`timeout 1800` for `commands.build`; a timeout is a FAIL). On Godot, run the
-import line above first. Read the result as `/setup-engine` documents it:
-Godot `smoke` exits 0 even on a parse error, so a `SCRIPT ERROR` line in its
-output is a FAIL, and so is `Can't run project: no main scene defined` — the
-game cannot launch; Unity `smoke` exits 1 on a compile error; any other
-non-zero exit is a FAIL. Record `Build check: PASS — [command] exit 0`,
-`FAIL — [reason]`, or `NOT RUN — [commands.smoke and commands.build unset |
-executable not found]`. A build check that did not run is named in the report
-and leaves the launch in Batch 1 to carry the verdict; it never passes on its
-own.
+**构建检查 — 仅 WAIVED 路径**（`qa.level: minimal`，无游戏测试；Phase 1 第 1 步）。没有套件可运行时，运行项目自身的启动检查：已设置则用 `commands.smoke`，否则已设置则用 `commands.build`，并使用 Phase 1 第 3 步解析出的可执行文件，遵循相同的超时规则（`timeout 900`，或 `commands.build` 用 `timeout 1800`；超时即为 FAIL）。在 Godot 上，先运行上面的导入行。按 `/setup-engine` 的说明读取结果：Godot 的 `smoke` 即便解析出错也以 0 退出，因此其输出中的 `SCRIPT ERROR` 行为 FAIL，`Can't run project: no main scene defined` 也是 FAIL — 游戏无法启动；Unity 的 `smoke` 在编译错误时退出 1；任何其他非零退出为 FAIL。记录 `Build check: PASS — [command] exit 0`、`FAIL — [reason]` 或 `NOT RUN — [commands.smoke and commands.build unset | executable not found]`。未运行的构建检查会在报告中指名，并让 Batch 1 中的启动检查承载结论；它本身绝不算通过。
 
 ---

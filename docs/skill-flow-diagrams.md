@@ -1,16 +1,16 @@
-# Skill Flow Diagrams
+# 技能流程图
 
-Visual maps of how skills chain together across the 7 development phases.
-These show what runs before and after each skill, and what artifacts flow between them.
+技能在 7 个开发阶段中如何串联的可视化地图。
+这些图展示每个技能之前和之后运行什么，以及它们之间流转哪些产出物。
 
 ---
 
-## Default Path: Rigor Minimal (Four Steps to Code)
+## 默认路径：Minimal 严格度（四步到代码）
 
-`modes.rigor: minimal` is the default. The one-page brief is the design record and
-its build order is the plan, so there is no epic planning, sprint or phase gate to run.
-Every skill below still runs at any tier; rigor changes what is required, not what
-is allowed. `/help` follows this route at `minimal`.
+`modes.rigor: minimal` 是默认值。一页纸简报就是设计记录，
+其构建顺序就是计划，因此没有史诗规划、冲刺或阶段闸门需要运行。
+下面每个技能在任何档位下仍可运行；严格度改变的是要求什么，
+而不是允许什么。在 `minimal` 下，`/help` 遵循这条路线。
 
 ```
 MINIMAL PATH (modes.rigor: minimal — the default; no /gate-check, stage stays Concept)
@@ -29,11 +29,11 @@ MINIMAL PATH (modes.rigor: minimal — the default; no /gate-check, stage stays 
               play the build · /create-stories for more · /settings to raise rigor
 ```
 
-The overview below is the `standard`/`full` pipeline.
+下面的概览是 `standard`/`full` 流水线。
 
 ---
 
-## Full Pipeline Overview (Zero to Ship)
+## 完整流水线概览（从零到发布）
 
 ```
 PHASE 1: CONCEPT
@@ -149,9 +149,9 @@ PHASE 7: RELEASE
 
 ---
 
-## Skill Chain: /design-system in Detail
+## 技能链：/design-system 详解
 
-How a single GDD gets authored, reviewed, and handed to architecture:
+单个 GDD 如何被编写、评审并交接给架构阶段：
 
 ```
 systems-index.md (input)
@@ -184,13 +184,13 @@ upstream GDDs (input, if any)
 
 ---
 
-## Skill Chain: UX / UI Pipeline in Detail
+## 技能链：UX / UI 流水线详解
 
-Screen and HUD specs are authored in Phase 4 (Pre-Production), before epics are
-written, so that story acceptance criteria can reference specific UX artifacts.
-Accessibility and interaction-pattern specs are authored earlier, in Phase 3
-(Technical Setup), since at `full` the Technical Setup → Pre-Production gate
-requires them (at `standard` they are recommended; at `minimal` they drop).
+界面和 HUD 规格在 Phase 4（预制作）编写，早于史诗编写，
+这样用户故事的验收标准就能引用具体的 UX 产出物。
+无障碍和交互模式规格更早编写，在 Phase 3
+（技术搭建）中，因为在 `full` 下技术搭建 → 预制作闸门
+要求它们（`standard` 下为推荐；`minimal` 下被删减）。
 
 ```
 design/gdd/*.md (UI/UX requirements extracted)
@@ -225,9 +225,9 @@ Note: /ux-design accessibility and /ux-design patterns belong in Phase 3
 
 ---
 
-## Skill Chain: Dev Story Flow in Detail
+## 技能链：Dev Story 流程详解
 
-How a story moves from backlog to closed:
+用户故事如何从待办列表走向关闭：
 
 ```
 /story-readiness [story]
@@ -259,9 +259,9 @@ How a story moves from backlog to closed:
 
 ---
 
-## Skill Chain: Story Lifecycle (Backlog to Closed)
+## 技能链：用户故事生命周期（从待办到关闭）
 
-How a story gets from backlog to closed (summary view):
+用户故事如何从待办列表走向关闭（概览视图）：
 
 ```
 /create-epics [layer]
@@ -284,7 +284,7 @@ How a story gets from backlog to closed (summary view):
 
 ---
 
-## Skill Chain: QA Pipeline in Detail
+## 技能链：QA 流水线详解
 
 ```
 [Phase 3 — one-time infrastructure setup]
@@ -339,9 +339,9 @@ How a story gets from backlog to closed (summary view):
 
 ---
 
-## Brownfield Onboarding Flow
+## 存量项目上手流程
 
-For projects with existing work (use `/start` option D or run directly):
+对于已有工作的项目（使用 `/start` 的选项 D 或直接运行）：
 
 ```
 /project-stage-detect    → stage detection report
@@ -364,36 +364,36 @@ For projects with existing work (use `/start` option D or run directly):
 
 ---
 
-## How to Read These Diagrams
+## 如何阅读这些图
 
-| Symbol | Meaning |
+| 符号 | 含义 |
 |--------|---------|
-| `──►` | Produces this artifact |
-| `│ ▼` | Flows into next step |
-| `├──` | Branch (multiple possible outcomes) |
-| `×N` | Runs N times (once per system, story, etc.) |
-| `(input)` | Read by the skill but not produced here |
-| `[optional]` | Not required for the gate to pass |
-| `WRITE` (caps) | File written to disk immediately |
+| `──►` | 产出该产出物 |
+| `│ ▼` | 流入下一步 |
+| `├──` | 分支（多种可能结果） |
+| `×N` | 运行 N 次（每个系统、用户故事等各一次） |
+| `(input)` | 被技能读取，但不在此处产出 |
+| `[optional]` | 通过闸门并不需要 |
+| `WRITE`（大写） | 立即写入磁盘的文件 |
 
 ---
 
-## Common Entry Points
+## 常见入口点
 
-| Where you are | Run this |
+| 你所在的位置 | 运行这个 |
 |---------------|---------|
-| Brand new, no idea | `/start` → `/brainstorm` |
-| Have a concept, no engine | `/setup-engine` |
-| Have concept + engine | `/map-systems` |
-| Mid-systems design | `/design-system [next system]` or `/map-systems next` |
-| All GDDs done | `/review-all-gdds` → `/gate-check` |
-| In technical setup | `/create-architecture` → `/architecture-decision` |
-| Starting UX design | `/ux-design screen [name]` or `/ux-design hud` |
-| Scaffolding tests | `/test-setup` → `/test-helpers` |
-| Have stories, ready to code | `/story-readiness [story]` → `/dev-story [story]` |
-| Story done | `/story-done [story]` |
-| Running QA for a sprint | `/qa-plan` → `/smoke-check` → `/regression-suite` |
-| Bug backlog needs sorting | `/bug-triage` |
-| Extended stability testing | `/soak-test` |
-| Not sure | `/help` |
-| Existing project | `/adopt` |
+| 全新开始，没有想法 | `/start` → `/brainstorm` |
+| 已有概念，没有引擎 | `/setup-engine` |
+| 已有概念 + 引擎 | `/map-systems` |
+| 系统设计进行中 | `/design-system [next system]` 或 `/map-systems next` |
+| 所有 GDD 已完成 | `/review-all-gdds` → `/gate-check` |
+| 处于技术搭建阶段 | `/create-architecture` → `/architecture-decision` |
+| 开始 UX 设计 | `/ux-design screen [name]` 或 `/ux-design hud` |
+| 搭建测试 | `/test-setup` → `/test-helpers` |
+| 已有用户故事，准备写代码 | `/story-readiness [story]` → `/dev-story [story]` |
+| 用户故事完成 | `/story-done [story]` |
+| 为冲刺运行 QA | `/qa-plan` → `/smoke-check` → `/regression-suite` |
+| 缺陷待办需要排序 | `/bug-triage` |
+| 扩展稳定性测试 | `/soak-test` |
+| 不确定 | `/help` |
+| 现有项目 | `/adopt` |

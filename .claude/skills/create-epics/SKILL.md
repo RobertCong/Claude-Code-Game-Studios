@@ -1,6 +1,6 @@
 ---
 name: create-epics
-description: "Turns the GDDs and architecture into epics, one per architectural module. Use when the user wants to break the game into epics or plan the work before writing stories. Not for splitting one epic into stories."
+description: "把游戏设计文档（GDD）和架构转化为史诗（epic），每个架构模块一个。当用户想把游戏拆分为史诗，或在编写用户故事前规划工作时使用。不用于把一个史诗拆成用户故事。"
 argument-hint: "[system-name | layer: foundation|core|feature|presentation | all] [--review full|lean|solo]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, Bash(bash "*/.claude/skills/create-epics/../../hooks/yaml-helper.sh" resolve_config *), Bash(bash .claude/scripts/gdd-structure-check.sh*), Bash(bash .claude/scripts/adr-status.sh*), Bash(bash .claude/scripts/md-section.sh *), Bash(bash .claude/scripts/write-guard.sh overwrite *)
@@ -9,28 +9,28 @@ model: sonnet
 
 !`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,review_gate,automation,workflow,docs.density,engine_values,system_overrides`
 
-Resolved above — use as-is; `--review` overrides `review_mode`. No block →
-defaults in `.claude/docs/config-resolution.md`.
+上面已解析——按原样使用；`--review` 会覆盖 `review_mode`。没有配置块 →
+使用 `.claude/docs/config-resolution.md` 中的默认值。
 
-Ask with the question tool. Without one, list the options numbered and end your turn
-to wait. A skipped or dismissed question is not an answer: ask again in plain text.
+用提问工具询问。没有提问工具时，把选项编号列出并结束本轮
+以等待回答。被跳过或关闭的问题不算回答：用纯文本再问一次。
 
-# Create Epics
+# 创建史诗
 
-An epic is a bounded body of work for one architectural module: **what** gets built
-and which decisions govern it. How to build it is for the stories. Run it once per
-layer as development reaches that layer: Feature epics written before Core is
-nearly done describe a design that will have changed.
+史诗（epic）是围绕一个架构模块的有界工作：**构建什么**，
+以及哪些决策支配它。如何构建属于用户故事的范畴。随着开发
+到达每一层，每层运行一次：在 Core 接近完成之前编写的 Feature 史诗，
+描述的将是一个届时已经改变的设计。
 
-**Writes:** `production/epics/[epic-slug]/EPIC.md` per epic and its row in
-`production/epics/index.md`, each after its own yes.
-**Next:** `/create-stories [epic-slug]` per epic. This skill never writes a story.
+**写入：** 每个史诗的 `production/epics/[epic-slug]/EPIC.md` 及其在
+`production/epics/index.md` 中的行，各自在单独确认后进行。
+**下一步：** 每个史诗运行 `/create-stories [epic-slug]`。本技能绝不编写用户故事。
 
-Asks follow `.claude/docs/automation-modes.md` (collaborative always asks, guided
-asks on major choices, autonomous logs and goes on; `automation_always_ask`
-categories always ask).
+询问遵循 `.claude/docs/automation-modes.md`（协作模式始终询问，引导模式
+对重大选择询问，自主模式记录并继续；`automation_always_ask`
+类别始终询问）。
 
-Checklist (copy it and tick as you go):
+清单（复制它并随进度勾选）：
 
 ```
 - [ ] Phase 1: scope and tier
@@ -41,98 +41,97 @@ Checklist (copy it and tick as you go):
 - [ ] Phase 6: closing block printed
 ```
 
-## Phase 1: Scope and tier
+## Phase 1: 范围与层级
 
-The text typed after the skill name, with any `--review <mode>` pair removed:
+技能名称之后输入的文本，去除任何 `--review <mode>` 对：
 
-- `all`: every system, in layer order.
-- `layer: foundation` (or `core`, `feature`, `presentation`): that layer only.
-- a system name: that system only.
-- nothing: the request's own words when they name a layer or system ("foundation
-  and core"); else ask "Which layer or system would you like epics for?"
+- `all`：按层顺序的所有系统。
+- `layer: foundation`（或 `core`、`feature`、`presentation`）：仅该层。
+- 一个系统名称：仅该系统。
+- 什么都没有：当请求自身的措辞点名了某一层或系统（“foundation
+  and core”）时，使用该措辞；否则询问“你想为哪个层级或系统创建史诗？”
 
-**Tier.** The project's `workflow` value sets what is required (Phase 2). Each
-in-scope system's own GDD bar comes from its `system_overrides` row, when it has one.
+**层级。** 项目的 `workflow` 值设定什么是必需的（Phase 2）。每个
+在范围内系统自身的 GDD 门槛来自其 `system_overrides` 行（如果有）。
 
-**At `minimal`, tell the user first:** this step is optional at this tier, because
-`/create-stories` builds the epic from `design/game-brief.md` by itself. Then go on
-when they asked for epics.
+**在 `minimal` 下，先告诉用户：** 该层级此步骤是可选的，因为
+`/create-stories` 会自行从 `design/game-brief.md` 构建史诗。然后在他们
+要求创建史诗时继续。
 
-## Phase 2: Load the inputs
+## Phase 2: 加载输入
 
-### `minimal`: the brief
+### `minimal`：简报
 
-Read `design/game-brief.md`. None: stop, "No `design/game-brief.md` — run `/start`
-or `/brainstorm` first." Never ask for GDDs, a systems index, an architecture
-document, ADRs, a TR registry or a control manifest, and never send the user to
-`/design-system`, `/map-systems` or `/create-architecture` first: this tier has none
-by design.
+读取 `design/game-brief.md`。没有则：停下，“没有 `design/game-brief.md`——请先运行 `/start`
+或 `/brainstorm`。”绝不要索取 GDD、系统索引、架构
+文档、ADR、TR 注册表或控制清单，也绝不要把用户先送去
+`/design-system`、`/map-systems` 或 `/create-architecture`：该层级
+按设计就没有这些东西。
 
-Report first, word for word:
+先逐字报告：
 
 ```
 Loaded: design/game-brief.md · engine [name version from the engine_values line]
 At minimal this step is optional: /create-stories builds the epic from the brief by itself.
 ```
 
-The epics come from the brief's MVP feature list, in its **Build order**. A short
-brief is one epic, slugged from the brief's working title (the slug `/create-stories`
-uses when nothing is typed). When the user asks for the work grouped, make one epic
-per group of MVP features that ship together. Every epic names its slug, since
-`/create-stories` needs it typed.
+史诗来自简报的 MVP 功能列表，按其 **Build order**。简短
+简报就是一个史诗，slug 取自简报的工作标题（即没有输入任何内容时
+`/create-stories` 使用的 slug）。当用户要求把工作分组时，为一起交付的每组
+MVP 功能创建一个史诗。每个史诗都要点明其 slug，因为
+`/create-stories` 需要输入它。
 
-### `standard` and `full`: the design and the architecture
+### `standard` 和 `full`：设计与架构
 
-1. **The system GDDs.** `bash .claude/scripts/gdd-structure-check.sh` lists every
-   system GDD; the game concept, systems index, pillars, cross-reviews and the other
-   non-system documents are left out for you. Their count is **N**. N is 0: stop,
-   "No system GDDs found in `design/gdd/` — run `/design-system` first."
-2. **What is in scope.** Each GDD's `## Summary` quick reference gives its layer and
-   priority. A GDD with no Summary (older GDDs predate it) takes its layer from
-   `design/gdd/systems-index.md`. Never treat an absent `## Summary` as an absent system:
-   it never drops one from scope.
-3. **The architecture.** `docs/architecture/architecture.md` is required at both
-   tiers: missing, stop with
-   "No `docs/architecture/architecture.md` — run `/create-architecture` first." Never invent module boundaries.
-4. **For in-scope systems only**, by section, never whole:
-   - each GDD's Overview and Acceptance Criteria
-     (`bash .claude/scripts/md-section.sh extract design/gdd/<file>.md "Overview"`);
-   - `bash .claude/scripts/adr-status.sh` for every ADR's status, layer and missing
-     sections; then the GDD Requirements Addressed, Decision and Engine
-     Compatibility sections of the ADRs that cover in-scope systems;
-   - `docs/architecture/tr-registry.yaml`: the entries whose `system:` is an
-     in-scope system;
-   - the control manifest's `Manifest Version` line (read if present at `standard`,
-     required at `full`);
-   - `docs/engine-reference/<engine>/VERSION.md` for the engine's risk levels.
+1. **系统 GDD。** `bash .claude/scripts/gdd-structure-check.sh` 列出每个
+   系统 GDD；游戏概念、系统索引、支柱、交叉评审和其他
+   非系统文档已为你排除。它们的数量为 **N**。N 为 0：停下，
+   “在 `design/gdd/` 中未找到系统 GDD——请先运行 `/design-system`。”
+2. **范围内的内容。** 每份 GDD 的 `## Summary` 快速参考给出其层级和
+   优先级。没有 Summary 的 GDD（较老的 GDD 早于它）从
+   `design/gdd/systems-index.md` 取层级。绝不要把缺失的 `## Summary` 当作缺失的系统：
+   它绝不会让某个系统掉出范围。
+3. **架构。** 两个层级都要求 `docs/architecture/architecture.md`：
+   缺失则停下，提示
+   “没有 `docs/architecture/architecture.md`——请先运行 `/create-architecture`。”绝不要凭空发明模块边界。
+4. **仅对范围内系统**，按章节读取，绝不整份读取：
+   - 每份 GDD 的 Overview 和 Acceptance Criteria
+     （`bash .claude/scripts/md-section.sh extract design/gdd/<file>.md "Overview"`）；
+   - `bash .claude/scripts/adr-status.sh` 获取每个 ADR 的状态、层级和缺失
+     章节；然后读取覆盖范围内系统的 ADR 的 GDD Requirements Addressed、Decision 和 Engine
+     Compatibility 章节；
+   - `docs/architecture/tr-registry.yaml`：其中 `system:` 为
+     范围内系统的条目；
+   - 控制清单的 `Manifest Version` 行（在 `standard` 下存在则读取，
+     在 `full` 下必需）；
+   - `docs/engine-reference/<engine>/VERSION.md`，获取引擎的风险等级。
 
-Report before defining anything, with the real state:
+在定义任何东西之前报告，并反映真实状态：
 
 ```
 Loaded: [N] system GDDs, [n] in scope ([names]) · [M] ADRs ([A] Accepted, [P] Proposed) · manifest v[date | absent] · engine [name version from the engine_values line]
 ```
 
-At `full`, every in-scope GDD needs all 8 sections and Approved status, and the TR
-registry and control manifest are required. At `standard`, the GDDs need their 5
-required sections, and only critical (Foundation-layer) ADRs are expected.
+在 `full` 下，每个范围内 GDD 都需要全部 8 个章节和 Approved 状态，且 TR
+注册表和控制清单是必需的。在 `standard` 下，GDD 需要其 5 个
+必需章节，且只预期关键（Foundation 层）ADR。
 
-## Phase 3: Define each epic, ask one at a time
+## Phase 3: 逐个定义史诗，一次询问一个
 
-Process by layer: Foundation, then Core, Feature, Presentation; within a layer, the
-systems index order (at `minimal`, the brief's Build order). For each system, its
-module from `architecture.md` (at `minimal`, the brief's feature group).
+按层处理：Foundation，然后 Core、Feature、Presentation；层内按
+系统索引顺序（在 `minimal` 下，按简报的 Build order）。对每个系统，其
+模块来自 `architecture.md`（在 `minimal` 下，为简报的功能组）。
 
-**Requirement coverage** (not at `minimal`). Each TR-ID of the system is:
+**需求覆盖**（`minimal` 下不适用）。系统的每个 TR-ID 是：
 
-- **covered** when an **Accepted** ADR addresses it;
-- **untraced** otherwise. A requirement whose only ADR is `Proposed` (or any other
-  status) is untraced, never covered: its row reads `❌ No ADR (ADR-NNNN Proposed)`,
-  so `/create-stories` still sees that ADR and blocks its story.
+- **已覆盖**：当有 **Accepted** ADR 处理它时；
+- **未追踪**：否则。唯一 ADR 为 `Proposed`（或任何其他
+  状态）的需求是未追踪的，绝不是已覆盖：其行读作 `❌ No ADR (ADR-NNNN Proposed)`，
+  因此 `/create-stories` 仍能看到该 ADR 并阻塞其用户故事。
 
-Untraced requirements are listed under **Untraced Requirements**. The ⚠️ warning
-below is for each untraced requirement at `full`, and only for untraced
-Foundation-layer requirements at `standard`; any other untraced requirement at
-`standard` is listed as information, with no warning.
+未追踪需求列在 **Untraced Requirements** 下。下文的 ⚠️ 警告
+在 `full` 下针对每个未追踪需求，在 `standard` 下仅针对未追踪的
+Foundation 层需求；`standard` 下任何其他未追踪需求作为信息列出，不带警告。
 
 ```
 ## Epic: [System Name]
@@ -145,51 +144,50 @@ Foundation-layer requirements at `standard`; any other untraced requirement at
 **Untraced Requirements**: [TR-IDs with why, or "None"]
 ```
 
-The warning, when it applies: "⚠️ [N] requirements in [system] have no Accepted ADR.
-Their stories will be written with no governing ADR, or Blocked on a Proposed one.
-Run `/architecture-decision` first if they need a decision, or go on and accept the
-gap."
+警告在适用时：“⚠️ [system] 中有 [N] 个需求没有 Accepted ADR。
+它们的用户故事将在没有支配 ADR 的情况下编写，或因 Proposed ADR 而阻塞。
+如果它们需要决策，请先运行 `/architecture-decision`，或者继续并接受
+该缺口。”
 
-Then ask, **for this epic alone**: "Shall I create Epic: [name]?" Options: Yes,
-create it / Skip this epic / Pause — I need to write ADRs first. Show and ask the
-next epic only after this answer. Never fold several epics into one question.
+然后，**仅针对这个史诗**询问：“我可以创建史诗：[name] 吗？”选项：Yes,
+create it / Skip this epic / Pause — I need to write ADRs first。在此回答之后
+才展示并询问下一个史诗。绝不要把多个史诗合并进一个问题。
 
-A yes covers the epic it answers, and only that one, even when it is worded for all
-("all of it", "go ahead with everything"): an epic is approved on sight. Show the
-next epic's block and ask again, until every epic in scope has been shown and
-answered.
+一个“是”只覆盖它所回答的那个史诗，且仅此一个，即便措辞是针对所有
+（“all of it”“go ahead with everything”）：史诗是见即批准。
+展示下一个史诗的区块并再次询问，直到范围内每个史诗都已展示并
+得到回答。
 
-## Phase 4: Producer review
+## Phase 4: 制作人评审
 
-Read the `review_gate` line above. `skill-gates=skip` (solo or lean): no agent; note
-`PR-EPIC skipped — [Solo | Lean] mode` in the reply and the closing block.
-`skill-gates=run`: read `references/pr-epic-gate.md` and
-`.claude/docs/director-gates.md`, and run it now, after every epic in scope is
-defined and before any write. On a skip, do not load it.
+阅读上面的 `review_gate` 行。`skill-gates=skip`（solo 或 lean）：无代理；在回复和收尾块中注明
+`PR-EPIC skipped — [Solo | Lean] mode`。
+`skill-gates=run`：阅读 `references/pr-epic-gate.md` 和
+`.claude/docs/director-gates.md`，并在现在运行它——在范围内每个史诗都已
+定义之后、任何写入之前。跳过时，不要加载它。
 
-## Phase 5: Write each epic
+## Phase 5: 编写每个史诗
 
-For each epic the user said yes to, in order:
+对用户说“是”的每个史诗，按顺序：
 
-**Already has an `EPIC.md`:** never overwrite it. Ask "An EPIC.md already exists for
-[name]. Update it in place, or skip it?" Options: Update in place / Skip this epic.
-An update edits only what this skill owns (the header fields other than Stories,
-Overview, Governing ADRs, GDD Requirements, Definition of Done) and leaves the
-`**Stories**` line and any `## Stories` table as they are: `/create-stories` wrote
-them, and resetting them orphans the stories already there.
+**已有 `EPIC.md`：** 绝不覆盖它。询问“已存在 [name] 的 EPIC.md。
+原地更新它，还是跳过？”选项：Update in place / Skip this epic。
+更新只编辑本技能拥有的内容（除 Stories、
+Overview、Governing ADRs、GDD Requirements、Definition of Done 之外的头部字段），并让
+`**Stories**` 行和任何 `## Stories` 表格保持原样：`/create-stories` 写了
+它们，重置它们会使已有用户故事成为孤儿。
 
-**New:** ask "May I write `production/epics/[epic-slug]/EPIC.md` and add its row to
-`production/epics/index.md`[, creating it]?" This is its own ask, one per epic, after
-the Phase 3 yes: that yes approved the epic, not the write. Write only on an explicit
-yes to it. Right
-before writing, run `bash .claude/scripts/write-guard.sh overwrite
-production/epics/[epic-slug]/EPIC.md`. It always prints a `checked` row; an
-`OVERWRITE` row back means the file exists after all, so write nothing and ask the
-update question instead.
+**新建：** 询问“我可以写入 `production/epics/[epic-slug]/EPIC.md` 并把其行添加到
+`production/epics/index.md`[, 若不存在则创建它]吗？”这是它自己的询问，每个史诗一次，在
+Phase 3 的“是”之后：那个“是”批准的是史诗，而不是写入。只在对它的明确
+“是”后写入。在写入之前，运行 `bash .claude/scripts/write-guard.sh overwrite
+production/epics/[epic-slug]/EPIC.md`。它总是打印一行 `checked`；返回
+`OVERWRITE` 行意味着文件毕竟存在，因此什么都不要写，改为询问
+更新问题。
 
-`docs.density` sets the depth of the Overview (`terse` bullets, `balanced` a short
-paragraph, `thorough` full prose with ADR rationale and risks); the tables stay
-whole at every density.
+`docs.density` 设定 Overview 的深度（`terse` 为要点，`balanced` 为短
+段落，`thorough` 为带 ADR 理由和风险的完整散文）；每个密度下表格都保持
+完整。
 
 ```markdown
 # Epic: [System Name]
@@ -226,12 +224,12 @@ whole at every density.
   (a lead sign-off too for Visual/Feel)
 ```
 
-At `minimal`, the GDD line names `design/game-brief.md`, the Governing ADRs and GDD
-Requirements tables are left out, and a **Scope** list holds the epic's MVP
-features in Build order.
+在 `minimal` 下，GDD 行写明 `design/game-brief.md`，省略 Governing ADRs 和 GDD
+Requirements 表格，并用一个 **Scope** 列表按 Build order 承载史诗的 MVP
+功能。
 
-**`production/epics/index.md`:** one row per epic. An epic that already has a row
-keeps it: update it in place, never add a second row, never reset its Stories cell.
+**`production/epics/index.md`：** 每个史诗一行。已有行的史诗
+保留它：原地更新，绝不添加第二行，绝不重置其 Stories 单元格。
 
 ```markdown
 # Epics Index
@@ -244,16 +242,16 @@ Engine: [name version]
 | [name] | [layer] | [system] | [file] | Not yet created | Ready |
 ```
 
-## Phase 6: Close
+## Phase 6: 收尾
 
-At `standard` and `full`, once Foundation and Core epics exist, add: "Foundation and
-Core epics are what the Pre-Production → Production gate needs. `/gate-check
-production` checks readiness." Never at `minimal`.
+在 `standard` 和 `full` 下，一旦 Foundation 和 Core 史诗存在，添加：“Foundation 和
+Core 史诗是 Pre-Production → Production 闸门所需要的。`/gate-check
+production` 检查就绪情况。”绝不在 `minimal` 下添加。
 
-Every epic's content comes from the GDDs, ADRs and architecture docs (the brief at
-`minimal`); none is invented.
+每个史诗的内容都来自 GDD、ADR 和架构文档（`minimal` 下为
+简报）；没有任何内容是凭空发明的。
 
-**The run's last reply ends with this block** (repeat it if you showed it earlier):
+**本次运行的最后一条回复以这个块结尾**（如果你之前展示过它，重复一次）：
 
 ```
 Verdict: COMPLETE — [N] epics written: [slugs]
@@ -262,6 +260,6 @@ Index: production/epics/index.md [created | updated]
 Next step: /create-stories [first-epic-slug]
 ```
 
-When the user skipped or declined every epic: `Verdict: BLOCKED — no epic written
-([why])`. No in-scope system found: `Verdict: BLOCKED — no eligible systems in
-[scope]`.
+当用户跳过或拒绝了每一个史诗时：`Verdict: BLOCKED — no epic written
+([why])`。未找到范围内系统时：`Verdict: BLOCKED — no eligible systems in
+[scope]`。

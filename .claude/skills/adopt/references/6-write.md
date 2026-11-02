@@ -1,16 +1,16 @@
-# /adopt — Phases 6 and 6b: Write the Adoption Plan and Report Review Mode
+# /adopt — Phase 6 与 6b: 写入采纳计划并报告评审模式
 
-> Part of `/adopt`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> `/adopt` 的一部分。`SKILL.md` 说明何时读取本文件；它解析出的设置
+> 以及其后续标题下的规则在此仍然适用。
 
-## Phase 6: Write the Adoption Plan
+## Phase 6: 写入采纳计划
 
-**In this file:**
+**本文件内容：**
 
-- Phase 6: the adoption plan template, then the write
-- Phase 6b: Report Review Mode
+- Phase 6：采纳计划模板，然后写入
+- Phase 6b：报告评审模式
 
-If approved, write `docs/adoption-plan-[date].md` with this structure:
+如果获批，按以下结构写入 `docs/adoption-plan-[date].md`：
 
 ```markdown
 # Adoption Plan
@@ -96,18 +96,18 @@ are resolved. The new run will reflect the current state of the project.
 
 ---
 
-## Phase 6b: Report Review Mode
+## Phase 6b: 报告评审模式
 
-**Do not write a review mode.** `modes.review_mode` is one of the six knobs
-`modes.rigor` fronts: pinning it in `project.yaml` shadows the rigor expansion, and
-the legacy `production/review-mode.txt` sits *above* that expansion in resolution,
-so either write would freeze director-review depth for good — the rule `/start`
-and `project.yaml`'s header comment both state.
+**不要写入评审模式。** `modes.review_mode` 是 `modes.rigor` 前置的六个旋钮
+之一：将它固定写入 `project.yaml` 会遮蔽 rigor 展开，而
+旧版的 `production/review-mode.txt` 在解析顺序中位于该展开*之上*，
+因此任一写入都会永久冻结总监评审的深度 — 这正是 `/start`
+和 `project.yaml` 头部注释都声明的规则。
 
-Report the value the bootstrap above resolved instead: "Review mode resolves to
-`[value]` — from `modes.rigor`, unless something pins it." If the user wants a
-different depth, point them to changing `modes.rigor`, or to pinning it on purpose
-with `/settings --local modes.review_mode=<full|lean|solo>` (a personal override in
-`project.local.yaml`).
+改为报告上述引导过程解析出的值：“评审模式解析为
+`[value]` — 来自 `modes.rigor`，除非有某处将其固定。”如果用户想要
+不同的深度，指引他们修改 `modes.rigor`，或有意识地
+用 `/settings --local modes.review_mode=<full|lean|solo>` 将其固定
+（在 `project.local.yaml` 中的个人覆盖）。
 
 ---

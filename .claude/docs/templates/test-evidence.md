@@ -3,15 +3,14 @@
 > **Story**: `[path to story file]`
 > **Story Type**: [Visual/Feel | UI]
 > **Date**: [date]
-> **Tester**: [who performed the test]
-> **Build / Commit**: [version or git hash]
+> **Tester**: [执行测试的人]
+> **Build / Commit**: [版本或 git 哈希]
 
 ---
 
 ## What Was Tested
 
-[One paragraph describing the feature or behaviour that was validated. Include
-the acceptance criteria numbers from the story that this evidence covers.]
+[一段话描述已验证的功能或行为。包含本证据覆盖的用户故事验收标准编号。]
 
 **Acceptance criteria covered**: [AC-1, AC-2, AC-3]
 
@@ -21,76 +20,74 @@ the acceptance criteria numbers from the story that this evidence covers.]
 
 | # | Criterion (from story) | Result | Notes |
 |---|----------------------|--------|-------|
-| AC-1 | [exact criterion text] | PASS / FAIL | [any observations] |
-| AC-2 | [exact criterion text] | PASS / FAIL | |
-| AC-3 | [exact criterion text] | PASS / FAIL | |
+| AC-1 | [验收标准原文] | PASS / FAIL | [任何观察] |
+| AC-2 | [验收标准原文] | PASS / FAIL | |
+| AC-3 | [验收标准原文] | PASS / FAIL | |
 
 ---
 
 ## Screenshots / Video
 
-List all captured evidence below. Store files in the same directory as this
-document or in `production/qa/evidence/[story-slug]/`.
+在下方列出所有已捕获的证据。把文件存放在本文档所在目录，或
+`production/qa/evidence/[story-slug]/` 中。
 
-**The file must actually be on disk.** Visual/Feel and UI gates are BLOCKING by
-default, and `/story-done` and `/test-evidence-review` glob for the image — a
-filename listed here with no file beside it does not satisfy the gate.
+**文件必须确实存在于磁盘上。** Visual/Feel 和 UI 闸门默认是阻塞性的，
+`/story-done` 和 `/test-evidence-review` 会通配查找图片——此处列出一个文件名
+但旁边没有对应文件，不满足闸门要求。
 
 | # | Filename | What It Shows | Acceptance Criterion |
 |---|----------|--------------|----------------------|
-| 1 | `[filename.png]` | [brief description of what is visible] | AC-1 |
+| 1 | `[filename.png]` | [可见内容的简要描述] | AC-1 |
 | 2 | `[filename.png]` | | AC-2 |
 
-*If video: note the timestamp and what it demonstrates.*
+*如果是视频：注明时间戳及其展示的内容。*
 
 ---
 
 ## Test Conditions
 
-- **Game state at start**: [e.g., "fresh save, player at level 1, no items"]
-- **Platform / hardware**: [e.g., "Windows 11, GTX 1080, 1080p"]
-- **Framerate during test**: [e.g., "stable 60fps" or "~45fps — within budget"]
-- **Any special setup required**: [e.g., "dev menu used to trigger specific state"]
+- **Game state at start**: [例如「全新存档，玩家 1 级，无物品」]
+- **Platform / hardware**: [例如「Windows 11，GTX 1080，1080p」]
+- **Framerate during test**: [例如「稳定 60fps」或「约 45fps——处于预算内」]
+- **Any special setup required**: [例如「使用开发菜单触发特定状态」]
 
 ---
 
 ## Observations
 
-[Anything noteworthy that didn't cause a FAIL but should be recorded. Examples:
-minor visual jitter, frame dip under load, behaviour that technically passes
-but felt slightly off. These become candidates for polish work.]
+[任何值得注意但未导致 FAIL 的情况。示例：轻微视觉抖动、负载下的帧率下降、
+技术上通过但感觉略有偏差的行为。这些会成为打磨工作的候选。]
 
-- [Observation 1]
-- [Observation 2]
+- [观察 1]
+- [观察 2]
 
-If nothing notable: *No significant observations.*
+如果无值得注意之处：*无重大观察。*
 
 ---
 
 ## Sign-Off
 
-A **Visual/Feel** story needs the lead sign-off below — the art-director, or the
-designer who owns the feature — before `/story-done` marks it COMPLETE. A **UI**
-story is closed by the retained screenshot of each screen it touched; a sign-off
-here is welcome but not required (`.claude/docs/coding-standards.md`).
+**Visual/Feel** 用户故事需要下方的主管签核——由 art-director 或拥有该功能的
+设计师——之后 `/story-done` 才会把它标记为 COMPLETE。**UI** 用户故事通过
+其触及的每个界面的保留截图来关闭；此处签核受欢迎但不是必需
+（`.claude/docs/coding-standards.md`）。
 
-**Solo developers**: you may sign as the lead yourself. The intent is that
-someone deliberately reviews the evidence before marking complete.
+**独立开发者**：你可以自己以主管身份签核。其意图是有人在标记完成前刻意
+审阅证据。
 
 | Role | Name | Date | Signature |
 |------|------|------|-----------|
 | Lead (art-director / designer) | | | [ ] Approved |
 
-*Optional:* add a row for anyone else whose review your team wants, such as the
-developer or the QA lead. `/story-done` and `/test-evidence-review` treat every
-row in this table as required, so add one only for someone who will sign.
+*可选：* 为团队希望参与评审的任何其他人添加一行，例如开发者或 QA 主管。
+`/story-done` 和 `/test-evidence-review` 会把此表中的每一行都视为必需，因此
+只为会签核的人添加行。
 
-**Any sign-off can be marked "Deferred — [reason]"** if the person is
-unavailable. Deferred sign-offs must be resolved before the story advances
-past the sprint review.
+**任何签核都可以标记为 "Deferred — [reason]"**，如果该人无法到场。延后的签核
+必须在用户故事通过冲刺评审之前解决。
 
 ---
 
 *Template: `.claude/docs/templates/test-evidence.md`*
-*Used for: Visual/Feel and UI story type evidence records*
+*Used for: Visual/Feel 和 UI 用户故事类型的证据记录*
 *Location: `production/qa/evidence/[story-slug]-evidence.md`*

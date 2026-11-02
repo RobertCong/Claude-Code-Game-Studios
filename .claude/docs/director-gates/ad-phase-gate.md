@@ -1,31 +1,27 @@
-> Gate definition. The spawning skill passes this file's path to the director agent; the AGENT reads it — the parent session should not.
+> 质量闸门定义。发起调用的技能会把本文件路径传给总监代理；由该 AGENT 读取——父会话不应读取。
 
-# AD-PHASE-GATE — Visual Readiness at Phase Transition
+# AD-PHASE-GATE — 阶段转换时的视觉就绪度
 
-Agent: `art-director` | Model tier: session (inherit) | Domain: Visual identity, art bible, visual production readiness
+Agent：`art-director` | 模型层级：session（继承） | 领域：视觉识别、美术圣经、视觉制作就绪度
 
-**Trigger**: At `/gate-check` when `modes.workflow` is `full` — the panel narrows by workflow, and only the full panel includes art-director; spawn in parallel with CD-PHASE-GATE, TD-PHASE-GATE, and PR-PHASE-GATE
+**触发时机**：在 `/gate-check` 中且 `modes.workflow` 为 `full` 时——评审小组按工作流收窄，只有 full 小组才包含 art-director；与 CD-PHASE-GATE、TD-PHASE-GATE、PR-PHASE-GATE 并行发起
 
-**Context to pass**:
-- Target phase name and the resolved `workflow` tier
-- The target gate's required and recommended artifacts at the resolved tier (from `/gate-check`'s loaded gate file)
-- List of all art/visual artifacts present (file paths)
-- Visual identity anchor from `design/gdd/game-concept.md` (if present; if there is no `design/gdd/game-concept.md`, the "Art & audio direction" line of `design/game-brief.md`)
-- Art bible path if it exists (`design/art/art-bible.md`)
+**需传入的上下文**：
+- 目标阶段名称与解析出的 `workflow` 层级
+- 在解析层级下目标闸门必需与推荐的产出物（来自 `/gate-check` 已加载的闸门文件）
+- 现存所有美术/视觉产出物的列表（文件路径）
+- 来自 `design/gdd/game-concept.md` 的视觉识别锚点（如存在；若没有 `design/gdd/game-concept.md`，则用 `design/game-brief.md` 中 "Art & audio direction" 一行）
+- 美术圣经路径（如存在，`design/art/art-bible.md`）
 
-**Prompt**:
-> "Review the current project state for [target phase] gate readiness from a visual
-> direction perspective, judged against what this gate requires at this tier (the
-> required-artifacts list you were given). Is the visual identity established and
-> documented at the level this phase requires? Are the visual artifacts this phase
-> requires in place? Would visual teams be able to begin their work without
-> visual direction gaps that cause costly rework later? Are there visual
-> decisions that are being deferred past their latest responsible moment?
-> A required artifact passed as "none" is a finding; one passed as "not expected
-> before [phase]" or "not required at `workflow: [tier]`" is not a finding.
-> Return READY, CONCERNS [specific visual direction gaps that could cause
-> production rework], or NOT READY [visual blockers that must exist before this
-> phase can succeed — specify what artifact is missing and why it matters at
-> this stage]."
+**提示词**：
+> "从视觉方向角度审查当前项目状态相对于[目标阶段]闸门的就绪度，以本闸门在该层级
+> 所要求的内容（即提供给你的必需产出物清单）为判据。视觉识别是否已按本阶段要求的
+> 程度确立并记录在案？本阶段要求的视觉产出物是否就位？视觉团队能否在没有视觉方向
+> 缺口的情况下开工，避免日后代价高昂的返工？是否存在被推迟到最晚责任时点之后的
+> 视觉决策？
+> 必需产出物被标为 "none" 算作一项发现；标为 "not expected before [phase]" 或
+> "not required at `workflow: [tier]`" 则不算发现。
+> 返回 READY、CONCERNS [可能导致制作返工的具体视觉方向缺口]，或 NOT READY [本阶段
+> 成功之前必须具备的视觉阻塞项——指明缺失的是哪个产出物，以及它为何在此阶段重要]。"
 
-**Verdicts**: READY / CONCERNS / NOT READY
+**结论**：READY / CONCERNS / NOT READY

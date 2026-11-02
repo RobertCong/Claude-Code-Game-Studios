@@ -1,50 +1,45 @@
-> Authoring guidance for game-design-document.md. Load only the part covering the section currently being authored — not the whole file at once.
+> game-design-document.md 的编写指导。只加载当前正在编写的部分所对应的内容——不要一次读整个文件。
 
 # Game Design Document Template — Authoring Guidance
 
-The template is the skeleton every GDD starts from: each section holds
-`[To be designed]` until it is written, so a section still holding it reads as
-not written yet. This guide says what goes in each section once it is written,
-with the tables and columns to use. It is organised by the template's section
-headings; when authoring a section, read only that section's guidance below.
+模板是每个 GDD 的起点骨架：在撰写之前，每个小节都保留 `[To be designed]`，因此
+仍保留该占位符的小节读起来就是尚未撰写。本指南说明每个小节写好后应包含什么，
+以及应使用哪些表格与列。指南按模板的小节标题组织；在编写某个小节时，只阅读下方
+该小节的指导。
 
 ---
 
 ## Header
 
-- **Status**: one of `In Design` (the skeleton's value), `Designed`,
-  `In Review`, `Needs Revision`, `Approved`, `Implemented`.
-- **Author**: the agent or person who wrote it.
-- **Last Updated**: the date of the last edit.
-- **Last Verified**: when this doc was last confirmed accurate against the
-  current design.
-- **Implements Pillar**: which game pillar this system supports.
+- **Status**：以下之一——`In Design`（骨架的默认值）、`Designed`、
+  `In Review`、`Needs Revision`、`Approved`、`Implemented`。
+- **Author**：撰写它的 agent 或个人。
+- **Last Updated**：最后一次编辑的日期。
+- **Last Verified**：本文档最后一次对照当前设计确认准确的时间。
+- **Implements Pillar**：该系统所支持的游戏支柱。
 
 ---
 
 ## Summary
 
-2–3 sentences: what this system is, what it does for the player, and why it
-exists in this game. Written for tiered context loading — a skill scanning
-20 GDDs uses this section to decide whether to read further. No jargon.
+2–3 句话：这个系统是什么、它为玩家做什么、以及它为何存在于这款游戏中。为分层
+上下文加载而写——一个扫描 20 份 GDD 的技能会用这一节来决定是否继续读下去。
+不要使用术语。
 
-Keep the **Quick reference** line under it, filled in: the system's layer, its
-priority and its key dependencies.
+保留其下方的 **Quick reference** 行并填写完整：系统的层级、优先级与关键依赖。
 
 ---
 
 ## Overview
 
-One paragraph that explains this mechanic to someone who knows nothing about
-the project. What is it, what does the player do, and why does it exist?
+用一段话向对项目一无所知的人解释这个机制。它是什么、玩家做什么、以及它为何存在？
 
 ---
 
 ## Player Fantasy
 
-What should the player FEEL when engaging with this mechanic? What is the
-emotional or power fantasy being served? This section guides all detail
-decisions below.
+玩家在接触这个机制时应当感受到什么？它所服务的是哪种情感幻想或力量幻想？
+这一节指导下方所有的细节决策。
 
 ---
 
@@ -52,29 +47,27 @@ decisions below.
 
 ### Core Rules
 
-Precise, unambiguous rules. A programmer should be able to implement this
-section without asking questions. Use numbered rules for sequential processes
-and bullet points for properties.
+精确、无歧义的规则。程序员应当能够不问任何问题就实现这一节。顺序流程使用编号
+规则，属性使用项目符号。
 
 ### States and Transitions
 
-If this system has states (e.g., weapon states, status effects, phases),
-document every state and every valid transition between states.
+如果该系统有状态（例如武器状态、状态效果、阶段），记录每一个状态以及状态之间
+每一种有效的转换。
 
 | State | Entry Condition | Exit Condition | Behavior |
 |-------|----------------|----------------|----------|
 
 ### Interactions with Other Systems
 
-How does this system interact with combat? Inventory? Progression? UI?
-For each interaction, specify the interface: what data flows in, what flows
-out, and who is responsible for what.
+该系统如何与战斗交互？物品栏？进度？UI？对每一种交互，明确接口：什么数据流入、
+什么流出，以及谁负责什么。
 
 ---
 
 ## Formulas
 
-Every mathematical formula used by this system. For each formula:
+该系统使用的每一个数学公式。对每个公式：
 
 ### [Formula Name]
 
@@ -84,42 +77,40 @@ result = base_value * (1 + modifier_sum) * scaling_factor
 
 | Variable | Type | Range | Source | Description |
 |----------|------|-------|--------|-------------|
-| base_value | float | 1-100 | data file | The base amount before modifiers |
-| modifier_sum | float | -0.9 to 5.0 | calculated | Sum of all active modifiers |
-| scaling_factor | float | 0.5-2.0 | data file | Level-based scaling |
+| base_value | float | 1-100 | data file | 应用修正值之前的基础数值 |
+| modifier_sum | float | -0.9 to 5.0 | calculated | 所有生效修正值之和 |
+| scaling_factor | float | 0.5-2.0 | data file | 基于等级的缩放系数 |
 
-**Expected output range**: [min] to [max]
-**Edge case**: When modifier_sum < -0.9, clamp to -0.9 to prevent negative results.
+**Expected output range**: [min] 到 [max]
+**Edge case**: 当 modifier_sum < -0.9 时，钳制为 -0.9 以防止出现负值。
 
 ---
 
 ## Edge Cases
 
-Explicitly document what happens in unusual situations. Each edge case
-should have a clear resolution.
+明确记录在异常情况下会发生什么。每个边界情况都应有清晰的解决方式。
 
 | Scenario | Expected Behavior | Rationale |
 |----------|------------------|-----------|
-| [What if X is zero?] | [This happens] | [Because of this reason] |
-| [What if both effects trigger?] | [Priority rule] | [Design reasoning] |
+| [如果 X 为零会怎样？] | [会发生这种情况] | [基于这个原因] |
+| [如果两个效果同时触发会怎样？] | [优先级规则] | [设计理由] |
 
 ---
 
 ## Dependencies
 
-List every system this mechanic depends on or that depends on this mechanic.
+列出该机制依赖的、或依赖该机制的每一个系统。
 
 | System | Direction | Nature of Dependency |
 |--------|-----------|---------------------|
-| [Combat] | This depends on Combat | Needs damage calculation results |
-| [Inventory] | Inventory depends on this | Provides item effect data |
+| [Combat] | 本系统依赖 Combat | 需要伤害计算结果 |
+| [Inventory] | Inventory 依赖本系统 | 提供物品效果数据 |
 
 ---
 
 ## Tuning Knobs
 
-Every value that should be adjustable for balancing. Include the current
-value, the safe range, and what happens at the extremes.
+每一个为平衡性而应可调节的数值。包含当前值、安全范围，以及达到极值时的表现。
 
 | Parameter | Current Value | Safe Range | Effect of Increase | Effect of Decrease |
 |-----------|--------------|------------|-------------------|-------------------|
@@ -128,7 +119,7 @@ value, the safe range, and what happens at the extremes.
 
 ## Visual/Audio Requirements
 
-What visual and audio feedback does this mechanic need?
+该机制需要哪些视觉与音频反馈？
 
 | Event | Visual Feedback | Audio Feedback | Priority |
 |-------|----------------|---------------|----------|
@@ -137,29 +128,25 @@ What visual and audio feedback does this mechanic need?
 
 ## Game Feel
 
-> **Why this section exists separately from Visual/Audio Requirements**: Visual/Audio
-> Requirements document WHAT feedback events occur (tables of events mapped to assets).
-> Game Feel documents HOW the mechanic feels to operate — the responsiveness, weight,
-> snap, and kinesthetic quality of the interaction. These are design targets for timing,
-> frame data, and physical sensation of control. Game feel must be specified at design
-> time because it drives animation budgets, input handling architecture, and hitbox
-> timing. Retrofitting feel targets after implementation is expensive and often requires
-> fundamental rework.
+> **为什么这一节要与 Visual/Audio Requirements 分开存在**：Visual/Audio
+> Requirements 记录的是有哪些反馈事件（事件到资源的映射表）。Game Feel 记录的是
+> 操作该机制时的感觉——交互的响应性、重量感、干脆度与动觉品质。这些是时序、帧数据
+> 与控制物理感受的设计目标。游戏手感必须在设计阶段明确，因为它决定了动画预算、
+> 输入处理架构与判定框时序。实现之后再补做手感目标代价高昂，且常常需要根本性重做。
 
-Write the section with these six parts.
+用以下六个部分撰写这一节。
 
 ### Feel Reference
 
-Name a specific game, mechanic, or moment that captures the target feel. Be precise —
-cite the exact mechanic, not just the game. Explain what quality you are borrowing.
-Optionally include an anti-reference (what this should NOT feel like).
+点明一款具体游戏、机制或时刻，它捕捉了目标手感。要精确——引用确切机制，而不只是
+游戏名。解释你要借鉴的是哪种品质。可选地给出一个反向参考（这不应该是什么感觉）。
 
-> Example: "Should feel like Dark Souls weapon swings — weighty, committed, and
+> 示例："Should feel like Dark Souls weapon swings — weighty, committed, and
 > telegraphed, but satisfying on contact. NOT floaty like early Halo melee."
 
 ### Input Responsiveness
 
-Maximum acceptable latency from player input to visible/audible response, per action.
+每个动作从玩家输入到可见/可听响应之间可接受的最大延迟。
 
 | Action | Max Input-to-Response Latency (ms) | Frame Budget (at 60fps) | Notes |
 |--------|-----------------------------------|------------------------|-------|
@@ -168,9 +155,8 @@ Maximum acceptable latency from player input to visible/audible response, per ac
 
 ### Animation Feel Targets
 
-Frame data targets for each animation in this mechanic. Startup = windup before the
-action has any effect. Active = frames when the action is "happening" (hitbox live,
-ability firing, etc.). Recovery = committed/vulnerable frames after the action resolves.
+该机制中每个动画的帧数据目标。Startup = 动作产生任何效果之前的起手帧。Active =
+动作"正在发生"的帧（判定框生效、技能释放等）。Recovery = 动作结算后的硬直/易受攻击帧。
 
 | Animation | Startup Frames | Active Frames | Recovery Frames | Feel Goal | Notes |
 |-----------|---------------|--------------|----------------|-----------|-------|
@@ -179,45 +165,45 @@ ability firing, etc.). Recovery = committed/vulnerable frames after the action r
 
 ### Impact Moments
 
-Defines the punctuation of the mechanic — the moments of peak feedback intensity that
-make actions feel consequential. Every high-stakes event should have at least one entry.
+定义该机制的标点——让动作显得有分量的反馈强度峰值时刻。每一个高风险事件都应至少
+有一条记录。
 
 | Impact Type | Duration (ms) | Effect Description | Configurable? |
 |-------------|--------------|-------------------|---------------|
-| Hit-stop (freeze frames) | [e.g., 80ms] | [Freeze both objects on contact] | Yes |
-| Screen shake | [e.g., 150ms] | [Directional, decaying] | Yes |
+| Hit-stop (freeze frames) | [e.g., 80ms] | [接触时冻结双方物体] | Yes |
+| Screen shake | [e.g., 150ms] | [有方向、逐渐衰减] | Yes |
 | Camera impact | | | |
 | Controller rumble | | | |
 | Time-scale slowdown | | | |
 
 ### Weight and Responsiveness Profile
 
-A short prose description of the overall feel target. Answer the following:
+用简短散文描述整体手感目标。回答以下问题：
 
-- **Weight**: Does this feel heavy and deliberate, or light and reactive?
-- **Player control**: How much does the player feel in control at every moment?
-  (High control = can course-correct mid-action; Low control = committed, momentum-based)
-- **Snap quality**: Does this feel crisp and binary, or smooth and analog?
-- **Acceleration model**: Does movement/action start instantly (arcade feel) or
-  ramp up from zero (simulation feel)? Same question for deceleration.
-- **Failure texture**: When the player makes an error, does the mechanic feel fair
-  or punishing? What is the read on WHY they failed?
+- **Weight**：感觉沉重而审慎，还是轻快而灵敏？
+- **Player control**：玩家在每一刻感到多大程度的掌控？
+  （高掌控 = 可在动作中途修正方向；低掌控 = 硬直、基于动量）
+- **Snap quality**：感觉干脆而二元，还是平滑而连续？
+- **Acceleration model**：移动/动作是瞬间启动（街机手感），还是从零逐渐加速
+  （模拟手感）？减速同理。
+- **Failure texture**：当玩家犯错时，机制感觉公平还是惩罚性过重？玩家对失败原因的
+  理解是什么？
 
 ### Feel Acceptance Criteria
 
-Specific, testable criteria a playtester can verify without measurement instruments.
-These are subjective targets stated precisely enough to get consistent verdicts.
+具体的、可测试的标准，试玩测试者无需测量工具即可验证。这些是陈述得足够精确、
+能获得一致结论的主观目标。
 
-- [ ] [e.g., "Combat feels impactful — playtesters comment on weight unprompted"]
-- [ ] [e.g., "No reviewer uses the words 'floaty', 'slippery', or 'unresponsive'"]
-- [ ] [e.g., "Input latency is imperceptible at target 60fps framerate"]
-- [ ] [e.g., "Hit-stop reads as satisfying, not as lag or stutter"]
+- [ ] [例如："战斗感觉有冲击力——试玩者会主动提及重量感"]
+- [ ] [例如："没有评审者使用'飘''滑'或'无响应'这些词"]
+- [ ] [例如："在目标 60fps 帧率下输入延迟不可察觉"]
+- [ ] [例如："命中定格读起来是令人满足的，而不是卡顿或掉帧"]
 
 ---
 
 ## UI Requirements
 
-What information needs to be displayed to the player and when?
+哪些信息需要展示给玩家，以及何时展示？
 
 | Information | Display Location | Update Frequency | Condition |
 |-------------|-----------------|-----------------|-----------|
@@ -226,10 +212,9 @@ What information needs to be displayed to the player and when?
 
 ## Cross-References
 
-Declare every explicit dependency on another GDD's specific mechanic, value, or
-rule. `/review-all-gdds` Phase 2c reads this table — it replaces implicit prose
-references with verifiable declarations. If you reference another system's
-behaviour anywhere in the document, it must appear here.
+声明对另一份 GDD 中特定机制、数值或规则的每一处显式依赖。`/review-all-gdds`
+的 Phase 2c 会读取此表——它用可验证的声明替换隐含的行文引用。如果你在文档任何
+地方引用了另一个系统的行为，它必须出现在这里。
 
 | This Document References | Target GDD | Specific Element Referenced | Nature |
 |--------------------------|-----------|----------------------------|--------|
@@ -237,28 +222,28 @@ behaviour anywhere in the document, it must appear here.
 | [e.g., "death triggers respawn"] | `design/gdd/respawn.md` | Death state transition | State trigger |
 | [e.g., "stamina gates dodge"] | `design/gdd/stamina.md` | Stamina depletion rule | Rule dependency |
 
-> **Note on "Nature"**: use one of — `Data dependency` (we consume their output),
-> `State trigger` (their state change triggers our behaviour), `Rule dependency`
-> (our rule assumes their rule is also true), `Ownership handoff` (we hand off
-> ownership of a value to them).
+> **关于"Nature"的说明**：使用以下之一——`Data dependency`（我们消费其输出）、
+> `State trigger`（其状态变化触发我们的行为）、`Rule dependency`
+> （我们的规则假设其规则同样成立）、`Ownership handoff`（我们将某个值的所有权
+> 移交给他们）。
 
 ---
 
 ## Acceptance Criteria
 
-Testable criteria that confirm this mechanic is working as designed.
+用于确认该机制按设计工作的可测试标准。
 
-- [ ] [Criterion 1: specific, measurable, testable]
-- [ ] [Criterion 2]
-- [ ] [Criterion 3]
-- [ ] Performance: System update completes within [X]ms
-- [ ] No hardcoded values in implementation
+- [ ] [标准 1：具体、可度量、可测试]
+- [ ] [标准 2]
+- [ ] [标准 3]
+- [ ] Performance: 系统更新在 [X]ms 内完成
+- [ ] 实现中无硬编码数值
 
 ---
 
 ## Open Questions
 
-Anything not yet decided. Each question should have an owner and deadline.
+任何尚未决定的事项。每个问题都应有负责人与截止日期。
 
 | Question | Owner | Deadline | Resolution |
 |----------|-------|----------|-----------|

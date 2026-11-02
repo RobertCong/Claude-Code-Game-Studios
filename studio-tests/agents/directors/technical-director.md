@@ -1,102 +1,102 @@
 # Agent Test Spec: technical-director
 
 ## Agent Summary
-**Domain owned:** System architecture decisions, technical feasibility assessment, ADR oversight and approval, engine risk evaluation, technical phase gate.
-**Does NOT own:** Game design decisions (creative-director / game-designer), creative direction, visual art style, production scheduling (producer).
+**Domain owned:** 系统架构决策、技术可行性评估、ADR 监督与批准、引擎风险评估、技术阶段闸门。
+**Does NOT own:** 游戏设计决策（creative-director / game-designer）、创意方向、视觉美术风格、制作排期（producer）。
 **Gate IDs handled:** TD-SYSTEM-BOUNDARY, TD-FEASIBILITY, TD-ARCHITECTURE, TD-ADR, TD-ENGINE-RISK, TD-MANIFEST, TD-CHANGE-IMPACT, TD-PHASE-GATE.
 
 ---
 
 ## Static Assertions (Structural)
 
-Verified by reading the agent's `.claude/agents/technical-director.md` frontmatter:
+通过读取该代理的 `.claude/agents/technical-director.md` frontmatter 进行验证：
 
-- [ ] `description:` field is present and domain-specific (references architecture, feasibility, ADR — not generic)
-- [ ] `tools:` reads Read, Glob, Grep, Write, Edit, Bash, WebSearch
-- [ ] Model tier is `opus` — frontmatter `model:` reads exactly `opus` (tiers: `.claude/docs/model-tiers.md`)
-- [ ] Agent definition does not claim authority over game design decisions or creative direction
+- [ ] `description:` 字段存在且针对具体领域（提及架构、可行性、ADR——而非泛泛而谈）
+- [ ] `tools:` 为 Read, Glob, Grep, Write, Edit, Bash, WebSearch
+- [ ] 模型档位为 `opus`——frontmatter `model:` 恰为 `opus`（档位：`.claude/docs/model-tiers.md`）
+- [ ] 代理定义未声称对游戏设计决策或创意方向拥有决定权
 
 ---
 
 ## Test Cases
 
-### Case 1: In-domain request — appropriate output format
-**Scenario:** The master architecture document is submitted for sign-off with its context: every TR-ID in the technical requirements baseline maps to an ADR, the Foundation-layer ADRs are Accepted, and the one HIGH risk engine domain is flagged as an open question. Its "Combat System" section describes a layered design — input layer → game logic layer → presentation layer — with clearly defined interfaces between each. Request is tagged TD-ARCHITECTURE.
-**Expected:** Returns `TD-ARCHITECTURE: APPROVE` with rationale confirming the gate's checks against the document: requirement coverage, engine risk handled, and clean, minimal API boundaries between the layers.
+### Case 1: 领域内请求——适当的输出格式
+**Scenario:** 主架构文档被提交签署，并附其上下文：技术需求基线中的每个 TR-ID 都映射到一个 ADR，基础层（Foundation-layer）的 ADR 均为 Accepted，唯一的 HIGH 风险引擎领域被标记为待解决问题。其「Combat System」章节描述了分层设计——输入层 → 游戏逻辑层 → 表现层——每层之间有清晰定义的接口。请求标记为 TD-ARCHITECTURE。
+**Expected:** 返回 `TD-ARCHITECTURE: APPROVE`，理由确认闸门对该文档的检查：需求覆盖率、引擎风险已处理，以及层之间干净、最小的 API 边界。
 **Assertions:**
-- [ ] Verdict is exactly one of APPROVE / CONCERNS / REJECT
-- [ ] Verdict token is formatted as `TD-ARCHITECTURE: APPROVE`
-- [ ] Rationale specifically references the layered structure and its interface definitions as the API-boundary check — not generic architecture advice
-- [ ] Output stays within technical scope — does not comment on whether the mechanic is fun or fits the creative vision
+- [ ] 结论恰为 APPROVE / CONCERNS / REJECT 之一
+- [ ] 结论文本格式为 `TD-ARCHITECTURE: APPROVE`
+- [ ] 理由具体引用分层结构及其接口定义作为 API 边界检查——而非泛泛的架构建议
+- [ ] 输出保持在技术范围内——不对该机制是否有趣或是否符合创意愿景发表评论
 
-### Case 2: Out-of-domain request — redirects or escalates
-**Scenario:** Writer asks technical-director to review and approve the dialogue scripts for the game's opening cutscene.
-**Expected:** Agent declines to evaluate dialogue quality and redirects the content decision to narrative-director, who owns dialogue direction and to whom the writer reports; creative-director remains the escalation target for creative decisions.
+### Case 2: 领域外请求——转交或上报
+**Scenario:** 编剧请 technical-director 评审并批准游戏开场过场动画的对话脚本。
+**Expected:** 代理拒绝评估对话质量，并将内容决策转交给 narrative-director——其拥有对话方向，且编剧向其汇报；creative-director 仍是创意决策的上报目标。
 **Assertions:**
-- [ ] Does not make any binding decision about the dialogue content or structure
-- [ ] Explicitly names `narrative-director` as the owner of the dialogue content — creative-director delegates dialogue to it, and coordination-rules.md rule 1 forbids skipping a tier; naming `creative-director` as the escalation target as well is fine
-- [ ] Comments only on technical constraints that affect dialogue (e.g., localization string limits, data format) — no judgement of the lines' quality, tone or wording
+- [ ] 不就对话内容或结构做出任何有约束力的决定
+- [ ] 明确指出 `narrative-director` 是对话内容的所有者——creative-director 将对话委托给它，且 coordination-rules.md 规则 1 禁止跳过层级；同时将 `creative-director` 列为上报目标也是可以的
+- [ ] 仅评论影响对话的技术约束（例如本地化字符串长度限制、数据格式）——不对台词的质量、语气或措辞作评判
 
-### Case 3: Gate verdict — correct vocabulary
-**Scenario:** A concept's identified technical risks (platform: PC; engine: Godot 4.6) include a multiplayer mechanic that raycasts from every active entity against every other entity each frame to detect line-of-sight. At expected counts (1000 entities in a large zone), this is O(n²) — about a million raycasts per frame. The mechanic itself can survive with a different implementation. Request is tagged TD-FEASIBILITY.
-**Expected:** Returns `TD-FEASIBILITY: CONCERNS` — the gate's middle verdict, a list with mitigation suggestions — citing the O(n²) complexity and the entity count that breaks the frame budget as implemented. Not HIGH RISK, because the concept does not need revising.
+### Case 3: 闸门结论——正确的词汇
+**Scenario:** 某概念已识别的技术风险（平台：PC；引擎：Godot 4.6）包括一个多人机制：每帧从每个活跃实体向其他所有实体进行射线检测以判定视线。在预期数量下（一个大型区域内有 1000 个实体），这是 O(n²)——每帧约一百万次射线检测。该机制本身可以通过不同的实现方式存活。请求标记为 TD-FEASIBILITY。
+**Expected:** 返回 `TD-FEASIBILITY: CONCERNS`——该闸门的中间结论，附缓解建议列表——引用 O(n²) 复杂度以及按当前实现会突破帧预算的实体数量。不是 HIGH RISK，因为该概念无需修改。
 **Assertions:**
-- [ ] Verdict is exactly one of VIABLE / CONCERNS / HIGH RISK (the TD-FEASIBILITY verdicts) — not APPROVE / REJECT and not freeform text
-- [ ] Verdict token is formatted as `TD-FEASIBILITY: CONCERNS`
-- [ ] Rationale includes the specific algorithmic complexity concern and the entity count threshold
-- [ ] Suggests at least one mitigation (e.g., spatial partitioning, interest management) without mandating which to choose
+- [ ] 结论恰为 VIABLE / CONCERNS / HIGH RISK 之一（TD-FEASIBILITY 的结论词汇）——不是 APPROVE / REJECT，也不是自由文本
+- [ ] 结论文本格式为 `TD-FEASIBILITY: CONCERNS`
+- [ ] 理由包含具体的算法复杂度问题和实体数量阈值
+- [ ] 至少提出一项缓解措施（例如空间分区、兴趣管理），但不强制选择哪一种
 
-### Case 4: Conflict escalation — correct parent
-**Scenario:** game-designer wants to add a real-time physics simulation for every inventory item (hundreds of items on screen simultaneously). technical-director assesses this as technically expensive and proposes simplifying the simulation. game-designer disagrees, arguing it is essential to the game feel.
-**Expected:** technical-director clearly states the technical cost and constraints, proposes alternative implementation approaches that could achieve a similar feel, but explicitly defers the design priority decision to creative-director as the arbiter of player experience trade-offs, with the user making the final call.
+### Case 4: 冲突上报——正确的上级
+**Scenario:** game-designer 想为每个背包物品加入实时物理模拟（屏幕上同时有数百个物品）。technical-director 评估认为技术上代价高昂，并提议简化模拟。game-designer 不同意，认为这对游戏手感至关重要。
+**Expected:** technical-director 清楚陈述技术成本与约束，提出可实现类似手感的替代实现方案，但明确将设计优先级决策交给 creative-director 作为玩家体验取舍的裁决者，最终由用户决定。
 **Assertions:**
-- [ ] Expresses the technical concern with specifics (e.g., performance budget, estimated cost)
-- [ ] Proposes at least one alternative that could reduce cost while preserving intent
-- [ ] Explicitly defers the "is this worth the cost" decision to `creative-director` (its escalation target for design decisions; coordination-rules.md rule 3 for a design conflict with no shared parent), leaving the final call to the user — does not unilaterally cut the feature
-- [ ] Does not claim authority to override game-designer's design intent
+- [ ] 用具体信息表达技术担忧（例如性能预算、估算成本）
+- [ ] 至少提出一种能在保留意图的同时降低成本的替代方案
+- [ ] 明确将「这值得付出这些成本吗」的决策交给 `creative-director`（其设计决策的上报目标；coordination-rules.md 规则 3 适用于无共同上级的设计冲突），最终决定留给用户——不单方面砍掉该功能
+- [ ] 不声称有权推翻 game-designer 的设计意图
 
-### Case 5: Context pass — uses provided context
-**Scenario:** An ADR proposing a GPU-driven rendering pipeline — culling and draw submission on compute shaders — is submitted before it is Accepted, with the engine version and its related ADRs. The gate context block adds the target platform constraints: mobile, 60fps target, 2GB RAM ceiling, no compute shaders. The ADR never mentions the platform. Request is tagged TD-ADR.
-**Expected:** Assessment references the specific hardware constraints from the context, identifies the compute shader dependency as incompatible with the stated platform constraints, and returns `TD-ADR: REJECT` — the decision rests on a capability the target platform does not have, an unsound technical assumption — with those specifics cited.
+### Case 5: 上下文传递——使用提供的上下文
+**Scenario:** 一份提议 GPU 驱动渲染管线——在计算着色器上进行剔除和绘制提交——的 ADR 在其被 Accepted 之前被提交，并附引擎版本及其相关 ADR。闸门上下文块补充了目标平台约束：移动端、60fps 目标、2GB RAM 上限、不支持计算着色器。该 ADR 从未提及平台。请求标记为 TD-ADR。
+**Expected:** 评估引用上下文中的具体硬件约束，指出计算着色器依赖与所述平台约束不兼容，并返回 `TD-ADR: REJECT`——该决策依赖目标平台不具备的能力，属于不健全的技术假设——并引用这些具体信息。
 **Assertions:**
-- [ ] References the specific platform constraints provided (mobile, 2GB RAM, no compute shaders)
-- [ ] Does not give generic performance advice disconnected from the supplied constraints
-- [ ] Correctly identifies the architectural component that conflicts with the platform constraint
-- [ ] Verdict token is `TD-ADR: REJECT`, with rationale tied to the provided context, not boilerplate warnings
+- [ ] 引用所提供的具体平台约束（移动端、2GB RAM、不支持计算着色器）
+- [ ] 不给出与所提供约束脱节的泛泛性能建议
+- [ ] 正确识别与平台约束冲突的架构组件
+- [ ] 结论文本为 `TD-ADR: REJECT`，理由与所提供上下文挂钩，而非套话式警告
 
-### Case 6: Missing gate input — NOT ASSESSED
-**Scenario:** The master architecture document is submitted for sign-off with its ADR list (Foundation-layer ADRs Accepted) and the engine knowledge gap inventory; its layers and interfaces are sound. The technical requirements baseline the gate names is missing: the context gives none, and `docs/architecture/tr-registry.yaml` does not exist. Request is tagged TD-ARCHITECTURE.
-**Expected:** Returns `TD-ARCHITECTURE: NOT ASSESSED`, naming the technical requirements baseline as the input it could not read — without it, the gate's first check (is every requirement covered by an architectural decision?) cannot be made.
+### Case 6: 缺少闸门输入——NOT ASSESSED
+**Scenario:** 主架构文档被提交签署，包含其 ADR 列表（基础层 ADR 均为 Accepted）和引擎知识缺口清单；其分层与接口均健全。闸门指定的技术需求基线缺失：上下文未提供，且 `docs/architecture/tr-registry.yaml` 不存在。请求标记为 TD-ARCHITECTURE。
+**Expected:** 返回 `TD-ARCHITECTURE: NOT ASSESSED`，将技术需求基数列为它无法读取的输入——没有它，闸门的第一项检查（每项需求是否都有架构决策覆盖？）就无法进行。
 **Assertions:**
-- [ ] Verdict token is `TD-ARCHITECTURE: NOT ASSESSED` — not APPROVE, although every part of the document it could check is sound
-- [ ] Names the technical requirements baseline as the missing input
-- [ ] Does not reconstruct a requirement list from the architecture document itself and judge coverage against it
+- [ ] 结论文本为 `TD-ARCHITECTURE: NOT ASSESSED`——不是 APPROVE，尽管它能检查的文档每个部分都健全
+- [ ] 将技术需求基数列为缺失的输入
+- [ ] 不从架构文档本身重建需求列表并据此评判覆盖率
 
-### Case 7: Phase gate — judged against the phase being entered
-**Scenario:** `/gate-check technical-setup` at `workflow: standard` spawns TD-PHASE-GATE. The context gives the target phase (Technical Setup), the tier, and the gate's required and recommended artifacts at that tier: a systems index enumerating the MVP systems, each MVP GDD at the 5 standard sections and reviewed, and — recommended — a cross-GDD review report. All are present; the systems index gives each system's dependencies and data flow both ways. The engine reference path is `docs/engine-reference/godot/VERSION.md`. The architecture document and the ADR list are passed as "not expected before Pre-Production".
-**Expected:** Returns `TD-PHASE-GATE: READY` — the systems and GDDs give enough to architect from, which is what entering Technical Setup requires. The absent architecture document and ADRs are the work of the phase being entered, not a gap in it.
-**Variant:** the same project at target Pre-Production, where the architecture document is required and is passed as "none" → `TD-PHASE-GATE: NOT READY` or `CONCERNS`, naming the missing architecture document.
+### Case 7: 阶段闸门——针对即将进入的阶段评判
+**Scenario:** `/gate-check technical-setup` 在 `workflow: standard` 下生成 TD-PHASE-GATE。上下文给出目标阶段（Technical Setup）、档位，以及该档位下闸门要求和建议的产出物：一份枚举 MVP 系统的系统索引、每份处于 5 个标准章节且已评审的 MVP GDD，以及——建议性的——跨 GDD 评审报告。全部存在；系统索引双向给出每个系统的依赖和数据流。引擎参考路径为 `docs/engine-reference/godot/VERSION.md`。架构文档和 ADR 列表以 "not expected before Pre-Production" 传入。
+**Expected:** 返回 `TD-PHASE-GATE: READY`——系统与 GDD 提供了足够的架构依据，这正是进入 Technical Setup 所需。缺失的架构文档和 ADR 是即将进入阶段的工作，而非该阶段的缺口。
+**Variant:** 同一项目在目标阶段为 Pre-Production 时，架构文档是必需的且以 "none" 传入 → `TD-PHASE-GATE: NOT READY` 或 `CONCERNS`，并点名缺失的架构文档。
 **Assertions:**
-- [ ] Verdict is exactly one of READY / CONCERNS / NOT READY (the TD-PHASE-GATE verdicts), formatted as `TD-PHASE-GATE: READY`
-- [ ] Does not list the architecture document or the ADRs as a blocker or concern when they are passed as "not expected before Pre-Production"
-- [ ] Does not answer NOT ASSESSED for them — an artifact passed as not expected yet is neither a finding nor a missing input
-- [ ] Variant: an artifact the target phase requires, passed as "none", is a finding (NOT READY or CONCERNS) — not NOT ASSESSED
+- [ ] 结论恰为 READY / CONCERNS / NOT READY 之一（TD-PHASE-GATE 的结论词汇），格式为 `TD-PHASE-GATE: READY`
+- [ ] 当架构文档或 ADR 以 "not expected before Pre-Production" 传入时，不将其列为阻塞项或关注项
+- [ ] 不对其回答 NOT ASSESSED——以「尚未预期」传入的产出物既不是发现，也不是缺失输入
+- [ ] Variant：目标阶段要求、却以 "none" 传入的产出物是一项发现（NOT READY 或 CONCERNS）——而非 NOT ASSESSED
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Returns the verdict vocabulary the invoked gate's definition file lists — APPROVE / CONCERNS / REJECT for TD-ARCHITECTURE, TD-ADR, TD-SYSTEM-BOUNDARY, TD-ENGINE-RISK, TD-MANIFEST and TD-CHANGE-IMPACT; VIABLE / CONCERNS / HIGH RISK for TD-FEASIBILITY; READY / CONCERNS / NOT READY for TD-PHASE-GATE; `NOT ASSESSED`, naming the input, at any gate when an input the gate names is missing
-- [ ] Stays within declared technical domain
-- [ ] Defers design priority conflicts to creative-director
-- [ ] Uses gate IDs in output (e.g., `TD-FEASIBILITY: CONCERNS`) not inline prose verdicts
-- [ ] Does not make binding game design or creative direction decisions
-- [ ] At a phase gate, treats an artifact the target phase requires that the calling skill passes as "none" as a finding (NOT READY or CONCERNS), and one passed as "not expected before [phase]" or "not required at `workflow: [tier]`" as no finding — it judges readiness for the phase being entered, not a later one
+- [ ] 返回所调用闸门定义文件列出的结论词汇——TD-ARCHITECTURE、TD-ADR、TD-SYSTEM-BOUNDARY、TD-ENGINE-RISK、TD-MANIFEST 和 TD-CHANGE-IMPACT 为 APPROVE / CONCERNS / REJECT；TD-FEASIBILITY 为 VIABLE / CONCERNS / HIGH RISK；TD-PHASE-GATE 为 READY / CONCERNS / NOT READY；任何闸门在缺少其指定输入时返回 `NOT ASSESSED` 并说明该输入
+- [ ] 保持在声明的技术领域内
+- [ ] 将设计优先级冲突交给 creative-director
+- [ ] 在输出中使用闸门 ID（例如 `TD-FEASIBILITY: CONCERNS`），而非行文中的散文式结论
+- [ ] 不做出有约束力的游戏设计或创意方向决定
+- [ ] 在阶段闸门上，将调用技能以 "none" 传入、但目标阶段所需的产出物视为一项发现（NOT READY 或 CONCERNS）；将以 "not expected before [phase]" 或 "not required at `workflow: [tier]`" 传入的产出物视为无发现——它评判的是即将进入阶段的就绪度，而非更靠后阶段
 
 ---
 
 ## Coverage Notes
-- TD-ADR is covered only for a platform conflict (Case 5); an ADR with missing sections or unflagged post-cutoff APIs has no case yet.
-- TD-ENGINE-RISK assessment for specific engine versions (e.g., Godot 4.6 post-cutoff APIs) is not covered — deferred to engine-specialist integration tests.
-- TD-PHASE-GATE is covered at one target phase (Case 7); its later-phase judgements (Production and on: is the architecture holding up in the build?) have no case yet.
-- Multi-domain architecture reviews (e.g., touching both TD-ARCHITECTURE and TD-ENGINE-RISK simultaneously) are not covered here.
+- TD-ADR 仅覆盖了平台冲突（Case 5）；对缺少章节或未标记后截止日期 API 的 ADR 尚无用例。
+- 未覆盖针对具体引擎版本（例如 Godot 4.6 后截止日期 API）的 TD-ENGINE-RISK 评估——推迟到引擎专家集成测试。
+- TD-PHASE-GATE 仅覆盖了一个目标阶段（Case 7）；其后续阶段判断（Production 及之后：架构在构建中是否经得起考验？）尚无用例。
+- 此处未覆盖多领域架构评审（例如同时触及 TD-ARCHITECTURE 和 TD-ENGINE-RISK）。

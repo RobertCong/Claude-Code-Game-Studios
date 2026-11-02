@@ -1,24 +1,22 @@
-> Gate definition. The spawning skill passes this file's path to the director agent; the AGENT reads it — the parent session should not.
+> 质量闸门定义。发起调用的技能会把本文件路径传给总监代理；由该 AGENT 读取——父会话不应读取。
 
-# CD-PILLARS — Pillar Stress Test
+# CD-PILLARS — 支柱压力测试
 
-Agent: `creative-director` | Model tier: Opus | Domain: Vision, pillars, player experience
+Agent：`creative-director` | 模型层级：session（继承） | 领域：愿景、支柱、玩家体验
 
-**Trigger**: After game pillars and anti-pillars are defined (brainstorm Phase 4,
-or any time pillars are revised)
+**触发时机**：游戏支柱与反支柱定义完成之后（头脑风暴 Phase 4，或任何支柱修订之时）
 
-**Context to pass**:
-- Full pillar set with names, definitions, and design tests
-- Anti-pillars list
-- Core fantasy statement
-- Unique hook ("Like X, AND ALSO Y")
+**需传入的上下文**：
+- 完整支柱集合，含名称、定义与设计检验
+- 反支柱清单
+- 核心幻想陈述
+- 独特钩子（"Like X, AND ALSO Y"）
 
-**Prompt**:
-> "Review these game pillars. Are they falsifiable — could a real design decision
-> actually fail this pillar? Do they create meaningful tension with each other? Do
-> they differentiate this game from its closest comparables? Would they help resolve
-> a design disagreement in practice, or are they too vague to be useful? Return
-> specific feedback for each pillar and an overall verdict: APPROVE (strong), CONCERNS
-> [list] (needs sharpening), or REJECT (weak — pillars do not carry weight)."
+**提示词**：
+> "审查这些游戏支柱。它们是否可证伪——一个真实的设计决策是否可能真的通不过
+> 该支柱？它们彼此之间是否形成了有意义的张力？它们能否把本游戏与最接近的竞品
+> 区分开？在实践中，它们能否帮助解决设计分歧，还是过于模糊而无用？对每个支柱
+> 给出具体反馈，并给出总体结论：APPROVE（强）、CONCERNS [清单]（需打磨），
+> 或 REJECT（弱——支柱不承载分量）。"
 
-**Verdicts**: APPROVE / CONCERNS / REJECT
+**结论**：APPROVE / CONCERNS / REJECT

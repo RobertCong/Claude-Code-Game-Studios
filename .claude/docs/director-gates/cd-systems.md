@@ -1,27 +1,22 @@
-> Gate definition. The spawning skill passes this file's path to the director agent; the AGENT reads it — the parent session should not.
+> 质量闸门定义。发起调用的技能会把本文件路径传给总监代理；由该 AGENT 读取——父会话不应读取。
 
-# CD-SYSTEMS — Systems Decomposition Vision Check
+# CD-SYSTEMS — 系统拆解愿景检查
 
-Agent: `creative-director` | Model tier: Opus | Domain: Vision, pillars, player experience
+Agent：`creative-director` | 模型层级：session（继承） | 领域：愿景、支柱、玩家体验
 
-**Trigger**: After the systems index is written by `/map-systems` — validates the
-complete system set before GDD authoring begins
+**触发时机**：`/map-systems` 写完系统索引之后——在 GDD 编写开始前校验完整的系统集合
 
-**Context to pass**:
-- Systems index path (`design/gdd/systems-index.md`)
-- Game pillars and core fantasy (from `design/gdd/game-concept.md`; if there is no `design/gdd/game-concept.md`, the pitch and "what they feel" line of `design/game-brief.md`, which has no pillars)
-- Priority tier assignments (MVP / Vertical Slice / Alpha / Full Vision)
-- Any high-risk or bottleneck systems identified in the dependency map
+**需传入的上下文**：
+- 系统索引路径（`design/gdd/systems-index.md`）
+- 游戏支柱与核心幻想（来自 `design/gdd/game-concept.md`；若没有 `design/gdd/game-concept.md`，则用 `design/game-brief.md` 的提案与 "what they feel" 一行，该文件不含支柱）
+- 优先级层级划分（MVP / Vertical Slice / Alpha / Full Vision）
+- 依赖图中识别出的任何高风险或瓶颈系统
 
-**Prompt**:
-> "Review this systems decomposition against the game's design pillars. Does the
-> full set of MVP-tier systems collectively deliver the core fantasy? Are there
-> systems whose mechanics don't serve any stated pillar — indicating they may be
-> scope creep? Are there pillar-critical player experiences that have no system
-> assigned to deliver them? Are any systems missing that the core loop requires?
-> Return APPROVE (systems serve the vision), CONCERNS [specific gaps or
-> misalignments with their pillar implications], or REJECT [fundamental gaps —
-> the decomposition misses critical design intent and must be revised before GDD
-> authoring begins]."
+**提示词**：
+> "对照游戏设计支柱审查这套系统拆解。整个 MVP 层级系统集合合起来是否交付了核心
+> 幻想？是否存在其机制不服务任何既定支柱的系统——这说明它们可能是范围蔓延？
+> 是否存在支柱关键的玩家体验，却没有系统负责交付？核心循环所需的系统是否有
+> 缺失？返回 APPROVE（系统服务愿景）、CONCERNS [具体缺口或错位及其支柱影响]，
+> 或 REJECT [根本性缺口——拆解遗漏了关键设计意图，必须先修订才能开始 GDD 编写]。"
 
-**Verdicts**: APPROVE / CONCERNS / REJECT
+**结论**：APPROVE / CONCERNS / REJECT

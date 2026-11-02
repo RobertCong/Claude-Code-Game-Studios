@@ -1,27 +1,27 @@
-# Godot Audio — Quick Reference
+# Godot 音频 — 快速参考
 
-Last verified: 2026-10-17 (4.7 changes); 2026-02-12 (rest) | Engine: Godot 4.7
+最后核对：2026-10-17（4.7 变更）；2026-02-12（其余部分） | Engine: Godot 4.7
 
-## What Changed Since ~4.3 (LLM Cutoff)
+## 自 ~4.3（LLM 知识截止）以来的变更
 
-No major breaking changes to the audio API in 4.4–4.6; 4.7 removes one
-property and changes one default:
+4.4–4.6 中音频 API 没有重大破坏性变更；4.7 移除了一个属性并更改了一个
+默认值：
 
-### 4.7 Changes
-- **`AudioEffectSpectrumAnalyzer.tap_back_pos` removed**
-- **`area_mask` on `AudioStreamPlayer2D`/`3D` defaults to `0`** (was layer `1`):
-  `audio_bus_override` on an `Area2D`/`Area3D` stops working with the default
-  mask until it is set back to layer `1` (4.7 migration guide: https://docs.godotengine.org/en/stable/tutorials/migrating/upgrading_to_godot_4.7.html)
+### 4.7 变更
+- **`AudioEffectSpectrumAnalyzer.tap_back_pos` 已移除**
+- **`AudioStreamPlayer2D`/`3D` 上的 `area_mask` 默认值为 `0`**（原为层 `1`）：
+  在把掩码改回层 `1` 之前，`Area2D`/`Area3D` 上的 `audio_bus_override` 会随默认
+  掩码停止工作（4.7 迁移指南：https://docs.godotengine.org/en/stable/tutorials/migrating/upgrading_to_godot_4.7.html）
 
-### 4.6 Changes
-- **No audio-specific breaking changes** in this release
+### 4.6 变更
+- **此版本没有音频相关的破坏性变更**
 
-### 4.5 Changes
-- **No audio-specific breaking changes** in this release
+### 4.5 变更
+- **此版本没有音频相关的破坏性变更**
 
-## Current API Patterns
+## 当前 API 模式
 
-### Playing Audio
+### 播放音频
 ```gdscript
 @onready var sfx_player: AudioStreamPlayer = %SFXPlayer
 @onready var music_player: AudioStreamPlayer = %MusicPlayer
@@ -39,7 +39,7 @@ func play_music(stream: AudioStream, fade_time: float = 1.0) -> void:
     music_player.play()
 ```
 
-### 3D Spatial Audio
+### 3D 空间音频
 ```gdscript
 @onready var audio_3d: AudioStreamPlayer3D = %AudioPlayer3D
 
@@ -49,7 +49,7 @@ func _ready() -> void:
     audio_3d.unit_size = 10.0
 ```
 
-### Audio Buses
+### 音频总线
 ```gdscript
 # Set bus volumes
 AudioServer.set_bus_volume_db(AudioServer.get_bus_index(&"Music"), volume_db)
@@ -59,7 +59,7 @@ AudioServer.set_bus_volume_db(AudioServer.get_bus_index(&"SFX"), volume_db)
 AudioServer.set_bus_mute(AudioServer.get_bus_index(&"Music"), true)
 ```
 
-### Object Pooling for SFX
+### SFX 对象池
 ```gdscript
 # Pre-create multiple AudioStreamPlayer nodes for concurrent sounds
 var _sfx_pool: Array[AudioStreamPlayer] = []
@@ -79,7 +79,7 @@ func play_pooled(stream: AudioStream) -> void:
             return
 ```
 
-## Common Mistakes
-- Creating new AudioStreamPlayer nodes at runtime instead of pooling
-- Not using audio buses for volume categories (Music, SFX, UI, Voice)
-- Using `_process()` for audio timing instead of signals (`finished`)
+## 常见错误
+- 在运行时创建新的 AudioStreamPlayer 节点，而不是使用对象池
+- 不使用音频总线来分类音量（Music、SFX、UI、Voice）
+- 使用 `_process()` 处理音频计时，而不是使用信号（`finished`）

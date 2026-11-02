@@ -1,6 +1,6 @@
 ---
 name: skill-improve
-description: "Improve a skill via a test-fix-retest loop — static checks, targeted fixes, keep or revert on score change."
+description: "通过测试—修复—复测循环改进技能 —— 静态检查、定向修复、按分数变化决定保留或回退。"
 argument-hint: "[skill-name]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Bash(bash "*/.claude/skills/skill-improve/../../hooks/yaml-helper.sh" resolve_config *)
@@ -9,180 +9,170 @@ model: sonnet
 
 !`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation`
 
-**Automation mode**: Resolve `modes.automation` (`project.local.yaml` →
-`project.yaml` → default `collaborative`). Every `AskUserQuestion` call and
-every file write follows `.claude/docs/automation-modes.md`
-(collaborative asks always · guided major-only · autonomous logs and proceeds;
-`automation_always_ask` categories always prompt).
+**自动化模式**：解析 `modes.automation`（`project.local.yaml` →
+`project.yaml` → 默认 `collaborative`）。每次 `AskUserQuestion` 调用与
+每次文件写入都遵循 `.claude/docs/automation-modes.md`
+（collaborative 总是询问 · guided 仅重大事项 · autonomous 记录后继续；
+`automation_always_ask` 类别总是询问）。
 
-# Skill Improve
+# 技能改进
 
-Runs an improvement loop on a single skill:
-test → fix → retest → keep or revert.
+对单个技能运行一个改进循环：
+测试 → 修复 → 复测 → 保留或回退。
 
-Its score comes from `/skill-test` static and category checks, which read the
-skill rather than run it: a better score means a better-written skill, not proof
-that it behaves better. To check behaviour, run the skill on a real request
-before and after the change.
+其分数来自 `/skill-test` 的静态检查与类别检查，这些检查是读取技能而非运行技能：分数更高
+意味着技能写得更好，而不是它表现更好的证明。要检查行为，请在改动前后用真实请求运行该技能。
 
 ---
 
-## Phase 1: Parse Argument
+## Phase 1: 解析参数
 
-Read the skill name from the first argument. If missing, output usage and stop:
+从第一个参数读取技能名称。若缺失，输出用法并停止：
 
 ```
 Usage: /skill-improve [skill-name]
 Example: /skill-improve tech-debt
 ```
 
-Verify `.claude/skills/[name]/SKILL.md` exists. If not, stop with:
-"Skill '[name]' not found."
+验证 `.claude/skills/[name]/SKILL.md` 存在。若不存在，停止并提示：
+"未找到技能 '[name]'。"
 
-Glob `CCGS Skill Testing Framework/catalog.yaml`. When it exists, say so first:
-"`CCGS Skill Testing Framework/` was renamed `studio-tests/` in 1.2.0, and this
-skill reads only `studio-tests/`. Move any specs you wrote there; UPGRADING.md
-(v1.1.3 → v1.2.0, `studio-tests/`) says how." Then go on.
+Glob `CCGS Skill Testing Framework/catalog.yaml`。当它存在时，先说明这一点：
+"`CCGS Skill Testing Framework/` 在 1.2.0 中已更名为 `studio-tests/`，本技能只读取
+`studio-tests/`。请把你写在那里的任何规格文件移过去；UPGRADING.md（v1.1.3 → v1.2.0，
+`studio-tests/`）说明了做法。"然后继续。
 
 ---
 
-## Phase 2: Baseline Test
+## Phase 2: 基线测试
 
-Run `/skill-test static [name]` and record the baseline score:
-- Count of FAILs
-- Count of WARNs
-- Which specific checks failed (Check 1–7)
+运行 `/skill-test static [name]` 并记录基线分数：
+- FAIL 数量
+- WARN 数量
+- 具体哪些检查失败（Check 1–7）
 
-Display to the user:
+向用户显示：
 ```
 Static baseline:   [N] failures, [M] warnings
 Failing: Check 4 (no ask-before-write), Check 5 (no handoff)
 ```
 
-If the static result is **NOT ASSESSED** (the skill file could not be read or
-parsed), stop and report it with its reason: there is no score to improve, and
-0 FAILs from a file nobody could read is not a clean result.
+如果静态结果为 **NOT ASSESSED**（技能文件无法读取或解析），停止并连同原因一起报告：没有
+可改进的分数，而一个没人能读取的文件给出 0 个 FAIL 并不算干净的结果。
 
-If baseline is 0 FAILs and 0 WARNs, note it and proceed to Phase 2b.
+如果基线为 0 个 FAIL、0 个 WARN，记录该情况并继续到 Phase 2b。
 
-### Phase 2b: Category Baseline
+### Phase 2b: 类别基线
 
-Look up the skill's `category:` field in `studio-tests/catalog.yaml`.
+在 `studio-tests/catalog.yaml` 中查找该技能的 `category:` 字段。
 
-If no `category:` field is found, display:
-"Category: not yet assigned — skipping category checks."
-and skip to Phase 3.
+如果未找到 `category:` 字段，显示：
+"类别：尚未分配 —— 跳过类别检查。"
+并跳到 Phase 3。
 
-If category is found, run `/skill-test category [name]` and record the category baseline:
-- Count of FAILs
-- Count of WARNs
-- Which specific category rubric metrics failed
+如果找到类别，运行 `/skill-test category [name]` 并记录类别基线：
+- FAIL 数量
+- WARN 数量
+- 具体哪些类别评分指标失败
 
-Display to the user:
+向用户显示：
 ```
 Category baseline: [N] failures, [M] warnings  ([category] rubric)
 ```
 
-A category result of **NOT ASSESSED** (a rubric section the skill-test could not
-find or apply) is reported with its reason and is not a zero: the category
-dimension is then excluded from "already passes" below.
+类别结果为 **NOT ASSESSED**（skill-test 无法找到或应用的评分章节）时，连同其原因一起报告，
+这不等于零：类别维度因此会从下面的"已通过"中排除。
 
-If BOTH static and category baselines are 0 FAILs and 0 WARNs — and neither is
-NOT ASSESSED — stop:
-"This skill already passes all static and category checks. No improvements needed."
+如果静态与类别基线**都**是 0 个 FAIL、0 个 WARN —— 且两者都不是 NOT ASSESSED —— 停止：
+"此技能已通过所有静态检查与类别检查。无需改进。"
 
 ---
 
-## Phase 3: Diagnose
+## Phase 3: 诊断
 
-Read the full skill: `.claude/skills/[name]/SKILL.md` and every file in its `references/` folder,
-if it has one — the longest skills keep each phase there. Name the file each
-gap is in.
+读取完整技能：`.claude/skills/[name]/SKILL.md`，以及其 `references/` 文件夹中的每个文件
+（若有）—— 最长的技能会把每个阶段的内容放在那里。指明每个缺口位于哪个文件。
 
-For each failing or warning **static** check, identify the exact gap:
+对每个失败或警告的**静态**检查，识别确切的缺口：
 
-- **Check 1 fail** → which frontmatter field is missing
-- **Check 2 fail** → how many phases found vs. minimum required
-- **Check 3 fail** → no verdict keywords anywhere in the skill body
-- **Check 4 fail** → Write or Edit in allowed-tools but no ask-before-write language
-- **Check 5 warn** → no follow-up or next-step section at the end
-- **Check 6 warn** → `context: fork` set but fewer than 5 phases found
-- **Check 7 warn** → argument-hint is empty or doesn't match documented modes
+- **Check 1 失败** → 缺少哪个 frontmatter 字段
+- **Check 2 失败** → 找到多少个阶段，对照最低要求
+- **Check 3 失败** → 技能正文中任何地方都没有结论关键字
+- **Check 4 失败** → allowed-tools 中有 Write 或 Edit，但没有写入前询问的措辞
+- **Check 5 警告** → 末尾没有后续操作或下一步章节
+- **Check 6 警告** → 设置了 `context: fork`，但找到的阶段少于 5 个
+- **Check 7 警告** → argument-hint 为空，或与已记录的模式不符
 
-For each failing or warning **category** check (if category was assigned in Phase 2b),
-identify the exact gap in the skill's text. For example:
-- If G2 fails (gate mode, director panel width): skill body does not size the
-  PHASE-GATE panel from `modes.workflow` (PR at `minimal`, TD + PR at `standard`,
-  all 4 at `full`)
-- If A2 fails (authoring, no per-section May-I-write): skill asks once at the end, not
-  before each section write
-- If T3 fails (team, BLOCKED not surfaced): skill doesn't halt dependent work on blocked agent
+对每个失败或警告的**类别**检查（若 Phase 2b 中已分配类别），识别技能文本中的确切缺口。
+例如：
+- 如果 G2 失败（闸门模式、总监小组宽度）：技能正文没有依据 `modes.workflow` 确定
+  PHASE-GATE 小组的规模（`minimal` 下为 PR，`standard` 下为 TD + PR，`full` 下为全部 4 个）
+- 如果 A2 失败（创作类，缺少逐章节的"我可以写入吗"）：技能只在末尾询问一次，而不是在每次
+  章节写入之前
+- 如果 T3 失败（团队类，未呈现 BLOCKED）：技能没有因 agent 被阻塞而停止相关工作
 
-Show the full combined diagnosis to the user before proposing any changes.
+在提出任何改动之前，向用户展示完整的合并诊断。
 
 ---
 
-## Phase 4: Propose Fix
+## Phase 4: 提出修复
 
-Write a targeted fix for each failure and warning. Show the proposed changes
-as clearly marked before/after blocks. Only change what is failing — do not
-rewrite sections that are passing. In a skill with a `references/` folder, a
-fix to a phase's steps goes in that phase's `references/` file, not back into
-`SKILL.md`; the question below then names each file the fix changes.
+为每个失败与警告编写针对性修复。用清晰标记的修改前/后区块展示拟议改动。只改失败的部分 ——
+不要重写已通过的章节。在带有 `references/` 文件夹的技能中，对某个阶段步骤的修复写入该阶段的
+`references/` 文件，而不是放回 `SKILL.md`；下面的问题随后要指出修复改动的每个文件。
 
-Ask: "May I write this improved version to `.claude/skills/[name]/SKILL.md`?"
+询问："我可以把这个改进版本写入 `.claude/skills/[name]/SKILL.md` 吗？"
 
-If the user says no, stop here.
+若用户回答否，就此停止。
 
 ---
 
-## Phase 5: Write and Retest
+## Phase 5: 写入并复测
 
-Record the current content of each file the fix changes — the exact text, kept
-in this conversation — so Phase 6 can restore it.
+记录修复所改动的每个文件的当前内容 —— 精确文本，保留在本对话中 —— 以便 Phase 6 恢复。
 
-Write the improved skill to `.claude/skills/[name]/SKILL.md`, and to each
-`references/` file the fix changes.
+把改进后的技能写入 `.claude/skills/[name]/SKILL.md`，以及修复所改动的每个 `references/`
+文件。
 
-Re-run `/skill-test static [name]` and record the new static score — measured by that run, never stated from the edit.
-If a category was assigned, also re-run `/skill-test category [name]` and record the new category score.
+重新运行 `/skill-test static [name]` 并记录新的静态分数 —— 以该次运行测得的为准，绝不依据
+编辑内容自行宣称。
+如果分配了类别，还要重新运行 `/skill-test category [name]` 并记录新的类别分数。
 
-Display the comparison:
+显示对比：
 ```
 Static:   Before [N] failures, [M] warnings  →  After [N'] failures, [M'] warnings
 Category: Before [N] failures, [M] warnings  →  After [N'] failures, [M'] warnings  (if applicable)
 Combined: [before] → [after] (improved / no change / worse)
 ```
 
-`[before]` and `[after]` are the Phase 6 combined counts — failures plus
-warnings, both dimensions — e.g. `Combined: 3 → 0 (improved)`.
+`[before]` 与 `[after]` 是 Phase 6 的合并计数 —— 失败数加警告数，两个维度都算 ——
+例如 `Combined: 3 → 0 (improved)`。
 
 ---
 
-## Phase 6: Verdict
+## Phase 6: 结论
 
-Count the combined failure total: static FAILs + category FAILs + static WARNs + category WARNs.
-**A re-test that comes back NOT ASSESSED** (for example, the edit broke the
-frontmatter so the file no longer parses) is never an improvement, whatever its
-counts: take the "did not improve" branch below.
+统计合并后的失败总数：静态 FAIL + 类别 FAIL + 静态 WARN + 类别 WARN。
+**返回 NOT ASSESSED 的复测**（例如编辑破坏了 frontmatter，导致文件无法再解析）绝不是改进，
+无论其计数如何：走下面的"未改进"分支。
 
-**If combined score improved (combined failure count is lower than baseline):**
-Report: "Score improved. Changes kept."
-Show a summary of what was fixed in each dimension.
+**如果合并分数改善（合并失败数低于基线）：**
+报告："分数已改善。改动已保留。"
+展示各维度修复内容的摘要。
 
-**If combined score is the same or worse:**
-Report: "Combined score did not improve."
-Show what changed and why it may not have helped.
-Ask: "May I restore `.claude/skills/[name]/SKILL.md` to the content it had before this run?"
-— naming every file Phase 5 wrote.
-If yes: write the content recorded in Phase 5 back to each file with Write; if no, leave the files as written. Never
-`git checkout` it — that returns the last *committed* version and discards any edits
-made before this run that were not yet committed.
+**如果合并分数相同或更差：**
+报告："合并分数未改善。"
+展示改动内容以及它可能为何没有帮助。
+询问："我可以把 `.claude/skills/[name]/SKILL.md` 恢复到此轮运行前的内容吗？"
+—— 并指明 Phase 5 写入的每个文件。
+若同意：用 Write 把 Phase 5 记录的内容写回每个文件；若不同意，保持文件为写入后的状态。绝不要
+对它执行 `git checkout` —— 那会返回最后一次*已提交*的版本，并丢弃本次运行之前尚未提交的任何
+编辑。
 
 ---
 
-## Phase 7: Next Steps
+## Phase 7: 后续步骤
 
-- Run `/skill-test static all` to find the next skill with failures.
-- Run `/skill-improve [next-name]` to continue the loop on another skill.
-- Run `/skill-test audit` to see overall coverage progress.
+- 运行 `/skill-test static all` 找出下一个存在失败的技能。
+- 运行 `/skill-improve [next-name]` 在另一个技能上继续循环。
+- 运行 `/skill-test audit` 查看整体覆盖率进展。

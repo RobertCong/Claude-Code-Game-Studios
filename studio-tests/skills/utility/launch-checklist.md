@@ -2,275 +2,272 @@
 
 ## Skill Summary
 
-`/launch-checklist` generates a launch-readiness checklist across code, content,
-QA, store, legal, infrastructure, community and operations, scoped to the
-project. It is handed the resolved `rigor`, `project.stage`, `platform.cert_tier`
-and `automation`, and scopes by them: out-of-reach phases are declared out of
-scope, `rigor: minimal` drops process-weight items, and the Platform
-Certification section is emitted **only** for the `cert_tier` value
-(`none | itch | steam | console`). An unset `cert_tier` is a question, not a
-licence to emit every track; if it cannot be determined the section is marked
-`NOT ASSESSED — cert tier unknown`.
+`/launch-checklist` 生成覆盖代码、内容、QA、商店、法务、基础设施、社区与运营的
+上线就绪清单，并按项目范围收窄。它接收已解析的 `rigor`、`project.stage`、`platform.cert_tier`
+与 `automation`，并据此划定范围：无法触及的阶段被声明为不在范围内，
+`rigor: minimal` 会裁掉流程性条目，Platform Certification 节**仅**在
+`cert_tier` 取值（`none | itch | steam | console`）下生成。未设置 `cert_tier` 是一个提问，
+而不是生成全部轨道的许可；若无法确定，该节标记为
+`NOT ASSESSED — cert tier unknown`。
 
-Phase 2 reads `CLAUDE.md`, the latest milestone, any existing checklist in
-`production/releases/` and the content calendar. Phase 3 scans the code root for
-TODO/FIXME/HACK, debug output, placeholder assets and hardcoded dev values, and
-reports every scan with its denominator (`scanned [N] files, [M] hits`) or
-`NOT ASSESSED — [reason]`; an unassessable item is written `- [?]` with a legend,
-never a bare box or tick. The bug rows follow `workflow`: S1 and S2 (or a
-documented exception), and at `full` S1–S3 with no exceptions. Phase 4b asks one
-`AskUserQuestion` per section about the items no scan or file settled, each
-answered yes / no / not yet / N/A: yes ticks it, no or not yet is a failed item
-(Blocking, or Conditional with a workaround or accepted risk), N/A leaves it out;
-it is skipped, and says so, in `dry-run` and in `autonomous` mode. The checklist
-ends in a Go / No-Go section. **Blocking Items** are every FAIL or unresolved
-finding with no documented workaround or accepted risk; **Conditional Items** are
-shortfalls with a documented workaround or an explicitly accepted risk. **Overall
-Status** is computed from them, first match wins: `NOT READY` (any blocking item)
-→ `NOT ASSESSED` (any `[?]` item, `NOT ASSESSED` section or unconfirmed item, each
-named) → `CONDITIONAL` (any conditional item) → `READY`. Unless the argument is
-`dry-run`, it asks "May I write this to
-`production/releases/launch-checklist-[date].md`?" and creates nothing — not
-even the directory — before the answer. Next steps: `/gate-check release` first
-if `project.stage` is not `Release` (`Polish`, an earlier stage, or unset), then
-`/team-release`. No director gates are spawned.
+Phase 2 读取 `CLAUDE.md`、最新里程碑、`production/releases/` 中任何现有清单
+以及内容日历。Phase 3 扫描代码根中的
+TODO/FIXME/HACK、调试输出、占位资源与硬编码开发值，并
+对每次扫描报告其分母（`scanned [N] files, [M] hits`）或
+`NOT ASSESSED — [reason]`；无法评估的条目写成 `- [?]` 并附图例，
+绝不写成空框或勾选。缺陷行遵循 `workflow`：S1 与 S2（或有
+记录的例外），在 `full` 下为 S1–S3 且无例外。Phase 4b 对每个
+没有任何扫描或文件能确定的条目，按节询问一次
+`AskUserQuestion`，回答为 yes / no / not yet / N/A：yes 勾选，no 或 not yet 为失败条目
+（Blocking，或带解决办法或已接受风险的 Conditional），N/A 则排除；
+在 `dry-run` 与 `autonomous` 模式下跳过，并明确说明。清单
+以 Go / No-Go 节结束。**Blocking Items** 是所有 FAIL 或未解决的
+发现，且没有记录的解决办法或已接受风险；**Conditional Items** 是
+有记录的解决办法或明确接受风险的不足。**Overall
+Status** 由它们计算，首个命中者胜出：`NOT READY`（任何阻塞项）
+→ `NOT ASSESSED`（任何 `[?]` 条目、`NOT ASSESSED` 节或未确认条目，逐项
+点名）→ `CONDITIONAL`（任何条件项）→ `READY`。除非参数为
+`dry-run`，否则它询问 "May I write this to
+`production/releases/launch-checklist-[date].md`?"，并在得到回答之前不创建任何内容——
+连目录也不创建。下一步：若 `project.stage` 不是 `Release`（`Polish`、更早阶段或未设置），
+先运行 `/gate-check release`，然后
+`/team-release`。不派发任何总监闸门。
 
 ---
 
 ## Static Assertions (Structural)
 
-Checked against the SKILL.md by `/skill-test spec` — no fixture needed.
+由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] Has required frontmatter fields: `name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`
-- [ ] Frontmatter sets `disable-model-invocation: true`: it runs only when the user types it, set in frontmatter rather than asked for in prose
-- [ ] Has ≥2 phase headings
-- [ ] Contains verdict keywords: READY, CONDITIONAL, NOT ASSESSED, NOT READY (Overall Status, first match NOT READY → NOT ASSESSED → CONDITIONAL → READY), and NOT ASSESSED for unassessable scans and cert tier
-- [ ] Contains "May I write" language before writing the checklist, and creates no file or directory before the answer
-- [ ] Has a Phase 4b that asks one `AskUserQuestion` per section, answers yes / no / not yet / N/A, with no / not yet a failed item and N/A excluded
-- [ ] Has a next-step handoff (`/gate-check release` only when `project.stage` is not `Release`, and `/team-release`)
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] frontmatter 设置 `disable-model-invocation: true`：仅在用户手动输入时运行，该设置在 frontmatter 中声明，而非在正文中询问
+- [ ] 有 ≥2 个 phase 标题
+- [ ] 包含结论关键词：READY、CONDITIONAL、NOT ASSESSED、NOT READY（Overall Status 首个命中顺序为 NOT READY → NOT ASSESSED → CONDITIONAL → READY），以及无法评估的扫描与 cert tier 的 NOT ASSESSED
+- [ ] 在写入清单之前包含 "May I write" 用语，且在得到回答之前不创建任何文件或目录
+- [ ] 有 Phase 4b，按节询问一次 `AskUserQuestion`，答案为 yes / no / not yet / N/A，no / not yet 为失败条目，N/A 排除
+- [ ] 有下一步交接（仅当 `project.stage` 不是 `Release` 时的 `/gate-check release`，以及 `/team-release`）
 
 ---
 
 ## Director Gate Checks
 
-None. `/launch-checklist` has no `Agent` tool and spawns no director. The
-"Sign-Offs Required" list (Creative Director, Technical Director, QA Lead,
-Producer, Release Manager) is checklist text for humans, coordinated later via
-`/team-release`; the formal gate verdict comes from `/gate-check`.
+无。`/launch-checklist` 没有 `Agent` 工具，也不派发任何总监。
+"Sign-Offs Required" 列表（Creative Director、Technical Director、QA Lead、
+Producer、Release Manager）是给人工使用的清单文本，之后通过
+`/team-release` 协调；正式的闸门结论来自 `/gate-check`。
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非某个用例自己的 Fixture 另有说明，否则每个用例的 `project.yaml` 都设置
+`modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。
+规则见：`studio-tests/CLAUDE.md` §
+Fixture defaults。
 
 ---
 
 ## Test Cases
 
-### Case 1: Happy Path — Steam project, clean scans, every section confirmed, READY
+### Case 1: 正常路径 — Steam 项目，扫描干净，各节全部确认，READY
 
 **Fixture:**
-- `project.yaml`: `project.stage: Release`, `modes.rigor: standard`, `platform.cert_tier: steam`,
-  engine Godot (code root `src/`); a single-player game with no servers
-- `src/` has 40 source files with no TODO/FIXME/HACK, no debug output, no placeholder or hardcoded dev values
-- `assets/` exists with final assets
-- `production/releases/` does not exist yet
-- In Phase 4b the user answers `Yes — all of them` for every section, except the
-  Infrastructure question, where `Some differ` gives each Servers item N/A and
-  every Analytics and Monitoring item yes
+- `project.yaml`：`project.stage: Release`、`modes.rigor: standard`、`platform.cert_tier: steam`，
+  引擎 Godot（代码根 `src/`）；单机游戏，无服务器
+- `src/` 有 40 个源文件，没有 TODO/FIXME/HACK，没有调试输出，没有占位资源或硬编码开发值
+- `assets/` 存在且为最终资源
+- `production/releases/` 尚不存在
+- 在 Phase 4b 中，用户对每个节都回答 `Yes — all of them`，但
+  Infrastructure 问题除外，其中 `Some differ` 使每个 Servers 条目为 N/A，
+  而每个 Analytics 与 Monitoring 条目为 yes
 
 **Input:** `/launch-checklist 2026-11-01`
 
 **Expected behavior:**
-1. Target Launch reads 2026-11-01
-2. Phase 3 reports each scan as `scanned [N] files, 0 hits`
-3. Platform Certification contains only the Steam block (Steamworks SDK, store page,
-   depot build, achievements, common content rules) plus the every-tier accessibility row
-4. The soak-test item asks for the longest soak `/soak-test` runs (or a longer
-   one run by hand), not a fixed duration `/soak-test` cannot produce
-5. Phase 4b asks one `AskUserQuestion` per section, listing only the items no
-   scan or file settled (not the Phase 3 counts), each answered yes / no /
+1. Target Launch 读取为 2026-11-01
+2. Phase 3 将每次扫描报告为 `scanned [N] files, 0 hits`
+3. Platform Certification 仅包含 Steam 块（Steamworks SDK、商店页面、
+   depot 构建、成就、通用内容规则）加上所有层级都有的无障碍行
+4. 浸泡测试条目要求 `/soak-test` 能运行的最长浸泡（或手工运行的
+   更长浸泡），而不是 `/soak-test` 无法产生的固定时长
+5. Phase 4b 按节询问一次 `AskUserQuestion`，只列出没有任何
+   扫描或文件能确定的条目（不是 Phase 3 的计数），每个回答为 yes / no /
    not yet / N/A
-6. The confirmed items are ticked `(confirmed by the user)`; the Servers items are
-   written `- N/A — [item]` and left out of the status. Nothing is Blocking,
-   Conditional or unconfirmed, so the first-match rule gives READY
-7. Skill presents the checklist with a summary (Overall Status, total items, blocking
-   count, conditional count, not-assessed count, departments with incomplete sections)
-8. Asks "May I write this to `production/releases/launch-checklist-[date].md`?";
-   `production/releases/` is not created before the answer
-9. Next steps: `/team-release` — the stage already reads `Release`, so `/gate-check`
-   is not offered
+6. 已确认的条目勾选为 `(confirmed by the user)`；Servers 条目
+   写成 `- N/A — [item]` 并排除在状态之外。没有任何阻塞、条件或未确认项，
+   因此首个命中规则给出 READY
+7. 技能展示清单及摘要（Overall Status、条目总数、阻塞
+   数、条件数、未评估数、存在未完成节的部门）
+8. 询问 "May I write this to `production/releases/launch-checklist-[date].md`?"；
+   在回答之前不创建 `production/releases/`
+9. 下一步：`/team-release`——阶段已为 `Release`，因此不提供 `/gate-check`
 
 **Assertions:**
-- [ ] Every Phase 3 scan line shows its denominator (`scanned [N] files, [M] hits`)
-- [ ] No console (TRC/Lotcheck) or itch.io items appear
-- [ ] The soak-test item does not require a soak longer than `/soak-test` offers
-- [ ] Phase 4b asks at most one question per section, and no Phase 3 count is asked about
-- [ ] Overall Status is READY — every item is ticked on evidence or on a Phase 4b answer, or marked N/A
-- [ ] The summary gives total, blocking, conditional and not-assessed counts
-- [ ] "May I write" names `production/releases/launch-checklist-[date].md`, and no directory exists before the user answers it
-- [ ] Next steps name `/team-release` and do not offer `/gate-check`
+- [ ] Phase 3 的每行扫描都显示其分母（`scanned [N] files, [M] hits`）
+- [ ] 不出现主机（TRC/Lotcheck）或 itch.io 条目
+- [ ] 浸泡测试条目不要求比 `/soak-test` 提供的更长的浸泡
+- [ ] Phase 4b 每节至多询问一个问题，且不询问任何 Phase 3 计数
+- [ ] Overall Status 为 READY——每个条目都基于证据或 Phase 4b 回答而勾选，或标记为 N/A
+- [ ] 摘要给出总数、阻塞数、条件数与未评估数
+- [ ] "May I write" 指明 `production/releases/launch-checklist-[date].md`，且在用户回答前不存在该目录
+- [ ] 下一步指明 `/team-release`，且不提供 `/gate-check`
 
 ---
 
-### Case 2: Blocking Findings — FIXMEs and debug output
+### Case 2: 阻塞性发现 — FIXME 与调试输出
 
 **Fixture:**
-- As Case 1, but `src/` contains 3 `FIXME` comments and one `print()` debug call in production code
-- `src/` also has one `HACK` comment whose justification is documented beside it
+- 同 Case 1，但 `src/` 中有 3 条 `FIXME` 注释，生产代码中有一处 `print()` 调试调用
+- `src/` 还有一条 `HACK` 注释，其理由记录在旁边
 
 **Input:** `/launch-checklist 2026-11-01`
 
 **Expected behavior:**
-1. Phase 3 counts the FIXMEs with their locations and finds the debug output
-2. Code Quality shows "FIXME count: 3 (zero required)" and the "No debug output" item unticked
-3. These appear under Blocking Items — findings with no workaround or accepted risk
-4. The justified HACK appears under Conditional Items, with its justification
-5. Overall Status is NOT READY — a blocking item outranks everything else
-6. "May I write" is still asked before saving
+1. Phase 3 统计 FIXME 及其位置，并找到调试输出
+2. Code Quality 显示 "FIXME count: 3 (zero required)"，且 "No debug output" 条目未勾选
+3. 它们出现在 Blocking Items 下——没有解决办法或已接受风险的发现
+4. 有理由的 HACK 出现在 Conditional Items 下，并附其理由
+5. Overall Status 为 NOT READY——阻塞项高于其他一切
+6. 保存前仍会询问 "May I write"
 
 **Assertions:**
-- [ ] FIXME count is 3, with file locations
-- [ ] The debug `print()` is reported and its item is not ticked
-- [ ] Blocking Items lists the FIXMEs and the debug output
-- [ ] The documented HACK is under Conditional Items, not Blocking Items
-- [ ] Overall Status is NOT READY (not READY, CONDITIONAL or NOT ASSESSED)
+- [ ] FIXME 计数为 3，并附文件位置
+- [ ] 报告调试 `print()`，且其条目未勾选
+- [ ] Blocking Items 列出 FIXME 与调试输出
+- [ ] 有记录的 HACK 位于 Conditional Items，而非 Blocking Items
+- [ ] Overall Status 为 NOT READY（不是 READY、CONDITIONAL 或 NOT ASSESSED）
 
 ---
 
-### Case 3: Cert Tier Unset — Ask, do not emit every track
+### Case 3: 未设置 Cert Tier — 询问，不生成所有轨道
 
 **Fixture:**
-- `project.yaml`: `project.stage: Release`, `modes.rigor: standard`, no `platform.cert_tier`
-- Config block shows `platform.cert_tier: (unset -- ask which platforms are in scope)`
+- `project.yaml`：`project.stage: Release`、`modes.rigor: standard`，没有 `platform.cert_tier`
+- 配置块显示 `platform.cert_tier: (unset -- ask which platforms are in scope)`
 
 **Input:** `/launch-checklist 2026-11-01`
 
 **Expected behavior:**
-1. Skill asks which platforms are in scope instead of emitting all certification tracks
-2. If the user answers, only the matching tier block is emitted
-3. If it cannot be determined, the section is marked `NOT ASSESSED — cert tier unknown`
-4. Unset is not treated as `none` — the section is not silently omitted
+1. 技能询问哪些平台在范围内，而不是生成所有认证轨道
+2. 若用户回答，则只生成匹配层级的块
+3. 若无法确定，该节标记为 `NOT ASSESSED — cert tier unknown`
+4. 未设置不被当作 `none`——该节不会被静默省略
 
 **Assertions:**
-- [ ] Skill asks which platforms are in scope
-- [ ] Console, Steam and itch.io blocks are never all emitted together
-- [ ] Without an answer, the section reads `NOT ASSESSED — cert tier unknown`
-- [ ] The "omitted — cert_tier is 'none'" line does not appear
+- [ ] 技能询问哪些平台在范围内
+- [ ] 主机、Steam 与 itch.io 块绝不一起全部生成
+- [ ] 没有回答时，该节为 `NOT ASSESSED — cert tier unknown`
+- [ ] 不出现 "omitted — cert_tier is 'none'" 行
 
 ---
 
-### Case 4: Nothing to Scan — `[?]` items, not green ticks
+### Case 4: 无内容可扫描 — `[?]` 条目，而非绿色勾选
 
 **Fixture:**
-- `project.yaml`: `project.stage: Release`, `platform.cert_tier: itch`, engine Godot
-- `src/` exists but is empty; no `assets/` directory
+- `project.yaml`：`project.stage: Release`、`platform.cert_tier: itch`，引擎 Godot
+- `src/` 存在但为空；没有 `assets/` 目录
 
 **Input:** `/launch-checklist 2026-11-01`
 
 **Expected behavior:**
-1. Phase 3 reports the code scans as `NOT ASSESSED — no source files` (or
-   `directory empty`) and the placeholder-asset scan as
-   `NOT ASSESSED — no asset folder`, instead of zero hits
-2. The affected items (e.g. "All placeholder art replaced with final assets",
-   "No debug output in production code") are written `- [?]`
-3. The legend `[?] = not assessed — the input to this check was absent` is included
-4. Platform Certification contains only the itch.io block
-5. Nothing was found, so Blocking Items is empty — and the `[?]` items make the
-   Overall Status **NOT ASSESSED**, naming the scans that could not run, never
-   READY
+1. Phase 3 将代码扫描报告为 `NOT ASSESSED — no source files`（或
+   `directory empty`），将占位资源扫描报告为
+   `NOT ASSESSED — no asset folder`，而不是零命中
+2. 受影响的条目（例如 "All placeholder art replaced with final assets"、
+   "No debug output in production code"）写成 `- [?]`
+3. 包含图例 `[?] = not assessed — the input to this check was absent`
+4. Platform Certification 仅包含 itch.io 块
+5. 没有发现任何内容，因此 Blocking Items 为空——而 `[?]` 条目使
+   Overall Status 为 **NOT ASSESSED**，点名无法运行的扫描，绝不
+   为 READY
 
 **Assertions:**
-- [ ] No scan with no input is reported as zero hits
-- [ ] "All placeholder art replaced with final assets" is `- [?]`, not ticked and not `- [ ]`
-- [ ] The `[?]` legend appears
-- [ ] No Steamworks or console items appear
-- [ ] Overall Status is NOT ASSESSED and names the `[?]` scans (code and placeholder-asset scans); it is not READY or CONDITIONAL
+- [ ] 没有输入的扫描不会被报告为零命中
+- [ ] "All placeholder art replaced with final assets" 为 `- [?]`，未勾选且不是 `- [ ]`
+- [ ] 出现 `[?]` 图例
+- [ ] 不出现 Steamworks 或主机条目
+- [ ] Overall Status 为 NOT ASSESSED，并点名 `[?]` 扫描（代码与占位资源扫描）；不是 READY 或 CONDITIONAL
 
 ---
 
-### Case 5: Director Gate Check — Dry run, cert tier `none`
+### Case 5: 总监闸门检查 — 试运行，cert tier 为 `none`
 
 **Fixture:**
-- `project.yaml`: `project.stage: Release`, `platform.cert_tier: none`
-- Code root with source files
+- `project.yaml`：`project.stage: Release`、`platform.cert_tier: none`
+- 代码根含源文件
 
 **Input:** `/launch-checklist dry-run`
 
 **Expected behavior:**
-1. Target Launch reads DRY RUN
-2. Platform Certification is replaced by the one line
+1. Target Launch 读取为 DRY RUN
+2. Platform Certification 被替换为一行
    `Platform Certification: omitted — cert_tier is 'none' (internal/jam release).`
-3. Phase 4b is skipped and the output says so; the items it would have asked stay
-   unconfirmed, so the Overall Status is NOT ASSESSED
-4. The checklist is presented but no "May I write" ask is made and no file is written
-5. No director or other agent is spawned; no gate IDs appear
-6. Next steps name `/team-release`; the stage reads `Release`, so `/gate-check` is not offered
+3. Phase 4b 被跳过，输出说明这一点；原本会询问的条目保持
+   未确认，因此 Overall Status 为 NOT ASSESSED
+4. 清单被展示，但不进行 "May I write" 询问，也不写入任何文件
+5. 不派发任何总监或其他代理；不出现闸门 ID
+6. 下一步指明 `/team-release`；阶段为 `Release`，因此不提供 `/gate-check`
 
 **Assertions:**
-- [ ] The "omitted — cert_tier is 'none'" line appears and no certification rows are emitted
-- [ ] No Phase 4b question is asked in dry-run, the skip is stated, and the Overall Status is NOT ASSESSED
-- [ ] No "May I write" ask and no file written in dry-run mode
-- [ ] No director gate is invoked and no gate skip messages appear
-- [ ] Next steps name `/team-release` and do not offer `/gate-check`
+- [ ] 出现 "omitted — cert_tier is 'none'" 行，且不生成任何认证行
+- [ ] 试运行中不询问任何 Phase 4b 问题，说明跳过，且 Overall Status 为 NOT ASSESSED
+- [ ] 试运行模式下不进行 "May I write" 询问，也不写入任何文件
+- [ ] 不调用任何总监闸门，也不出现闸门跳过消息
+- [ ] 下一步指明 `/team-release`，且不提供 `/gate-check`
 
 ---
 
-### Case 6: Stage Still Polish — Answers Make It CONDITIONAL, or NOT ASSESSED
+### Case 6: 阶段仍为 Polish — 回答使其为 CONDITIONAL 或 NOT ASSESSED
 
 **Fixture:**
-- As Case 1, but `project.stage: Polish` and `modes.rigor: full` (`workflow: full`)
-- Variant A: in Phase 4b the Marketing items all get yes except "Press/influencer
-  review keys distributed", answered `not yet` — the user says the keys go out on
-  launch morning and the producer accepts the risk; every other section is `Yes —
-  all of them` (Servers N/A as in Case 1)
-- Variant B: as Variant A, but the user leaves the Legal question unanswered
+- 同 Case 1，但 `project.stage: Polish` 且 `modes.rigor: full`（`workflow: full`）
+- 变体 A：在 Phase 4b 中，Marketing 条目全部为 yes，但 "Press/influencer
+  review keys distributed" 回答为 `not yet`——用户说密钥在
+  上线当天早上发出，制作人接受该风险；其他每个节都为 `Yes —
+  all of them`（Servers 如 Case 1 为 N/A）
+- 变体 B：同变体 A，但用户未回答 Legal 问题
 
 **Input:** `/launch-checklist 2026-11-01`
 
 **Expected behavior:**
-1. The Testing bug rows are the `workflow: full` ones: zero S1, and zero S2 and S3
-   with no exceptions
-2. Variant A: the press-keys item is a failed item with an accepted risk, so it goes
-   under Conditional Items naming who accepted it; nothing is Blocking or
-   unconfirmed; Overall Status is CONDITIONAL
-3. Variant B: the Legal items stay unconfirmed and are named; Overall Status is
-   NOT ASSESSED (it outranks CONDITIONAL)
-4. Next steps: run `/gate-check release` first — the stage still reads `Polish` —
-   then `/team-release`
+1. Testing 缺陷行为 `workflow: full` 版本：零 S1，以及零 S2 与 S3
+   且无例外
+2. 变体 A：媒体密钥条目是带已接受风险的失败条目，因此归入
+   Conditional Items，并点名由谁接受；没有阻塞或未确认项；
+   Overall Status 为 CONDITIONAL
+3. 变体 B：Legal 条目保持未确认并被点名；Overall Status 为
+   NOT ASSESSED（高于 CONDITIONAL）
+4. 下一步：先运行 `/gate-check release`——阶段仍为 `Polish`——
+   然后 `/team-release`
 
 **Assertions:**
-- [ ] A `not yet` answer is never ticked; with an accepted risk it is listed under Conditional Items
-- [ ] Variant A's Overall Status is CONDITIONAL
-- [ ] Variant B's Overall Status is NOT ASSESSED and names the unanswered Legal items
-- [ ] No "documented exception" is offered for an S2 or S3 at `workflow: full`
-- [ ] Next steps name `/gate-check release` before `/team-release`
+- [ ] `not yet` 回答绝不被勾选；带已接受风险时列在 Conditional Items 下
+- [ ] 变体 A 的 Overall Status 为 CONDITIONAL
+- [ ] 变体 B 的 Overall Status 为 NOT ASSESSED，并点名未回答的 Legal 条目
+- [ ] 在 `workflow: full` 下不为 S2 或 S3 提供任何 "documented exception"
+- [ ] 下一步在 `/team-release` 之前指明 `/gate-check release`
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Scopes the checklist by `project.stage`, `modes.rigor` and `platform.cert_tier`
-- [ ] Branches certification on the four `cert_tier` values, not on platform names
-- [ ] Reports every scan with a denominator or `NOT ASSESSED — [reason]`
-- [ ] Writes unassessable items as `- [?]` with the legend
-- [ ] Asks "May I write" before saving (skipped entirely in dry-run), and creates no file or directory before the answer
-- [ ] Asks one Phase 4b question per section for the items only a person can confirm, never answering them itself; skips Phase 4b, and says so, in `dry-run` and `autonomous` mode
-- [ ] Names `/gate-check release` in next steps whenever `project.stage` is not `Release`
-- [ ] Puts findings with no workaround or accepted risk under Blocking Items, and shortfalls with a documented workaround or accepted risk under Conditional Items
-- [ ] Overall Status is READY, CONDITIONAL, NOT ASSESSED or NOT READY, first match NOT READY → NOT ASSESSED → CONDITIONAL → READY
+- [ ] 按 `project.stage`、`modes.rigor` 与 `platform.cert_tier` 收窄清单范围
+- [ ] 认证按四个 `cert_tier` 取值分支，而非按平台名分支
+- [ ] 每次扫描都报告分母或 `NOT ASSESSED — [reason]`
+- [ ] 无法评估的条目写成 `- [?]` 并附图例
+- [ ] 保存前询问 "May I write"（试运行中完全跳过），且在得到回答之前不创建任何文件或目录
+- [ ] Phase 4b 按节询问一次，只针对必须由人确认的条目，绝不自答；在 `dry-run` 与 `autonomous` 模式下跳过 Phase 4b 并明确说明
+- [ ] 只要 `project.stage` 不是 `Release`，就在下一步中指明 `/gate-check release`
+- [ ] 将无解决办法或已接受风险的发现放在 Blocking Items 下，将有记录的解决办法或已接受风险的不足放在 Conditional Items 下
+- [ ] Overall Status 为 READY、CONDITIONAL、NOT ASSESSED 或 NOT READY，首个命中顺序为 NOT READY → NOT ASSESSED → CONDITIONAL → READY
 
 ---
 
 ## Coverage Notes
 
-- `cert_tier: console` (TRC/Lotcheck, save-data, controller-mapping, age ratings)
-  is not separately tested.
-- Stage scoping (items for phases not yet reached are declared out of scope) and
-  `rigor: minimal` trimming are not separately tested.
-- An existing checklist in `production/releases/` is read as context only; no
-  comparison against it is tested.
+- `cert_tier: console`（TRC/Lotcheck、存档数据、手柄映射、年龄分级）
+  未单独测试。
+- 阶段收窄（尚未到达阶段的条目被声明为不在范围内）与
+  `rigor: minimal` 裁剪未单独测试。
+- `production/releases/` 中的现有清单仅作为上下文读取；未测试
+  与其进行的比较。

@@ -1,21 +1,21 @@
-# Unity 6.3 — Input Module Reference
+# Unity 6.3 — 输入模块参考
 
 **Last verified:** 2026-02-13
-**Knowledge Gap:** Unity 6 uses new Input System (legacy Input deprecated)
+**Knowledge Gap:** Unity 6 使用新的 Input System（旧版 Input 已弃用）
 
 ---
 
-## Overview
+## 概述
 
-Unity 6 input systems:
-- **Input System Package** (RECOMMENDED): Cross-platform, rebindable, modern
-- **Legacy Input Manager**: Deprecated, avoid for new projects
+Unity 6 输入系统：
+- **Input System Package**（推荐）：跨平台、可重绑定、现代化
+- **旧版 Input Manager**：已弃用，新项目应避免
 
 ---
 
-## Key Changes from 2022 LTS
+## 相较 2022 LTS 的关键变更
 
-### Legacy Input Deprecated in Unity 6
+### Unity 6 中旧版 Input 已弃用
 
 ```csharp
 // ❌ DEPRECATED: Input class
@@ -26,32 +26,32 @@ using UnityEngine.InputSystem;
 if (Keyboard.current.spaceKey.wasPressedThisFrame) { }
 ```
 
-**Migration Required:** Install `com.unity.inputsystem` package.
+**Migration Required:** 安装 `com.unity.inputsystem` 包。
 
 ---
 
-## Input System Package Setup
+## Input System 包设置
 
-### Installation
+### 安装
 1. `Window > Package Manager`
-2. Search "Input System"
-3. Install package
-4. Restart Unity when prompted
+2. 搜索 "Input System"
+3. 安装包
+4. 按提示重启 Unity
 
-### Enable New Input System
-`Edit > Project Settings > Player > Active Input Handling`:
-- **Input System Package (New)** ✅ Recommended
-- **Both** (for migration period)
+### 启用新 Input System
+`Edit > Project Settings > Player > Active Input Handling`：
+- **Input System Package (New)** ✅ 推荐
+- **Both**（用于迁移期间）
 
 ---
 
-## Input Actions (Recommended Pattern)
+## Input Actions（推荐模式）
 
-### Create Input Actions Asset
+### 创建 Input Actions 资源
 
 1. `Assets > Create > Input Actions`
-2. Name it (e.g., "PlayerControls")
-3. Open asset, define actions:
+2. 命名（例如 "PlayerControls"）
+3. 打开资源，定义动作：
 
 ```
 Action Maps:
@@ -63,10 +63,10 @@ Action Maps:
       - Look (Value, Vector2)
 ```
 
-4. **Generate C# Class**: Check "Generate C# Class" in Inspector
-5. Click "Apply"
+4. **Generate C# Class**：在检视面板中勾选 "Generate C# Class"
+5. 点击 "Apply"
 
-### Use Generated Input Class
+### 使用生成的输入类
 
 ```csharp
 using UnityEngine;
@@ -107,9 +107,9 @@ public class PlayerController : MonoBehaviour {
 
 ---
 
-## Direct Device Access (Quick & Dirty)
+## 直接访问设备（快速简便）
 
-### Keyboard
+### 键盘
 
 ```csharp
 using UnityEngine.InputSystem;
@@ -126,7 +126,7 @@ void Update() {
 }
 ```
 
-### Mouse
+### 鼠标
 
 ```csharp
 using UnityEngine.InputSystem;
@@ -147,7 +147,7 @@ void Update() {
 }
 ```
 
-### Gamepad
+### 手柄
 
 ```csharp
 using UnityEngine.InputSystem;
@@ -173,7 +173,7 @@ void Update() {
 }
 ```
 
-### Touch (Mobile)
+### 触摸（移动端）
 
 ```csharp
 using UnityEngine.InputSystem;
@@ -192,9 +192,9 @@ void Update() {
 
 ---
 
-## Input Action Callbacks
+## Input Action 回调
 
-### Action Callbacks (Event-Driven)
+### 动作回调（事件驱动）
 
 ```csharp
 // started: Input began (e.g., trigger pressed slightly)
@@ -207,7 +207,7 @@ controls.Gameplay.Fire.performed += ctx => Debug.Log("Fire performed");
 controls.Gameplay.Fire.canceled += ctx => Debug.Log("Fire canceled");
 ```
 
-### Context Data
+### 上下文数据
 
 ```csharp
 controls.Gameplay.Move.performed += ctx => {
@@ -219,9 +219,9 @@ controls.Gameplay.Move.performed += ctx => {
 
 ---
 
-## Control Schemes & Device Switching
+## 控制方案与设备切换
 
-### Define Control Schemes in Input Actions Asset
+### 在 Input Actions 资源中定义控制方案
 
 ```
 Control Schemes:
@@ -230,7 +230,7 @@ Control Schemes:
   - Touch (Touchscreen)
 ```
 
-### Auto-Switch on Device Change
+### 设备变更时自动切换
 
 ```csharp
 controls.Gameplay.Move.performed += ctx => {
@@ -244,9 +244,9 @@ controls.Gameplay.Move.performed += ctx => {
 
 ---
 
-## Rebinding (Runtime Key Mapping)
+## 重绑定（运行时按键映射）
 
-### Interactive Rebind
+### 交互式重绑定
 
 ```csharp
 using UnityEngine.InputSystem;
@@ -262,7 +262,7 @@ public void RebindJumpKey() {
 }
 ```
 
-### Save/Load Bindings
+### 保存/加载绑定
 
 ```csharp
 // Save
@@ -276,23 +276,23 @@ controls.LoadBindingOverridesFromJson(rebinds);
 
 ---
 
-## Action Types
+## 动作类型
 
-### Button (Press/Release)
-- Single press/release
-- Example: Jump, Fire
+### Button（按下/释放）
+- 单次按下/释放
+- 示例：Jump、Fire
 
-### Value (Continuous)
-- Continuous value (float, Vector2)
-- Example: Move, Look, Aim
+### Value（连续）
+- 连续值（float、Vector2）
+- 示例：Move、Look、Aim
 
-### Pass-Through (Immediate)
-- No processing, immediate value
-- Example: Mouse position
+### Pass-Through（立即）
+- 不做处理，立即取值
+- 示例：鼠标位置
 
 ---
 
-## Processors (Input Modifiers)
+## 处理器（输入修饰器）
 
 ### Scale
 
@@ -308,7 +308,7 @@ controls.LoadBindingOverridesFromJson(rebinds);
 // Flip input sign
 ```
 
-### Dead Zone
+### 死区
 
 ```csharp
 // In Input Actions asset: Action > Properties > Processors > Add > Stick Deadzone
@@ -317,9 +317,9 @@ controls.LoadBindingOverridesFromJson(rebinds);
 
 ---
 
-## PlayerInput Component (Simplified Setup)
+## PlayerInput 组件（简化设置）
 
-### Automatic Input Setup
+### 自动输入设置
 
 ```csharp
 // Add Component: Player Input
@@ -343,14 +343,14 @@ public class Player : MonoBehaviour {
 
 ---
 
-## Debugging
+## 调试
 
 ### Input Debugger
 - `Window > Analysis > Input Debugger`
-- See active devices, input values, action states
+- 查看活动设备、输入值、动作状态
 
 ---
 
-## Sources
+## 来源
 - https://docs.unity3d.com/Packages/com.unity.inputsystem@1.11/manual/index.html
 - https://docs.unity3d.com/Packages/com.unity.inputsystem@1.11/manual/QuickStartGuide.html

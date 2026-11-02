@@ -6,35 +6,35 @@
 - **Author**: [Agent/Person]
 - **Reviewer**: lead-programmer
 - **Related ADR**: [ADR-XXXX if applicable]
-- **Related Design Doc**: [Link to game design doc this implements]
+- **Related Design Doc**: [实现本文档所依据的游戏设计文档链接]
 
 ## Engine API Surface
 
 | Field | Value |
 |-------|-------|
-| **Engine** | [e.g. Godot 4.7 / Unity 6 / Unreal Engine 5.8] |
-| **APIs Depended On** | [Specific classes/methods/nodes used, version-pinned — e.g. `CharacterBody3D.move_and_slide() (Godot 4.x)`] |
-| **References Consulted** | [engine-reference docs read before writing this — e.g. `docs/engine-reference/godot/modules/physics.md`] |
-| **Post-Cutoff Features Used** | [Features from engine versions beyond LLM training cutoff, or "None"] |
-| **Unverified Assumptions** | [API behaviours assumed but not yet tested against the target version, or "None"] |
-| **Engine Upgrade Risk** | [LOW / MEDIUM / HIGH — how fragile is this design if the engine version changes?] |
+| **Engine** | [例如 Godot 4.7 / Unity 6 / Unreal Engine 5.8] |
+| **APIs Depended On** | [使用的具体类/方法/节点，固定版本——例如 `CharacterBody3D.move_and_slide() (Godot 4.x)`] |
+| **References Consulted** | [撰写前阅读的引擎参考资料——例如 `docs/engine-reference/godot/modules/physics.md`] |
+| **Post-Cutoff Features Used** | [超出 LLM 训练截止时间的引擎版本功能，或 "None"] |
+| **Unverified Assumptions** | [已假设但尚未针对目标版本测试的 API 行为，或 "None"] |
+| **Engine Upgrade Risk** | [LOW / MEDIUM / HIGH——若引擎版本变化，此设计有多脆弱？] |
 
-> **Rule**: If any **Unverified Assumptions** are listed, this document cannot be marked
-> as Accepted until those assumptions are validated in the actual engine environment.
+> **Rule**：如果列出了任何 **Unverified Assumptions**，在那些假设于实际引擎
+> 环境中得到验证之前，本文档不能标记为 Accepted。
 
 ## Overview
-[2-3 sentence summary of what this system does and why it exists]
+[用 2-3 句话概述该系统的功能及存在原因]
 
 ## Requirements
 ### Functional Requirements
-- [FR-1]: [Description]
-- [FR-2]: [Description]
+- [FR-1]：[描述]
+- [FR-2]：[描述]
 
 ### Non-Functional Requirements
-- **Performance**: [Budget — e.g., "< 1ms per frame"]
-- **Memory**: [Budget — e.g., "< 50MB at peak"]
-- **Scalability**: [Limits — e.g., "Support up to 1000 entities"]
-- **Thread Safety**: [Requirements]
+- **Performance**: [预算——例如「每帧 < 1ms」]
+- **Memory**: [预算——例如「峰值 < 50MB」]
+- **Scalability**: [限制——例如「支持最多 1000 个实体」]
+- **Thread Safety**: [要求]
 
 ## Architecture
 
@@ -46,7 +46,7 @@
 ### Component Breakdown
 | Component | Responsibility | Owns |
 | --------- | -------------- | ---- |
-| [Name] | [What it does] | [What data it owns] |
+| [Name] | [它做什么] | [它拥有什么数据] |
 
 ### Public API
 ```
@@ -59,7 +59,7 @@
 ```
 
 ### Data Flow
-[Step by step: how data moves through the system during a typical frame]
+[逐步说明：在典型的一帧中数据如何流经系统]
 
 ## Implementation Plan
 
@@ -77,20 +77,20 @@
 ## Dependencies
 | Depends On | For What |
 | ---------- | -------- |
-| [System] | [Reason] |
+| [System] | [原因] |
 
 | Depended On By | For What |
 | -------------- | -------- |
-| [System] | [Reason] |
+| [System] | [原因] |
 
 ## Testing Strategy
-- **Unit Tests**: [What to test at unit level]
-- **Integration Tests**: [Cross-system tests needed]
-- **Performance Tests**: [Benchmarks to create]
-- **Edge Cases**: [Specific scenarios to test]
+- **Unit Tests**: [在单元层面测试什么]
+- **Integration Tests**: [所需的跨系统测试]
+- **Performance Tests**: [要创建的基准]
+- **Edge Cases**: [要测试的具体场景]
 
 ## Known Limitations
-[What this design intentionally does NOT support and why]
+[此设计有意不支持什么，以及为什么]
 
 ## Future Considerations
-[What might need to change if requirements evolve — but do NOT build for this now]
+[如果需求演变可能需要改变什么——但现在不要为此构建]

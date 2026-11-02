@@ -2,252 +2,242 @@
 
 ## Skill Summary
 
-`/create-control-manifest` reads the Accepted ADRs in `docs/architecture/` and
-generates a control manifest — a flat, actionable rules sheet that captures the
-required patterns, forbidden approaches, performance guardrails and engine API
-constraints for each architectural layer (Foundation, Core, Feature,
-Presentation), plus global rules from project config and engine reference docs.
-Story authors use it so stories inherit the correct architectural rules without
-reading every ADR.
+`/create-control-manifest` 读取 `docs/architecture/` 中已接受（Accepted）的 ADR，
+并生成一份控制清单（control manifest）—— 一张扁平、可执行的规则表，记录每个
+架构层（Foundation、Core、Feature、Presentation）所需的模式、禁止的做法、
+性能护栏和引擎 API 约束，以及来自项目配置和引擎参考资料文档的全局规则。
+用户故事作者借助它，让用户故事继承正确的架构规则，而无需阅读每一份 ADR。
 
-The skill counts ADRs first, resolves each ADR's `## Status` with a Grep before
-reading any ADR body, and builds the manifest from the Accepted set only. It
-previews rule counts per layer, runs the **TD-MANIFEST** director gate when the
-review mode is `full` (skipped with a note in `solo` and `lean`), then asks
-"May I write the Control Manifest?" before writing
-`docs/architecture/control-manifest.md`. Verdicts: COMPLETE on write, BLOCKED
-when the user declines the write.
+该技能先统计 ADR 数量，在读取任何 ADR 正文之前用 Grep 解析每份 ADR 的
+`## Status`，并仅基于 Accepted 集合构建清单。它会预览每个层的规则数量，在
+评审模式为 `full` 时运行 **TD-MANIFEST** 总监质量闸门（gate）（在 `solo` 和
+`lean` 下跳过并附注说明），然后在写入
+`docs/architecture/control-manifest.md` 之前询问
+"May I write the Control Manifest?"。结论：写入后为 COMPLETE，用户拒绝写入时
+为 BLOCKED。
 
 ---
 
 ## Static Assertions (Structural)
 
-Checked against the SKILL.md by `/skill-test spec` — no fixture needed.
+由 `/skill-test spec` 针对 SKILL.md 检查 —— 无需 fixture。
 
-- [ ] Has required frontmatter fields: `name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`
-- [ ] Has ≥2 phase headings
-- [ ] Contains verdict keywords: COMPLETE, BLOCKED
-- [ ] Contains "May I write" collaborative protocol language (for the control manifest)
-- [ ] Has a next-step handoff at the end (`/create-epics` then `/create-stories`)
-- [ ] Documents that only Accepted ADRs are included (not Proposed)
-- [ ] Names gate TD-MANIFEST and its solo/lean skip notes
+- [ ] 具有必需的前置元数据字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 至少有 2 个阶段标题
+- [ ] 包含结论关键词：COMPLETE、BLOCKED
+- [ ] 包含 "May I write" 协作协议用语（针对控制清单）
+- [ ] 结尾有下一步交接（先 `/create-epics`，再 `/create-stories`）
+- [ ] 说明只包含 Accepted ADR（不含 Proposed）
+- [ ] 点明质量闸门 TD-MANIFEST 及其 solo/lean 跳过说明
 
 ---
 
 ## Director Gate Checks
 
-One gate: **TD-MANIFEST** (`technical-director`,
-`.claude/docs/director-gates/td-manifest.md`), spawned after the user accepts the
-Phase 4 rule summary and before the Phase 5 write ask.
+一个质量闸门：**TD-MANIFEST**（`technical-director`，
+`.claude/docs/director-gates/td-manifest.md`），在用户接受 Phase 4 规则摘要之后、
+Phase 5 写入询问之前被派发。
 
-- `full` → spawned; receives the Control Manifest Preview, the ADRs covered, the
-  engine version and any rules sourced from preferences or engine reference docs
-- `lean` → skipped; output notes "TD-MANIFEST skipped — Lean mode."
-- `solo` → skipped; output notes "TD-MANIFEST skipped — Solo mode."
+- `full` → 派发；接收控制清单预览（Control Manifest Preview）、覆盖的 ADR、
+  引擎版本，以及任何来自偏好设置或引擎参考资料文档的规则
+- `lean` → 跳过；输出注明 "TD-MANIFEST skipped — Lean mode."
+- `solo` → 跳过；输出注明 "TD-MANIFEST skipped — Solo mode."
 
-Verdict handling: APPROVE → proceed to the write ask; CONCERNS → `AskUserQuestion`
-with `Revise flagged rules` / `Accept and proceed` / `Discuss further`; REJECT →
-the manifest is not written, flagged rules are fixed and the summary re-presented;
-NOT ASSESSED [missing input] → never read as APPROVE: the missing input is named,
-then supplied and the gate re-run, or the run goes on with
-`TD-MANIFEST: NOT ASSESSED — [input]` stated in the output and the Verdict line.
+结论处理：APPROVE → 进入写入询问；CONCERNS → 通过 `AskUserQuestion` 提供
+`Revise flagged rules` / `Accept and proceed` / `Discuss further`；REJECT →
+不写入清单，修复被标记的规则并重新呈现摘要；NOT ASSESSED [missing input] →
+绝不当作 APPROVE 读取：先指出缺失的输入，随后补齐并重新运行质量闸门，或者继续
+运行并在输出和结论行中注明 `TD-MANIFEST: NOT ASSESSED — [input]`。
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非某个用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置
+`modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有
+`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
 
 ---
 
 ## Test Cases
 
-### Case 1: Happy Path — 4 Accepted ADRs create a correct manifest
+### Case 1: 正常路径 —— 4 份 Accepted ADR 生成正确的清单
 
 **Fixture:**
-- `docs/architecture/` contains `adr-0001-*.md` … `adr-0004-*.md`, each with a
-  `## Status` section reading `Accepted`
-- Each ADR has `## Decision` (with "must"/"always" statements) and
-  `## Alternatives Considered` (with rejected alternatives)
-- No existing `docs/architecture/control-manifest.md`
-- Review mode resolves to `solo`
+- `docs/architecture/` 包含 `adr-0001-*.md` … `adr-0004-*.md`，每份都有
+  一个内容为 `Accepted` 的 `## Status` 小节
+- 每份 ADR 都有 `## Decision`（含 "must"/"always" 表述）和
+  `## Alternatives Considered`（含被否决的备选方案）
+- 不存在 `docs/architecture/control-manifest.md`
+- 评审模式解析为 `solo`
 
 **Input:** `/create-control-manifest`
 
 **Expected behavior:**
-1. Globs `docs/architecture/adr-*.md` (N = 4), then Greps `^## Status` to resolve
-   the Accepted set before reading any ADR body
-2. Greps only the Decision / Alternatives Considered / Performance Implications /
-   Engine Compatibility sections of the Accepted ADRs
-3. Reports "Loaded 4 Accepted ADRs, engine: [name + version]."
-4. Shows the Control Manifest Preview (rule counts per layer, ADRs covered) and
-   asks "Does this rule summary look complete?"
-5. Notes "TD-MANIFEST skipped — Solo mode."
-6. Asks "May I write the Control Manifest?" with option
+1. Glob `docs/architecture/adr-*.md`（N = 4），然后在读取任何 ADR 正文之前
+   Grep `^## Status` 以确定 Accepted 集合
+2. 只 Grep Accepted ADR 的 Decision / Alternatives Considered / Performance
+   Implications / Engine Compatibility 小节
+3. 报告 "Loaded 4 Accepted ADRs, engine: [name + version]."
+4. 显示控制清单预览（每层规则数量、覆盖的 ADR），并询问
+   "Does this rule summary look complete?"
+5. 注明 "TD-MANIFEST skipped — Solo mode."
+6. 询问 "May I write the Control Manifest?"，选项为
    `[A] Yes — write to docs/architecture/control-manifest.md`
-7. Writes the manifest after approval; Verdict: COMPLETE
+7. 获得批准后写入清单；结论：COMPLETE
 
 **Assertions:**
-- [ ] All 4 Accepted ADRs are listed under `ADRs Covered` in the manifest header
-- [ ] Each layer section has `### Required Patterns` and `### Forbidden Approaches`
-- [ ] Every rule carries its source — `— source: [ADR-NNNN]` for a layer rule; a global rule names its `project.yaml` / `technical-preferences.md` key or engine-reference file (e.g. `deprecated-apis.md`)
-- [ ] Preview is shown and "Does this rule summary look complete?" is asked before any write ask
-- [ ] "TD-MANIFEST skipped — Solo mode." appears; no technical-director is spawned
-- [ ] Skill does NOT write before the "May I write the Control Manifest?" approval
-- [ ] Verdict is COMPLETE after writing
+- [ ] 全部 4 份 Accepted ADR 都列在清单头部的 `ADRs Covered` 下
+- [ ] 每个层小节都有 `### Required Patterns` 和 `### Forbidden Approaches`
+- [ ] 每条规则都带有来源 —— 层规则为 `— source: [ADR-NNNN]`；全局规则需指明其 `project.yaml` / `technical-preferences.md` 键或引擎参考资料文件（例如 `deprecated-apis.md`）
+- [ ] 在任何写入询问之前显示预览并询问 "Does this rule summary look complete?"
+- [ ] 出现 "TD-MANIFEST skipped — Solo mode."；未派发 technical-director
+- [ ] 在 "May I write the Control Manifest?" 获得批准前，技能不写入
+- [ ] 写入后结论为 COMPLETE
 
 ---
 
-### Case 2: Failure Path — No ADRs found
+### Case 2: 失败路径 —— 未找到 ADR
 
 **Fixture:**
-- `docs/architecture/` directory exists but contains no `adr-*.md` files
+- `docs/architecture/` 目录存在，但不含任何 `adr-*.md` 文件
 
 **Input:** `/create-control-manifest`
 
 **Expected behavior:**
-1. Glob returns N = 0
-2. Skill outputs: "No ADRs found — run `/architecture-decision` before building a
+1. Glob 返回 N = 0
+2. 技能输出："No ADRs found — run `/architecture-decision` before building a
    control manifest."
-3. Skill stops — no Status Grep, no preview, no write ask, no file written
+3. 技能停止 —— 不执行 Status Grep、不显示预览、不发起写入询问、不写文件
 
 **Assertions:**
-- [ ] The "No ADRs found" message is printed
-- [ ] Skill recommends `/architecture-decision` as the next action
-- [ ] No control manifest file is written and no "May I write" ask is shown
-- [ ] Verdict COMPLETE is NOT emitted (the skill stops at Phase 1)
+- [ ] 打印出 "No ADRs found" 消息
+- [ ] 技能推荐以 `/architecture-decision` 作为下一步操作
+- [ ] 不写入任何控制清单文件，也不显示 "May I write" 询问
+- [ ] 不输出 COMPLETE 结论（技能在 Phase 1 即停止）
 
 ---
 
-### Case 3: Mixed ADR Statuses — Only Accepted ADRs included
+### Case 3: ADR 状态混合 —— 只纳入 Accepted ADR
 
 **Fixture:**
-- `docs/architecture/` contains 5 ADRs: 3 with `## Status` Accepted, 2 with
-  `## Status` Proposed (ADR-0004, ADR-0005)
+- `docs/architecture/` 包含 5 份 ADR：3 份的 `## Status` 为 Accepted，2 份的
+  `## Status` 为 Proposed（ADR-0004、ADR-0005）
 
 **Input:** `/create-control-manifest`
 
 **Expected behavior:**
-1. N = 5; the `^## Status` Grep returns 5 matches, 3 reading Accepted — the
-   "some Accepted" row applies and the Accepted set A = the 3 ADRs
-2. Section extraction is filtered to set A
-3. Preview reports "Loaded 3 Accepted ADRs", `ADRs covered` lists only the 3, and
-   `ADRs excluded` names ADR-0004 (Proposed) and ADR-0005 (Proposed)
-4. Proceeds without asking about Proposed ADRs (that ask is reserved for the
-   none-Accepted case)
+1. N = 5；`^## Status` Grep 返回 5 个匹配，其中 3 个为 Accepted —— 适用
+   "some Accepted" 行，Accepted 集合 A = 这 3 份 ADR
+2. 小节提取被过滤到集合 A
+3. 预览报告 "Loaded 3 Accepted ADRs"，`ADRs covered` 只列出这 3 份，
+   且 `ADRs excluded` 指名 ADR-0004（Proposed）和 ADR-0005（Proposed）
+4. 继续执行，不询问如何处理 Proposed ADR（该询问保留给无 Accepted ADR 的情形）
 
 **Assertions:**
-- [ ] Status is resolved with the `^## Status` Grep before any ADR section is read
-- [ ] The preview's `ADRs covered` and the manifest's `ADRs Covered` list exactly the 3 Accepted ADRs
-- [ ] Both excluded ADRs are named, with their status, in the preview the user sees before approving — the skill does not silently omit them
-- [ ] No rule in the manifest is sourced from either Proposed ADR
-- [ ] The "none Accepted — proceed with Proposed or stop?" ask is NOT shown for this fixture
+- [ ] 在读取任何 ADR 小节之前，用 `^## Status` Grep 确定状态
+- [ ] 预览的 `ADRs covered` 和清单的 `ADRs Covered` 恰好列出这 3 份 Accepted ADR
+- [ ] 两份被排除的 ADR 都在用户批准前看到的预览中被指名并标注状态 —— 技能不会静默省略它们
+- [ ] 清单中没有任何规则来源于这两份 Proposed ADR
+- [ ] 此 fixture 下不显示 "none Accepted — proceed with Proposed or stop?" 询问
 
 ---
 
-### Case 4: Edge Case — Regenerating an existing manifest
+### Case 4: 边界情况 —— 重新生成已存在的清单
 
 **Fixture:**
-- `docs/architecture/control-manifest.md` already exists with
-  `Manifest Version` and `Last Updated` both dated last week
-- `docs/architecture/` contains Accepted ADRs, one of them accepted since then
-- `production/epics/` already holds epics with stories, so the first-run
-  `/create-epics` next step does not apply
+- `docs/architecture/control-manifest.md` 已存在，其
+  `Manifest Version` 和 `Last Updated` 均为上周日期
+- `docs/architecture/` 包含 Accepted ADR，其中一份是此后才被接受的
+- `production/epics/` 已存有带用户故事的史诗（epic），因此首次运行的
+  `/create-epics` 下一步不适用
 
 **Input:** `/create-control-manifest update`
 
 **Expected behavior:**
-1. Skill rebuilds the manifest from the current Accepted ADRs (same Phases 1–4)
-2. Asks "May I write the Control Manifest?" before overwriting
-3. The new manifest's `Manifest Version` and `Last Updated` are both today's date
-4. After writing, prints "Updated. Recommend notifying the team of changed rules —
+1. 技能基于当前 Accepted ADR 重建清单（同样的 Phase 1–4）
+2. 覆盖之前询问 "May I write the Control Manifest?"
+3. 新清单的 `Manifest Version` 和 `Last Updated` 均为今天的日期
+4. 写入后打印 "Updated. Recommend notifying the team of changed rules —
    especially any new Forbidden entries."
 
 **Assertions:**
-- [ ] The existing file is not overwritten before "May I write the Control Manifest?" is approved
-- [ ] The newly accepted ADR appears in `ADRs Covered`
-- [ ] `Manifest Version` equals `Last Updated` and is the generation date (not a v1→v2 counter)
-- [ ] The regeneration next-step ("Updated. Recommend notifying the team…") is shown instead of the first-run `/create-epics` handoff
+- [ ] 在 "May I write the Control Manifest?" 获得批准前，不覆盖已存在的文件
+- [ ] 新接受的 ADR 出现在 `ADRs Covered` 中
+- [ ] `Manifest Version` 等于 `Last Updated`，且为生成日期（不是 v1→v2 计数器）
+- [ ] 显示重新生成的下一步提示（"Updated. Recommend notifying the team…"），而不是首次运行的 `/create-epics` 交接
 
 ---
 
-### Case 5: Director Gate — TD-MANIFEST in full review mode returns REJECT
+### Case 5: 总监质量闸门 —— 在 full 评审模式下 TD-MANIFEST 返回 REJECT
 
 **Fixture:**
-- 4 Accepted ADRs exist
-- Review mode resolves to `full`
-- TD-MANIFEST returns REJECT, naming one rule that has no source ADR
+- 存在 4 份 Accepted ADR
+- 评审模式解析为 `full`
+- TD-MANIFEST 返回 REJECT，并指名一条没有来源 ADR 的规则
 
 **Input:** `/create-control-manifest`
 
 **Expected behavior:**
-1. Skill shows the Phase 4 preview; user picks
+1. 技能显示 Phase 4 预览；用户选择
    `[A] Yes — looks good, run the director review and write the manifest`
-2. Spawns `technical-director` via `Agent` with gate TD-MANIFEST, passing the
-   preview (full rule list), ADRs covered and engine version
-3. On REJECT: does not write the manifest; fixes the flagged rule and re-presents
-   the summary
-4. "May I write the Control Manifest?" is not asked while the REJECT stands
+2. 通过 `Agent` 派发 `technical-director`，质量闸门为 TD-MANIFEST，并传入
+   预览（完整规则列表）、覆盖的 ADR 和引擎版本
+3. 收到 REJECT 时：不写入清单；修复被标记的规则并重新呈现摘要
+4. 在 REJECT 仍然有效期间，不询问 "May I write the Control Manifest?"
 
 **Assertions:**
-- [ ] TD-MANIFEST is spawned only after the Phase 4 summary is accepted
-- [ ] The gate receives the rule list, ADRs covered and engine version
-- [ ] On REJECT no manifest file is written
-- [ ] The flagged rule is revised and the summary re-presented before any write ask
-- [ ] No "TD-MANIFEST skipped" note appears in `full` mode
+- [ ] 仅在 Phase 4 摘要被接受后才派发 TD-MANIFEST
+- [ ] 质量闸门接收规则列表、覆盖的 ADR 和引擎版本
+- [ ] 收到 REJECT 时不写入任何清单文件
+- [ ] 在任何写入询问之前修订被标记的规则并重新呈现摘要
+- [ ] `full` 模式下不出现 "TD-MANIFEST skipped" 提示
 
 ---
 
-### Case 6: Edge Case — No Accepted ADR, and ADRs with no `## Status`
+### Case 6: 边界情况 —— 无 Accepted ADR，以及 ADR 缺少 `## Status`
 
 **Fixture (none Accepted):**
-- `docs/architecture/` contains 3 ADRs, each with `## Status` Proposed
+- `docs/architecture/` 包含 3 份 ADR，每份的 `## Status` 均为 Proposed
 
 **Fixture (malformed):**
-- `docs/architecture/` contains 3 ADRs, none with a `## Status` section
+- `docs/architecture/` 包含 3 份 ADR，均无 `## Status` 小节
 
 **Input (both fixtures):** `/create-control-manifest`
 
 **Expected behavior (none Accepted):**
-1. N = 3; the `^## Status` Grep matches 3, none reading Accepted
-2. Reports "3 ADRs found, none Accepted. A manifest built from Proposed ADRs would
-   encode decisions that may still change." and asks whether to proceed with the
-   Proposed ADRs or stop
+1. N = 3；`^## Status` Grep 匹配 3 个，均不是 Accepted
+2. 报告 "3 ADRs found, none Accepted. A manifest built from Proposed ADRs would
+   encode decisions that may still change."，并询问是继续使用 Proposed ADR
+   还是停止
 
 **Expected behavior (malformed):**
-1. N = 3; the `^## Status` Grep matches nothing
-2. Reports "3 ADRs found, none has a `## Status` section — acceptance cannot be
-   determined. Run `/architecture-decision retrofit [file]` on each." and stops
+1. N = 3；`^## Status` Grep 无匹配
+2. 报告 "3 ADRs found, none has a `## Status` section — acceptance cannot be
+   determined. Run `/architecture-decision retrofit [file]` on each." 并停止
 
 **Assertions:**
-- [ ] None Accepted: the ask is shown and no empty manifest is written
-- [ ] Malformed: the run stops — the ADRs are not treated as Accepted and no manifest is written
-- [ ] Malformed: the retrofit command reads `/architecture-decision retrofit [file]` — the form that skill parses
-- [ ] In neither fixture is a rule summary previewed or a "May I write" ask shown before the user proceeds
+- [ ] 无 Accepted 时：显示询问，不写入空清单
+- [ ] 格式异常时：运行停止 —— ADR 不被视为 Accepted，且不写入清单
+- [ ] 格式异常时：retrofit 命令的写法为 `/architecture-decision retrofit [file]` —— 即该技能可解析的形式
+- [ ] 两种 fixture 下，在用户继续之前都不预览规则摘要、也不显示 "May I write" 询问
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Counts ADRs and resolves `## Status` before reading ADR sections
-- [ ] Only Accepted ADRs included, and every excluded ADR is named with its status in the preview; the none-Accepted and no-`## Status` cases stop or ask instead of emitting an empty manifest
-- [ ] Rule summary shown to user before the gate and before "May I write"
-- [ ] "May I write the Control Manifest?" asked before writing `docs/architecture/control-manifest.md`
-- [ ] TD-MANIFEST runs in `full`, is skipped with a named note in `lean`/`solo`
-- [ ] Ends with next-step handoff: `/create-epics layer: foundation` then `/create-stories [epic-slug]`
+- [ ] 在读取 ADR 小节之前统计 ADR 数量并确定 `## Status`
+- [ ] 只纳入 Accepted ADR，且每份被排除的 ADR 都在预览中被指名并标注状态；无 Accepted 和缺少 `## Status` 的情形应停止或询问，而不是输出空清单
+- [ ] 在质量闸门之前、在 "May I write" 之前向用户显示规则摘要
+- [ ] 在写入 `docs/architecture/control-manifest.md` 之前询问 "May I write the Control Manifest?"
+- [ ] TD-MANIFEST 在 `full` 下运行，在 `lean`/`solo` 下跳过并给出具名说明
+- [ ] 以下一步交接结尾：先 `/create-epics layer: foundation`，再 `/create-stories [epic-slug]`
 
 ---
 
 ## Coverage Notes
 
-- The exact section structure of the generated manifest (constraint tables, pattern
-  lists) is defined by the skill body and not re-enumerated in test assertions.
-- What happens after the user proceeds with Proposed ADRs (Case 6) is not
-  fixture-tested.
-- TD-MANIFEST APPROVE, CONCERNS and NOT ASSESSED paths, and the `lean` skip note,
-  are not separately fixture-tested.
-- Relevance filtering of `deprecated-apis.md` entries (2D vs 3D scoping) is not
-  covered.
+- 生成清单的具体小节结构（约束表、模式列表）由技能正文定义，不在测试断言中再次列举。
+- 用户在 Case 6 中选择继续使用 Proposed ADR 后的行为未做 fixture 测试。
+- TD-MANIFEST 的 APPROVE、CONCERNS 和 NOT ASSESSED 路径，以及 `lean` 跳过说明，未单独做 fixture 测试。
+- `deprecated-apis.md` 条目的相关性过滤（2D 与 3D 的范围划分）未覆盖。

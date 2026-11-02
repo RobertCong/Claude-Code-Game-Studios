@@ -1,33 +1,33 @@
-> Gate definition, loaded by `/gate-check` for the TARGET PHASE ONLY.
-> Never load the other five — one gate applies per invocation.
+> 闸门定义，由 `/gate-check` 仅为目标阶段加载。
+> 绝不加载其他五个——每次调用只适用一个闸门。
 
 
-# Gate: Concept → Systems Design
+# 质量闸门：Concept → Systems Design
 
 
-**Required Artifacts:**
-- [ ] `design/gdd/game-concept.md` exists and has content
-- [ ] Game pillars defined (in concept doc or `design/gdd/game-pillars.md`)
-- [ ] Visual Identity Anchor section exists in `design/gdd/game-concept.md` (from brainstorm Phase 4 art-director output)
+**必需产出物：**
+- [ ] `design/gdd/game-concept.md` 存在且有内容
+- [ ] 已定义游戏支柱（位于概念文档或 `design/gdd/game-pillars.md` 中）
+- [ ] `design/gdd/game-concept.md` 中存在视觉识别锚点章节（来自头脑风暴 Phase 4 的 art-director 输出）
 
-**Recommended (not blocking):**
-- [ ] Concept prototype exists in `prototypes/` with a REPORT.md showing PROCEED verdict
-      (`/prototype [core-mechanic]`) — skipping this means GDDs may be written for an
-      idea that hasn't been played. Acceptable if the concept is proven by other means.
+**推荐（非阻塞）：**
+- [ ] `prototypes/` 中存在概念原型，其 REPORT.md 显示 PROCEED 结论
+      （`/prototype [core-mechanic]`）——跳过它意味着 GDD 可能是为一个
+      从未被玩过的点子而写。如果概念已通过其他方式得到验证，则可接受。
 
-**Quality Checks:**
-- [ ] Game concept has been reviewed (`/design-review` verdict not MAJOR REVISION NEEDED)
-- [ ] Core loop is described and understood
-- [ ] Target audience is identified
-- [ ] Visual Identity Anchor contains a one-line visual rule and at least 2 supporting visual principles
+**质量检查：**
+- [ ] 游戏概念已经过评审（`/design-review` 结论不是 MAJOR REVISION NEEDED）
+- [ ] 核心循环已被描述并理解
+- [ ] 已明确目标受众
+- [ ] 视觉识别锚点包含一条一句话视觉规则和至少 2 条支撑性视觉原则
 
-## Workflow tier reductions
+## 工作流层级削减
 
-The checklist above is the **`full` baseline**. At lower tiers apply the
-reduction for the resolved tier; items not named keep their status above.
-Reductions only ever *relax* a requirement — `workflow_overrides` is the
-only thing that adds one.
+以上清单是 **`full` 基线**。在较低层级应用已解析层级对应的
+削减；未点名的条目保持上述状态。
+削减只会*放宽*要求——`workflow_overrides` 是唯一会新增要求的
+机制。
 
-- **`full`** — game-concept.md + pillars + Visual Identity Anchor all required
-- **`standard`** — pillars + Visual Identity Anchor → recommended; `game-concept.md` stays required
-- **`minimal`** — gate target is **`design/game-brief.md`** (not `game-concept.md`); the GDD / pillars / Visual Identity Anchor checks **drop** (a brief with content = PASS). `/brainstorm` writes `design/game-brief.md` at this tier (Option A); `game-concept.md` remains the `standard`/`full` concept doc.
+- **`full`** —— game-concept.md + 游戏支柱 + 视觉识别锚点全部必需
+- **`standard`** —— 游戏支柱 + 视觉识别锚点 → 推荐；`game-concept.md` 仍为必需
+- **`minimal`** —— 闸门目标是 **`design/game-brief.md`**（而非 `game-concept.md`）；GDD / 游戏支柱 / 视觉识别锚点检查**取消**（有内容的简报 = PASS）。在此层级 `/brainstorm` 写入 `design/game-brief.md`（选项 A）；`game-concept.md` 仍是 `standard`/`full` 的概念文档。

@@ -1,81 +1,81 @@
 # Agent Test Spec: ux-designer
 
 ## Agent Summary
-Domain: User experience flows, interaction design, information architecture, input handling design, and onboarding UX.
-Does NOT own: visual art style (art-director), UI implementation code (ui-programmer).
-No gate IDs assigned.
+领域：用户体验流程、交互设计、信息架构、输入处理设计与上手引导 UX。
+不负责：视觉美术风格（art-director）、UI 实现代码（ui-programmer）。
+未分配质量闸门（gate）ID。
 
 ---
 
 ## Static Assertions (Structural)
 
-- [ ] `description:` field is present and domain-specific (references UX flows / interaction design / information architecture)
-- [ ] `tools:` list includes Read, Write, Edit, Glob, Grep
-- [ ] Model tier is `inherit` — frontmatter `model:` reads exactly `inherit` (tiers: `.claude/docs/model-tiers.md`)
-- [ ] Agent definition does not claim authority over visual art direction or UI implementation code
+- [ ] `description:` 字段存在且与领域特定（提及 UX 流程 / 交互设计 / 信息架构）
+- [ ] `tools:` 列表包含 Read、Write、Edit、Glob、Grep
+- [ ] 模型档位为 `inherit` — frontmatter `model:` 的值恰为 `inherit`（档位说明：`.claude/docs/model-tiers.md`）
+- [ ] 代理定义未声称对视觉美术方向或 UI 实现代码拥有权限
 
 ---
 
 ## Test Cases
 
-### Case 1: In-domain request — appropriate output
-**Input:** "Design the inventory management flow for a survival game."
+### Case 1: 域内请求 — 合适的输出
+**Input:** “为生存游戏设计物品栏管理流程。”
 **Expected behavior:**
-- Before drafting, asks clarifying questions (core player goal, constraints such as input methods and scope, reference games) and presents 2-4 flow options with pros/cons grounded in UX theory (e.g., mental models, progressive disclosure, Fitts's Law), with a recommendation and the final choice deferred to the user
-- The drafted flow maps each step and transition: open, browse, select item, sub-actions (equip/drop/combine), close — and names the friction points it removes
-- Specifies button assignments and contextual actions for each input method in scope (keyboard/mouse, gamepad, touch if applicable)
-- Specifies player feedback for each action (visual, audio, haptic) so the player always knows what happened and why
-- Checks the flow against the agent's Accessibility Checklist (keyboard-only, gamepad-only, not reliant on color alone, readable at minimum font size)
-- Does NOT produce visual design (colors, icons) or implementation code
-- Asks "May I write this to [filepath]?" before writing the spec
+- 在起草前提出澄清问题（核心玩家目标、约束如输入方式与范围、参考游戏），并基于 UX 理论（例如心智模型、渐进式披露、菲茨定律）给出 2–4 个流程选项及利弊，附建议，最终选择交予用户
+- 起草的流程映射每个步骤与转换：打开、浏览、选中物品、子操作（装备/丢弃/组合）、关闭——并指出其消除的摩擦点
+- 为范围内每种输入方式（键盘/鼠标、手柄、触摸如适用）指定按键分配与情境操作
+- 为每个操作指定玩家反馈（视觉、音频、触觉），使玩家始终知道发生了什么以及原因
+- 依据代理的无障碍清单检查流程（仅键盘、仅手柄、不只依赖颜色、在最小字号下可读）
+- 不产出视觉设计（颜色、图标）或实现代码
+- 写入规格前询问“May I write this to [filepath]?”
 
-### Case 2: Out-of-domain request — redirects correctly
-**Input:** "Implement the inventory screen in GDScript with drag-and-drop support."
+### Case 2: 域外请求 — 正确重定向
+**Input:** “用 GDScript 实现物品栏界面，支持拖放。”
 **Expected behavior:**
-- Does NOT produce implementation code
-- Explicitly states that UI code implementation belongs to `ui-programmer`
-- Redirects the request to `ui-programmer`
-- Offers the part of the request it does own: the drag-and-drop interaction design (drag affordance, valid/invalid drop feedback, and a non-drag equivalent so the screen stays usable with gamepad only and keyboard only) for ui-programmer to implement against
+- 不产出实现代码
+- 明确说明 UI 代码实现属于 `ui-programmer`
+- 将请求重定向给 `ui-programmer`
+- 提供其真正负责的那部分请求：拖放交互设计（拖拽可供性、有效/无效放置反馈，以及非拖放等效方案，使界面在仅手柄和仅键盘下仍可用），供 ui-programmer 实现
 
-### Case 3: Flow depth conflict — simplification
-**Input:** "The lead designer says the current 5-step crafting flow is too deep; maximum 3 steps allowed."
+### Case 3: 流程深度冲突 — 简化
+**Input:** “主设计师说当前 5 步的制作流程太深；最多允许 3 步。”
 **Expected behavior:**
-- Presents 2-4 ways to reach a 3-step flow, each with pros/cons and a recommendation, and defers the choice to the user
-- For each option, shows which of the 5 steps are merged or removed and what each removed step did for the player, so the usability cost of the collapse is visible
-- Does NOT drop a step whose player goal has nowhere else to happen without saying so
-- Flags any required use case the 3-step limit cannot serve for user input, and proposes an alternative (e.g., progressive disclosure of advanced options)
+- 提出 2–4 种达到 3 步流程的方式，各附利弊与建议，将选择交予用户
+- 对每个选项，展示 5 个步骤中哪些被合并或移除，以及每个被移除步骤曾为玩家带来什么，使折叠的可用性代价可见
+- 不删除玩家目标无处安放的步骤而不说明
+- 对 3 步上限无法满足的任何必需用例，标记并请求用户输入，同时提出替代方案（例如高级选项的渐进式披露）
 
-### Case 4: Accessibility conflict
-**Input:** "The onboarding flow uses a timed prompt (auto-advances after 3 seconds) to keep pace, but this conflicts with accessibility requirements for user-controlled timing."
+### Case 4: 无障碍冲突
+**Input:** “上手引导流程使用限时提示（3 秒后自动前进）以保持节奏，但这与要求由用户控制时机的无障碍要求冲突。”
 **Expected behavior:**
-- Identifies the conflict: an auto-advancing prompt takes timing out of the player's control
-- Does NOT keep the auto-advance to preserve pace — accessibility requirements are not overridden for aesthetics
-- Coordinates with `accessibility-specialist`, which owns the WCAG criterion that applies (SC 2.2.1 Timing Adjustable), to agree on a compliant solution
-- Presents alternatives as options with pros/cons — player-advanced prompt, skip or pause control, a setting to disable auto-advance — and shows how each keeps the onboarding's information pacing
+- 识别冲突：自动前进的提示将时机控制权从玩家手中拿走
+- 不为维持节奏而保留自动前进——无障碍要求不因美学而被覆盖
+- 与 `accessibility-specialist` 协作，其拥有适用的 WCAG 准则（SC 2.2.1 Timing Adjustable），商定合规方案
+- 以带利弊的选项呈现替代方案——玩家前进提示、跳过或暂停控制、禁用自动前进的设置——并展示每个选项如何保持上手引导的信息节奏
 
-### Case 5: Context pass — player mental model research
-**Input:** Playtest research provided in context: "Players consistently expected the 'Crafting' option to be inside the Inventory screen, not in a separate top-level menu." Request: "Redesign the navigation IA for crafting."
+### Case 5: 上下文传递 — 玩家心智模型研究
+**Input:** 上下文中提供试玩研究：“玩家始终期望‘制作’选项位于物品栏界面内，而不是单独的顶层菜单。”请求：“重新设计制作功能的导航信息架构（IA）。”
 **Expected behavior:**
-- References the specific player expectation from the research (crafting expected inside inventory)
-- Presents IA options with pros/cons and recommends one that places crafting inside the inventory screen (e.g., a tab or panel), deferring the final choice to the user
-- Does NOT recommend a design that contradicts the stated player mental model without explicit justification
-- The WHY behind the recommendation cites the playtest finding and names it as the players' mental model
+- 引用研究中的具体玩家期望（预期制作在物品栏内）
+- 呈现带利弊的信息架构（IA）选项，推荐将制作放在物品栏界面内（例如标签页或面板）的方案，最终选择交予用户
+- 不推荐与所述玩家心智模型矛盾的设计，除非有明确理由
+- 建议背后的 WHY 引用试玩研究发现，并将其命名为玩家的心智模型
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Stays within declared domain (UX flows, interaction design, IA, onboarding)
-- [ ] Redirects code implementation to ui-programmer, visual style to art-director
-- [ ] Presents 2-4 options with pros/cons and a recommendation before drafting, and defers the decision to the user
-- [ ] Coordinates with accessibility-specialist when a flow conflicts with an accessibility requirement
-- [ ] Grounds recommendations in provided player research when it is given, citing it in the rationale, rather than in assumed behavior
-- [ ] Documents rationale for flow decisions against user goals
-- [ ] Asks "May I write this to [filepath]?" before writing
+- [ ] 保持在声明的领域内（UX 流程、交互设计、IA、上手引导）
+- [ ] 将代码实现重定向给 ui-programmer，将视觉风格重定向给 art-director
+- [ ] 在起草前呈现 2–4 个带利弊的选项与建议，并将决定交予用户
+- [ ] 当流程与无障碍要求冲突时与 accessibility-specialist 协作
+- [ ] 在提供玩家研究时以之为建议依据，并在理由中引用，而不是假定行为
+- [ ] 针对用户目标记录流程决策的理由
+- [ ] 写入前询问“May I write this to [filepath]?”
 
 ---
 
 ## Coverage Notes
-- Inventory flow (Case 1) should be written to `design/ux/` as a spec for ui-programmer to implement against
-- Mental model case (Case 5) verifies the agent applies research evidence, not intuition
-- Accessibility coordination (Case 4) confirms the agent does not override accessibility requirements for UX aesthetics
+- 物品栏流程（Case 1）应写入 `design/ux/` 作为规格，供 ui-programmer 据此实现
+- 心智模型用例（Case 5）验证代理应用研究证据，而非直觉
+- 无障碍协作（Case 4）确认代理不会为 UX 美学而覆盖无障碍要求

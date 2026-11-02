@@ -1,86 +1,86 @@
 # Agent Test Spec: godot-gdextension-specialist
 
 ## Agent Summary
-Domain: GDExtension API, godot-cpp C++ bindings, godot-rust bindings, native library integration, and native performance optimization.
-Does NOT own: GDScript code (gdscript-specialist), shader code (godot-shader-specialist).
-No gate IDs assigned.
+领域：GDExtension API、godot-cpp C++ 绑定、godot-rust 绑定、原生库集成以及原生性能优化。
+不负责：GDScript 代码（gdscript-specialist）、着色器代码（godot-shader-specialist）。
+未分配质量闸门（gate）ID。
 
 ---
 
 ## Static Assertions (Structural)
 
-- [ ] `description:` field is present and domain-specific (references GDExtension / godot-cpp / native bindings)
-- [ ] `tools:` list includes Read, Write, Edit, Bash, Glob, Grep
-- [ ] Model tier is `sonnet` — frontmatter `model:` reads exactly `sonnet` (tiers: `.claude/docs/model-tiers.md`)
-- [ ] Agent definition does not claim authority over GDScript or shader authoring
+- [ ] `description:` 字段存在且与领域相关（提及 GDExtension / godot-cpp / 原生绑定）
+- [ ] `tools:` 列表包含 Read、Write、Edit、Bash、Glob、Grep
+- [ ] 模型层级为 `sonnet` — frontmatter `model:` 的内容恰好为 `sonnet`（层级说明：`.claude/docs/model-tiers.md`）
+- [ ] 代理定义未声明对 GDScript 或着色器编写的权限
 
 ---
 
 ## Test Cases
 
-### Case 1: In-domain request — appropriate output
-**Input:** "Expose a C++ rigid-body physics simulation library to GDScript via GDExtension."
+### Case 1: 领域内请求 — 输出得当
+**Input:** "通过 GDExtension 把一个 C++ 刚体物理模拟库暴露给 GDScript。"
 **Expected behavior:**
-- Produces a GDExtension binding pattern using godot-cpp:
-  - Class inheriting from `godot::Object` or an appropriate Godot base class
-  - `GDCLASS` macro registration
-  - `_bind_methods()` implementation exposing the physics API to GDScript
-  - Module entry point: `initialize_module` in `register_types.cpp` registers the class with `ClassDB::register_class<T>()` at `MODULE_INITIALIZATION_LEVEL_SCENE`, reached from the exported init function named by the manifest's `entry_symbol`
-- Notes the `.gdextension` manifest file format required
-- Does NOT produce the GDScript usage code (that belongs to gdscript-specialist)
+- 使用 godot-cpp 生成 GDExtension 绑定模式：
+  - 类继承自 `godot::Object` 或合适的 Godot 基类
+  - `GDCLASS` 宏注册
+  - 实现 `_bind_methods()`，将物理 API 暴露给 GDScript
+  - 模块入口点：`register_types.cpp` 中的 `initialize_module` 在 `MODULE_INITIALIZATION_LEVEL_SCENE` 层级用 `ClassDB::register_class<T>()` 注册该类，由清单（manifest）`entry_symbol` 所指的导出初始化函数到达
+- 说明所需的 `.gdextension` 清单文件格式
+- 不生成 GDScript 使用代码（那属于 gdscript-specialist）
 
-### Case 2: Out-of-domain redirect
-**Input:** "Write the GDScript that calls the physics simulation from Case 1."
+### Case 2: 领域外重定向
+**Input:** "编写调用 Case 1 中物理模拟的 GDScript。"
 **Expected behavior:**
-- Does NOT produce GDScript code
-- Explicitly states that GDScript authoring belongs to `godot-gdscript-specialist`
-- Redirects to `godot-gdscript-specialist`
-- Any hand-off it offers is the extension's bound API surface (method names, parameter and return types) — not GDScript that calls it
+- 不生成 GDScript 代码
+- 明确说明 GDScript 编写属于 `godot-gdscript-specialist`
+- 重定向到 `godot-gdscript-specialist`
+- 它提供的任何交接内容是该扩展的绑定 API 表面（方法名、参数与返回类型）— 而不是调用它的 GDScript
 
-### Case 3: ABI compatibility risk — minor version update
-**Input:** "We're upgrading from Godot 4.5 to 4.6. Will our existing GDExtension still work?"
+### Case 3: ABI 兼容性风险 — 次版本更新
+**Input:** "我们正从 Godot 4.5 升级到 4.6。现有的 GDExtension 还能用吗？"
 **Expected behavior:**
-- States the compatibility direction: an extension built for 4.5 should load in 4.6, but not the reverse — so it may keep working, yet it must be re-tested, and rebuilt against 4.6 to use newer APIs
-- Directs to check the 4.5→4.6 migration guide for GDExtension API changes
-- Recommends rebuilding against the 4.6 godot-cpp headers rather than treating "should load" as tested
-- Notes that the `.gdextension` manifest may need a `compatibility_minimum` version update
-- Lays out the rebuild as a checklist: rebuild debug and release (`scons ... target=template_debug` / `template_release`, or `cargo build` / `cargo build --release`) for every target platform, update `compatibility_minimum`, then re-test in the 4.6 editor before shipping
+- 说明兼容性方向：为 4.5 构建的扩展应能在 4.6 中加载，反之则不行 — 因此它可能继续可用，但必须重新测试，并针对 4.6 重新构建以使用更新的 API
+- 指引查阅 4.5→4.6 迁移指南中的 GDExtension API 变更
+- 建议针对 4.6 的 godot-cpp 头文件重新构建，而不是把"应该能加载"当作已测试
+- 说明 `.gdextension` 清单可能需要更新 `compatibility_minimum` 版本
+- 将重新构建整理为清单：为每个目标平台重新构建 debug 与 release（`scons ... target=template_debug` / `template_release`，或 `cargo build` / `cargo build --release`），更新 `compatibility_minimum`，然后在发布前于 4.6 编辑器中重新测试
 
-### Case 4: Memory management — RAII for Godot objects
-**Input:** "How should we manage the lifecycle of Godot objects created inside C++ GDExtension code?"
+### Case 4: 内存管理 — Godot 对象的 RAII
+**Input:** "我们应该如何管理在 C++ GDExtension 代码内部创建的 Godot 对象的生命周期？"
 **Expected behavior:**
-- Produces the RAII-based lifecycle pattern for Godot objects in GDExtension:
-  - `Ref<T>` for reference-counted objects (auto-released when Ref goes out of scope)
-  - `memnew()` / `memdelete()` for non-reference-counted objects
-  - Warning: do NOT use `new`/`delete` for Godot objects — undefined behavior
-- Notes object ownership rules: who is responsible for freeing a node added to the scene tree
-- Its concrete example (e.g., a `CollisionShape3D` created in C++) applies both rules: the node is created with `memnew()` and handed to the scene tree with `add_child()`, after which the tree frees it (no `memdelete()`); its shape resource is held in a `Ref<>`; `memdelete()` is only for a node that never enters the tree
+- 为 GDExtension 中的 Godot 对象生成基于 RAII 的生命周期模式：
+  - 引用计数对象使用 `Ref<T>`（Ref 离开作用域时自动释放）
+  - 非引用计数对象使用 `memnew()` / `memdelete()`
+  - 警告：Godot 对象不要使用 `new`/`delete` — 属未定义行为
+- 说明对象所有权规则：加入场景树的节点由谁负责释放
+- 其具体示例（例如在 C++ 中创建的 `CollisionShape3D`）同时应用这两条规则：节点用 `memnew()` 创建，并用 `add_child()` 交给场景树，之后由场景树负责释放（不使用 `memdelete()`）；其形状资源保存在 `Ref<>` 中；`memdelete()` 只用于从未进入场景树的节点
 
-### Case 5: Context pass — Godot 4.6 GDExtension API check
-**Input:** Engine version context: Godot 4.6 (upgrading from 4.5). Request: "Check if any GDExtension APIs changed from 4.5 to 4.6."
+### Case 5: 上下文校验 — Godot 4.6 GDExtension API 检查
+**Input:** 引擎版本上下文：Godot 4.6（从 4.5 升级）。请求："检查 4.5 到 4.6 之间是否有 GDExtension API 发生变化。"
 **Expected behavior:**
-- References the 4.5→4.6 migration guide from the VERSION.md verified sources list
-- Reads the 4.5 → 4.6 table in `docs/engine-reference/godot/breaking-changes.md` and states explicitly that it has no GDExtension-specific row, with the caveat to verify against the official changelog
-- Still surfaces the listed 4.6 changes that reach native code: `Quaternion` now initializes to identity (it was zero)
-- Flags the D3D12 default on Windows (4.6 change) as potentially relevant for GDExtension rendering code
-- Provides a checklist of what to verify after upgrading
+- 引用 VERSION.md 已验证来源列表中的 4.5→4.6 迁移指南
+- 读取 `docs/engine-reference/godot/breaking-changes.md` 中的 4.5 → 4.6 表格，并明确说明其中没有 GDExtension 专属条目，同时提示需对照官方变更日志核实
+- 仍指出所列出的、会影响原生代码的 4.6 变更：`Quaternion` 现在初始化为单位值（此前为零）
+- 将 Windows 上默认使用 D3D12（4.6 变更）标记为可能与 GDExtension 渲染代码相关
+- 提供升级后需核实事项的清单
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Stays within declared domain (GDExtension, godot-cpp, godot-rust, native bindings)
-- [ ] Redirects GDScript authoring to godot-gdscript-specialist
-- [ ] Redirects shader authoring to godot-shader-specialist
-- [ ] Returns structured output (binding patterns, RAII examples, ABI checklists)
-- [ ] States that compatibility runs forward only (older build → newer Godot) and requires a re-test after an upgrade — never treats "should load" as tested
-- [ ] Uses Godot-specific memory management (`memnew`/`memdelete`, `Ref<T>`) not raw C++ new/delete
-- [ ] Checks engine version reference for GDExtension API changes before confirming compatibility
-- [ ] Asks "May I write this to [filepath]?" naming the file before writing
+- [ ] 保持在声明的领域内（GDExtension、godot-cpp、godot-rust、原生绑定）
+- [ ] 将 GDScript 编写重定向到 godot-gdscript-specialist
+- [ ] 将着色器编写重定向到 godot-shader-specialist
+- [ ] 返回结构化输出（绑定模式、RAII 示例、ABI 检查清单）
+- [ ] 说明兼容性仅向前（旧构建 → 更新的 Godot），且升级后需要重新测试 — 绝不把"应该能加载"当作已测试
+- [ ] 使用 Godot 专属内存管理（`memnew`/`memdelete`、`Ref<T>`），而非原生 C++ new/delete
+- [ ] 在确认兼容性前检查引擎版本参考资料中的 GDExtension API 变更
+- [ ] 写入前询问 "May I write this to [filepath]?" 并指明文件名
 
 ---
 
 ## Coverage Notes
-- Binding pattern (Case 1) should include a smoke test verifying the extension loads and the method is callable from GDScript
-- ABI risk (Case 3) is a critical escalation path — the agent must not approve shipping an unverified extension binary
-- Memory management (Case 4) verifies the agent applies Godot-specific patterns, not generic C++ RAII
+- 绑定模式（Case 1）应包含冒烟测试，验证扩展可加载且该方法可从 GDScript 调用
+- ABI 风险（Case 3）是关键的升级上报路径 — 代理不得批准发布未经验证的扩展二进制文件
+- 内存管理（Case 4）验证代理应用 Godot 专属模式，而非通用 C++ RAII

@@ -1,27 +1,27 @@
-# /ux-design — Section 3: Create File Skeleton
+# /ux-design — 第 3 节：创建文件骨架
 
-> Part of `/ux-design`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> 属于 `/ux-design` 的一部分。`SKILL.md` 指明了何时阅读本文件；它
+> 解析出的设置以及其后各标题下的规则在此仍然适用。
 
-## 3. Create File Skeleton
+## 3. 创建文件骨架
 
-**In this file:**
+**本文件包含：**
 
-- Skeleton for UX Spec (screen or flow)
-- Skeleton for HUD Design
-- Skeleton for Interaction Pattern Library
-- Skeleton for Accessibility Requirements
+- UX 规格（屏幕或流程）的骨架
+- HUD 设计的骨架
+- 交互模式库的骨架
+- 无障碍要求的骨架
 
-Once the user confirms, **immediately** create the output file with empty section
-headers. This ensures incremental writes have a target and work survives interruptions.
+一旦用户确认，**立即**创建带有空小节标题的输出文件。这样可以确保
+增量写入有目标，工作成果也能在中断后保留下来。
 
-Ask: "May I create the skeleton file at `design/ux/[filename].md`?" — except in
-`accessibility` mode, where the path is `design/accessibility-requirements.md`
-(see the mode table in Section 1; it is deliberately not under `design/ux/`).
+询问：“我可以在 `design/ux/[filename].md` 创建骨架文件吗？” — 但在
+`accessibility` 模式下例外，那里路径是 `design/accessibility-requirements.md`
+（见第 1 节的模式表；它有意不放在 `design/ux/` 下）。
 
 ---
 
-### Skeleton for UX Spec (screen or flow)
+### UX 规格（屏幕或流程）的骨架
 
 ```markdown
 # UX Spec: [Screen/Flow Name]
@@ -140,7 +140,7 @@ Ask: "May I create the skeleton file at `design/ux/[filename].md`?" — except i
 
 ---
 
-### Skeleton for HUD Design
+### HUD 设计的骨架
 
 ```markdown
 # HUD Design
@@ -238,7 +238,7 @@ Ask: "May I create the skeleton file at `design/ux/[filename].md`?" — except i
 
 ---
 
-### Skeleton for Interaction Pattern Library
+### 交互模式库的骨架
 
 ```markdown
 # Interaction Pattern Library
@@ -281,10 +281,10 @@ Ask: "May I create the skeleton file at `design/ux/[filename].md`?" — except i
 
 ---
 
-### Skeleton for Accessibility Requirements
+### 无障碍要求的骨架
 
-Section list mirrors `.claude/docs/templates/accessibility-requirements.md` — if
-the template gains or loses a section, this skeleton follows it, not the reverse.
+小节列表与 `.claude/docs/templates/accessibility-requirements.md` 保持一致 — 如果
+模板增加或删除了某个小节，这个骨架会跟随它，而不是反过来。
 
 ```markdown
 # Accessibility Requirements
@@ -365,17 +365,17 @@ the template gains or loses a section, this skeleton follows it, not the reverse
 [To be designed]
 ```
 
-> **The tier commitment is the gated part.** `gate-pre-production.md` requires
-> the file to exist *with an accessibility tier committed*, and
-> `gate-production.md` checks that tier is addressed in every key screen spec.
-> A skeleton whose Tier Definition is still `[To be designed]` satisfies the
-> glob but not the gate — author that section first.
+> **等级承诺是受质量闸门约束的部分。** `gate-pre-production.md` 要求
+> 该文件存在*且已承诺无障碍等级*，而
+> `gate-production.md` 会检查该等级是否在每个关键屏幕规格中得到落实。
+> 若骨架的 Tier Definition 仍是 `[To be designed]`，它能满足
+> glob，却无法通过质量闸门 — 请先撰写该小节。
 
 ---
 
-After writing the skeleton, update `production/session-state/active.md` with:
-- Task: Designing [screen/flow name] UX spec
-- Current section: Starting (skeleton created)
-- File: design/ux/[filename].md (or `design/accessibility-requirements.md` in `accessibility` mode)
+写出骨架之后，用以下内容更新 `production/session-state/active.md`：
+- 任务：设计 [screen/flow name] 的 UX 规格
+- 当前小节：开始（骨架已创建）
+- 文件：design/ux/[filename].md（或在 `accessibility` 模式下为 `design/accessibility-requirements.md`）
 
 ---

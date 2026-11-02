@@ -5,45 +5,43 @@ paths:
   - "Source/**/Tests/**/*.{h,cpp}"
 ---
 
-# Test Standards
+# 测试标准
 
-- Test naming follows the engine's language — every name says the scenario and
-  the expected result:
-  - **Godot (gdUnit4):** file `[system]_[feature]_test.gd`, function
+- 测试命名遵循引擎的语言——每个名称都说明场景和预期结果：
+  - **Godot（gdUnit4）：** 文件 `[system]_[feature]_test.gd`，函数
     `test_[scenario]_[expected]`
-  - **Unity (NUnit):** class `[System]Tests` in a file of the same name, method
-    `[Scenario]_[Expected]` in PascalCase
-  - **Unreal (Automation):** class `F[System][Scenario]Test` — one per test:
-    each `IMPLEMENT_SIMPLE_AUTOMATION_TEST` defines its class, so a second test
-    reusing a name fails to link — test name
-    `<Project>.[System].[Scenario]` — the project's test command,
-    `Automation RunTests <Project>.`, runs every test whose name contains
-    `<Project>.` (a substring match, not a prefix). `<Project>.` is the root
-    that filter in `commands.test` uses: the project name, or the distinct root
-    `/setup-engine` chose when the project's name is also an engine area
-    (`Audio`, `Core`, `Input`, …) — name tests under whichever it is
-- Every test must have a clear arrange/act/assert structure
-- Unit tests must not depend on external state (filesystem, network, database)
-- Integration tests must clean up after themselves
-- Performance tests must specify acceptable thresholds and fail if exceeded
-- Test data must be defined in the test or in dedicated fixtures, never shared mutable state
-- Mock external dependencies — tests should be fast and deterministic
-- Every bug fix must have a regression test that would have caught the original bug —
-  and **you must watch it fail before you trust it.** Run the new test against the
-  unfixed code, confirm it fails, then apply the fix and confirm it passes. A
-  regression test that has only ever been seen passing is not known to test anything.
+  - **Unity（NUnit）：** 类 `[System]Tests` 放在同名文件中，方法
+    `[Scenario]_[Expected]` 使用 PascalCase
+  - **Unreal（Automation）：** 类 `F[System][Scenario]Test` —— 每个测试一个：
+    每个 `IMPLEMENT_SIMPLE_AUTOMATION_TEST` 定义自己的类，因此第二个测试
+    复用名称会链接失败 —— 测试名
+    `<Project>.[System].[Scenario]` —— 项目的测试命令
+    `Automation RunTests <Project>.` 会运行所有名称包含
+    `<Project>.` 的测试（子串匹配，不是前缀匹配）。`<Project>.` 是
+    `commands.test` 中过滤器的根：项目名，或当项目名同时也是一个引擎领域
+    （`Audio`、`Core`、`Input`……）时 `/setup-engine` 选择的独特根——无论哪种，
+    都把测试命名在它之下
+- 每个测试必须有清晰的 arrange/act/assert 结构
+- 单元测试不得依赖外部状态（文件系统、网络、数据库）
+- 集成测试必须自行清理
+- 性能测试必须指定可接受的阈值，并在超限时失败
+- 测试数据必须定义在测试内或专用 fixture 中，绝不能共享可变状态
+- 对外部依赖进行 mock——测试应当快速且确定性
+- 每个 bug 修复都必须有一个能捕获原始 bug 的回归测试——
+  并且**在信任它之前，你必须亲眼见它失败。** 对未修复的代码运行新测试，
+  确认它失败，然后应用修复并确认它通过。一个只见过通过的
+  回归测试，不能算作测试了任何东西。
 
-  > This is `.claude/rules/skill-authoring.md`'s "a gate you have not watched fail
-  > is not a gate", applied to tests. It is written out here because stating the
-  > *goal* is not enough. A regression test for an iteration-order defect can use
-  > a fixture where no cell takes part in two transfers per tick — it then passes
-  > against the very bug it was written for, and looks authoritative doing it. The
-  > fixture, not the assertion, is what makes it useless, and only running it
-  > against the unfixed code exposes that.
+  > 这是把 `.claude/rules/skill-authoring.md` 的「没有亲眼见它失败的闸门
+  > 不是闸门」应用到测试上。这里写出来是因为只陈述
+  > *目标*不够。针对迭代顺序缺陷的回归测试可能使用
+  > 一个没有任何单元在单个 tick 内参与两次传输的 fixture——于是它对着
+  > 它所针对的那个 bug 也通过，还显得权威。让测试无效的是
+  > fixture，而不是断言，只有对未修复代码运行它才能暴露这一点。
 
-## Examples
+## 示例
 
-**Correct** (proper naming + Arrange/Act/Assert) — Godot, gdUnit4:
+**正确**（恰当的命名 + Arrange/Act/Assert）——Godot，gdUnit4：
 
 ```gdscript
 extends GdUnitTestSuite
@@ -61,7 +59,7 @@ func test_take_damage_reduces_health() -> void:
     assert_int(health.current_health).is_equal(75)
 ```
 
-Unity, NUnit (`Assets/Tests/EditMode/HealthTests.cs`):
+Unity，NUnit（`Assets/Tests/EditMode/HealthTests.cs`）：
 
 ```csharp
 using NUnit.Framework;
@@ -83,7 +81,7 @@ public class HealthTests
 }
 ```
 
-Unreal, Automation (`Source/<Module>/Private/Tests/HealthTest.cpp`):
+Unreal，Automation（`Source/<Module>/Private/Tests/HealthTest.cpp`）：
 
 ```cpp
 #include "Misc/AutomationTest.h"
@@ -109,7 +107,7 @@ bool FHealthTakeDamageTest::RunTest(const FString& Parameters)
 #endif
 ```
 
-**Incorrect**:
+**错误**：
 
 ```gdscript
 func test1() -> void:  # VIOLATION: no descriptive name

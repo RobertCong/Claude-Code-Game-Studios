@@ -1,9 +1,9 @@
 ### Certification: Console
-- [ ] TRC/TCR/Lotcheck requirements checklist complete
-- [ ] First-party certification submission prepared
-- [ ] Platform-specific achievement/trophy integration tested
-- [ ] Parental controls respected
-- [ ] Save-data rules compliant (corruption, full storage, user switching)
-- [ ] Controller-mapping rules met, platform-correct button prompts
-- [ ] Suspend/resume verified
-- [ ] Age ratings obtained (ESRB, PEGI, regional)
+- [ ] TRC/TCR/Lotcheck 要求检查清单已完成
+- [ ] 第一方认证提交材料已准备
+- [ ] 平台专属成就/奖杯集成已测试
+- [ ] 家长控制已遵守
+- [ ] 存档数据规则符合要求（损坏、存储已满、切换用户）
+- [ ] 控制器映射规则已满足，按键提示符合平台规范
+- [ ] 挂起/恢复已验证
+- [ ] 已取得年龄分级（ESRB、PEGI、各地区）

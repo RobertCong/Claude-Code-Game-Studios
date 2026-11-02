@@ -1,25 +1,22 @@
-> Gate definition. The spawning skill passes this file's path to the director agent; the AGENT reads it — the parent session should not.
+> 质量闸门定义。发起调用的技能会把本文件路径传给总监代理；由该 AGENT 读取——父会话不应读取。
 
-# AD-CONCEPT-VISUAL — Visual Identity Anchor
+# AD-CONCEPT-VISUAL — 视觉识别锚点
 
-Agent: `art-director` | Model tier: session (inherit) | Domain: Visual identity, art bible, visual production readiness
+Agent：`art-director` | 模型层级：session（继承） | 领域：视觉识别、美术圣经、视觉制作就绪度
 
-**Trigger**: After game pillars are locked (brainstorm Phase 4), in parallel with CD-PILLARS
+**触发时机**：游戏支柱确定之后（头脑风暴 Phase 4），与 CD-PILLARS 并行
 
-**Context to pass**:
-- Game concept (elevator pitch, core fantasy, unique hook)
-- Full pillar set with names, definitions, and design tests
-- Target platform (if known)
-- Any reference games or visual touchstones mentioned by the user
+**需传入的上下文**：
+- 游戏概念（一句话提案、核心幻想、独特钩子）
+- 完整支柱集合，含名称、定义与设计检验
+- 目标平台（如已知）
+- 用户提到的任何参考游戏或视觉参照物
 
-**Prompt**:
-> "Based on these game pillars and core concept, propose 2-3 distinct visual identity
-> directions. For each direction provide: (1) a one-line visual rule that could guide
-> all visual decisions (e.g., 'everything must move', 'beauty is in the decay'), (2)
-> mood and atmosphere targets, (3) shape language (sharp/rounded/organic/geometric
-> emphasis), (4) color philosophy (palette direction, what colors mean in this world).
-> Be specific — avoid generic descriptions. One direction should directly serve the
-> primary design pillar. Name each direction. Recommend which best serves the stated
-> pillars and explain why."
+**提示词**：
+> "基于这些游戏支柱与核心概念，提出 2-3 个彼此不同的视觉识别方向。对每个方向
+> 给出：(1) 一条可指导所有视觉决策的视觉法则（例如"一切皆须运动"、"美在衰败中"），
+> (2) 情绪与氛围目标，(3) 形状语言（锐利/圆润/有机/几何侧重），(4) 色彩哲学
+> （配色方向、色彩在这个世界中的含义）。要具体——避免泛泛而谈。其中一个方向应
+> 直接服务首要设计支柱。为每个方向命名。推荐哪一个最能服务既定支柱，并解释原因。"
 
-**Verdicts**: CONCEPTS (multiple valid options — user selects) / STRONG (one direction clearly dominant) / CONCERNS (pillars don't provide enough direction to differentiate visual identity yet — name each pillar that gives none, and which of the four elements above it leaves open)
+**结论**：CONCEPTS（多个有效选项——由用户选择） / STRONG（某一方向明显占优） / CONCERNS（支柱尚不足以区分视觉识别方向——列出未提供方向感的每个支柱，以及它使上述四要素中的哪一项悬而未决）

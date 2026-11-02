@@ -1,6 +1,6 @@
 ---
 name: qa-plan
-description: "QA test plan for a sprint — classifies stories by Logic/Integration/Visual/UI, covers automated tests, manual cases, smoke scope."
+description: "针对一个冲刺的 QA 测试计划——按 Logic/Integration/Visual/UI 对用户故事分类，覆盖自动化测试、手工用例、冒烟测试范围。"
 argument-hint: "[sprint | feature: system-name | story: path]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Bash(bash "*/.claude/skills/qa-plan/../../hooks/yaml-helper.sh" resolve_config *)
@@ -9,95 +9,92 @@ model: sonnet
 
 !`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow,qa.level,system_overrides`
 
-Resolved above — use as-is. No block → defaults in
-`.claude/docs/config-resolution.md`.
+以上已解析——直接使用。无配置块 → 使用
+`.claude/docs/config-resolution.md` 中的默认值。
 
 
-# QA Plan
+# QA 计划
 
-This skill generates a structured QA plan for a sprint, feature, or individual
-story. It reads all in-scope story files and their referenced GDDs, classifies
-each story by test type, and produces a plan that tells developers exactly what
-to automate, what to verify manually, what the smoke test scope is, and when
-to bring in a playtester.
+本技能为一次冲刺（sprint）、一个功能或单个用户故事生成结构化的 QA 计划。
+它读取所有范围内的用户故事文件及其引用的 GDD，按测试类型对每个用户故事
+分类，并产出一份计划，明确告诉开发者哪些要自动化、哪些要手工验证、
+冒烟测试（smoke test）范围是什么，以及何时引入试玩测试者。
 
-Run this before a sprint begins so the team knows upfront what testing work
-is required. A test plan written after implementation is a post-mortem, not a
-plan.
+在冲刺开始之前运行本技能，好让团队提前知道需要哪些测试工作。
+在实现之后才写的测试计划是事后复盘，而不是计划。
 
-**Output:** `production/qa/qa-plan-[sprint-slug]-[date].md`
+**输出：** `production/qa/qa-plan-[sprint-slug]-[date].md`
 
 ---
 
-Every `AskUserQuestion` call follows `.claude/docs/automation-modes.md`
-(collaborative asks always · guided major-only · autonomous logs and proceeds;
-`automation_always_ask` categories always prompt).
+每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+（collaborative 每次必问 · guided 仅重大事项 · autonomous 记录日志并继续；
+`automation_always_ask` 类别始终提示）。
 
-**Workflow tier**: resolve per the GDD's system as each is read (per
-`.claude/docs/workflow-modes.md`): `workflow_overrides.system_overrides.<system>`
-if the block lists one, else the project value. It sets how many GDD sections
-the test plan is mined from — see Phase 2.
+**工作流层级（Workflow tier）**：每读到一个 GDD 的系统时按该系统的配置解析（依据
+`.claude/docs/workflow-modes.md`）：如果配置块列出了该项，则用 `workflow_overrides.system_overrides.<system>`，
+否则用项目值。它决定测试计划从多少个 GDD 章节中挖掘——见 Phase 2。
 
-**`qa.level`**: at `minimal`, produce only a minimal smoke
-plan — drop the automated-test-required rows and the test-file DoD; at `standard`,
-a full plan per story type; at `full`, also add per-system coverage targets.
-Distinct axis from `workflow` (which sets how many GDD sections are mined).
-No level drops the Visual/Feel and UI screenshot rows — tests are waived at
-`minimal`, the look is not (`.claude/docs/coding-standards.md`).
+**`qa.level`**：在 `minimal` 下，只产出最小化的冒烟
+计划——去掉"需要自动化测试"的行和测试文件的 DoD；在 `standard` 下，
+按用户故事类型产出完整计划；在 `full` 下，还要增加按系统的覆盖率目标。
+它与 `workflow` 是不同的维度（后者决定挖掘多少个 GDD 章节）。
+任何层级都不删除 Visual/Feel 和 UI 截图的条目——在
+`minimal` 下测试被豁免，但外观不是（`.claude/docs/coding-standards.md`）。
 
-## Phase 1: Parse Scope
+## Phase 1: 解析范围
 
-**Argument:** `$ARGUMENTS` (blank = ask user via AskUserQuestion)
+**参数：** `$ARGUMENTS`（留空 = 通过 AskUserQuestion 询问用户）
 
-Determine scope from the argument:
+根据参数确定范围：
 
-- **`sprint`** — read the most recent file in `production/sprints/`, extract
-  every story file path referenced. If `production/sprint-status.yaml` exists,
-  use it as the primary story list and fall back to the sprint plan for story
-  metadata.
-- **`feature: [system-name]`** — glob `production/epics/*/story-*.md`, filter
-  to stories whose file path or title contains the system name. Also check the
-  epic index file (`EPIC.md`) in that system's directory.
-- **`story: [path]`** — validate that the path exists and load that single file.
-- **No argument** — use `AskUserQuestion`:
-  - "What is the scope for this QA plan?"
-  - Options: "Current sprint", "Specific feature (enter system name)",
-    "Specific story (enter path)", "Full epic"
+- **`sprint`** —— 读取 `production/sprints/` 中最近的文件，提取
+  其中引用的每一个用户故事文件路径。如果 `production/sprint-status.yaml` 存在，
+  就以它作为主要用户故事列表，并从冲刺计划回退获取用户故事
+  元数据。
+- **`feature: [system-name]`** —— glob `production/epics/*/story-*.md`，筛选出
+  文件路径或标题包含该系统名的用户故事。同时检查该系统目录下的
+  史诗（epic）索引文件（`EPIC.md`）。
+- **`story: [path]`** —— 校验该路径存在，并加载那一个文件。
+- **无参数** —— 使用 `AskUserQuestion`：
+  - "这份 QA 计划的范围是什么？"
+  - 选项："当前冲刺"、"特定功能（输入系统名）"、
+    "特定用户故事（输入路径）"、"完整史诗"
 
-After resolving scope, report: "Building QA plan for [N] stories in [scope]."
+确定范围后，报告："正在为 [scope] 中的 [N] 个用户故事构建 QA 计划。"
 
-If a story file path is referenced but the file does not exist, note it as
-MISSING and continue with the remaining stories. Do not fail the entire plan
-for one missing file.
+如果引用了某个用户故事文件路径但文件不存在，将其标记为
+MISSING 并继续处理其余用户故事。不要因为一个文件缺失就使整个计划
+失败。
 
-> **If the resolved scope contains ZERO stories, stop — do not build a plan.**
-> Report `NOT ASSESSED — no stories in scope`, naming which scope was searched
-> and which path was empty, and route:
-> - no file in `production/sprints/` → "No sprint plan found. Run `/sprint-plan new`."
->   At `workflow: minimal` there are no sprints by design — route instead to
->   `/qa-plan feature: [epic-slug]` or `/qa-plan story: [path]`.
-> - a sprint plan exists but references no stories → "Sprint plan `[path]` lists no
->   stories. Run `/create-stories [epic-slug]`."
-> - `feature:`/`story:` scope matched nothing → name the glob that came back empty.
+> **如果解析出的范围包含零个用户故事，停止——不要构建计划。**
+> 报告 `NOT ASSESSED — no stories in scope`，说明搜索的是哪个范围
+> 以及哪条路径为空，并进行路由：
+> - `production/sprints/` 中没有任何文件 → "未找到冲刺计划。运行 `/sprint-plan new`。"
+>   在 `workflow: minimal` 下按设计没有冲刺——改为路由到
+>   `/qa-plan feature: [epic-slug]` 或 `/qa-plan story: [path]`。
+> - 存在冲刺计划但未引用任何用户故事 → "冲刺计划 `[path]` 未列出任何
+>   用户故事。运行 `/create-stories [epic-slug]`。"
+> - `feature:`/`story:` 范围没有匹配到任何内容 → 指出返回为空的 glob。
 >
-> **The N=0 guard is mandatory.** Without it an empty scope reports "Building QA
-> plan for 0 stories" and continues into Phase 4, producing a plan document with
-> empty tables — and **a QA plan for zero stories looks exactly like a completed
-> QA plan.** This skill gates the hand-off to manual QA, so a false-clean here
-> sends a build to QA on the strength of a plan that tested nothing.
+> **N=0 的守卫是强制性的。** 没有它，空范围会报告"正在为 0 个用户故事构建 QA
+> 计划"并继续进入 Phase 4，产出一份表格为空的计划文档——而**零个用户故事的 QA 计划
+> 看起来与已完成的 QA 计划一模一样。** 本技能是向手工 QA 交接的
+> 质量闸门（gate），因此这里的假性通过会把一个什么都没测的计划当作依据，
+> 把一个构建送去 QA。
 >
-> The rule at the top of this block still stands: one missing file among several
-> is MISSING-and-continue. This is the different case where there is no *several*.
+> 本块顶部的规则依然成立：多个文件中缺一个属于
+> MISSING 并继续。这里说的是另一种情况：根本不存在"多个"。
 
 ---
 
-## Phase 2: Load Inputs
+## Phase 2: 加载输入
 
-Establish the denominator first — glob the in-scope story files and count **N** —
-then collect the fields below with **targeted section greps, not a full read of
-each story**. A QA plan needs each story's type and acceptance criteria; it does
-not need its implementation notes, out-of-scope boundaries or ADR rationale, and
-reading N stories whole to reach two sections is where this phase's cost lives:
+先确立分母——glob 范围内的用户故事文件并计数 **N**——
+然后用**针对性的章节 grep，而不是完整读取每个用户故事**来收集下面的字段。
+QA 计划需要每个用户故事的类型和验收标准；它不需要实现说明、范围外
+边界或 ADR 理由，而为了读到两个章节就把 N 个用户故事整篇读完，正是本阶段
+成本所在：
 
 ```
 Grep pattern="^## Acceptance Criteria" glob="production/epics/**/story-*.md" output_mode="content" -A 15
@@ -105,72 +102,68 @@ Grep pattern="^> \*\*(Type|Status|Estimate)\*\*" glob="production/epics/**/story
 Grep pattern="^## (Context|Dependencies)" glob="production/epics/**/story-*.md" output_mode="content" -A 8
 ```
 
-(Scope the globs to the sprint plan's story paths in `sprint` mode.) From those:
+（在 `sprint` 模式下把 glob 限定为冲刺计划中的用户故事路径。）由此得到：
 
-- **Story title** and story ID — from the file name and path; no read at all
-- **Story Type** field — from the header grep (e.g., `Type: Logic`)
-- **Acceptance criteria** — the complete numbered/bulleted list, from the first grep
-- **GDD / ADR reference** and **Dependencies** — from the `## Context` grep
-- **Estimate** — from the header grep if present
-- **Implementation files** and **Engine notes** — only needed for stories whose
-  test plan actually turns on them; full-read those individual stories
+- **用户故事标题**和用户故事 ID —— 来自文件名和路径；完全不需要读取
+- **Story Type** 字段 —— 来自 header grep（例如 `Type: Logic`）
+- **验收标准** —— 完整的有序/无序列表，来自第一个 grep
+- **GDD / ADR 引用**和**依赖** —— 来自 `## Context` grep
+- **估算** —— 来自 header grep（若存在）
+- **实现文件**和**引擎说明** —— 仅对测试计划确实依赖它们的用户故事才需要；
+  单独完整读取这些用户故事
 
-**Never treat an absent section as an absent story.** If a story matched no
-`## Acceptance Criteria`, full-read that one and say so — a story with no
-testable criteria is a QA finding in its own right, not a story to skip.
+**绝不要把缺失的章节当作缺失的用户故事。** 如果某个用户故事没有匹配到任何
+`## Acceptance Criteria`，就单独完整读取它并说明——没有可测试标准的
+用户故事本身就是一项 QA 发现，而不是可以跳过的用户故事。
 
-After reading stories, load supporting context once (not per story):
+读取用户故事后，一次性加载支撑上下文（不要每个用户故事都加载）：
 
-- `design/gdd/systems-index.md` — to understand system priorities and which
-  GDDs are approved
-- For each unique GDD referenced across all stories: mine test material per that
-  system's workflow tier (resolved above) — at `full`, mine all 8 sections; at
-  `standard`, mine the test-relevant subset of the required sections
-  (**Acceptance Criteria** and **Edge Cases** always, plus **Formulas** for any
-  system that defines numeric rules); at `minimal`, **Acceptance
-  Criteria only**. Do not load the full GDD
-  text. Find the section headings with the Grep tool (pattern `^#`, content mode) and Read
-  those ranges with offset and limit. These sections contain the testable requirements, the math
-  to verify, and the boundary conditions tests must cover. If an Edge Cases section is absent (or
-  not expected at minimal), note per GDD: "No Edge Cases section found — edge case
-  coverage will be inferred from acceptance criteria only."
-- `docs/architecture/control-manifest.md` — scan for forbidden patterns that
-  automated tests should guard against (if the file exists)
+- `design/gdd/systems-index.md` —— 用于了解系统优先级以及哪些
+  GDD 已批准
+- 对全部用户故事中引用的每一份不同 GDD：按该系统的工作流层级（上文已解析）挖掘测试素材——在 `full` 下挖掘全部 8 个章节；在
+  `standard` 下挖掘所需章节中与测试相关的子集
+  （**Acceptance Criteria** 和 **Edge Cases** 始终包含，另外对任何定义了数值规则的系统再加 **Formulas**）；在 `minimal` 下**仅挖掘 Acceptance
+  Criteria**。不要加载完整的 GDD
+  文本。用 Grep 工具（模式 `^#`，content 模式）找到章节标题，再用 offset 和 limit Read
+  这些区段。这些章节包含可测试的需求、需要验证的
+  数学计算，以及测试必须覆盖的边界条件。如果缺少 Edge Cases 章节（或
+  在 minimal 下本就不期望出现），按 GDD 记录："未找到 Edge Cases 章节——边界用例
+  覆盖将仅从验收标准推断。"
+- `docs/architecture/control-manifest.md` —— 扫描自动化测试应防范的
+  禁用模式（如果该文件存在）
 
-If no GDD is referenced in a story, note it as a gap but do not block the plan.
-The story will be classified using acceptance criteria alone.
+如果某个用户故事没有引用任何 GDD，把它记为缺口，但不要因此阻塞计划。
+该用户故事将仅依据验收标准进行分类。
 
 ---
 
-## Phase 3: Classify Each Story
+## Phase 3: 分类每个用户故事
 
-For each story, assign a Story Type:
+对每个用户故事，指定一个 Story Type：
 
-- **If the story already has a `Type:` field in its header**: accept it as-is. Do NOT re-classify or validate against the criteria below — the Type was set by lead-programmer at story creation and is authoritative. Record it as-is.
-- **If the `Type:` field is missing**: infer the type from the acceptance criteria using the table below, and note in the report that the type was inferred (not declared). Flag this as a gap — the story should have its Type declared explicitly before implementation begins.
+- **如果用户故事的 header 中已有 `Type:` 字段**：按原样接受。不要重新分类，也不要对照下面的标准做校验——Type 是 lead-programmer 在创建用户故事时设定的，具有权威性。按原样记录。
+- **如果缺少 `Type:` 字段**：依据下面的表格从验收标准推断类型，并在报告中说明该类型是推断出来的（而非声明的）。将其标记为缺口——在实现开始之前，应当明确声明该用户故事的 Type。
 
-| Story Type | Classification Indicators |
+| Story Type | 分类指标 |
 |---|---|
-| **Logic** | Acceptance criteria reference calculations, formulas, numerical thresholds, state transitions, AI decisions, data validation, buff/debuff stacking, economy transactions, or any testable computation |
-| **Integration** | Criteria involve two or more systems interacting, signals or events propagating across system boundaries, save/load round-trips, network sync, or persistence |
-| **Visual/Feel** | Criteria reference animation behaviour, VFX, shader output, "feels responsive", perceived timing, screen shake, particle effects, audio sync, or visual feedback quality |
-| **UI** | Criteria reference menus, HUD elements, buttons, screens, dialogue boxes, inventory panels, tooltips, or any player-facing interface element |
-| **Config/Data** | Changes are limited to balance tuning values, data files, or configuration — no new code logic is involved |
+| **Logic** | 验收标准涉及计算、公式、数值阈值、状态转换、AI 决策、数据校验、buff/debuff 叠加、经济交易，或任何可测试的计算 |
+| **Integration** | 标准涉及两个或更多系统交互、信号或事件跨系统边界传递、存档/读档往返、网络同步或持久化 |
+| **Visual/Feel** | 标准涉及动画行为、VFX、着色器（shader）输出、"手感灵敏"、感知时机、屏幕震动、粒子效果、音频同步或视觉反馈质量 |
+| **UI** | 标准涉及菜单、HUD 元素、按钮、界面、对话框、背包面板、工具提示，或任何面向玩家的界面元素 |
+| **Config/Data** | 变更仅限于平衡性调参值、数据文件或配置——不涉及新的代码逻辑 |
 
-**Mixed stories** (e.g., a story that adds both a formula and a UI display):
-assign the primary type based on which acceptance criteria carry the highest
-implementation risk, and note the secondary type. Mixed Logic+Integration or
-Visual+UI combinations are the most common.
+**混合型用户故事**（例如同时新增公式和 UI 显示的用户故事）：
+按承载最高实现风险的验收标准指定主要类型，并注明次要类型。
+Logic+Integration 或 Visual+UI 的组合最为常见。
 
-After classifying all stories, produce a classification summary table in
-conversation before proceeding to Phase 4. This gives the user visibility into
-how tests will be allocated.
+完成全部用户故事分类后，在进入 Phase 4 之前在对话中产出一张分类摘要表。
+这让用户清楚了解测试将如何分配。
 
 ---
 
-## Phase 4: Generate Test Plan
+## Phase 4: 生成测试计划
 
-Assemble the full QA plan document. Use this structure:
+组装完整的 QA 计划文档。使用以下结构：
 
 ````markdown
 # QA Plan: [Sprint/Feature Name]
@@ -288,16 +281,15 @@ sign-off rows stay at every level, because the look is not):
 - [ ] Story file updated to `Status: Complete` (via `/story-done`)
 ````
 
-When generating content, use the actual story titles, GDD formula text, and
-acceptance criteria extracted in Phase 2. Do not use placeholder text — every
-test entry should reflect the real requirements of these specific stories.
+生成内容时，使用 Phase 2 中提取的真实用户故事标题、GDD 公式文本和
+验收标准。不要使用占位文本——每一条测试条目都应反映这些具体用户故事的真实需求。
 
 ---
 
-## Phase 5: Write Output
+## Phase 5: 写入输出
 
-Show the complete plan in conversation (or a summary if the plan is very long),
-then ask two questions together using `AskUserQuestion`:
+在对话中展示完整计划（如果计划非常长则展示摘要），
+然后用 `AskUserQuestion` 一起问两个问题：
 
 ```
 question: "Ready to write the QA plan. Choose output options:"
@@ -307,46 +299,45 @@ options:
   - "Also back-fill test case specs into each story file's ## QA Test Cases section (Recommended — enables /dev-story and /code-review traceability)"
 ```
 
-If "Write QA plan" is selected: write the plan file exactly as generated — do not truncate.
+如果选择了 "Write QA plan"：按生成内容原样写入计划文件——不要截断。
 
-If "Also back-fill story files" is selected: for each Logic and Integration story in scope, edit the story file at its path. Find the `## QA Test Cases` section and replace its content with the test case specs generated in Phase 4 for that story. If a story has no `## QA Test Cases` section, append it before `## Test Evidence`. For Visual/Feel and UI stories, write the manual verification steps instead of test specs.
+如果选择了 "Also back-fill story files"：对范围内每个 Logic 和 Integration 用户故事，编辑其路径下的用户故事文件。找到 `## QA Test Cases` 章节，用 Phase 4 为该用户故事生成的测试用例规格替换其内容。如果用户故事没有 `## QA Test Cases` 章节，就在 `## Test Evidence` 之前追加。对 Visual/Feel 和 UI 用户故事，写入手工验证步骤而不是测试规格。
 
-After writing:
+写入之后：
 
-"QA plan written to `production/qa/qa-plan-[sprint-slug]-[date].md`.
+"QA 计划已写入 `production/qa/qa-plan-[sprint-slug]-[date].md`。
 
-Next steps:
-- Share this plan with the team before sprint implementation begins
-- Once all sprint stories are implemented, run `/smoke-check sprint` to gate QA hand-off — not yet, only after implementation is complete
-- For Logic/Integration stories, create the test files at the listed paths
-  before marking stories done — `/story-done` checks for them"
+后续步骤：
+- 在冲刺实现开始之前把这份计划分享给团队
+- 所有冲刺用户故事实现完成后，运行 `/smoke-check sprint` 把关 QA 交接——不是现在，只在实现完成之后
+- 对 Logic/Integration 用户故事，在把用户故事标记完成之前，
+  在列出的路径创建测试文件——`/story-done` 会检查它们"
 
-Silently append to `production/session-state/active.md` (create the file if it does not exist):
+静默追加到 `production/session-state/active.md`（如果文件不存在则创建）：
 
 ```
 <!-- QA-PLAN: [date] | System: [system/sprint identifier] | Plan written: production/qa/qa-plan-[identifier]-[date].md -->
 ```
 
-Close with the verdict: **COMPLETE** — QA plan written (or **COMPLETE** — QA plan
-shown, not written, if the write was declined). The only other outcome is the
-`NOT ASSESSED — no stories in scope` path in Phase 1.
+以结论收尾：**COMPLETE** —— 已写入 QA 计划（如果写入被拒绝，则为 **COMPLETE** ——
+QA 计划已展示、未写入）。唯一其他结果就是 Phase 1 中的
+`NOT ASSESSED — no stories in scope` 路径。
 
 ---
 
-## Collaborative Protocol
+## 协作协议
 
-**Applies in `collaborative` mode (the default).** For `guided` and
-`autonomous` modes, see `.claude/docs/automation-modes.md` — the rules below
-describe what collaborative mode requires, not universal behavior.
+**适用于 `collaborative` 模式（默认）。** 关于 `guided` 和
+`autonomous` 模式，见 `.claude/docs/automation-modes.md` ——下面的规则描述的是协作模式的要求，而不是普遍行为。
 
-- **Never write the plan without asking** — Phase 5 requires explicit approval.
-- **Classify conservatively**: when a story is ambiguous between Logic and
-  Integration, classify it as Integration — it requires both unit and
-  integration tests.
-- **Do not invent test cases** beyond what acceptance criteria and GDD formulas
-  support. If a formula is absent from the GDD, flag it rather than guessing.
-- **Playtest requirements are advisory**: the user decides whether a playtest
-  is warranted for borderline Visual/Feel stories. Flag the case; do not mandate.
-- Use `AskUserQuestion` for scope selection when no argument is provided.
-  Keep all other phases non-interactive — present findings, then ask once to
-  approve the write.
+- **绝不在未询问的情况下写入计划** —— Phase 5 要求明确批准。
+- **保守分类**：当用户故事在 Logic 和
+  Integration 之间有歧义时，归类为 Integration——它同时需要单元测试和
+  集成测试。
+- **不要臆造测试用例**超出验收标准和 GDD 公式所支持的
+  范围。如果 GDD 中缺少某个公式，标记出来而不是猜测。
+- **试玩测试要求是建议性的**：对边界性的 Visual/Feel 用户故事，由用户决定
+  是否值得进行试玩测试。标记情况；不要强制。
+- 未提供参数时，使用 `AskUserQuestion` 进行范围选择。
+  保持其他所有阶段非交互——呈现发现，然后只问一次以
+  批准写入。

@@ -1,11 +1,11 @@
-# /test-setup — Phase 5: Create Smoke Test Seed
+# /test-setup — Phase 5: 创建冒烟测试种子
 
-> Part of `/test-setup`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> `/test-setup` 的一部分。`SKILL.md` 说明何时读取本文件；它解析出的设置
+> 以及其后续标题下的规则在此仍然适用。
 
-## Phase 5: Create Smoke Test Seed
+## Phase 5: 创建冒烟测试种子
 
-Create `tests/smoke/critical-paths.md`:
+创建 `tests/smoke/critical-paths.md`：
 
 ```markdown
 # Smoke Test: Critical Paths

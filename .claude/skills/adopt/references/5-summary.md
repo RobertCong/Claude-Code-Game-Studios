@@ -1,11 +1,11 @@
-# /adopt — Phase 5: Present Summary and Ask to Write
+# /adopt — Phase 5: 呈现摘要并询问是否写入
 
-> Part of `/adopt`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> `/adopt` 的一部分。`SKILL.md` 说明何时读取本文件；它解析出的设置
+> 以及其后续标题下的规则在此仍然适用。
 
-## Phase 5: Present Summary and Ask to Write
+## Phase 5: 呈现摘要并询问是否写入
 
-Present a compact summary before writing:
+在写入前呈现一份精简摘要：
 
 ```
 ## Adoption Audit Summary
@@ -24,25 +24,25 @@ Gap counts:
 Estimated remediation: [X blocking items × ~Y min each = roughly Z hours]
 ```
 
-Before asking to write, show a **Gap Preview**:
-- List every BLOCKING gap as a one-line bullet describing the actual problem
-  (e.g. `systems-index.md: 3 rows have parenthetical status values`,
-  `adr-0002.md: missing ## Status section`). No counts — show the actual items.
-- Show HIGH / MEDIUM / LOW as counts only (e.g. `HIGH: 4, MEDIUM: 2, LOW: 1`).
+在询问是否写入之前，展示一份**缺口预览**：
+- 将每个 BLOCKING 缺口列为一行要点，描述实际问题
+  （例如 `systems-index.md: 3 rows have parenthetical status values`、
+  `adr-0002.md: missing ## Status section`）。不显示数量 — 展示实际条目。
+- HIGH / MEDIUM / LOW 仅显示数量（例如 `HIGH: 4, MEDIUM: 2, LOW: 1`）。
 
-This gives the user enough context to judge scope before committing to writing the file.
+这能让用户在决定写入文件之前有足够的上下文来判断范围。
 
-If a prior adoption plan was detected in Phase 1, add a note:
-> "A previous plan exists at `docs/adoption-plan-[prior-date].md`. The new plan will
-> reflect current project state — it does not diff against the prior run."
+如果 Phase 1 检测到先前的采纳计划，添加一条说明：
+> “已有一份计划位于 `docs/adoption-plan-[prior-date].md`。新计划将
+> 反映当前项目状态 — 它不会与先前的运行做差异比较。”
 
-Use `AskUserQuestion`:
-- "Ready to write the migration plan?"
-  - "Yes — write `docs/adoption-plan-[date].md`"
-  - "Show me the full plan preview first (don't write yet)"
-  - "Cancel — I'll handle migration manually"
+使用 `AskUserQuestion`：
+- “准备好写入迁移计划了吗？”
+  - “是 — 写入 `docs/adoption-plan-[date].md`”
+  - “先给我看完整计划预览（暂不写入）”
+  - “取消 — 我自行处理迁移”
 
-If the user picks "Show me the full plan preview", output the complete plan as a
-fenced markdown block. Then ask again with the same three options.
+如果用户选择“先给我看完整计划预览”，以围栏 markdown 代码块
+输出完整计划。然后用同样的三个选项再次询问。
 
 ---

@@ -1,28 +1,28 @@
-# /prototype — Phase 4: Plan the Prototype
+# /prototype — Phase 4: 规划原型
 
-> Part of `/prototype`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> `/prototype` 的一部分。`SKILL.md` 规定了何时阅读本文件；它已解析的设置以及
+> 其后续标题下的规则在这里同样适用。
 
-## Phase 4: Plan the Prototype
+## Phase 4: 规划原型
 
-Define in 3–5 bullet points the minimum viable prototype:
+用 3–5 个要点定义最小可行原型：
 
-- What is the falsifiable hypothesis?
-- What is the riskiest assumption — and how does this prototype test it first?
-- What is the absolute minimum needed to answer the question?
-- What is explicitly cut? (menus, save systems, error handling, polish, architecture — all of it)
+- 可证伪假设是什么？
+- 风险最高的假设是什么——这个原型如何先测试它？
+- 回答这个问题所需的绝对最小内容是什么？
+- 明确砍掉了什么？（菜单、存档系统、错误处理、打磨、架构——全部砍掉）
 
-**Scope constraint:** A concept prototype tests ONE mechanic — not the whole game.
-If scope covers more than one mechanic, cut it down. When in doubt, cut more.
+**范围约束：** 概念原型只测试一个机制——不是整个游戏。
+如果范围覆盖超过一个机制，就削减它。拿不准时，砍得更多。
 
-Present this plan to the user before building. Get confirmation before proceeding.
-Name the checkpoint file in that confirmation: "May I record this plan in
-`production/session-state/active.md`?"
+在构建之前向用户呈现这个计划。获得确认后再继续。
+在那次确认中点明检查点文件：“我可以把这个计划记录到
+`production/session-state/active.md` 吗？”
 
-Once confirmed, write a session checkpoint to `production/session-state/active.md`
-(create `production/session-state/` if it does not exist). Include: concept name,
-hypothesis, path chosen, scope bullet points, and current phase ("Phase 5 —
-Implement"). This lets the next session resume without starting over if the session
-ends mid-build — especially important for multi-day Engine path work.
+一旦确认，向 `production/session-state/active.md` 写入会话检查点
+（如果 `production/session-state/` 不存在则创建它）。内容包括：概念名称、
+假设、所选路径、范围要点，以及当前阶段（“Phase 5 —
+实现”）。这样如果会话在构建中途结束，下一个会话无需从头开始就能恢复——对于多天的
+引擎路径工作尤为重要。
 
 ---

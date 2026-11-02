@@ -1,29 +1,29 @@
-# /adopt — Phase 3: Classify and Prioritise Gaps
+# /adopt — Phase 3: 对缺口进行分类并排定优先级
 
-> Part of `/adopt`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> `/adopt` 的一部分。`SKILL.md` 说明何时读取本文件；它解析出的设置
+> 以及其后续标题下的规则在此仍然适用。
 
-## Phase 3: Classify and Prioritise Gaps
+## Phase 3: 对缺口进行分类并排定优先级
 
-Organise every gap found across all audits into four severity tiers:
+将所有审计中发现的每个缺口归入四个严重程度层级：
 
-**BLOCKING** — Will cause template skills to silently produce wrong results *right now*.
-Examples: ADR missing Status field, systems-index parenthetical status values,
-engine not configured when ADRs exist.
+**BLOCKING** — 会让模板技能*现在就*静默产生错误结果。
+示例：ADR 缺少 Status 字段、systems-index 中带括号的状态值、
+存在 ADR 但引擎未配置。
 
-**HIGH** — Will cause stories to be generated with missing safety checks, or
-infrastructure bootstrapping will fail.
-Examples: ADRs missing Engine Compatibility, GDDs missing Acceptance Criteria
-(stories can't be generated from them), tr-registry.yaml missing.
+**HIGH** — 会导致生成缺少安全检查的用户故事，或
+基础设施引导会失败。
+示例：ADR 缺少 Engine Compatibility、GDD 缺少 Acceptance Criteria
+（无法据此生成用户故事）、tr-registry.yaml 缺失。
 
-**MEDIUM** — Degrades quality and pipeline tracking but does not break functionality.
-Examples: GDDs missing Tuning Knobs or Formulas sections, stories missing TR-IDs,
-sprint-status.yaml missing.
+**MEDIUM** — 会降低质量和流水线追踪能力，但不破坏功能。
+示例：GDD 缺少 Tuning Knobs 或 Formulas 章节、用户故事缺少 TR-ID、
+sprint-status.yaml 缺失。
 
-**LOW** — Retroactive improvements that are nice-to-have but not urgent.
-Examples: Stories missing Manifest Version stamps, GDDs missing Open Questions section.
+**LOW** — 事后改进项，值得做但不紧急。
+示例：用户故事缺少 Manifest Version 标记、GDD 缺少 Open Questions 章节。
 
-Count totals per tier. If zero BLOCKING and zero HIGH gaps: report that the project
-is template-compatible and only advisory improvements remain.
+按层级统计总数。如果 BLOCKING 和 HIGH 缺口均为零：报告项目
+已兼容模板，仅剩建议性改进。
 
 ---

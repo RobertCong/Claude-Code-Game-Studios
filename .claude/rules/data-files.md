@@ -5,32 +5,22 @@ paths:
   - "Content/**/{Data,data}/**/*.json"
 ---
 
-# Data File Rules
+# 数据文件规则
 
-- All JSON files must be valid JSON — broken JSON blocks the entire build pipeline
-- File naming: lowercase with underscores only, following `[system]_[name].json` pattern
-- Every data file must have a documented schema (either JSON Schema or documented in the corresponding design doc)
-- Numeric values must include comments or companion docs explaining what the numbers mean
-- Use consistent key naming: **`snake_case` for keys within JSON files**, matching
-  the `[system]_[name].json` file convention one line above and the engine idiom
-  every other standard in this repo uses.
+- 所有 JSON 文件必须是合法 JSON —— 损坏的 JSON 会阻塞整条构建流水线
+- 文件命名：仅使用小写字母和下划线，遵循 `[system]_[name].json` 模式
+- 每个数据文件都必须有文档化的 schema（JSON Schema，或记录在对应的设计文档中）
+- 数值必须附带注释或配套文档，说明这些数字的含义
+- 使用一致的键命名：**JSON 文件内的键使用 `snake_case`**，与上一行的 `[system]_[name].json` 文件约定以及本仓库其他标准所用的引擎惯例保持一致。
 
-  > **On Unity and Unreal this costs you a mapping layer — budget for it rather
-  > than changing the keys.** `JsonUtility` binds by *exact field name*, and C#
-  > fields are `camelCase` per `naming.variables`, so a snake_case file cannot bind
-  > directly to the type that consumes it. Use a private nested DTO whose fields
-  > are the wire format and which maps once into your real type, or take a
-  > dependency that supports a naming policy (Newtonsoft `SnakeCaseNamingStrategy`,
-  > `System.Text.Json` `JsonNamingPolicy`). Do **not** switch the file to camelCase
-  > to avoid the DTO: keys are the cross-engine contract. Write the DTO and
-  > document it as a wire-format boundary — that is the intended shape.
-- No orphaned data entries — every entry must be referenced by code or another data file
-- Version data files when making breaking schema changes
-- Include sensible defaults for all optional fields
+  > **在 Unity 和 Unreal 上，这会带来一层映射成本——请为此预留预算，而不是改键名。** `JsonUtility` 按*精确字段名*绑定，而 C# 字段按 `naming.variables` 是 `camelCase`，因此 snake_case 文件无法直接绑定到消费它的类型。请使用一个私有嵌套 DTO，其字段即传输格式，并一次性映射到你的真实类型；或者引入支持命名策略的依赖（Newtonsoft 的 `SnakeCaseNamingStrategy`、`System.Text.Json` 的 `JsonNamingPolicy`）。**不要**为了避免 DTO 而把文件改成 camelCase：键是跨引擎契约。写好 DTO，并把它记录为传输格式边界——这才是预期的形态。
+- 不允许孤立的数据条目——每个条目都必须被代码或另一个数据文件引用
+- 进行破坏性 schema 变更时，对数据文件做版本管理
+- 为所有可选字段提供合理的默认值
 
-## Examples
+## 示例
 
-**Correct** naming and structure (`combat_enemies.json`):
+**正确**的命名与结构（`combat_enemies.json`）：
 
 ```json
 {
@@ -49,7 +39,7 @@ paths:
 }
 ```
 
-**Incorrect** (`EnemyData.json`):
+**错误**（`EnemyData.json`）：
 
 ```json
 {
@@ -57,4 +47,4 @@ paths:
 }
 ```
 
-Violations: uppercase filename, uppercase key, no `[system]_[name]` pattern, missing required fields.
+违规项：文件名大写、键名大写、缺少 `[system]_[name]` 模式、缺少必需字段。

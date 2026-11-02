@@ -1,11 +1,11 @@
-# /setup-engine — Section 12: Output Summary
+# /setup-engine — 第 12 节：输出摘要
 
-> Part of `/setup-engine`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> 属于 `/setup-engine` 的一部分。`SKILL.md` 指明何时读取本文件；它解析出的
+> 设置及其后续标题下的规则在此仍然适用。
 
-## 12. Output Summary
+## 12. 输出摘要
 
-After setup is complete, output:
+设置完成后，输出：
 
 ```
 Engine Setup Complete
@@ -23,18 +23,18 @@ Next Steps:
 1. Review docs/engine-reference/<engine>/VERSION.md
 ```
 
-Then print **one** Next-Steps list, matching the resolved `workflow` tier:
+然后打印**一份** Next Steps 列表，与解析出的 `workflow` 层级匹配：
 
-**`minimal` — the lean 4-step floor (you are on step 1):**
+**`minimal` — 精简的 4 步基础流程（你正处于第 1 步）：**
 ```
 2. Run /brainstorm to produce your one-page design/game-brief.md (the lean-tier design artifact)
 3. Run /create-stories to turn the brief's MVP list into stories
 4. Run /dev-story — first line of game code
 ```
-(No `/map-systems`, `/design-system`, `/prototype`, or `/sprint-plan` at
-`minimal` — the brief replaces the GDDs and its build order is the plan.)
+（在 `minimal` 层级没有 `/map-systems`、`/design-system`、`/prototype` 或
+`/sprint-plan` — 简报取代 GDD，其构建顺序就是计划。）
 
-**`standard` / `full` — the full pipeline:**
+**`standard` / `full` — 完整流水线：**
 ```
 2. [If from /brainstorm] Run /map-systems to decompose your concept into individual systems
 3. [If from /brainstorm] Run /design-system to author per-system GDDs (guided, section-by-section)
@@ -45,4 +45,4 @@ Then print **one** Next-Steps list, matching the resolved `workflow` tier:
 
 ---
 
-Verdict: **COMPLETE** — engine configured and reference docs populated.
+结论：**COMPLETE** — 引擎已配置，参考资料已填充。

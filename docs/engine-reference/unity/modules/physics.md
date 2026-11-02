@@ -1,30 +1,30 @@
-# Unity 6.3 — Physics Module Reference
+# Unity 6.3 — 物理模块参考
 
 **Last verified:** 2026-02-13
-**Knowledge Gap:** Unity 6 physics improvements, solver changes
+**Knowledge Gap:** Unity 6 物理改进、求解器变更
 
 ---
 
-## Overview
+## 概述
 
-Unity 6.3 uses **PhysX 5.1** (improved from PhysX 4.x in 2022 LTS):
-- Better solver stability
-- Improved performance
-- Enhanced collision detection
+Unity 6.3 使用 **PhysX 5.1**（相较 2022 LTS 的 PhysX 4.x 有改进）：
+- 更好的求解器稳定性
+- 改进的性能
+- 增强的碰撞检测
 
 ---
 
-## Key Changes from 2022 LTS
+## 相较 2022 LTS 的关键变更
 
-### Default Solver Iterations Increased
-Unity 6 increased default solver iterations for better stability:
+### 默认求解器迭代次数提高
+Unity 6 提高了默认求解器迭代次数，以获得更好的稳定性：
 
 ```csharp
 // Default changed from 6 to 8 iterations
 Physics.defaultSolverIterations = 8; // Check if relying on old behavior
 ```
 
-### Enhanced Collision Detection
+### 增强的碰撞检测
 
 ```csharp
 // ✅ Unity 6: Improved Continuous Collision Detection (CCD)
@@ -34,7 +34,7 @@ rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
 ---
 
-## Core Physics Components
+## 核心物理组件
 
 ### Rigidbody
 
@@ -47,7 +47,7 @@ rb.AddForce(Vector3.forward * 10f, ForceMode.Impulse);
 rb.velocity = new Vector3(0, 10, 0); // Only use when necessary
 ```
 
-### Colliders
+### 碰撞体
 
 ```csharp
 // Primitive colliders: Box, Sphere, Capsule (cheapest)
@@ -58,9 +58,9 @@ rb.velocity = new Vector3(0, 10, 0); // Only use when necessary
 
 ---
 
-## Raycasting
+## 射线检测
 
-### Efficient Raycasting (Avoid Allocations)
+### 高效射线检测（避免分配）
 
 ```csharp
 // ✅ Non-allocating raycast
@@ -79,7 +79,7 @@ for (int i = 0; i < hitCount; i++) {
 RaycastHit[] hits = Physics.RaycastAll(origin, direction); // GC allocation!
 ```
 
-### LayerMask for Selective Raycasting
+### 使用 LayerMask 进行选择性射线检测
 
 ```csharp
 // ✅ Use LayerMask to filter collisions
@@ -89,9 +89,9 @@ Physics.Raycast(origin, direction, out RaycastHit hit, maxDistance, layerMask);
 
 ---
 
-## Physics Queries
+## 物理查询
 
-### OverlapSphere (Check for nearby objects)
+### OverlapSphere（检查附近对象）
 
 ```csharp
 // ✅ Non-allocating version
@@ -102,7 +102,7 @@ for (int i = 0; i < count; i++) {
 }
 ```
 
-### SphereCast (Thick raycast)
+### SphereCast（粗射线）
 
 ```csharp
 // Useful for character controllers
@@ -113,7 +113,7 @@ if (Physics.SphereCast(origin, radius, direction, out RaycastHit hit, maxDistanc
 
 ---
 
-## Collision Events
+## 碰撞事件
 
 ### OnCollisionEnter / Stay / Exit
 
@@ -142,9 +142,9 @@ void OnTriggerEnter(Collider other) {
 
 ---
 
-## Character Controllers
+## 角色控制器
 
-### CharacterController Component
+### CharacterController 组件
 
 ```csharp
 CharacterController controller = GetComponent<CharacterController>();
@@ -162,9 +162,9 @@ controller.Move(velocity * Time.deltaTime);
 
 ---
 
-## Physics Materials
+## 物理材质
 
-### Friction & Bounciness
+### 摩擦与弹性
 
 ```csharp
 // Create: Assets > Create > Physic Material
@@ -180,16 +180,16 @@ controller.Move(velocity * Time.deltaTime);
 
 ---
 
-## Joints
+## 关节
 
-### Fixed Joint (Attach two rigidbodies)
+### Fixed Joint（连接两个刚体）
 
 ```csharp
 FixedJoint joint = gameObject.AddComponent<FixedJoint>();
 joint.connectedBody = otherRigidbody;
 ```
 
-### Hinge Joint (Door, wheel)
+### Hinge Joint（门、轮子）
 
 ```csharp
 HingeJoint hinge = gameObject.AddComponent<HingeJoint>();
@@ -200,28 +200,28 @@ hinge.limits = new JointLimits { min = -90, max = 90 };
 
 ---
 
-## Performance Optimization
+## 性能优化
 
-### Physics Layer Collision Matrix
+### 物理层碰撞矩阵
 `Edit > Project Settings > Physics > Layer Collision Matrix`
-- Disable unnecessary collision checks between layers
-- Massive performance gain
+- 禁用层之间不必要的碰撞检查
+- 可带来大幅性能提升
 
-### Fixed Timestep
+### 固定时间步长
 `Edit > Project Settings > Time > Fixed Timestep`
-- Default: 0.02 (50 FPS physics)
-- Lower = more accurate, higher CPU cost
-- Match game's target framerate if possible
+- 默认值：0.02（50 FPS 物理）
+- 越低越精确，但 CPU 开销越高
+- 尽可能匹配游戏的目标帧率
 
-### Simplified Collision Geometry
-- Use primitive colliders (box, sphere, capsule) over mesh colliders
-- Bake mesh colliders at build time, not runtime
+### 简化碰撞几何体
+- 优先使用基本碰撞体（box、sphere、capsule），而非网格碰撞体
+- 在构建时烘焙网格碰撞体，而不是运行时
 
 ---
 
-## Common Patterns
+## 常见模式
 
-### Ground Check (Character Controller)
+### 地面检测（Character Controller）
 
 ```csharp
 bool IsGrounded() {
@@ -230,7 +230,7 @@ bool IsGrounded() {
 }
 ```
 
-### Apply Explosion Force
+### 施加爆炸力
 
 ```csharp
 void ApplyExplosion(Vector3 explosionPos, float radius, float force) {
@@ -246,11 +246,11 @@ void ApplyExplosion(Vector3 explosionPos, float radius, float force) {
 
 ---
 
-## Debugging
+## 调试
 
-### Physics Debugger (Unity 6+)
+### Physics Debugger（Unity 6+）
 - `Window > Analysis > Physics Debugger`
-- Visualize colliders, contacts, queries
+- 可视化碰撞体、接触点、查询
 
 ### Gizmos
 
@@ -263,6 +263,6 @@ void OnDrawGizmos() {
 
 ---
 
-## Sources
+## 来源
 - https://docs.unity3d.com/6000.0/Documentation/Manual/PhysicsOverview.html
 - https://docs.unity3d.com/ScriptReference/Physics.html

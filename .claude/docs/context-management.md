@@ -1,59 +1,54 @@
-# Context Management
+# 上下文管理
 
-Context is the most critical resource in a Claude Code session. Manage it actively.
+上下文是 Claude Code 会话中最关键的资源。要主动管理它。
 
-## File-Backed State (Primary Strategy)
+## 文件承载状态（主要策略）
 
-**The file is the memory, not the conversation.** Conversations are ephemeral and
-will be compacted or lost. Files on disk persist across compactions and session crashes.
+**文件才是记忆，对话不是。** 对话是短暂的，会被压缩或丢失。磁盘上的文件在压缩和会话崩溃后仍然存在。
 
-### Session State File
+### 会话状态文件
 
-Maintain `production/session-state/active.md` as a living checkpoint. Update it
-after each significant milestone:
+把 `production/session-state/active.md` 维护为持续更新的检查点。在每个重要里程碑之后更新它：
 
-- Design section approved and written to file
-- Architecture decision made
-- Implementation milestone reached
-- Test results obtained
+- 设计小节已批准并写入文件
+- 已做出架构决策
+- 达到实现里程碑
+- 已获得测试结果
 
-**Create it from `.claude/docs/templates/session-state.md`** — the file has a
-schema, and hooks depend on it.
+**从 `.claude/docs/templates/session-state.md` 创建它**——该文件有
+schema，且钩子依赖它。
 
-Two regions, and the distinction is load-bearing:
+分为两个区域，这一区分是承重设计：
 
-| Region | Who reads it | Rule |
+| 区域 | 谁读取它 | 规则 |
 |--------|--------------|------|
-| `<!-- STATUS -->` … `<!-- /STATUS -->` | `statusline.sh` (breadcrumb, Production+ only) | Keep the markers even when empty |
-| `<!-- CHECKPOINT -->` … `<!-- /CHECKPOINT -->` | `session-start.sh` (every start, including after a compaction) | **Overwrite, never append.** Under ~25 lines — shown verbatim |
-| Everything after `<!-- /CHECKPOINT -->` | humans, and an agent that wants detail | Free-form; no hook injects it |
+| `<!-- STATUS -->` … `<!-- /STATUS -->` | `statusline.sh`（面包屑，仅 Production+） | 即使为空也保留标记 |
+| `<!-- CHECKPOINT -->` … `<!-- /CHECKPOINT -->` | `session-start.sh`（每次启动，包括压缩之后） | **覆盖，绝不追加。** 约 25 行以内——逐字显示 |
+| `<!-- /CHECKPOINT -->` 之后的所有内容 | 人类，以及想了解细节的 agent | 自由格式；没有钩子注入它 |
 
-The checkpoint holds: current task, next step, what it is blocked on, files in
-progress, open questions. Write it so a cold reader can resume without opening
-anything else.
+检查点包含：当前任务、下一步、阻塞在什么上、进行中的文件、开放问题。要写得让一个毫无背景的读者无需打开任何其他东西就能恢复工作。
 
-> **Why the split.** One append-only file doing both jobs grows without bound,
-> and every consumer then reads a different slice of it: the top, the bottom, or
-> a block nothing writes. None of them is wrong, because nothing defines where
-> the recoverable state lives. With a named region, every consumer reads the
-> same part, and the cost is fixed no matter how long the narrative grows.
+> **为何要拆分。** 一个兼具两种用途的仅追加文件会无限增长，
+> 随后每个消费方读取它的不同切片：顶部、底部，或一个没人写入的块。
+> 它们都没有错，因为没有任何东西定义可恢复状态位于何处。
+> 有了命名区域后，每个消费方读取同一部分，而且无论叙事增长多长，
+> 成本都是固定的。
 
-**Rotation.** When the narrative passes ~200 lines, move it into
-`production/session-logs/`:
+**轮转。** 当叙事超过约 200 行时，将其移入
+`production/session-logs/`：
 
 ```bash
 bash .claude/scripts/rotate-session-state.sh            # --dry-run to preview
 ```
 
-The checkpoint stays, the narrative is appended to a dated log, nothing is
-deleted. `session-start.sh` observes when rotation is due but never performs it.
+检查点保留，叙事被追加到带日期的日志中，不删除任何内容。`session-start.sh` 会观察何时需要轮转，但从不执行轮转。
 
-### Status Line Block (Production+ only)
+### 状态行块（仅 Production+）
 
-When the project is in Production, Polish, or Release stage, include a structured
-status block in `active.md` that the status line script can parse. (The project
-stage is resolved from `project.stage` in `project.yaml`, falling back to
-`production/stage.txt`.)
+当项目处于 Production、Polish 或 Release 阶段时，在 `active.md` 中包含一个
+状态行脚本可以解析的结构化状态块。（项目
+阶段从 `project.yaml` 中的 `project.stage` 解析，回退到
+`production/stage.txt`。）
 
 ```markdown
 <!-- STATUS -->
@@ -63,110 +58,106 @@ Task: Implement hitbox detection
 <!-- /STATUS -->
 ```
 
-- All three fields (Epic, Feature, Task) are optional — include only what applies
-- Update this block when switching focus areas
-- The status line displays it as a breadcrumb: `Combat System > Melee Combat > Hitboxes`
-- Remove or empty the block when no active work focus exists
+- 全部三个字段（Epic、Feature、Task）都是可选的——只包含适用的内容
+- 切换关注区域时更新此块
+- 状态行将其显示为面包屑：`Combat System > Melee Combat > Hitboxes`
+- 当没有活跃的工作重点时，移除或清空该块
 
-After any disruption (compaction, crash, `/clear`), read the state file first.
+在任何中断（压缩、崩溃、`/clear`）之后，先读取状态文件。
 
-### Incremental File Writing
+### 增量写入文件
 
-When creating multi-section documents (design docs, architecture docs, lore entries):
+创建多节文档（设计文档、架构文档、设定条目）时：
 
-1. Ask to create the file ("May I create [path] with the section skeleton?"), then
-   create it with every section header and empty bodies
-2. Discuss and draft one section at a time in conversation
-3. Write each section to the file as soon as it's approved (a skill that writes
-   once at the end, such as `/create-architecture`, records approved sections in
-   the session state instead)
-4. Update the session state file after each section
-5. After writing a section, previous discussion about that section can be safely
-   compacted — the decisions are in the file
+1. 请求创建文件（"May I create [path] with the section skeleton?"），然后
+   创建它，包含每个小节的标题和空正文
+2. 在对话中逐节讨论并起草
+3. 每个小节一旦批准就写入文件（像 `/create-architecture` 这样
+   最后一次性写入的技能，则在会话状态中记录已批准的小节）
+4. 每节之后更新会话状态文件
+5. 写入某节后，关于该节之前的讨论可以安全地
+   被压缩——决策已在文件中
 
-This keeps the context window holding only the *current* section's discussion
-(~3-5k tokens) instead of the entire document's conversation history (~30-50k tokens).
+这样上下文窗口只保留*当前*小节的讨论
+（约 3-5k token），而不是整个文档的对话历史（约 30-50k token）。
 
-## Proactive Compaction
+## 主动压缩
 
-- **Compact proactively** at ~60-70% context usage, not reactively at the limit
-- **Use `/clear`** between unrelated tasks, or after 2+ failed correction attempts
-- **Natural compaction points:** after writing a section to file, after committing,
-  after completing a task, before starting a new topic
-- **Focused compaction:** `/compact Focus on [current task] — sections 1-3 are
+- **主动压缩**，在上下文使用率约 60-70% 时，而不是到极限时才反应
+- **使用 `/clear`** 在不相关的任务之间，或在 2 次以上纠正尝试失败后
+- **自然压缩点：** 将某节写入文件后、提交后、
+  完成任务后、开始新主题前
+- **聚焦压缩：** `/compact Focus on [current task] — sections 1-3 are
   written to file, working on section 4`
 
-## Context Budgets by Task Type
+## 按任务类型的上下文预算
 
-- Light (read/review): ~3k tokens startup
-- Medium (implement feature): ~8k tokens
-- Heavy (multi-system refactor): ~15k tokens
+- 轻量（读取/评审）：约 3k token 启动
+- 中等（实现功能）：约 8k token
+- 重量（多系统重构）：约 15k token
 
-## Deterministic Helpers — `.claude/scripts/`
+## 确定性辅助脚本——`.claude/scripts/`
 
-The cheapest context saving is not summarising a document, it is **not reading it
-at all**. When a question has a deterministic answer, a script should answer it
-and the model should spend its budget on judgment instead.
+最便宜的上下文节省不是总结文档，而是**根本不读它**。当问题有确定性答案时，应由脚本回答，模型则应把预算花在判断上。
 
-Two directories, two purposes — reach for the right one:
+两个目录，两种用途——选择正确的那一个：
 
-| Directory | Purpose | Invoked by |
+| 目录 | 用途 | 调用方式 |
 |---|---|---|
-| `.claude/hooks/` | Event-driven — wired into `settings.json` and fired by Claude Code | the harness |
-| `.claude/scripts/` | Manually invoked from a skill body | `bash .claude/scripts/<name>.sh` |
+| `.claude/hooks/` | 事件驱动——接入 `settings.json` 并由 Claude Code 触发 | 执行框架 |
+| `.claude/scripts/` | 从技能正文手动调用 | `bash .claude/scripts/<name>.sh` |
 
-Current helpers:
+当前辅助脚本：
 
-- **`gdd-structure-check.sh`** — which of the 8 standard sections a GDD contains.
-  Replaces a full-document read per GDD, and cannot hallucinate a missing
-  section. Reports **presence only**; the caller applies the workflow tier.
-- **`review-scope.sh`** — which GDDs changed since the last cross-review, plus
-  their declared dependencies. Replaces reasoning through git history.
+- **`gdd-structure-check.sh`** —— GDD 包含 8 个标准小节中的哪些。
+  替代对每个 GDD 的完整文档读取，且不会幻觉出不存在的
+  小节。仅报告**存在性**；调用方应用工作流层级。
+- **`review-scope.sh`** —— 自上次交叉评审以来哪些 GDD 发生了变更，以及
+  它们声明的依赖。替代通过 git 历史进行推理。
 
-Two rules for helpers:
+辅助脚本的两条规则：
 
-1. **Grant it the way `.claude/docs/config-resolution.md` shows.** `allowed-tools`
-   pre-approves commands; it does not restrict them — a skill without the grant
-   still runs the script, after a permission prompt. An injected `` !`cmd` `` in
-   the body is stricter: unapproved, it aborts the whole invocation, so it needs
-   the exact grant that doc gives.
-2. **Emit observations, not verdicts.** A script that scores or judges will
-   eventually contradict a tier, mode, or per-system override it does not know
-   about. Report what is on disk and let the caller decide what it means.
+1. **按 `.claude/docs/config-resolution.md` 展示的方式授予权限。** `allowed-tools`
+   预批准命令；它不限制命令——没有授权的技能
+   仍会在权限提示后运行脚本。正文中注入的 `` !`cmd` `` 更严格：
+   未获批准时，它会中止整个调用，因此需要该文档给出的
+   精确授权。
+2. **输出观察结果，而非结论。** 一个打分或评判的脚本最终会
+   与它不知道的层级、模式或按系统覆盖相矛盾。报告磁盘上的内容，
+   让调用方决定其含义。
 
-## Subagent Delegation
+## 子代理委派
 
-Use subagents for research and exploration to keep the main session clean.
-Subagents run in their own context window and return only summaries:
+使用子代理进行研究与探索，以保持主会话干净。
+子代理在自己的上下文窗口中运行，只返回摘要：
 
-- **Use subagents** when investigating across multiple files, exploring unfamiliar code,
-  or doing research that would consume >5k tokens of file reads
-- **Use direct reads** when you know exactly which 1-2 files to check
-- Subagents do not inherit conversation history — provide full context in the prompt
+- **使用子代理**，当跨多个文件调查、探索不熟悉的代码，
+  或进行研究将消耗超过 5k token 的文件读取时
+- **使用直接读取**，当你确切知道要检查哪 1-2 个文件时
+- 子代理不继承对话历史——在提示中提供完整上下文
 
-## Compaction Instructions
+## 压缩指令
 
-When context is compacted, preserve the following in the summary:
+当上下文被压缩时，在摘要中保留以下内容：
 
-- Reference to `production/session-state/active.md` (read it to recover state)
-- List of files modified in this session and their purpose
-- Any architectural decisions made and their rationale
-- Active sprint tasks and their current status
-- Agent invocations and their outcomes (success/failure/blocked)
-- Test results (pass/fail counts, specific failures)
-- Unresolved blockers or questions awaiting user input
-- The current task and what step we are on
-- Which sections of the current document are written to file vs. still in progress
+- 对 `production/session-state/active.md` 的引用（读取它以恢复状态）
+- 本次会话中修改的文件列表及其用途
+- 已做出的任何架构决策及其理由
+- 活跃的冲刺任务及其当前状态
+- Agent 调用及其结果（成功/失败/阻塞）
+- 测试结果（通过/失败计数、具体失败项）
+- 未解决的阻塞项或等待用户输入的问题
+- 当前任务以及我们进行到哪一步
+- 当前文档的哪些小节已写入文件，哪些仍在进行中
 
-**After compaction:** Read `production/session-state/active.md` and any files being
-actively worked on to recover full context. The files contain the decisions; the
-conversation history is secondary.
+**压缩后：** 读取 `production/session-state/active.md` 以及任何正在
+积极处理的文件，以恢复完整上下文。文件包含决策；对话历史是次要的。
 
-## Recovery After Session Crash
+## 会话崩溃后的恢复
 
-If a session dies ("prompt too long") or you start a new session to continue work:
+如果会话终止（"prompt too long"），或者你启动新会话继续工作：
 
-1. The `session-start.sh` hook will detect and preview `active.md` automatically
-2. Read the full state file for context
-3. Read the partially-completed file(s) listed in the state
-4. Continue from the next incomplete section or task
+1. `session-start.sh` 钩子会自动检测并预览 `active.md`
+2. 读取完整状态文件以获取上下文
+3. 读取状态中列出的部分完成的文件
+4. 从下一个未完成的小节或任务继续

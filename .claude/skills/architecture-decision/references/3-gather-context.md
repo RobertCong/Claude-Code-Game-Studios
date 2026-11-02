@@ -1,20 +1,18 @@
-# /architecture-decision — Steps 3a and 3b: Gather Context
+# /architecture-decision — 第 3a 与 3b 步：收集上下文
 
-> Part of `/architecture-decision`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> 属于 `/architecture-decision`。`SKILL.md` 指明了何时读取此文件；它所解析的
+> 设置以及其后续标题下的规则在这里同样适用。
 
-## 3. Gather context
+## 3. 收集上下文
 
-### 3a: Architecture Registry Check (BLOCKING gate) — do this FIRST
+### 3a: 架构注册表检查（BLOCKING 质量闸门）—— 最先执行
 
-Read `docs/registry/architecture.yaml`. Extract entries relevant to this ADR's
-domain and decision (grep by system name, domain keyword, or state being touched).
-Run this before reading any existing ADR — the registry exists specifically so a
-new ADR's author does not need to open prior ADRs to learn their binding facts
-(state ownership, interface contracts, forbidden patterns).
+读取 `docs/registry/architecture.yaml`。提取与此 ADR 的领域和决策相关的条目
+（按系统名、领域关键词或涉及的状态 grep）。在读取任何现有 ADR 之前先运行此步骤——
+注册表的存在正是为了让新 ADR 的作者无需打开之前的 ADR 就能了解其约束性事实
+（状态归属、接口契约、禁止模式）。
 
-Present any relevant stances to the user **before** the collaborative design
-begins, as locked constraints:
+在协作式设计开始**之前**，向用户展示所有相关立场，作为锁定约束：
 
 ```
 ## Existing Architectural Stances (must not contradict)
@@ -35,46 +33,40 @@ Forbidden Patterns:
   → The proposed approach must not use these patterns.
 ```
 
-If the user's proposed decision would contradict any registered stance, surface
-the conflict immediately:
+如果用户提议的决策会与任何已注册立场矛盾，立即暴露该冲突：
 
-> "⚠️ Conflict: This ADR proposes [X], but ADR-[NNNN] established that [Y] is
-> the accepted pattern for this purpose. Proceeding without resolving this will
-> produce contradictory ADRs and inconsistent stories.
-> Options: (1) Align with the existing stance, (2) Supersede ADR-[NNNN] with
-> an explicit replacement, (3) Explain why this case is an exception."
+> "⚠️ 冲突：此 ADR 提议 [X]，但 ADR-[NNNN] 已确立 [Y] 是
+> 此用途的公认模式。不解决就继续会产生矛盾的 ADR
+> 和不一致的用户故事。
+> 选项：(1) 与现有立场对齐，(2) 用显式替代方案
+> 取代 ADR-[NNNN]，(3) 说明为何此案例属于例外。"
 
-Do not proceed to Step 4 (collaborative design) until any conflict is resolved
-or explicitly accepted as an intentional exception.
+在冲突解决或被明确接受为有意例外之前，不要进入第 4 步（协作式设计）。
 
-### 3b: Existing ADRs and Related GDDs — registry-scoped, never unbounded
+### 3b: 现有 ADR 与相关 GDD —— 由注册表限定范围，绝无边界地读取
 
-The registry (3a) covers *what* prior decisions bind — not always *why*. If the
-registry surfaced a directly relevant ADR and its reasoning matters here (not
-just its stated facts), read that specific ADR — never glob-and-read every
-ADR in `docs/architecture/` on the chance one is relevant. Read it by section:
-find the headings you need with the Grep tool (pattern `^#`, content mode)
-and Read those ranges with offset and limit.
+注册表（3a）涵盖先前决策约束了*什么*——并不总能涵盖*为什么*。如果注册表
+浮现出某个直接相关的 ADR，且其推理在此重要（而不只是其陈述的事实），
+就读取那个具体 ADR——绝不要用 glob 读取 `docs/architecture/` 中的每个
+ADR 以期碰巧相关。按章节读取它：用 Grep 工具找到你需要的标题（pattern `^#`，content 模式），
+再用 offset 和 limit 读取这些范围。
 
-1. **Map its headings first** (cheap):
+1. **先梳理其标题**（开销低）：
    ```
    Grep pattern="^## " path="docs/architecture/[adr-file].md" output_mode="content" -n
    ```
-2. **Under ~40KB** (`Bash: wc -c "docs/architecture/[adr-file].md"`) — one full
-   `Read` is fine; per-call overhead exceeds the savings from bounded reads at
-   this size.
-3. **~40KB or larger** — bounded-read only `## Context`, `## Decision`, and
-   `## Consequences` (the sections that carry reasoning, not just facts) via
-   `Read(offset, limit)` from the heading map.
+2. **约 40KB 以下**（`Bash: wc -c "docs/architecture/[adr-file].md"`）—— 一次完整
+   `Read` 即可；在此大小下，每次调用的开销超过了有界读取节省的开销。
+3. **约 40KB 或更大** —— 通过标题映射使用 `Read(offset, limit)` 仅
+   有界读取 `## Context`、`## Decision` 和 `## Consequences`
+   （承载推理而不只是事实的章节）。
 
-Read GDDs the same way `/design-system` Step 2b does: only GDDs the registry
-or the ADR list names as directly relevant, and only their `## Dependencies`,
-`## Formulas`, and `## Edge Cases` sections
-(`Grep pattern="^## (Dependencies|Formulas|Edge Cases)" ... -A 40`) — never a
-speculative full read of `design/gdd/*.md` looking for anything that might
-relate.
+按 `/design-system` 第 2b 步的方式读取 GDD：只读注册表
+或 ADR 列表点名为直接相关的 GDD，且只读其 `## Dependencies`、
+`## Formulas` 和 `## Edge Cases` 章节
+（`Grep pattern="^## (Dependencies|Formulas|Edge Cases)" ... -A 40`）——
+绝不要投机性地完整读取 `design/gdd/*.md` 去寻找任何可能相关的内容。
 
-Skip 3b entirely if the registry already answers everything this decision
-needs — most ADRs will.
+如果注册表已经回答了此决策所需的一切，就完全跳过 3b——大多数 ADR 都会如此。
 
 ---

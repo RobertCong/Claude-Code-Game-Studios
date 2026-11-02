@@ -1,83 +1,83 @@
 # Agent Test Spec: godot-gdscript-specialist
 
 ## Agent Summary
-Domain: GDScript static typing, design patterns in GDScript, signal architecture, coroutine/await patterns, and GDScript performance.
-Does NOT own: shader code (godot-shader-specialist), GDExtension bindings (godot-gdextension-specialist).
-No gate IDs assigned.
+领域：GDScript 静态类型、GDScript 设计模式、信号架构、协程/await 模式以及 GDScript 性能。
+不负责：着色器代码（godot-shader-specialist）、GDExtension 绑定（godot-gdextension-specialist）。
+未分配质量闸门（gate）ID。
 
 ---
 
 ## Static Assertions (Structural)
 
-- [ ] `description:` field is present and domain-specific (references GDScript / static typing / signals / coroutines)
-- [ ] `tools:` list includes Read, Write, Edit, Bash, Glob, Grep
-- [ ] Model tier is `sonnet` — frontmatter `model:` reads exactly `sonnet` (tiers: `.claude/docs/model-tiers.md`)
-- [ ] Agent definition does not claim authority over shader code or GDExtension
+- [ ] `description:` 字段存在且与领域相关（提及 GDScript / 静态类型 / 信号 / 协程）
+- [ ] `tools:` 列表包含 Read、Write、Edit、Bash、Glob、Grep
+- [ ] 模型层级为 `sonnet` — frontmatter `model:` 的内容恰好为 `sonnet`（层级说明：`.claude/docs/model-tiers.md`）
+- [ ] 代理定义未声明对着色器代码或 GDExtension 的权限
 
 ---
 
 ## Test Cases
 
-### Case 1: In-domain request — appropriate output
-**Input:** "Review this GDScript file for type annotation coverage."
+### Case 1: 领域内请求 — 输出得当
+**Input:** "检查这个 GDScript 文件的类型标注覆盖率。"
 **Expected behavior:**
-- Reads the provided GDScript file
-- Flags every variable, parameter, and return type that is missing a static type annotation
-- Produces a list of specific line-by-line findings: `var speed = 5.0` → `var speed: float = 5.0`
-- Notes the performance and tooling benefits of static typing in Godot 4
-- Does NOT rewrite the entire file unprompted — produces a findings list for the developer to apply
+- 读取所提供的 GDScript 文件
+- 标记出每个缺少静态类型标注的变量、参数与返回类型
+- 生成逐行的具体发现列表：`var speed = 5.0` → `var speed: float = 5.0`
+- 说明 Godot 4 中静态类型在性能和工具链方面的收益
+- 不擅自重写整个文件 — 而是生成发现列表供开发者自行应用
 
-### Case 2: Out-of-domain request — redirects correctly
-**Input:** "Write a vertex shader to distort the mesh in world space."
+### Case 2: 领域外请求 — 正确重定向
+**Input:** "写一个顶点着色器，在世界空间中扭曲网格。"
 **Expected behavior:**
-- Does NOT produce shader code in GDScript or in Godot's shading language
-- Explicitly states that shader authoring belongs to `godot-shader-specialist`
-- Redirects the request to `godot-shader-specialist`
-- Any help it offers stays on the script side its redirect line says it owns (`set_shader_parameter()`, material assignment) — it writes no shader code
+- 不在 GDScript 中、也不在 Godot 着色语言中生成着色器代码
+- 明确说明着色器编写属于 `godot-shader-specialist`
+- 将请求重定向到 `godot-shader-specialist`
+- 它提供的任何帮助都停留在其重定向说明中声明拥有的脚本侧（`set_shader_parameter()`、材质赋值）— 不编写任何着色器代码
 
-### Case 3: Async loading with coroutines
-**Input:** "Load a scene asynchronously and wait for it to finish before spawning it."
+### Case 3: 使用协程的异步加载
+**Input:** "异步加载一个场景，等它完成后再生成。"
 **Expected behavior:**
-- Produces an `await` + `ResourceLoader.load_threaded_request` pattern for Godot 4
-- Uses static typing throughout (`var scene: PackedScene`)
-- Handles the completion check with `ResourceLoader.load_threaded_get_status()`, awaiting between polls rather than blocking the frame
-- Checks `is_instance_valid(self)` after the await before spawning — the node may have been freed while the scene loaded
-- Notes error handling for failed loads
-- Does NOT use deprecated Godot 3 `yield()` syntax
+- 为 Godot 4 生成 `await` + `ResourceLoader.load_threaded_request` 模式
+- 全程使用静态类型（`var scene: PackedScene`）
+- 用 `ResourceLoader.load_threaded_get_status()` 处理完成检查，在轮询之间 await 而不是阻塞帧
+- 在 await 之后、生成之前检查 `is_instance_valid(self)` — 节点可能在场景加载期间已被释放
+- 说明加载失败的错误处理
+- 不使用已弃用的 Godot 3 `yield()` 语法
 
-### Case 4: Performance issue — typed array recommendation
-**Input:** "The entity update loop is slow; it iterates an untyped Array of 1,000 nodes every frame."
+### Case 4: 性能问题 — 类型化数组建议
+**Input:** "实体更新循环很慢；它每帧遍历一个含 1,000 个节点的无类型 Array。"
 **Expected behavior:**
-- Identifies that an untyped `Array` foregoes GDScript compiler optimizations
-- Recommends converting to a typed array (`Array[Node]` or the specific type) so the compiler can use typed code paths
-- Produces the typed array refactor as the immediate fix
-- Notes that if profiling still shows the loop as a bottleneck, the next step is moving the hot path to GDExtension (C++/Rust) with godot-gdextension-specialist, per its GDScript/GDExtension boundary
-- Does NOT recommend moving the loop, or the codebase, out of GDScript without profiler evidence
+- 指出无类型 `Array` 会放弃 GDScript 编译器的优化
+- 建议改为类型化数组（`Array[Node]` 或具体类型），以便编译器使用类型化代码路径
+- 将类型化数组重构作为立即修复方案生成
+- 说明若性能分析仍显示该循环是瓶颈，下一步是按 GDScript/GDExtension 边界，与 godot-gdextension-specialist 一起把热路径迁移到 GDExtension（C++/Rust）
+- 在没有性能分析证据的情况下，不建议把循环或代码库移出 GDScript
 
-### Case 5: Context pass — Godot 4.6 with post-cutoff features
-**Input:** Engine version context provided: Godot 4.6. Request: "Create an abstract base class for all enemy types using @abstract."
+### Case 5: 上下文校验 — Godot 4.6 与截止后特性
+**Input:** 提供的引擎版本上下文：Godot 4.6。请求："使用 @abstract 为所有敌人类型创建一个抽象基类。"
 **Expected behavior:**
-- Identifies `@abstract` as a Godot 4.5+ feature (post-cutoff)
-- Notes this in the output: feature introduced in 4.5, confirmed against `docs/engine-reference/godot/breaking-changes.md` (4.4 → 4.5 table)
-- Produces the GDScript class using `@abstract` on the class and its abstract methods, following the reference docs (`current-best-practices.md`) rather than training data
-- Flags that `VERSION.md` records `Installed at pin time` as NOT DETERMINED — the installed editor must be 4.5 or later for `@abstract` to parse
-- Uses static typing for all method signatures in the abstract class
+- 识别出 `@abstract` 是 Godot 4.5+ 特性（截止后）
+- 在输出中说明：该特性在 4.5 引入，已对照 `docs/engine-reference/godot/breaking-changes.md`（4.4 → 4.5 表格）确认
+- 按参考资料（`current-best-practices.md`）而非训练数据，生成在类及其抽象方法上使用 `@abstract` 的 GDScript 类
+- 指出 `VERSION.md` 将 `Installed at pin time` 记录为 NOT DETERMINED — 已安装编辑器必须为 4.5 或更高版本，`@abstract` 才能解析
+- 对抽象类中所有方法签名使用静态类型
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Stays within declared domain (GDScript — typing, patterns, signals, coroutines, performance)
-- [ ] Redirects shader requests to godot-shader-specialist
-- [ ] Redirects GDExtension requests to godot-gdextension-specialist
-- [ ] Returns structured GDScript output with full static typing
-- [ ] Uses Godot 4 API only — no deprecated Godot 3 patterns (yield, connect with strings, etc.)
-- [ ] Flags features from 4.4 onward (4.4 just before the cutoff; 4.5, 4.6, 4.7 after it) and marks them as requiring doc verification
-- [ ] Asks "May I write this to [filepath]?" naming the file before writing
+- [ ] 保持在声明的领域内（GDScript — 类型、模式、信号、协程、性能）
+- [ ] 将着色器请求重定向到 godot-shader-specialist
+- [ ] 将 GDExtension 请求重定向到 godot-gdextension-specialist
+- [ ] 返回带完整静态类型的结构化 GDScript 输出
+- [ ] 仅使用 Godot 4 API — 不使用已弃用的 Godot 3 模式（yield、基于字符串的 connect 等）
+- [ ] 标记 4.4 及之后的特性（4.4 恰在截止前；4.5、4.6、4.7 在截止后），并将其标注为需要查阅文档核实
+- [ ] 写入前询问 "May I write this to [filepath]?" 并指明文件名
 
 ---
 
 ## Coverage Notes
-- Type annotation review (Case 1) output is suitable as a code review checklist
-- Async loading (Case 3) should produce testable code verifiable with a unit test in `tests/unit/`
-- Post-cutoff @abstract (Case 5) confirms the agent flags version uncertainty rather than silently using unverified APIs
+- 类型标注检查（Case 1）的输出适合作为代码评审检查清单
+- 异步加载（Case 3）应生成可用 `tests/unit/` 中单元测试验证的可测试代码
+- 截止后的 @abstract（Case 5）确认代理会标记版本不确定性，而不是悄悄使用未经验证的 API

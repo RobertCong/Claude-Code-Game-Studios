@@ -2,192 +2,174 @@
 
 ## Skill Summary
 
-`/estimate [task-description]` estimates the effort for one task. It reads the
-task description from the argument (asking for clarification first if it is too
-vague to estimate), the project context from `CLAUDE.md`, and any related GDD in
-`design/gdd/` (Phase 1). It scans the affected code for complexity, integration
-points and test coverage, and reads `production/sprints/` for similar completed
-tasks and historical velocity (Phase 2). It analyzes code complexity, scope and
-risk (Phase 3), then prints an estimate (Phase 4): a Complexity Assessment
-table, an Effort Estimate in days for Optimistic / Expected / Pessimistic
-scenarios, a recommended budget equal to the Expected figure, a Confidence of
-High / Medium / Low with its drivers, Risk Factors, Dependencies, a Suggested
-Breakdown with a total, and Notes and Assumptions — followed by a one-line
-summary and `Verdict: COMPLETE — estimate generated.` Estimates are rounded to
-half days. The skill is read-only and invokes no director gates.
+`/estimate [task-description]` 估算单个任务的工作量。它从参数中读取任务描述（如果描述过于模糊、无法估算，则先请求澄清），从 `CLAUDE.md` 读取项目上下文，并从 `design/gdd/` 读取任何相关游戏设计文档（GDD）（Phase 1）。它扫描受影响的代码以评估复杂度、集成点和测试覆盖率，并读取 `production/sprints/` 中类似已完成任务和历史速度（Phase 2）。它分析代码复杂度、范围和风险（Phase 3），然后输出估算（Phase 4）：一张复杂度评估（Complexity Assessment）表、按乐观（Optimistic）/ 预期（Expected）/ 悲观（Pessimistic）三种情景给出的天数工作量估算、一个等于预期数值的推荐预算、一个带驱动因素的高 / 中 / 低置信度、风险因素、依赖、带合计的建议拆分，以及备注与假设——随后是一行摘要和 `Verdict: COMPLETE — estimate generated.`。估算值按半天取整。该技能为只读，不调用任何总监质量闸门（gate）。
 
 ---
 
 ## Static Assertions (Structural)
 
-Checked against the SKILL.md by `/skill-test spec` — no fixture needed.
+由 `/skill-test spec` 对照 SKILL.md 检查——无需夹具。
 
-- [ ] Has required frontmatter fields: `name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`
-- [ ] Has ≥2 phase headings
-- [ ] Contains the Optimistic / Expected / Pessimistic scenarios, the High / Medium / Low confidence levels, and the `COMPLETE` verdict
-- [ ] Does NOT require "May I write" language (read-only; states that no files are written)
-- [ ] Has a next-step handoff (how to use the estimate in sprint planning)
+- [ ] 具有必需的前置元数据（frontmatter）字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具有 ≥2 个阶段标题
+- [ ] 包含乐观 / 预期 / 悲观情景、高 / 中 / 低置信度，以及 `COMPLETE` 结论
+- [ ] 不要求「May I write」措辞（只读；明确说明不写入任何文件）
+- [ ] 具有下一步交接（如何在冲刺规划中使用该估算）
 
 ---
 
 ## Director Gate Checks
 
-None. Estimation is an advisory informational skill; no gates are invoked.
+无。估算是提供建议的信息型技能；不调用任何质量闸门（gate）。
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非某个用例自己的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见 `studio-tests/CLAUDE.md` § Fixture defaults。
 
 ---
 
 ## Test Cases
 
-### Case 1: Happy Path — Clear task in a documented system with existing patterns
+### Case 1: 正常路径 — 文档化系统中已有既定模式的清晰任务
 
 **Fixture:**
-- `project.yaml`: `engine.name: godot`, so the code root is `src/`
-- `design/gdd/combat.md` documents melee hit detection
-- `src/combat/` holds the melee attack code; similar collision code already exists there
-- `production/sprints/sprint-003.md` through `sprint-005.md` record completed combat tasks
+- `project.yaml`：`engine.name: godot`，因此代码根为 `src/`
+- `design/gdd/combat.md` 记录了近战命中检测
+- `src/combat/` 存放近战攻击代码；其中已有类似的碰撞代码
+- `production/sprints/sprint-003.md` 到 `sprint-005.md` 记录了已完成的战斗任务
 
 **Input:** `/estimate Add hitbox detection to melee attacks`
 
 **Expected behavior:**
-1. Skill restates the task; the description is specific enough, so no clarification is asked
-2. Skill reads `design/gdd/combat.md` because the task relates to a documented system
-3. Skill scans `src/combat/` for affected files, integration points and existing tests
-4. Skill reads `production/sprints/` for similar completed tasks and velocity
-5. Output follows the Phase 4 template: Complexity Assessment, Effort Estimate (Optimistic / Expected / Pessimistic, in days), Recommended budget, Confidence, Risk Factors, Dependencies, Suggested Breakdown with a Total, Notes and Assumptions
-6. Recommended budget equals the Expected figure; all figures are in half-day increments
-7. A brief summary gives the recommended budget, the confidence level and the single biggest risk
-8. Output ends with `Verdict: COMPLETE — estimate generated.`; no files are written
+1. 技能复述任务；描述足够具体，因此不请求澄清
+2. 由于任务涉及已文档化的系统，技能读取 `design/gdd/combat.md`
+3. 技能扫描 `src/combat/`，找出受影响的文件、集成点和现有测试
+4. 技能读取 `production/sprints/`，查找类似的已完成任务和速度
+5. 输出遵循 Phase 4 模板：复杂度评估、工作量估算（乐观 / 预期 / 悲观，以天计）、推荐预算、置信度、风险因素、依赖、带合计的建议拆分、备注与假设
+6. 推荐预算等于预期数值；所有数值均为半天增量
+7. 简短摘要给出推荐预算、置信度和最大的单一风险
+8. 输出以 `Verdict: COMPLETE — estimate generated.` 结束；不写入任何文件
 
 **Assertions:**
-- [ ] The combat GDD and the sprint history are read before the estimate is produced
-- [ ] The Complexity Assessment's size row gives Grep counts for the affected files (non-blank lines, branch lines) and calls branching an approximation, not a measured complexity
-- [ ] Effort is given as three day figures (Optimistic, Expected, Pessimistic), not a single number
-- [ ] Recommended budget equals the Expected figure, not the Optimistic one
-- [ ] Figures are rounded to half days, not hours
-- [ ] The closing summary names budget, confidence and the biggest risk
-- [ ] No files are written
+- [ ] 在产出估算之前，已读取战斗 GDD 和冲刺历史
+- [ ] 复杂度评估的规模行给出受影响文件的 Grep 计数（非空行数、分支行数），并说明分支数量只是近似值而非实测复杂度
+- [ ] 工作量以三个天数形式给出（乐观、预期、悲观），而不是单一数字
+- [ ] 推荐预算等于预期数值，而不是乐观数值
+- [ ] 数值按半天取整，而不是按小时
+- [ ] 结尾摘要点明预算、置信度和最大风险
+- [ ] 不写入任何文件
 
 ---
 
-### Case 2: High Uncertainty — New subsystem, no architecture decided
+### Case 2: 高不确定性 — 新子系统，架构未定
 
 **Fixture:**
-- `project.yaml`: `engine.name: godot`
-- `src/` holds no source files for an online or matchmaking subsystem
-- `design/gdd/online.md` describes the lobby with open "TBD" requirements, and says the networking approach (transport, host model) is not yet decided
+- `project.yaml`：`engine.name: godot`
+- `src/` 中没有任何在线或匹配子系统的源文件
+- `design/gdd/online.md` 描述了大厅，需求为开放的「TBD」，并说明网络方案（传输方式、主机模型）尚未决定
 
 **Input:** `/estimate Implement online lobby matchmaking`
 
 **Expected behavior:**
-1. Skill reads `design/gdd/online.md` and finds the unresolved requirements and the undecided networking approach
-2. Code scan finds no existing subsystem; "Existing patterns available" is No
-3. Risk Factors table lists the specific unknowns: the networking approach the GDD leaves undecided, new technology, unclear requirements
-4. Confidence is Low, with the drivers explained
-5. Phase 5 recommends a time-boxed spike via `/prototype` before committing
-6. No files are written
+1. 技能读取 `design/gdd/online.md`，发现未解决的需求和未定的网络方案
+2. 代码扫描未发现现有子系统；「Existing patterns available」为 No
+3. 风险因素表列出具体的未知项：GDD 未决定的网络方案、新技术、不明确的需求
+4. 置信度为低，并解释其驱动因素
+5. Phase 5 建议在投入前通过 `/prototype` 进行时间盒式的技术探索（spike）
+6. 不写入任何文件
 
 **Assertions:**
-- [ ] Confidence is Low when the task has an undecided approach, no existing code and TBD requirements
-- [ ] The Risk Factors table names the specific unknowns driving the uncertainty
-- [ ] Output recommends a time-boxed `/prototype` spike before committing
-- [ ] No files are written
+- [ ] 当任务方案未定、没有现有代码且需求为 TBD 时，置信度为低
+- [ ] 风险因素表指出驱动不确定性的具体未知项
+- [ ] 输出建议在投入前进行时间盒式的 `/prototype` 技术探索
+- [ ] 不写入任何文件
 
 ---
 
-### Case 3: No Sprint Velocity Data — Estimate still produced, gap stated
+### Case 3: 无冲刺速度数据 — 仍产出估算，并说明数据缺口
 
 **Fixture:**
-- `project.yaml`: `engine.name: godot`; `src/core/` holds the inventory code the save touches
-- `design/gdd/save-load.md` documents the save system clearly
-- `production/sprints/` is empty — no historical sprints
+- `project.yaml`：`engine.name: godot`；`src/core/` 存放存档所涉及的背包代码
+- `design/gdd/save-load.md` 清晰记录了存档系统
+- `production/sprints/` 为空——没有历史冲刺
 
 **Input:** `/estimate Implement save and load of player inventory`
 
 **Expected behavior:**
-1. Skill reads the task, the GDD and the affected code
-2. Skill looks for past sprint data and finds none
-3. The estimate is still produced with all three scenarios and a recommended budget
-4. Notes and Assumptions (or the Confidence explanation) states that no sprint history was available, so the figures are not calibrated to team velocity
-5. No figure is padded silently to cover the missing data — any extra risk is called out explicitly
-6. No files are written
+1. 技能读取任务、GDD 和受影响的代码
+2. 技能查找过往冲刺数据，未找到
+3. 仍产出包含全部三种情景和推荐预算的估算
+4. 备注与假设（或置信度说明）指出没有可用的冲刺历史，因此数值未按团队速度校准
+5. 不会为了弥补缺失数据而悄悄抬高任何数值——任何额外风险都被明确点出
+6. 不写入任何文件
 
 **Assertions:**
-- [ ] Skill does not error or stop when no sprint history exists
-- [ ] Estimate is still produced with Optimistic, Expected and Pessimistic figures
-- [ ] Output states that no sprint history was available for velocity calibration
-- [ ] Any allowance for the missing data is stated as a risk, not hidden in the figures
+- [ ] 没有冲刺历史时，技能不报错也不停止
+- [ ] 仍产出包含乐观、预期和悲观数值的估算
+- [ ] 输出说明没有可用于速度校准的冲刺历史
+- [ ] 针对缺失数据的任何余量都以风险形式说明，而不是隐藏在数值中
 
 ---
 
-### Case 4: Vague Task — Clarification before estimating
+### Case 4: 模糊任务 — 估算前先澄清
 
 **Fixture:**
-- `project.yaml`: `engine.name: godot`
-- Project has GDDs and source code under `src/`; sprint history exists
+- `project.yaml`：`engine.name: godot`
+- 项目在 `src/` 下有 GDD 和源代码；存在冲刺历史
 
 **Input:** `/estimate make combat feel better`
 
 **Expected behavior:**
-1. Skill reads the task description and finds it too vague to estimate meaningfully (no scope, no named change)
-2. Skill asks for clarification before proceeding
-3. No Complexity Assessment, Effort Estimate or verdict is produced until the task is clarified
-4. No files are written
+1. 技能读取任务描述，发现其过于模糊、无法有意义地估算（没有范围、没有明确的改动）
+2. 技能在继续前请求澄清
+3. 在任务得到澄清之前，不产出复杂度评估、工作量估算或结论
+4. 不写入任何文件
 
 **Assertions:**
-- [ ] Skill asks for clarification for a task that names no concrete change
-- [ ] No estimate figures are produced before the clarification is answered
-- [ ] `Verdict: COMPLETE` is not printed for an unclarified task
-- [ ] No files are written
+- [ ] 对于没有指明具体改动的任务，技能请求澄清
+- [ ] 在澄清得到回答之前，不产出任何估算数值
+- [ ] 对未澄清的任务不打印 `Verdict: COMPLETE`
+- [ ] 不写入任何文件
 
 ---
 
-### Case 5: Gate Compliance — No gate; estimates are informational
+### Case 5: 质量闸门合规 — 无质量闸门；估算仅供参考
 
 **Fixture:**
-- `project.yaml`: `engine.name: godot`, `modes.review_mode: full`
-- Task relates to a documented system with medium complexity; its code is under `src/`
+- `project.yaml`：`engine.name: godot`，`modes.review_mode: full`
+- 任务涉及一个已文档化的中等复杂度系统；其代码位于 `src/` 下
 
 **Input:** `/estimate Add item pickup with inventory stacking`
 
 **Expected behavior:**
-1. Skill reads context, scans code and sprint history; produces the estimate
-2. No director gate is invoked in any review mode
-3. Estimate is presented as advisory output only
-4. Next steps include "run `/sprint-plan update` to add it to the next sprint"
+1. 技能读取上下文，扫描代码和冲刺历史；产出估算
+2. 在任何评审模式下都不调用总监质量闸门
+3. 估算仅作为建议性输出呈现
+4. 后续步骤包括「run `/sprint-plan update` to add it to the next sprint」
 
 **Assertions:**
-- [ ] No director gate is invoked regardless of review mode
-- [ ] Output is purely informational — no approval or write prompt
-- [ ] Next-step recommendation references `/sprint-plan`
-- [ ] Estimate does not change based on review mode
+- [ ] 无论评审模式如何，都不调用总监质量闸门
+- [ ] 输出纯属信息性质——没有审批或写入提示
+- [ ] 后续步骤建议引用 `/sprint-plan`
+- [ ] 估算不因评审模式而改变
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Reads the task argument, project context and any related GDD before estimating
-- [ ] Reads `production/sprints/` for similar tasks and velocity when available
-- [ ] Produces an effort range (Optimistic / Expected / Pessimistic days), not a single number
-- [ ] Does not write any files
-- [ ] No director gates are invoked
-- [ ] Ends with Phase 5 next steps matched to the result (`/prototype` for Low confidence, `/create-stories` for tasks over 10 days, `/sprint-plan update` to schedule)
+- [ ] 在估算前读取任务参数、项目上下文和任何相关 GDD
+- [ ] 在可用时读取 `production/sprints/` 以获取类似任务和速度
+- [ ] 产出一个工作量区间（乐观 / 预期 / 悲观天数），而不是单一数字
+- [ ] 不写入任何文件
+- [ ] 不调用任何总监质量闸门
+- [ ] 以与结果匹配的 Phase 5 后续步骤结束（低置信度时用 `/prototype`，任务超过 10 天时用 `/create-stories`，安排排期时用 `/sprint-plan update`）
 
 ---
 
 ## Coverage Notes
 
-- The skill estimates one task per run; a sprint file with several stories is
-  not a supported input.
-- The "task over 10 days → break it into smaller stories via `/create-stories`"
-  branch is not given its own case.
-- The accuracy of the day figures depends on the team and is not tested; the
-  assertions check the range's structure, its sources and its stated drivers.
+- 该技能每次运行只估算一个任务；包含多个用户故事的冲刺文件不是受支持的输入。
+- 「任务超过 10 天 → 通过 `/create-stories` 拆分为更小的用户故事」这一分支没有单独用例。
+- 天数数值的准确性取决于团队，因此不做测试；断言检查的是区间的结构、来源及其声明的驱动因素。

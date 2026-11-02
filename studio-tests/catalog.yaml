@@ -1,7 +1,7 @@
 version: 2
 last_updated: ""
 skills:
-  # Critical — gate skills that control phase transitions
+  # Critical —— 控制阶段转换的闸门技能
   - name: gate-check
     spec: studio-tests/skills/gate/gate-check.md
     last_static: ""
@@ -68,7 +68,7 @@ skills:
     priority: critical
     category: review
 
-  # High — pipeline-critical skills
+  # High —— 流水线关键技能
   - name: create-epics
     spec: studio-tests/skills/pipeline/create-epics.md
     last_static: ""
@@ -179,7 +179,7 @@ skills:
     priority: high
     category: analysis
 
-  # Medium — team and sprint management skills
+  # Medium —— 团队与冲刺管理技能
   - name: sprint-plan
     spec: studio-tests/skills/sprint/sprint-plan.md
     last_static: ""
@@ -301,7 +301,7 @@ skills:
     priority: medium
     category: team
 
-  # Low — analysis, reporting, utility skills
+  # Low —— 分析、报告与通用技能
   - name: skill-test
     spec: studio-tests/skills/utility/skill-test.md
     last_static: ""
@@ -820,7 +820,7 @@ skills:
     category: utility
 
 agents:
-  # Tier 1 Directors
+  # Tier 1 总监
   - name: creative-director
     spec: studio-tests/agents/directors/creative-director.md
     last_spec: ""
@@ -853,7 +853,7 @@ agents:
     last_category_result: ""
     category: director
 
-  # Tier 2 Leads
+  # Tier 2 主管
   - name: lead-programmer
     spec: studio-tests/agents/leads/lead-programmer.md
     last_spec: ""
@@ -910,7 +910,7 @@ agents:
     last_category_result: ""
     category: lead
 
-  # Core Specialists
+  # 核心专家
   - name: gameplay-programmer
     spec: studio-tests/agents/specialists/gameplay-programmer.md
     last_spec: ""
@@ -1007,7 +1007,7 @@ agents:
     last_category_result: ""
     category: specialist
 
-  # Engine Specialists — Godot
+  # 引擎专家 —— Godot
   - name: godot-specialist
     spec: studio-tests/agents/engine/godot/godot-specialist.md
     last_spec: ""
@@ -1048,7 +1048,7 @@ agents:
     last_category_result: ""
     category: engine
 
-  # Engine Specialists — Unity
+  # 引擎专家 —— Unity
   - name: unity-specialist
     spec: studio-tests/agents/engine/unity/unity-specialist.md
     last_spec: ""
@@ -1089,7 +1089,7 @@ agents:
     last_category_result: ""
     category: engine
 
-  # Engine Specialists — Unreal
+  # 引擎专家 —— Unreal
   - name: unreal-specialist
     spec: studio-tests/agents/engine/unreal/unreal-specialist.md
     last_spec: ""
@@ -1130,7 +1130,7 @@ agents:
     last_category_result: ""
     category: engine
 
-  # Operations
+  # 运营
   - name: devops-engineer
     spec: studio-tests/agents/operations/devops-engineer.md
     last_spec: ""
@@ -1187,7 +1187,7 @@ agents:
     last_category_result: ""
     category: operations
 
-  # QA & Creative
+  # QA 与创意
   - name: qa-tester
     spec: studio-tests/agents/qa/qa-tester.md
     last_spec: ""

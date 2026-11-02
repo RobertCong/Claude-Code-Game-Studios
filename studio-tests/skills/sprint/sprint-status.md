@@ -2,198 +2,163 @@
 
 ## Skill Summary
 
-`/sprint-status` is a Haiku-tier read-only skill that produces a concise sprint
-snapshot. It uses the sprint named by its argument, or the most recently
-modified file in `production/sprints/`, and reads `production/sprint-status.yaml`
-as the source of truth for story status (falling back to markdown scanning with
-a warning when the yaml is absent). It greps the story files'
-`Last Updated` fields and flags an In Progress story as STALE when its date is
-more than 4 days old. The burndown verdict is On Track / At Risk / Behind,
-derived from completion % against time consumed %, and any STALE story upgrades
-it to at least At Risk. Fast escalation flags go at the top of the output: the
-SPRINT AT RISK critical flag, the Must Haves completion flag, and the missing
-stories flag. When no sprint files exist it points to `/sprint-plan new` at
-`standard`/`full` workflow, and reports build-order progress at `minimal` —
-where, if every unfinished story is Blocked, Draft or unstatused, it names them
-(each blocked one with its blocker) and never reports the build order done. It
-never writes files, invokes no director gates, and makes at most one
-recommendation.
+`/sprint-status` 是一个 Haiku 档的只读技能，用于产出简洁的冲刺快照。它使用由其参数指名的冲刺，或 `production/sprints/` 中最近修改的文件，并读取 `production/sprint-status.yaml` 作为用户故事状态的事实来源（当 yaml 缺失时回退到 markdown 扫描并给出警告）。它 grep 用户故事文件的 `Last Updated` 字段，并在某个 In Progress 用户故事的日期超过 4 天时将其标记为 STALE。燃尽结论为 On Track / At Risk / Behind，由完成百分比相对于已消耗时间百分比推导而来，任何 STALE 用户故事会把它至少升级为 At Risk。快速升级标记置于输出顶部：SPRINT AT RISK 严重标记、Must Haves 完成标记以及缺失用户故事标记。当不存在任何冲刺文件时，它在 `standard`/`full` 工作流下指向 `/sprint-plan new`，并在 `minimal` 下报告构建顺序进度——此时，如果每个未完成的用户故事都是 Blocked、Draft 或无状态，它会指名它们（每个受阻的附上其阻塞项）并且绝不报告构建顺序已完成。它从不写入文件，不调用任何总监闸门，且最多给出一条建议。
 
 ---
 
 ## Static Assertions (Structural)
 
-Checked against the SKILL.md by `/skill-test spec` — no fixture needed.
+由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] Has required frontmatter fields: `name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`
-- [ ] Has ≥2 phase headings or numbered check sections
-- [ ] Contains burndown verdict keywords: On Track, At Risk, Behind
-- [ ] Does NOT require "May I write" language (read-only skill)
-- [ ] Has a next-step handoff (the Recommendation section)
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备 ≥2 个 phase 标题或编号检查小节
+- [ ] 包含燃尽结论关键词：On Track、At Risk、Behind
+- [ ] 不要求 "May I write" 措辞（只读技能）
+- [ ] 具有下一步交接（Recommendation 小节）
 
 ---
 
 ## Director Gate Checks
 
-None. `/sprint-status` is a read-only reporting skill; no gates are invoked.
+无。`/sprint-status` 是一个只读报告技能，不调用任何闸门。
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非该用例自己的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
 
 ---
 
 ## Test Cases
 
-### Case 1: Happy Path — Mixed sprint, At Risk with a blocked Must Have
+### Case 1: 正常路径 —— 混合冲刺，因 Must Have 受阻而为 At Risk
 
 **Fixture:**
-- `production/sprints/sprint-004.md` is the most recently modified sprint file
-- `production/sprint-status.yaml` covers sprint 4: it started 13 days ago and
-  ends 7 days from today (65% of time consumed)
-- The yaml lists 6 stories:
-  - 3 with `status: done`
-  - 2 with `status: in-progress`, both last updated within the past 2 days
-  - 1 with `status: blocked`, `priority: must-have`,
+- `production/sprints/sprint-004.md` 是最近修改的冲刺文件
+- `production/sprint-status.yaml` 覆盖冲刺 4：它于 13 天前开始，并于今天起 7 天后结束（已消耗 65% 时间）
+- yaml 列出 6 个用户故事：
+  - 3 个为 `status: done`
+  - 2 个为 `status: in-progress`，均在最近 2 天内更新
+  - 1 个为 `status: blocked`，`priority: must-have`，
     `blocker: "Waiting on physics ADR acceptance"`
 
 **Input:** `/sprint-status`
 
 **Expected behavior:**
-1. Skill selects `sprint-004.md` and reads `production/sprint-status.yaml`
-2. Skill computes 65% time consumed and 3/6 = 50% complete — 15 points behind
-3. A blocked Must Have with 35% of sprint time remaining (under 40%) triggers
-   the critical flag at the top: "SPRINT AT RISK: … Recommend replanning with
-   `/sprint-plan update`."
-4. Skill outputs the status table with the blocker in the Blocker column and
-   the burndown verdict At Risk
+1. 技能选择 `sprint-004.md` 并读取 `production/sprint-status.yaml`
+2. 技能计算已消耗 65% 时间、3/6 = 50% 完成——落后 15 个百分点
+3. 在剩余 35% 冲刺时间（低于 40%）时存在受阻的 Must Have，触发顶部严重标记：“SPRINT AT RISK: … Recommend replanning with `/sprint-plan update`.”
+4. 技能输出状态表，blocker 置于 Blocker 列，燃尽结论为 At Risk
 
 **Assertions:**
-- [ ] Output includes "Progress: 3/6 tasks (50%)" and a status table listing all 6 stories
-- [ ] The blocked story is named with "Waiting on physics ADR acceptance" in its Blocker column
-- [ ] Burndown is At Risk (50% complete vs 65% time consumed — 15 points behind)
-- [ ] The SPRINT AT RISK critical flag appears at the top, recommending `/sprint-plan update`
-- [ ] Skill does not write any files
+- [ ] 输出包含“Progress: 3/6 tasks (50%)”，以及列出全部 6 个用户故事的状态表
+- [ ] 受阻用户故事在 Blocker 列中被指名，并附“Waiting on physics ADR acceptance”
+- [ ] 燃尽为 At Risk（50% 完成 vs 65% 时间已消耗——落后 15 个百分点）
+- [ ] SPRINT AT RISK 严重标记出现在顶部，并推荐 `/sprint-plan update`
+- [ ] 技能不写入任何文件
 
 ---
 
-### Case 2: All Stories Complete — On Track with completion flag
+### Case 2: 全部用户故事完成 —— On Track 并带完成标记
 
 **Fixture:**
-- `production/sprints/sprint-004.md` is the most recently modified sprint file
-- `production/sprint-status.yaml` covers sprint 4: it started 5 days ago and ends
-  5 days from today (50% of time consumed)
-- All 5 stories have `status: done` (3 `must-have`, 2 `should-have`)
+- `production/sprints/sprint-004.md` 是最近修改的冲刺文件
+- `production/sprint-status.yaml` 覆盖冲刺 4：它于 5 天前开始，并于今天起 5 天后结束（已消耗 50% 时间）
+- 全部 5 个用户故事为 `status: done`（3 个 `must-have`，2 个 `should-have`）
 
 **Input:** `/sprint-status`
 
 **Expected behavior:**
-1. Skill reads the yaml — 5/5 complete
-2. 100% complete against 50% time consumed → On Track
-3. The completion flag appears at the top: "All Must Haves complete. Team can
-   pull from Should Have backlog."
-4. Must-Haves at Risk reads "None."; the Attention Needed section is omitted
-5. Skill ends with a single recommendation
+1. 技能读取 yaml——5/5 完成
+2. 100% 完成相对于 50% 时间已消耗 → On Track
+3. 完成标记出现在顶部：“All Must Haves complete. Team can pull from Should Have backlog.”
+4. Must-Haves at Risk 读作“None.”；省略 Attention Needed 小节
+5. 技能以一条建议结束
 
 **Assertions:**
-- [ ] Burndown is On Track
-- [ ] The completion flag "All Must Haves complete. Team can pull from Should Have backlog." appears at the top
-- [ ] Output shows "Progress: 5/5 tasks (100%)"
-- [ ] Output makes at most one recommendation (or "Sprint is on track — no action needed.")
-- [ ] No files are written
+- [ ] 燃尽为 On Track
+- [ ] 完成标记“All Must Haves complete. Team can pull from Should Have backlog.”出现在顶部
+- [ ] 输出显示“Progress: 5/5 tasks (100%)”
+- [ ] 输出最多给出一条建议（或“Sprint is on track — no action needed.”）
+- [ ] 不写入任何文件
 
 ---
 
-### Case 3: No Sprint Files — Guidance to run /sprint-plan
+### Case 3: 无冲刺文件 —— 指引运行 /sprint-plan
 
 **Fixture:**
-- `production/sprints/` directory is absent
-- `project.yaml` sets `modes.workflow: standard`
+- `production/sprints/` 目录不存在
+- `project.yaml` 设置 `modes.workflow: standard`
 
 **Input:** `/sprint-status`
 
 **Expected behavior:**
-1. Skill finds no sprint files
-2. At `standard` workflow, skill reports: "No sprint files found. Start a sprint
-   with `/sprint-plan new`."
-3. Skill stops
+1. 技能找不到任何冲刺文件
+2. 在 `standard` 工作流下，技能报告：“No sprint files found. Start a sprint with `/sprint-plan new`.”
+3. 技能停止
 
 **Assertions:**
-- [ ] Skill does not error or crash when no sprint file exists
-- [ ] Output states "No sprint files found" and recommends `/sprint-plan new`
-- [ ] Skill stops there — no burndown verdict and no status table are emitted
-- [ ] The `workflow: minimal` build-order report is not used at `standard`
+- [ ] 不存在冲刺文件时技能不报错也不崩溃
+- [ ] 输出说明“No sprint files found”并推荐 `/sprint-plan new`
+- [ ] 技能就此停止——不输出燃尽结论，也不输出状态表
+- [ ] 在 `standard` 下不使用 `workflow: minimal` 的构建顺序报告
 
 ---
 
-### Case 4: Edge Case — Stale In Progress Story (flagged)
+### Case 4: 边界情况 —— 陈旧的 In Progress 用户故事（已标记）
 
 **Fixture:**
-- `production/sprints/sprint-004.md` is the most recently modified sprint file
-- `production/sprint-status.yaml` covers sprint 4: 10-day sprint, 5 days elapsed
-  (50% of time consumed); 4 stories — 2 `done`, 2 `in-progress` (50% complete)
-- `production/epics/combat/story-003-dash.md` (in progress) has
-  `> **Last Updated**: [6 days before today]`
-- `production/epics/combat/story-004-parry.md` (in progress) has
-  `> **Last Updated**: [3 days before today]`
-- No stories are Blocked
+- `production/sprints/sprint-004.md` 是最近修改的冲刺文件
+- `production/sprint-status.yaml` 覆盖冲刺 4：10 天冲刺，已过 5 天（已消耗 50% 时间）；4 个用户故事——2 个 `done`，2 个 `in-progress`（50% 完成）
+- `production/epics/combat/story-003-dash.md`（进行中）带有 `> **Last Updated**: [6 days before today]`
+- `production/epics/combat/story-004-parry.md`（进行中）带有 `> **Last Updated**: [3 days before today]`
+- 没有用户故事为 Blocked
 
 **Input:** `/sprint-status`
 
 **Expected behavior:**
-1. Skill resolves the dates with one grep for the `Last Updated` field across
-   `production/epics/**/story-*.md`
-2. story-003 is 6 days old — more than the 4-day threshold — and is flagged
-   STALE; story-004 (3 days) is not
-3. The Attention Needed table lists story-003 with its Last Updated date, Days
-   Stale and the STALE note
-4. The burndown, On Track by percentage alone, is upgraded to At Risk with the
-   reason "At Risk — 1 stale story(ies): …" naming story-003 with its own age,
-   6 days
+1. 技能通过一次 grep 在 `production/epics/**/story-*.md` 中解析 `Last Updated` 字段来确定日期
+2. story-003 已 6 天——超过 4 天阈值——被标记 STALE；story-004（3 天）不标记
+3. Attention Needed 表列出 story-003，含其 Last Updated 日期、Days Stale 和 STALE 注记
+4. 仅凭百分比本应为 On Track 的燃尽被升级为 At Risk，原因“At Risk — 1 stale story(ies): …”指名 story-003 及其自身年龄 6 天
 
 **Assertions:**
-- [ ] Dates come from the story files' `Last Updated` field via a single grep, not from `active.md` or a read per story
-- [ ] story-003 (6 days) is flagged STALE by name in Attention Needed; story-004 (3 days) is not flagged
-- [ ] Burndown is At Risk despite 50% complete against 50% time consumed, and the escalation reason gives the stale count (1) and story-003's own age (6 days) as separate figures
-- [ ] Output does not conflate "stale" with "Blocked" — story-003 keeps its IN PROGRESS status with a STALE note
+- [ ] 日期通过一次 grep 从用户故事文件的 `Last Updated` 字段获取，而非来自 `active.md` 或逐个用户故事读取
+- [ ] story-003（6 天）在 Attention Needed 中按名标记为 STALE；story-004（3 天）不标记
+- [ ] 尽管 50% 完成相对于 50% 时间已消耗，燃尽仍为 At Risk，且升级原因把陈旧数（1）和 story-003 自身年龄（6 天）作为两个独立数字给出
+- [ ] 输出不把“陈旧”与“Blocked”混为一谈——story-003 保持其 IN PROGRESS 状态并附带 STALE 注记
 
 ---
 
-### Case 5: Gate Compliance — Read-only; no gate invocation
+### Case 5: 闸门合规 —— 只读；不调用闸门
 
 **Fixture:**
-- `production/sprints/sprint-004.md` exists and `production/sprint-status.yaml`
-  lists 4 stories (2 `done`, 2 `in-progress`) with sprint dates
-- `project.yaml` sets `modes.review_mode: full`
+- `production/sprints/sprint-004.md` 存在，且 `production/sprint-status.yaml` 列出 4 个用户故事（2 个 `done`，2 个 `in-progress`）并带冲刺日期
+- `project.yaml` 设置 `modes.review_mode: full`
 
 **Input:** `/sprint-status`
 
 **Expected behavior:**
-1. Skill reads the sprint and produces the status snapshot
-2. Skill does NOT invoke any director gate regardless of review mode
-3. Output is a plain status report with a Burndown verdict (On Track, At Risk or Behind)
-4. Skill does not prompt for user approval or ask to write any file
+1. 技能读取冲刺并产出状态快照
+2. 无论评审模式如何，技能都不调用任何总监闸门
+3. 输出是带燃尽结论（On Track、At Risk 或 Behind）的普通状态报告
+4. 技能不提示用户批准，也不请求写入任何文件
 
 **Assertions:**
-- [ ] No director gate is invoked in any review mode
-- [ ] Output does not contain any "May I write" prompt
-- [ ] Skill completes and returns a Burndown verdict without user interaction
-- [ ] `review_mode` is not among the keys the skill resolves (it resolves `story_granularity` and `workflow`)
+- [ ] 在任何评审模式下都不调用总监闸门
+- [ ] 输出不含任何“May I write”提示
+- [ ] 技能完成并返回燃尽结论，无需用户交互
+- [ ] `review_mode` 不在技能解析的键之列（它解析 `story_granularity` 和 `workflow`）
 
 ---
 
-### Case 6: Default Minimal Workflow — Build-order progress, no sprint files
+### Case 6: 默认最小工作流 —— 构建顺序进度，无冲刺文件
 
 **Fixture:**
-- `production/sprints/` does not exist
-- `project.yaml` sets neither `modes.rigor` nor `modes.workflow`, so the injected
-  block reads `workflow: minimal (rigor:minimal)`
-- The injected `story-status.sh` list reads:
+- `production/sprints/` 不存在
+- `project.yaml` 既未设置 `modes.rigor` 也未设置 `modes.workflow`，因此注入块读作 `workflow: minimal (rigor:minimal)`
+- 注入的 `story-status.sh` 列表为：
   ```
   IN_REVIEW    production/epics/core/story-003-dash.md
   IN_PROGRESS  production/epics/core/story-002-jump.md
@@ -204,69 +169,61 @@ Fixture defaults.
 **Input:** `/sprint-status`
 
 **Expected behavior:**
-1. Skill finds no sprint files; at `workflow: minimal` it reports build-order
-   progress instead of pointing to `/sprint-plan`
-2. Skill prints "Build order: 1 of 4 stories complete"
-3. Next is story-003 (In Review), the first line — ahead of story-002, which
-   comes first in file order; skill recommends
-   `/story-done production/epics/core/story-003-dash.md`
-4. Skill stops — no burndown verdict, no status table, no write
+1. 技能找不到冲刺文件；在 `workflow: minimal` 下它报告构建顺序进度，而非指向 `/sprint-plan`
+2. 技能输出“Build order: 1 of 4 stories complete”
+3. Next 为 story-003（In Review），即第一行——优先于在文件顺序中更靠前的 story-002；技能推荐 `/story-done production/epics/core/story-003-dash.md`
+4. 技能停止——无燃尽结论、无状态表、无写入
 
 **Assertions:**
-- [ ] Output does not say "No sprint files found" and does not recommend `/sprint-plan new`
-- [ ] Output shows "Build order: 1 of 4 stories complete" — the `In Review` story is not counted as complete
-- [ ] Next is story-003, the first line of the list, with `/story-done` and its path — the story files are not re-ranked into file order
-- [ ] No burndown verdict is emitted and no file is written
+- [ ] 输出不说“No sprint files found”，也不推荐 `/sprint-plan new`
+- [ ] 输出显示“Build order: 1 of 4 stories complete”——`In Review` 用户故事不计为完成
+- [ ] Next 为 story-003，即列表第一行，附带 `/story-done` 及其路径——用户故事文件未被重新排序为文件顺序
+- [ ] 不输出燃尽结论，也不写入任何文件
 
 ---
 
-### Case 7: Minimal Workflow — Every unfinished story Blocked or Draft
+### Case 7: 最小工作流 —— 每个未完成用户故事都是 Blocked 或 Draft
 
 **Fixture:**
-- `production/sprints/` does not exist; the injected block reads
-  `workflow: minimal (rigor:minimal)`
-- The injected `story-status.sh` list reads:
+- `production/sprints/` 不存在；注入块读作 `workflow: minimal (rigor:minimal)`
+- 注入的 `story-status.sh` 列表为：
   ```
   BLOCKED      production/epics/core/story-003-dash.md  (Blocked)
   OTHER        production/epics/core/story-004-parry.md  (Draft)
   COMPLETE     2 of 4
   ```
-- story-003's file carries the note `BLOCKED: waiting on the dash animation`
+- story-003 的文件带有注记 `BLOCKED: waiting on the dash animation`
 
 **Input:** `/sprint-status`
 
 **Expected behavior:**
-1. There is no `IN_REVIEW`, `IN_PROGRESS` or `TODO` line and 2 of 4 stories are
-   complete, so there is no Next and the build order is not done
-2. Skill prints "Build order: 2 of 4 stories complete"
-3. Skill names story-003 with its blocker and story-004 with its status, `Draft`
-4. Skill makes one recommendation — clearing story-003's blocker — and stops
+1. 没有 `IN_REVIEW`、`IN_PROGRESS` 或 `TODO` 行，且 4 个用户故事中 2 个已完成，因此没有 Next，构建顺序也未完成
+2. 技能输出“Build order: 2 of 4 stories complete”
+3. 技能指名 story-003 及其阻塞项，以及 story-004 及其状态 `Draft`
+4. 技能给出一条建议——清除 story-003 的阻塞项——然后停止
 
 **Assertions:**
-- [ ] Output never says the build order is done — no "Build order done" line, no three ways on
-- [ ] No story is presented as Next — neither the Blocked story-003 nor the Draft story-004
-- [ ] story-003 is named with its blocker, "waiting on the dash animation", from its `BLOCKED:` note
-- [ ] story-004 is named with its status as written, `Draft`
-- [ ] Output makes exactly one recommendation, and no file is written
+- [ ] 输出绝不声称构建顺序已完成——没有“Build order done”行，也不做三选一
+- [ ] 没有任何用户故事被呈现为 Next——既非 Blocked 的 story-003，也非 Draft 的 story-004
+- [ ] story-003 被指名并附其阻塞项“waiting on the dash animation”，取自其 `BLOCKED:` 注记
+- [ ] story-004 被指名并附其原样状态 `Draft`
+- [ ] 输出恰好给出一条建议，且不写入任何文件
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Does NOT use Write or Edit tools (read-only skill)
-- [ ] Presents the story status table before the Burndown verdict
-- [ ] Does not ask for approval
-- [ ] Ends with at most one recommended next step
-- [ ] Declares `model: haiku` (when a declared tier is used: `.claude/docs/model-tiers.md`)
+- [ ] 不使用 Write 或 Edit 工具（只读技能）
+- [ ] 在燃尽结论之前展示用户故事状态表
+- [ ] 不请求批准
+- [ ] 以最多一条推荐的下一步结束
+- [ ] 声明 `model: haiku`（当使用已声明的档位时：`.claude/docs/model-tiers.md`）
 
 ---
 
 ## Coverage Notes
 
-- At `workflow: minimal`, the all-Complete ("Build order done") and
-  `STORIES none` branches are not tested.
-- The markdown fallback when `production/sprint-status.yaml` is absent (with its
-  "No `sprint-status.yaml` found" warning) is not tested.
-- A sprint without dates ("burndown assessment skipped") is not tested.
-- Selecting a specific sprint by argument (`/sprint-status 3`) is not tested;
-  the cases above use the most recently modified sprint file.
+- 在 `workflow: minimal` 下，全 Complete（“Build order done”）和 `STORIES none` 分支未测试。
+- `production/sprint-status.yaml` 缺失时的 markdown 回退（及其“No `sprint-status.yaml` found”警告）未测试。
+- 没有日期的冲刺（“burndown assessment skipped”）未测试。
+- 通过参数选择特定冲刺（`/sprint-status 3`）未测试；上述用例使用最近修改的冲刺文件。

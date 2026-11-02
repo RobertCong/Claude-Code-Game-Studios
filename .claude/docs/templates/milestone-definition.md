@@ -4,25 +4,24 @@
 
 - **Target Date**: [Date]
 - **Type**: [Prototype | Vertical Slice | Alpha | Beta | Gold | Post-Launch]
-- **Duration**: [N weeks]
+- **Duration**: [N 周]
 - **Number of Sprints**: [N]
 
 ## Milestone Goal
 
-[2-3 sentences describing what this milestone achieves and why it matters.
-What can we demonstrate or evaluate at the end of this milestone?]
+[用 2-3 句话描述此里程碑达成什么以及为何重要。
+里程碑结束时我们能演示或评估什么？]
 
 ## Success Criteria
 
-[Specific, measurable criteria. The milestone is complete ONLY when all of
-these are met.]
+[具体、可衡量的标准。仅当下列全部满足时，里程碑才算完成。]
 
-- [ ] [Criterion 1 -- specific and testable]
-- [ ] [Criterion 2]
-- [ ] [Criterion 3]
-- [ ] All S1 and S2 bugs resolved
-- [ ] Performance within budget on target hardware
-- [ ] Build stable for [X] consecutive days
+- [ ] [标准 1——具体且可测试]
+- [ ] [标准 2]
+- [ ] [标准 3]
+- [ ] 所有 S1 与 S2 缺陷均已解决
+- [ ] 在目标硬件上性能处于预算内
+- [ ] 构建在连续 [X] 天内保持稳定
 
 ## Feature List
 
@@ -45,12 +44,12 @@ these are met.]
 
 | Gate | Threshold | Measurement Method |
 |------|-----------|-------------------|
-| Crash rate | < [X] per hour | Automated crash reporting |
-| Frame rate | > [X] FPS on min spec | Performance profiling |
-| Load time | < [X] seconds | Automated timing |
-| Critical bugs | 0 open S1 | Bug tracker |
-| High-severity bugs | < [X] open S2 High | Bug tracker |
-| Test coverage | > [X]% | Test framework report |
+| Crash rate | < [X] 每小时 | 自动化崩溃上报 |
+| Frame rate | > [X] FPS（最低配置） | 性能剖析 |
+| Load time | < [X] 秒 | 自动化计时 |
+| Critical bugs | 0 个未关闭的 S1 | 缺陷跟踪器 |
+| High-severity bugs | < [X] 个未关闭的 S2 High | 缺陷跟踪器 |
+| Test coverage | > [X]% | 测试框架报告 |
 
 ## Risk Register
 
@@ -73,7 +72,7 @@ these are met.]
 
 | Date | Review Type | Attendees |
 |------|-----------|-----------|
-| [Week 2] | Early progress check | Producer, Directors |
-| [Midpoint] | Mid-milestone review | Full team |
-| [Week N-1] | Pre-milestone review | Full team |
-| [Target Date] | Milestone review | Full team |
+| [Week 2] | 早期进度检查 | 制作人、总监 |
+| [Midpoint] | 里程碑中期评审 | 全体团队 |
+| [Week N-1] | 里程碑前评审 | 全体团队 |
+| [Target Date] | 里程碑评审 | 全体团队 |

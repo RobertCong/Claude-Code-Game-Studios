@@ -1,62 +1,36 @@
-# Agent Coordination Rules
+# Agent 协调规则
 
-1. **Vertical Delegation**: Leadership agents delegate to department leads, who
-   delegate to specialists. Never skip a tier for complex decisions.
-2. **Horizontal Consultation**: Agents at the same tier may consult each other
-   but must not make binding decisions outside their domain.
-3. **Conflict Resolution**: When two agents disagree, escalate to the shared
-   parent. If no shared parent, escalate to `creative-director` for design
-   conflicts or `technical-director` for technical conflicts.
-4. **Change Propagation**: When a design change affects multiple domains, the
-   `producer` agent coordinates the propagation.
-5. **No Unilateral Cross-Domain Changes**: An agent must never modify files
-   outside its designated directories without explicit delegation.
-6. **Read Design Docs by Section**: A brief names the sections an agent needs
-   by heading. Find a heading in a GDD, ADR or the art bible with the Grep
-   tool (`^#`, content mode) and Read that range with offset and limit; read a doc
-   whole only when the task needs all of it, and say why. `validate-read.sh`
-   refuses a whole-file read of a doc over 40 KB.
-7. **Nothing Goes Upstream**: Never file, open or comment on an issue or pull
-   request in an engine, plugin or vendor repository, even when asked. Write a
-   draft (`/bug-report` drafts only) and the user submits it.
+1. **纵向委派**：领导层 agent 委派给部门主管，部门主管再委派给专家。对于复杂决策，绝不跳过层级。
+2. **横向咨询**：同一层级的 agent 可以相互咨询，但不得在其领域之外做出有约束力的决策。
+3. **冲突解决**：当两个 agent 意见不一致时，上报给共同的上级。若无共同上级，设计冲突上报给 `creative-director`，技术冲突上报给 `technical-director`。
+4. **变更传播**：当设计变更影响多个领域时，由 `producer` agent 协调传播。
+5. **禁止单方面的跨领域变更**：未经明确委派，agent 绝不修改其指定目录之外的文件。
+6. **按章节阅读设计文档**：简报（brief）会以标题指明 agent 所需的章节。用 Grep 工具（`^#`，内容模式）在 GDD、ADR 或美术圣经中找到标题，再用 offset 和 limit 读取该范围；仅当任务需要整篇文档时才通读整篇，并说明原因。对于超过 40 KB 的文档，`validate-read.sh` 会拒绝整文件读取。
+7. **不向上游提交任何内容**：绝不在引擎、插件或供应商仓库中提交 issue、发起 pull request 或发表评论，即使被要求也是如此。只编写草稿（`/bug-report` 仅起草），由用户自行提交。
 
-## Model Tier Assignment
+## 模型层级分配
 
-Read `.claude/docs/model-tiers.md` on demand. It carries the tier table, the
-per-skill assignments and the authoring rule.
+按需阅读 `.claude/docs/model-tiers.md`。其中包含层级表、各技能的分配以及编写规则。
 
-**Key point:** whether a skill's `model:` is used
-depends on how the skill starts. Typed as `/skill-name`: yes, except a `haiku`
-pin in auto mode. Started by Claude through the Skill tool: no. Never tell a
-user a `haiku` skill saves money; an `opus` skill typed in a Sonnet session
-costs more. The agent-side `model:` is a different mechanism, and is applied.
+**关键点：** 技能的 `model:` 是否生效取决于技能的启动方式。以 `/skill-name` 键入：生效，但在 auto 模式下固定为 `haiku` 的情况除外。由 Claude 通过 Skill 工具启动：不生效。绝不要对用户说 `haiku` 技能能省钱；在 Sonnet 会话中键入的 `opus` 技能反而花费更高。agent 侧的 `model:` 是另一种机制，并且会生效。
 
-## Subagents vs Agent Teams
+## 子 agent 与 agent teams
 
-This project uses two distinct multi-agent patterns:
+本项目使用两种截然不同的多 agent 模式：
 
-### Subagents (current, always active)
-Spawned via the `Agent` tool within a single Claude Code session. Used by all
-`team-*` skills and orchestration skills. Subagents share the session's
-permission context, run sequentially or in parallel within the session, and
-return results to the parent.
+### 子 agent（当前，始终启用）
+在单个 Claude Code 会话内通过 `Agent` 工具创建。所有 `team-*` 技能和编排技能都使用它。子 agent 共享会话的权限上下文，在会话内顺序或并行运行，并将结果返回给父级。
 
-**When to spawn in parallel**: If two subagents' inputs are independent (neither
-needs the other's output to begin), spawn both `Agent` calls simultaneously
-rather than waiting. Example: `/review-all-gdds` **Phase 2** (consistency) and
-**Phase 3** (design theory) are independent — spawn both at the same time.
-Phase 1 loads the GDDs and both depend on it, so it is the one phase here that
-must NOT be parallelised.
+**何时并行创建**：如果两个子 agent 的输入相互独立（两者都无需对方的输出即可开始），就同时发起两个 `Agent` 调用，而不是依次等待。例如：`/review-all-gdds` 的 **Phase 2**（一致性）和 **Phase 3**（设计理论）相互独立 —— 应同时发起两者。Phase 1 负责加载 GDD，两者都依赖它，因此它是这里唯一一个绝不能并行的阶段。
 
-### Agent Teams (experimental — opt-in)
-Multiple independent Claude Code *sessions* coordinated via a shared task list.
-Opt-in only — read `.claude/docs/agent-teams.md` on demand before proposing one.
+### Agent Teams（实验性 —— 需主动启用）
+多个独立的 Claude Code *会话*通过共享任务列表进行协调。仅限主动启用 —— 在提议使用之前，按需阅读 `.claude/docs/agent-teams.md`。
 
-## Parallel Task Protocol
+## 并行任务协议
 
-When an orchestration skill spawns multiple independent agents:
+当编排技能创建多个相互独立的 agent 时：
 
-1. Issue all independent `Agent` calls before waiting for any result
-2. Collect all results before proceeding to dependent phases
-3. If any agent is BLOCKED, surface it immediately — do not silently skip
-4. Always produce a partial report if some agents complete and others block
+1. 在等待任何结果之前，先发出所有独立的 `Agent` 调用
+2. 在进入有依赖的阶段之前，先收集所有结果
+3. 如果任何 agent 处于 BLOCKED，立即上报 —— 不要悄悄跳过
+4. 如果部分 agent 完成而其他 agent 阻塞，始终产出部分报告

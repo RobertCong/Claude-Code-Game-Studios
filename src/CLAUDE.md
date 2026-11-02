@@ -1,39 +1,39 @@
-# Source Directory
+# 源代码目录
 
-When writing or editing game code in this directory, follow these standards.
+在此目录中编写或编辑游戏代码时，请遵循以下标准。
 
-## Engine Version Warning
+## 引擎版本警告
 
-The LLM's training data predates the pinned engine version.
-**Always check `docs/engine-reference/` before using any engine API.**
-Do not guess at post-cutoff API signatures — look them up first.
+LLM 的训练数据早于项目固定的引擎版本。
+**在使用任何引擎 API 前，务必先查阅 `docs/engine-reference/`。**
+不要猜测训练截止日期之后的 API 签名——先查清楚。
 
-## Coding Standards
+## 编码标准
 
-- All public APIs require doc comments
-- Gameplay values must be **data-driven** (external config files), never hardcoded
-- Prefer dependency injection over singletons for testability
-- Architecture decisions go in `docs/architecture/` as ADRs — **how many depends on
-  `modes.workflow`**: all at `full`, critical only at `standard`, none required at
-  `minimal` (the decision log carries them)
-- Commits must reference the relevant story ID or design document
+- 所有公共 API 都需要文档注释
+- 玩法数值必须**数据驱动**（外部配置文件），绝不能硬编码
+- 优先使用依赖注入而非单例，以便测试
+- 架构决策以 ADR 形式记录在 `docs/architecture/` —— **需要多少份取决于
+  `modes.workflow`**：`full` 下全部需要，`standard` 下仅关键决策需要，`minimal`
+  下无需 ADR（由决策日志承载）
+- 提交必须引用相关的用户故事 ID 或设计文档
 
-## File Routing
+## 文件路由
 
-Match the engine-specialist agent to the file type being written.
-`/setup-engine` records which specialist handles code, shaders and UI in the
-`specialists` block of `project.yaml`.
+根据正在编写的文件类型匹配引擎专家代理。
+`/setup-engine` 会在 `project.yaml` 的 `specialists` 块中记录由哪位专家
+负责代码、着色器和 UI。
 
-When in doubt, use `specialists.code` from `project.yaml`.
+拿不准时，使用 `project.yaml` 中的 `specialists.code`。
 
-## Tests
+## 测试
 
-Tests live in `tests/` — not in `src/`.
-Run `/test-setup` to scaffold the test framework if it doesn't exist yet.
-Every gameplay system should have unit tests covering its formulas and edge cases.
+测试位于 `tests/` —— 不在 `src/` 中。
+如果测试框架尚不存在，运行 `/test-setup` 进行搭建。
+每个玩法系统都应有单元测试，覆盖其公式和边缘情况。
 
-## Verification-Driven Development
+## 验证驱动开发
 
-Write tests first when adding gameplay systems.
-For UI changes, verify with screenshots.
-Compare expected output to actual output before marking work complete.
+添加玩法系统时先写测试。
+对于 UI 改动，用截图验证。
+在标记工作完成前，将预期输出与实际输出进行比对。

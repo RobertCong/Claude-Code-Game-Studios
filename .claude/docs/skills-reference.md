@@ -1,132 +1,132 @@
-# Available Skills (Slash Commands)
+# 可用技能（斜杠命令）
 
-74 slash commands organized by phase. Type `/` in Claude Code to access any of them.
+74 个按阶段组织的斜杠命令。在 Claude Code 中输入 `/` 即可访问其中任意一个。
 
-## Onboarding & Navigation
+## 上手引导与导航
 
-| Command | Purpose |
+| 命令 | 用途 |
 |---------|---------|
-| `/start` | First-time onboarding — asks where you are, then guides you to the right workflow |
-| `/help` | Context-aware "what do I do next?" — reads current stage and surfaces the required next step |
-| `/project-stage-detect` | Full project audit — detect phase, identify existence gaps, recommend next steps |
-| `/setup-engine` | Configure engine + version, detect knowledge gaps, populate version-aware reference docs |
-| `/adopt` | Brownfield format audit — checks internal structure of existing GDDs/ADRs/stories, produces migration plan |
-| `/settings` | View or change project config — the effective merged values, or a local override in `project.local.yaml` |
+| `/start` | 首次上手引导 — 询问你当前所处的位置，然后引导你进入正确的工作流 |
+| `/help` | 结合上下文的“我接下来该做什么？” — 读取当前阶段并给出必需的下一步 |
+| `/project-stage-detect` | 完整项目审计 — 检测阶段、找出缺失项、建议后续步骤 |
+| `/setup-engine` | 配置引擎与版本，检测知识缺口，填充与版本相关的参考资料文档 |
+| `/adopt` | 既有项目格式审计 — 检查现有 GDD/ADR/用户故事的内部结构，产出迁移计划 |
+| `/settings` | 查看或修改项目配置 — 生效的合并值，或 `project.local.yaml` 中的本地覆盖 |
 
-## Game Design
+## 游戏设计
 
-| Command | Purpose |
+| 命令 | 用途 |
 |---------|---------|
-| `/brainstorm` | Guided ideation using professional studio methods (MDA, SDT, Bartle, verb-first) |
-| `/map-systems` | Decompose game concept into systems, map dependencies, prioritize design order |
-| `/design-system` | Guided, section-by-section GDD authoring for a single game system |
-| `/quick-design` | Lightweight design spec for small changes — tuning, tweaks, minor additions |
-| `/review-all-gdds` | Cross-GDD consistency and game design holism review across all design docs |
-| `/propagate-design-change` | When a GDD is revised, find affected ADRs and produce an impact report |
+| `/brainstorm` | 使用专业工作室方法（MDA、SDT、Bartle、动词优先）进行引导式创意发散 |
+| `/map-systems` | 把游戏概念分解为系统，梳理依赖关系，排定设计优先级顺序 |
+| `/design-system` | 针对单个游戏系统，逐章节引导编写 GDD |
+| `/quick-design` | 面向小改动（调优、微调、小幅新增）的轻量设计规格 |
+| `/review-all-gdds` | 跨 GDD 一致性以及所有设计文档的游戏设计整体性评审 |
+| `/propagate-design-change` | GDD 修订后，找出受影响的 ADR 并产出影响报告 |
 
-## Art & Assets
+## 美术与资源
 
-| Command | Purpose |
+| 命令 | 用途 |
 |---------|---------|
-| `/art-bible` | Guided, section-by-section Art Bible authoring — creates visual identity spec before asset production begins |
-| `/asset-spec` | Generate per-asset visual specifications and AI generation prompts from GDDs, level docs, or character profiles |
-| `/asset-audit` | Audit assets for naming conventions, file size budgets, and pipeline compliance |
+| `/art-bible` | 逐章节引导编写美术圣经 — 在资源生产开始前创建视觉识别规格 |
+| `/asset-spec` | 根据 GDD、关卡文档或角色档案生成逐个资源的视觉规格与 AI 生成提示词 |
+| `/asset-audit` | 审计资源的命名约定、文件大小预算与流水线合规性 |
 
-## UX & Interface Design
+## 用户体验与界面设计
 
-| Command | Purpose |
+| 命令 | 用途 |
 |---------|---------|
-| `/ux-design` | Guided section-by-section UX spec authoring (screen/flow, HUD, or pattern library) |
-| `/ux-review` | Validate UX specs for GDD alignment, accessibility, and pattern compliance |
+| `/ux-design` | 逐章节引导编写用户体验规格（屏幕/流程、HUD 或模式库） |
+| `/ux-review` | 校验用户体验规格是否符合 GDD、无障碍要求与模式规范 |
 
-## Architecture
+## 架构
 
-| Command | Purpose |
+| 命令 | 用途 |
 |---------|---------|
-| `/create-architecture` | Guided authoring of the master architecture document |
-| `/architecture-decision` | Create an Architecture Decision Record (ADR) |
-| `/architecture-review` | Validate all ADRs for completeness, dependency ordering, and GDD coverage |
-| `/create-control-manifest` | Generate flat programmer rules sheet from accepted ADRs |
+| `/create-architecture` | 引导编写主架构文档 |
+| `/architecture-decision` | 创建架构决策记录（ADR） |
+| `/architecture-review` | 校验所有 ADR 的完整性、依赖顺序与 GDD 覆盖 |
+| `/create-control-manifest` | 根据已接受的 ADR 生成扁平化的程序员规则表 |
 
-## Stories & Sprints
+## 用户故事与冲刺
 
-| Command | Purpose |
+| 命令 | 用途 |
 |---------|---------|
-| `/create-epics` | Translate GDDs + ADRs into epics — one per architectural module |
-| `/create-stories` | Break a single epic into implementable story files |
-| `/dev-story` | Read a story and implement it — routes to the correct programmer agent |
-| `/sprint-plan` | Generate or update a sprint plan; initializes sprint-status.yaml |
-| `/sprint-status` | Fast 30-line sprint snapshot (reads sprint-status.yaml) |
-| `/story-readiness` | Validate a story is implementation-ready before pickup (READY/NEEDS WORK/BLOCKED) |
-| `/story-done` | 8-phase completion review after implementation; updates story file, surfaces next story |
-| `/estimate` | Structured effort estimate with complexity, dependencies, and risk breakdown |
+| `/create-epics` | 将 GDD 与 ADR 转化为史诗 — 每个架构模块一个 |
+| `/create-stories` | 把单个史诗拆分为可实现的故事文件 |
+| `/dev-story` | 读取用户故事并实现它 — 路由到正确的程序员代理 |
+| `/sprint-plan` | 生成或更新冲刺计划；初始化 sprint-status.yaml |
+| `/sprint-status` | 快速生成 30 行的冲刺快照（读取 sprint-status.yaml） |
+| `/story-readiness` | 在领取之前校验用户故事是否已具备实现条件（READY/NEEDS WORK/BLOCKED） |
+| `/story-done` | 实现后的 8 阶段完成评审；更新用户故事文件并给出下一个用户故事 |
+| `/estimate` | 结构化工作量估算，含复杂度、依赖与风险分解 |
 
-## Reviews & Analysis
+## 评审与分析
 
-| Command | Purpose |
+| 命令 | 用途 |
 |---------|---------|
-| `/design-review` | Review a game design document for completeness and consistency |
-| `/code-review` | Architectural code review for a file or changeset |
-| `/balance-check` | Analyze game balance data, formulas, and config — flag outliers |
-| `/content-audit` | Audit GDD-specified content counts against implemented content |
-| `/scope-check` | Analyze feature or sprint scope against original plan, flag scope creep |
-| `/perf-profile` | Structured performance profiling with bottleneck identification |
-| `/tech-debt` | Scan, track, prioritize, and report on technical debt |
-| `/gate-check` | Validate readiness to advance between development phases (PASS/CONCERNS/NOT ASSESSED/FAIL) |
-| `/consistency-check` | Scan all GDDs against the entity registry to detect cross-document inconsistencies (stats, names, rules that contradict each other) |
-| `/security-audit` | Audit the game for security vulnerabilities: save tampering, cheat vectors, network exploits, data exposure, and input validation gaps |
+| `/design-review` | 评审游戏设计文档的完整性与一致性 |
+| `/code-review` | 针对文件或变更集的架构级代码评审 |
+| `/balance-check` | 分析游戏平衡性数据、公式与配置 — 标记异常值 |
+| `/content-audit` | 将 GDD 规定的内容数量与实际实现的内容进行审计对比 |
+| `/scope-check` | 对照原始计划分析功能或冲刺范围，标记范围蔓延 |
+| `/perf-profile` | 结构化性能剖析，识别瓶颈 |
+| `/tech-debt` | 扫描、跟踪、排序并报告技术债 |
+| `/gate-check` | 校验在开发阶段之间推进的就绪度（PASS/CONCERNS/NOT ASSESSED/FAIL） |
+| `/consistency-check` | 将所有 GDD 与实体注册表比对，检测跨文档不一致（数值、名称、相互矛盾的规则） |
+| `/security-audit` | 审计游戏的安全漏洞：存档篡改、作弊途径、网络漏洞、数据暴露与输入校验缺口 |
 
-## QA & Testing
+## 质量保证与测试
 
-| Command | Purpose |
+| 命令 | 用途 |
 |---------|---------|
-| `/qa-plan` | Generate a QA test plan for a sprint or feature |
-| `/smoke-check` | Run critical path smoke test gate before QA hand-off |
-| `/soak-test` | Generate a soak test protocol for extended play sessions |
-| `/regression-suite` | Map test coverage to GDD critical paths, identify fixed bugs without regression tests |
-| `/test-setup` | Scaffold the test framework and CI/CD pipeline for the project's engine |
-| `/test-helpers` | Generate engine-specific test helper libraries for the test suite |
-| `/test-evidence-review` | Quality review of test files and manual evidence documents |
-| `/test-flakiness` | Detect non-deterministic (flaky) tests from CI run logs |
-| `/skill-test` | Validate skill files for structural compliance and behavioral correctness |
-| `/skill-improve` | Improve a skill using a test-fix-retest loop — diagnose, propose fix, rewrite, verify |
+| `/qa-plan` | 为某个冲刺或功能生成质量保证测试计划 |
+| `/smoke-check` | 在质量保证交接前运行关键路径冒烟测试闸门 |
+| `/soak-test` | 为长时间游玩会话生成浸泡测试方案 |
+| `/regression-suite` | 将测试覆盖率映射到 GDD 关键路径，找出没有回归测试的已修复缺陷 |
+| `/test-setup` | 为项目所用引擎搭建测试框架与 CI/CD 流水线 |
+| `/test-helpers` | 为测试套件生成引擎专属的测试辅助库 |
+| `/test-evidence-review` | 对测试文件与人工证据文档进行质量评审 |
+| `/test-flakiness` | 从 CI 运行日志中检测非确定性（不稳定）测试 |
+| `/skill-test` | 校验技能文件的结构合规性与行为正确性 |
+| `/skill-improve` | 通过测试—修复—重测循环改进技能 — 诊断、提出修复、重写、验证 |
 
-## Production
+## 制作
 
-| Command | Purpose |
+| 命令 | 用途 |
 |---------|---------|
-| `/milestone-review` | Review milestone progress and generate status report |
-| `/retrospective` | Run a structured sprint or milestone retrospective |
-| `/bug-report` | Create a structured bug report |
-| `/bug-triage` | Read all open bugs, re-evaluate priority vs. severity, assign owner and label |
-| `/reverse-document` | Generate design or architecture docs from existing implementation |
-| `/playtest-report` | Generate a structured playtest report or analyze existing playtest notes |
+| `/milestone-review` | 评审里程碑进度并生成状态报告 |
+| `/retrospective` | 开展结构化的冲刺或里程碑回顾 |
+| `/bug-report` | 创建结构化的缺陷报告 |
+| `/bug-triage` | 读取所有未关闭缺陷，重新评估优先级与严重程度，指派负责人与标签 |
+| `/reverse-document` | 根据现有实现生成设计或架构文档 |
+| `/playtest-report` | 生成结构化的试玩测试报告，或分析已有的试玩测试笔记 |
 
-## Release
+## 发布
 
-| Command | Purpose |
+| 命令 | 用途 |
 |---------|---------|
-| `/release-checklist` | Generate and validate a pre-release checklist for the current build |
-| `/launch-checklist` | Complete launch readiness validation across all departments |
-| `/changelog` | Auto-generate changelog from git commits and sprint data |
-| `/patch-notes` | Generate player-facing patch notes from git history and internal data |
-| `/hotfix` | Emergency fix workflow with audit trail, bypassing normal sprint process |
-| `/day-one-patch` | Prepare a focused day-one patch for known issues discovered after gold master but before or at public launch |
+| `/release-checklist` | 为当前构建生成并校验发布前检查清单 |
+| `/launch-checklist` | 完成跨所有部门的发布就绪验证 |
+| `/changelog` | 根据 git 提交与冲刺数据自动生成变更日志 |
+| `/patch-notes` | 根据 git 历史与内部数据生成面向玩家的补丁说明 |
+| `/hotfix` | 带审计轨迹的紧急修复工作流，绕过常规冲刺流程 |
+| `/day-one-patch` | 为金母版之后、公开发布之前或发布时发现的已知问题准备聚焦的首日补丁 |
 
-## Creative & Content
+## 创意与内容
 
-| Command | Purpose |
+| 命令 | 用途 |
 |---------|---------|
-| `/prototype` | Concept prototype — throwaway build right after brainstorm to validate core idea (Phase 1) |
-| `/vertical-slice` | Pre-Production validation — production-quality end-to-end build before committing to Production (Phase 4) |
-| `/onboard` | Generate contextual onboarding document for a new contributor or agent |
-| `/localize` | Localization workflow: string extraction, validation, translation readiness |
+| `/prototype` | 概念原型 — 头脑风暴后立即构建用于验证核心想法的一次性构建（Phase 1） |
+| `/vertical-slice` | 预制作阶段验证 — 在投入 Production 之前构建达到生产质量的端到端版本（Phase 4） |
+| `/onboard` | 为新贡献者或代理生成结合上下文的引导文档 |
+| `/localize` | 本地化工作流：字符串提取、校验、翻译就绪检查 |
 
-## Team Orchestration
+## 团队编排
 
-Coordinate multiple agents on a single feature area:
+在单个功能领域上协调多个代理：
 
-| Command | Coordinates |
+| 命令 | 协调的代理 |
 |---------|-------------|
 | `/team-combat` | game-designer + gameplay-programmer + ai-programmer + technical-artist + sound-designer + qa-tester |
 | `/team-narrative` | narrative-director + writer + world-builder + level-designer |
@@ -138,22 +138,20 @@ Coordinate multiple agents on a single feature area:
 | `/team-live-ops` | live-ops-designer + economy-designer + community-manager + analytics-engineer |
 | `/team-qa` | qa-lead + qa-tester + gameplay-programmer + producer |
 
-## Overlap with Claude Code's bundled skills
+## 与 Claude Code 内置技能的重叠
 
-Claude Code ships its own skills, and one name collides with CCGS's.
+Claude Code 自带一些技能，其中一个名称与 CCGS 的发生了冲突。
 
-| You type | You get | Use it for |
+| 你输入 | 实际得到 | 适用场景 |
 |---------|---------|-----------|
-| `/code-review` | **CCGS's** — project skills take the bare name | Architectural review against this project's coding standards, SOLID, testability and the control manifest. Knows about ADRs, stories and `docs/architecture/`. |
-| `/review` | **Claude Code's bundled** review — the alias of its `/code-review`, which CCGS's skill shadows | Reviewing a pull request or a plain diff for correctness bugs, with no knowledge of CCGS's design documents or gates. |
+| `/code-review` | **CCGS 的** — 项目技能占用裸名称 | 对照本项目的编码标准、SOLID、可测试性与控制清单进行架构评审。它了解 ADR、用户故事和 `docs/architecture/`。 |
+| `/review` | **Claude Code 内置的**评审 — 其 `/code-review` 的别名，而该命令被 CCGS 的技能遮蔽 | 评审拉取请求或普通 diff 中的正确性缺陷，不涉及 CCGS 的设计文档或闸门。 |
 
-Both are useful; they answer different questions. Reach for the CCGS one during
-`/dev-story` and before `/story-done`, because it checks the things the gates
-later check. Reach for the bundled one when you want a general review of a diff
-that has nothing to do with a story.
+两者都有用；它们回答不同的问题。在 `/dev-story` 期间以及 `/story-done` 之前使用
+CCGS 的那个，因为它检查的正是后续闸门会检查的内容。当你需要对与用户故事无关的
+diff 做通用评审时，使用内置的那个。
 
-CCGS does **not** turn the bundled skills off. `disableBundledSkills` would
-remove all of them, including `/debug`, `/security-review` and `/simplify`,
-which are worth keeping. If you want a bundled skill hidden, use
-`skillOverrides` in your own `.claude/settings.local.json` rather than disabling
-the whole set.
+CCGS **不会**关闭内置技能。`disableBundledSkills` 会把它们全部移除，包括
+`/debug`、`/security-review` 和 `/simplify`，而这些值得保留。如果你希望隐藏某个
+内置技能，请在你自己的 `.claude/settings.local.json` 中使用 `skillOverrides`，
+而不是禁用整个技能集。

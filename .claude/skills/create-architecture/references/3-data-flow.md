@@ -1,24 +1,24 @@
-# /create-architecture — Phase 3: Data Flow
+# /create-architecture — Phase 3: 数据流
 
-> Part of `/create-architecture`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> 属于 `/create-architecture`。`SKILL.md` 指明了何时读取此文件；它所解析的
+> 设置以及其后续标题下的规则在这里同样适用。
 
-## Phase 3: Data Flow
+## Phase 3: 数据流
 
-Define how data moves between modules during key game scenarios. Cover at minimum:
+定义在关键游戏场景中数据如何在模块之间流动。至少覆盖：
 
-1. **Frame update path**: Input → Core systems → State → Rendering
-2. **Event/signal path**: How systems communicate without tight coupling
-3. **Save/load path**: What state is serialised, which module owns serialisation
-4. **Initialisation order**: Which modules must boot before others
+1. **帧更新路径**：输入 → 核心系统 → 状态 → 渲染
+2. **事件/信号路径**：系统如何在不紧耦合的情况下通信
+3. **存档/读档路径**：哪些状态被序列化，哪个模块负责序列化
+4. **初始化顺序**：哪些模块必须先于其他模块启动
 
-Use ASCII sequence diagrams where helpful. For each data flow:
-- Name the data being transferred
-- Identify the producer and consumer
-- State whether this is synchronous call, signal/event, or shared state
-- Flag any data flows that cross thread boundaries
+在有用时使用 ASCII 时序图。对每个数据流：
+- 命名被传输的数据
+- 识别生产者与消费者
+- 说明这是同步调用、信号/事件，还是共享状态
+- 标出任何跨越线程边界的数据流
 
-Get user approval on each scenario, then record it in
-`production/session-state/active.md`; it is written at Phase 7.
+取得用户对每个场景的批准，然后记录到
+`production/session-state/active.md`；它在 Phase 7 写入。
 
 ---

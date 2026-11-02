@@ -10,18 +10,18 @@
 
 ## Pre-Session Setup
 
-Before starting the soak:
+在开始浸泡测试之前：
 
-- [ ] Game is running from a **fresh launch** (not resumed from a prior session)
-- [ ] All background applications closed (minimise OS memory interference)
-- [ ] Performance monitoring tool open and recording:
-  - **Godot**: Debugger → Monitors tab → Memory section visible
-  - **Unity**: Memory Profiler window open
-  - **Unreal**: `stat memory` ready in console
-  - Tool actually used, as named in this editor: [record it — the names above
-    are NOT SOURCEABLE from `docs/engine-reference/`; none found → NOT ASSESSED]
-- [ ] Soak target confirmed: [session design intent from game concept]
-- [ ] Prior known issues to watch for: [from most recent playtest / qa-plan]
+- [ ] 游戏从**全新启动**开始运行（不是从之前的会话恢复）
+- [ ] 已关闭所有后台应用（尽量减少操作系统内存干扰）
+- [ ] 性能监控工具已打开并正在记录：
+  - **Godot**：Debugger → Monitors 标签页 → Memory 区域可见
+  - **Unity**：Memory Profiler 窗口已打开
+  - **Unreal**：控制台中 `stat memory` 已就绪
+  - 实际使用的工具，按此编辑器中的名称记录：[记录下来——上述名称
+    无法从 `docs/engine-reference/` 查证；均未找到 → NOT ASSESSED]
+- [ ] 浸泡目标已确认：[来自游戏概念文档的会话设计意图]
+- [ ] 需要留意的既有已知问题：[来自最近的试玩测试 / qa-plan]
 
 ---
 
@@ -29,10 +29,10 @@ Before starting the soak:
 
 | Metric | Baseline Value |
 |--------|---------------|
-| Memory / Heap | [record before first frame of gameplay] |
-| Object Count | [record] |
-| FPS (first 30 seconds) | [record] |
-| [Engine-specific metric] | [record] |
+| Memory / Heap | [在游戏第一帧之前记录] |
+| Object Count | [记录] |
+| FPS (first 30 seconds) | [记录] |
+| [Engine-specific metric] | [记录] |
 
 ---
 
@@ -40,7 +40,7 @@ Before starting the soak:
 
 ### T+[N] minutes
 
-**Memory / Stability** *(if applicable)*:
+**Memory / Stability** *（如适用）*：
 
 | Metric | Value | Δ from Baseline | Alert? |
 |--------|-------|-----------------|--------|
@@ -50,24 +50,24 @@ Before starting the soak:
 | Crashes / Hangs | | | |
 
 **Stability checks**:
-- [ ] No crash or hang since last checkpoint
-- [ ] Frame rate within budget ([N] fps target)
-- [ ] Audio correct
-- [ ] HUD rendering correctly
-- [ ] Input responding correctly
+- [ ] 自上个检查点以来无崩溃或卡死
+- [ ] 帧率处于预算内（目标 [N] fps）
+- [ ] 音频正常
+- [ ] HUD 渲染正常
+- [ ] 输入响应正常
 
-**Balance / Fatigue** *(if applicable)*:
-- Core mechanic still rewarding: Y / N
-- Difficulty perception: too easy / appropriate / too hard
-- Notable moments: [note any peak engagement or frustration]
-- Content exhaustion signs: Y / N — [describe]
+**Balance / Fatigue** *（如适用）*：
+- 核心机制仍有回报感：Y / N
+- 难度感知：太简单 / 合适 / 太难
+- 值得注意的时刻：[记录任何投入高峰或挫败感]
+- 内容耗尽迹象：Y / N——[描述]
 
 **Free observations**:
-*(Note anything unexpected observed since the last checkpoint)*
+*（记录自上个检查点以来观察到的任何意外情况）*
 
 ---
 
-[Repeat Checkpoint Log section for each timed checkpoint]
+[为每个定时检查点重复 Checkpoint Log 章节]
 
 ---
 
@@ -81,48 +81,46 @@ Before starting the soak:
 | [T+N] | | |
 
 **Leak detected?** Y / N
-**Estimated time to OOM at current rate**: [N hours / not applicable]
+**Estimated time to OOM at current rate**: [N hours / 不适用]
 
 ### Stability Summary
 
 Total crashes: [N]
 Total hangs: [N]
 Worst FPS observed: [N] fps at [checkpoint]
-Performance degradation: stable / mild / severe
+Performance degradation: 稳定 / 轻微 / 严重
 
 ### Balance / Fatigue Summary
 
-Fun curve: [engaged throughout / fatigue onset at T+N / repetitive from start]
-Content exhaustion point: [never / at T+N / early]
-Difficulty arc: [appropriate / too easy throughout / difficulty spike at T+N]
+Fun curve: [全程投入 / 在 T+N 出现疲劳 / 从一开始就重复]
+Content exhaustion point: [从不 / 在 T+N / 很早]
+Difficulty arc: [合适 / 全程太简单 / 在 T+N 难度骤增]
 
 ### Issues Found
 
 | ID | Severity | Checkpoint | Description |
 |----|----------|------------|-------------|
-| SOAK-001 | S[1-4] | T+[N] | [description] |
+| SOAK-001 | S[1-4] | T+[N] | [描述] |
 
 ---
 
 ## Verdict: PASS / PASS WITH CONCERNS / NOT ASSESSED / FAIL
 
-**PASS**: No leaks detected, stability maintained, fun factor consistent
-**PASS WITH CONCERNS**: Minor drift or fatigue noted; addressable in Polish
-**NOT ASSESSED**: The soak did not run to a length that could show what it looks
-for — say how far it got and which checkpoints were never reached
-**FAIL**: Memory leak confirmed, stability breach, or severe fun fatigue
+**PASS**：未检测到泄漏，稳定性保持，趣味性一致
+**PASS WITH CONCERNS**：注意到轻微漂移或疲劳；可在打磨阶段处理
+**NOT ASSESSED**：浸泡测试运行时长不足以显露它要检测的问题——说明运行到
+了哪一步，以及哪些检查点从未到达
+**FAIL**：确认内存泄漏、稳定性被破坏，或严重趣味疲劳
 
-> **A short soak cannot return PASS.** Everything this protocol exists to detect
-> — slow leaks, fatigue, late-appearing edge cases — is by definition invisible
-> early, so a session that ended before the checkpoints it was built around has
-> not shown stability; it has shown nothing yet. Record `NOT ASSESSED — reached
-> T+[N] of [duration]; checkpoints [list] not reached`. Ranks **above both pass
-> values** and **below FAIL**: a crash observed at T+20 is a real finding no
-> matter how short the run, and must not be demoted behind the run's length.
-> The same applies when the build crashed for reasons unrelated to the soak, when
-> no memory instrumentation was available (nothing was measured, so "no leaks
-> detected" means "no leaks could have been detected"), or when the protocol was
-> written but never executed — a protocol document is not a result.
+> **短时浸泡测试不能返回 PASS。** 本协议要检测的一切——慢速泄漏、疲劳、
+> 后期出现的边缘情况——从定义上在早期是不可见的，因此如果一次会话在它所
+> 围绕的检查点之前就结束，那它并没有显示出稳定性；它什么也还没显示出来。
+> 记录 `NOT ASSESSED — reached T+[N] of [duration]; checkpoints [list] not reached`。
+> 其优先级**高于两个通过值**、**低于 FAIL**：在 T+20 观察到的崩溃是真实发现，
+> 无论运行多短，绝不能因运行时长而被降级。
+> 当构建因与浸泡无关的原因崩溃、当没有可用的内存监测工具（什么都没测量，
+> 因此「未检测到泄漏」意味着「不可能检测到泄漏」）、或当协议写了但从未执行
+> 时，同样适用——协议文档不是结果。
 
 ---
 

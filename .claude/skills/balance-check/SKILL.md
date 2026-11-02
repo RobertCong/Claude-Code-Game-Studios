@@ -1,6 +1,6 @@
 ---
 name: balance-check
-description: "Find balance outliers, broken progressions, degenerate strategies, economy imbalances in formulas and data. 'Check game balance'."
+description: "在公式与数据中发现平衡性异常值、断裂的成长曲线、退化策略、经济失衡。'检查游戏平衡性'。"
 argument-hint: "[system-name|path-to-data-file]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, AskUserQuestion, Bash(bash "*/.claude/skills/balance-check/../../hooks/yaml-helper.sh" resolve_config *)
@@ -9,134 +9,121 @@ model: sonnet
 
 !`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation`
 
-# Balance Check
+# 平衡性检查
 
 
 
-Every `AskUserQuestion` call follows `.claude/docs/automation-modes.md`
-(collaborative asks always · guided major-only · autonomous logs and proceeds;
-`automation_always_ask` categories always prompt).
+每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+（collaborative 总是询问 · guided 仅重大事项 · autonomous 记录后继续；
+`automation_always_ask` 类别总是询问）。
 
-## Insufficient input — check this before producing any report
+## 输入不足 —— 在产出任何报告之前先检查
 
-**If the inputs this skill needs do not exist, the answer is "could not run" —
-not a filled-in report.** Check first, and stop if the check fails.
+**如果本技能所需的输入不存在，答案就是"无法运行" —— 而不是一份填好的报告。** 先检查，
+若检查不通过就停止。
 
-1. List the inputs this skill reads (data files, prior reports, profiler output,
-   test results, registries, source code).
-2. For each, record `FOUND` or `ABSENT` — not "assumed present".
-3. If any input required for a section is ABSENT, that section is
-   **`NOT ASSESSED — NO DATA`**. Do not estimate it, do not infer it from an
-   adjacent artifact, and do not leave a mandated cell to be filled by whoever
-   reads the template next.
-4. If **every** required input is ABSENT, stop and report
-   **`NOT ASSESSED — NO DATA`** as the whole verdict, naming what was missing and
-   which skill produces it.
+1. 列出本技能读取的输入（数据文件、既往报告、性能分析器输出、测试结果、注册表、源代码）。
+2. 对每一项记录 `FOUND` 或 `ABSENT` —— 而不是"假定存在"。
+3. 如果某个章节所需的任何输入为 ABSENT，该章节即为
+   **`NOT ASSESSED — NO DATA`**。不要估算它，不要从相邻产出物推断，也不要留下一个应由
+   下一位模板读者填写的必填单元格。
+4. 如果**所有**必需输入都为 ABSENT，停止并把 **`NOT ASSESSED — NO DATA`** 作为整体结论
+   报告，指明缺失了什么，以及由哪个技能产出它。
 
-**A verdict of `NOT ASSESSED` is a success.** It is the correct, useful answer to
-"what does the data say?" when there is no data. The failure mode this prevents is
-specific: a report whose verdict enum has no "could not run" state produces
-**false clean passes** — an asset audit returning COMPLIANT on a project with no
-assets and no standards, or a performance profile reporting ">99% headroom against
-a 16.67ms budget" with zero profiler data and no budget ever set.
+**`NOT ASSESSED` 的结论也是一种成功。** 在没有数据时，这是对"数据说明了什么？"这一问题
+正确且有价值的回答。它防止的失败模式很具体：一个结论枚举中没有"无法运行"状态的报告会产生
+**虚假的干净通过** —— 例如在没有资源、也没有标准的项目上返回 COMPLIANT 的资源审计，或在
+零性能分析数据、从未设定预算的情况下报告"相对 16.67ms 预算 >99% 余量"的性能剖析。
 
-**Absence of evidence is never evidence of absence.** A scan that finds no
-matches because there are no files to scan has not verified anything. Say which of
-the two happened — a reader cannot tell from a green result.
+**没有证据绝不等同于证明不存在。** 一次扫描因为没有文件可扫而找不到匹配，并没有验证任何
+东西。要说明两者中发生的是哪一种 —— 读者无法从绿色结果中分辨。
 
 ---
 
-## Phase 1: Identify Balance Domain
+## Phase 1: 识别平衡性领域
 
-Determine the balance domain from `$ARGUMENTS` — the whole string, since a data-file path may contain spaces:
+根据 `$ARGUMENTS` 确定平衡性领域 —— 使用整个字符串，因为数据文件路径可能包含空格：
 
-- **Combat** → weapon/ability DPS, time-to-kill, damage type interactions
-- **Economy** → resource faucets/sinks, acquisition rates, item pricing
-- **Progression** → XP/power curves, dead zones, power spikes
-- **Loot** → rarity distribution, pity timers, inventory pressure
-- **File path given** → load that file directly and infer domain from content
+- **战斗** → 武器/技能 DPS、击杀所需时间（TTK）、伤害类型交互
+- **经济** → 资源来源/消耗、获取速率、物品定价
+- **成长** → 经验/战力曲线、死区、战力突增
+- **战利品** → 稀有度分布、保底计时器、背包压力
+- **给出文件路径** → 直接加载该文件，并根据内容推断领域
 
-If no argument, ask the user which system to check.
-
----
-
-## Phase 2: Read Data Files
-
-Read relevant files from `assets/data/` and `design/balance/` for the identified domain.
-Note every file read — they will appear in the Data Sources section of the report.
+若无参数，询问用户要检查哪个系统。
 
 ---
 
-## Phase 3: Read Design Document
+## Phase 2: 读取数据文件
 
-**Registry first.** If `design/registry/entities.yaml` exists, read it before the
-GDD. Its `constants` and `formulas` sections hold the cross-GDD named values and
-output ranges — the balance targets — already distilled, each with a `source:`
-GDD and any `revised:` date:
+从 `assets/data/` 与 `design/balance/` 中读取已识别领域的相关文件。
+记录读取过的每个文件 —— 它们将出现在报告的 Data Sources 章节中。
+
+---
+
+## Phase 3: 读取设计文档
+
+**注册表优先。** 如果 `design/registry/entities.yaml` 存在，先于 GDD 读取它。其 `constants`
+与 `formulas` 章节保存了跨 GDD 的具名数值与输出范围 —— 即平衡性目标 —— 且已经过提炼，
+每一项都带有 `source:` GDD 与任何 `revised:` 日期：
 ```
 Grep pattern="^  - name:" path="design/registry/entities.yaml" output_mode="content" -A 6
 ```
-Take the intended values from the registry for any constant or formula it lists
-(the `constants:` and `formulas:` blocks); these are the authoritative cross-doc
-figures a GDD must not contradict. **If `design/registry/entities.yaml` does not
-exist or has no entries** (it ships as an empty stub until `/design-system`
-populates it), skip this and use the GDD alone.
+对于注册表列出的任何常量或公式（`constants:` 与 `formulas:` 块），从注册表获取其预期值；
+这些是权威的跨文档数值，GDD 不得与之矛盾。**如果 `design/registry/entities.yaml` 不存在或
+没有条目**（在 `/design-system` 填充之前，它以空存根形式随项目提供），跳过此项，仅使用 GDD。
 
-Then read the GDD for the system from `design/gdd/` to understand intended design
-targets, tuning knobs, and expected value ranges — for anything the registry did
-not already supply. This is the baseline for "correct" behaviour. Read it by section:
-find the headings you need with the Grep tool (pattern `^#`, content mode) and
-Read those ranges with offset and limit.
+然后从 `design/gdd/` 读取该系统的 GDD，以了解预期设计目标、调参旋钮与预期取值范围 ——
+用于填补注册表未提供的任何内容。这是"正确"行为的基线。按章节读取：用 Grep 工具（pattern
+`^#`，content 模式）找出需要的标题，再用 offset 与 limit 读取那些范围。
 
-If the data files are FOUND but neither source gives targets for this domain,
-the sections that judge against targets (Outliers Detected, and Progression
-Analysis where the domain has a curve) are `NOT ASSESSED — NO DATA`. Each one names what was missing — the
-GDD it looked for in `design/gdd/`, and whether the registry was absent or empty
-— and names `/design-system`, which writes both.
+如果数据文件为 FOUND，但两个来源都没有为本领域提供目标值，则那些需要对照目标进行判断的
+章节（Outliers Detected，以及当该领域有曲线时的 Progression Analysis）为
+`NOT ASSESSED — NO DATA`。每个章节都要说明缺失了什么 —— 它在 `design/gdd/` 中寻找的 GDD，
+以及注册表是不存在还是为空 —— 并指出 `/design-system`，它负责写入这两者。
 
 ---
 
-## Phase 4: Perform Analysis
+## Phase 4: 执行分析
 
-**Every domain: compare each value with its target.** For each named value in the
-data files, take its target from Phase 3 — a registry constant's `value`, a
-registry formula's `output_range`, or the range the GDD states — and compare. A
-value outside its target is a row in Outliers Detected (`player_damage_base` 140
-against 90–110). A value with no target anywhere is neither in range nor an
-outlier: list it under Values That Need Attention as `no stated range — not judged`.
+**所有领域：把每个值与其目标比较。** 对数据文件中的每个具名数值，从 Phase 3 取得其目标 ——
+注册表常量的 `value`、注册表公式的 `output_range`，或 GDD 声明的范围 —— 并进行比较。超出
+目标的值会在 Outliers Detected 中记为一行（`player_damage_base` 140 对照 90–110）。在任何
+地方都没有目标的值既不算在范围内，也不算异常值：把它列在 Values That Need Attention 下，
+注明 `no stated range — not judged`。
 
-Then run domain-specific checks:
+然后运行领域特定的检查：
 
-**Combat balance:**
-- Calculate DPS for all weapons/abilities at each power tier
-- Check time-to-kill at each tier
-- Identify any options that dominate all others (strictly better)
-- Check if defensive options can create unkillable states
-- Verify damage type/resistance interactions are balanced
+**战斗平衡：**
+- 计算每个战力层级下所有武器/技能的 DPS
+- 检查每个层级的击杀所需时间
+- 识别任何碾压其他所有选项（严格更优）的选项
+- 检查防御性选项是否会造成无法被击杀的状态
+- 验证伤害类型/抗性交互是否平衡
 
-**Economy balance:**
-- Map all resource faucets and sinks with flow rates
-- Project resource accumulation over time
-- Check for infinite resource loops
-- Verify gold sinks scale with gold generation
-- Check if any items are never worth purchasing
+**经济平衡：**
+- 以流量速率绘制所有资源来源与消耗
+- 预测资源随时间的累积
+- 检查是否存在无限资源循环
+- 验证金币消耗是否与金币产出同步增长
+- 检查是否有任何物品永远不值得购买
 
-**Progression balance:**
-- Plot the XP curve and power curve
-- Check for dead zones (no meaningful progression for too long)
-- Check for power spikes (sudden jumps in capability)
-- Verify content gates align with expected player power
-- Check if skip/grind strategies break intended pacing
+**成长平衡：**
+- 绘制经验曲线与战力曲线
+- 检查死区（过长时间没有有意义的成长）
+- 检查战力突增（能力突然跃升）
+- 验证内容门槛与预期玩家战力是否对齐
+- 检查跳过/刷取策略是否破坏预期节奏
 
-**Loot balance:**
-- Calculate expected time to acquire each rarity tier
-- Check pity timer math
-- Verify no loot is strictly useless at any stage
-- Check inventory pressure vs acquisition rate
+**战利品平衡：**
+- 计算获取每个稀有度层级的预期时间
+- 检查保底计时器的数学
+- 验证在任何阶段都没有战利品是严格无用的
+- 检查背包压力与获取速率的对比
 
 ---
 
-## Phase 5: Output the Analysis
+## Phase 5: 输出分析
 
 ```
 ## Balance Check: [System Name]
@@ -164,45 +151,41 @@ Then run domain-specific checks:
 [Specific values with suggested adjustments and rationale]
 ```
 
-Choose the Health Summary by the worst finding, first match wins:
-- **CRITICAL ISSUES** — a degenerate strategy (one choice dominates every
-  alternative), a progression that stalls or cannot be completed, or an economy
-  loop with no sink
-- **CONCERNS** — outliers or curve problems a tuning pass can fix, with no
-  finding of the critical kind
-- **NOT ASSESSED** — nothing to analyze (the no-data path above), a section that
-  needs targets is `NOT ASSESSED — NO DATA`, or a value had no stated range to
-  judge it against; name which. It ranks below the two finding verdicts, because
-  a measured problem is more actionable than a gap, and above HEALTHY
-- **HEALTHY** — every value judged against a stated target, no outliers, no
-  degenerate strategies, progression within the stated targets
+根据最严重的发现选择 Health Summary，先匹配者优先：
+- **CRITICAL ISSUES** —— 存在退化策略（某个选择碾压所有替代方案）、成长停滞或无法完成，
+  或没有消耗端的经济循环
+- **CONCERNS** —— 异常值或曲线问题，可通过一轮调参修复，没有关键级别的发现
+- **NOT ASSESSED** —— 无可分析内容（上方无数据路径）、某个需要目标的章节为
+  `NOT ASSESSED — NO DATA`，或某个值没有可据以判断的声明范围；要指明是哪一种。它排在两种
+  发现类结论之下，因为已测得的问题比缺口更具可操作性，但高于 HEALTHY
+- **HEALTHY** —— 每个值都对照已声明的目标判断、无异常值、无退化策略、成长在声明的目标之内
 
 ---
 
-## Phase 6: Fix & Verify Cycle
+## Phase 6: 修复与验证循环
 
-After presenting the report, use `AskUserQuestion`:
-- Prompt: "Balance check complete. What would you like to do next?"
-- Options:
-  - `[A] Fix highest-priority issue now — walk me through it`
-  - `[B] Save report to design/balance/balance-check-[system]-[date].md`
-  - `[C] Stop here — I'll review the findings manually`
+呈现报告后，使用 `AskUserQuestion`：
+- 提示："平衡性检查完成。你接下来想做什么？"
+- 选项：
+  - `[A] 立即修复最高优先级问题 —— 带我逐步处理`
+  - `[B] 把报告保存到 design/balance/balance-check-[system]-[date].md`
+  - `[C] 就此停止 —— 我自己查看这些发现`
 
-**Run as a subagent?** `game-designer` preloads this skill, and a subagent has
-no `AskUserQuestion`. End your reply with the question and these three options
-as a short list, and stop: whoever called you asks the user and passes the
-answer back.
+**作为子 agent 运行？** `game-designer` 会预加载本技能，而子 agent 没有 `AskUserQuestion`。
+在回复末尾以简短列表给出该问题及这三个选项，然后停止：调用你的人会去询问用户并把回答传回。
 
-If [A]:
-- Ask which issue to address first (refer to the Recommendations table by priority row)
-- Guide the user to update the relevant data file in `assets/data/` or formula in `design/balance/`
-- After each fix, offer to re-run the relevant balance checks to verify no new outliers were introduced
-- If the fix changes a tuning knob defined in a GDD or referenced by an ADR, remind the user:
-  > "This value is defined in a design document. Run `/propagate-design-change [path]` on the affected GDD to find downstream impacts before committing."
+若选 [A]：
+- 询问先处理哪个问题（按优先级行引用 Recommendations 表格）
+- 引导用户更新 `assets/data/` 中相关的数据文件，或 `design/balance/` 中的公式
+- 每次修复后，提议重新运行相关的平衡性检查，以验证没有引入新的异常值
+- 如果修复改动了 GDD 中定义的、或被 ADR 引用的调参旋钮，提醒用户：
+  > "该值在某个设计文档中定义。请对受影响的 GDD 运行 `/propagate-design-change [path]`，
+  > 在提交前找出下游影响。"
 
-If [B]:
-- Write the report to `design/balance/balance-check-[system]-[date].md` (create the directory if needed). Use the current date for [date] in YYYY-MM-DD format.
-- Confirm the file was written, then end with: "Re-run `/balance-check` after fixes to verify."
+若选 [B]：
+- 把报告写入 `design/balance/balance-check-[system]-[date].md`（必要时创建目录）。使用当前
+  日期作为 [date]，格式为 YYYY-MM-DD。
+- 确认文件已写入，然后以如下内容结束："修复后请重新运行 `/balance-check` 以验证。"
 
-If [C]:
-- Summarize open issues and end with: "Re-run `/balance-check` after fixes to verify."
+若选 [C]：
+- 总结未解决的问题，并以如下内容结束："修复后请重新运行 `/balance-check` 以验证。"

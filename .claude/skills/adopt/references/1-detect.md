@@ -1,72 +1,72 @@
-# /adopt — Phase 1: Detect Project State
+# /adopt — Phase 1: 检测项目状态
 
-> Part of `/adopt`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> `/adopt` 的一部分。`SKILL.md` 说明何时读取本文件；它解析出的设置
+> 以及其后续标题下的规则在此仍然适用。
 
-## Phase 1: Detect Project State
+## Phase 1: 检测项目状态
 
-Emit one line before reading: `"Scanning project artifacts..."` — this confirms the
-skill is running during the silent read phase.
+在读取前输出一行：`"Scanning project artifacts..."` — 这用于确认
+技能正在静默读取阶段运行。
 
-Then read silently before presenting anything else.
+然后在呈现其他任何内容之前静默读取。
 
-### Existence check
-- `project.stage` in `project.yaml` (fallback `production/stage.txt`) — if either is present, use that value (authoritative phase)
-- `design/gdd/game-concept.md` (or, at the minimal tier, `design/game-brief.md`) — concept exists?
-- `design/gdd/systems-index.md` — systems index exists?
-- Count GDD files: `design/gdd/*.md` (excluding game-concept.md and systems-index.md)
-- Count ADR files: `docs/architecture/adr-*.md`
-- Count story files: `production/epics/**/*.md` (excluding EPIC.md)
-- `project.yaml` (`engine.name`) / `.claude/docs/technical-preferences.md` — engine configured?
-- `docs/engine-reference/` — engine reference docs present?
-- Glob `docs/adoption-plan-*.md` — note the filename of the most recent prior plan if any exist
+### 存在性检查
+- `project.yaml` 中的 `project.stage`（回退到 `production/stage.txt`）— 若任一存在，则使用该值（权威阶段）
+- `design/gdd/game-concept.md`（或在 minimal 层级下 `design/game-brief.md`）— 概念是否存在？
+- `design/gdd/systems-index.md` — 系统索引是否存在？
+- 统计 GDD 文件数：`design/gdd/*.md`（排除 game-concept.md 和 systems-index.md）
+- 统计 ADR 文件数：`docs/architecture/adr-*.md`
+- 统计用户故事文件数：`production/epics/**/*.md`（排除 EPIC.md）
+- `project.yaml`（`engine.name`）/ `.claude/docs/technical-preferences.md` — 引擎是否已配置？
+- `docs/engine-reference/` — 是否存在引擎参考文档？
+- Glob `docs/adoption-plan-*.md` — 如有任何既有计划，记下最近一份的文件名
 
-### Infer phase (if no project.stage / stage.txt)
-Use the same heuristic as `/project-stage-detect`:
-- 10+ source files in the code root → Production
-- Stories in `production/epics/` → Pre-Production
-- ADRs exist → Technical Setup
-- systems-index.md exists → Systems Design
-- game-concept.md (or `design/game-brief.md`) exists → Concept
-- Nothing → Fresh (not a brownfield project — suggest `/start`)
+### 推断阶段（若无 project.stage / stage.txt）
+使用与 `/project-stage-detect` 相同的启发式规则：
+- 代码根目录中有 10 个以上源文件 → Production
+- `production/epics/` 中存在用户故事 → Pre-Production
+- 存在 ADR → Technical Setup
+- 存在 systems-index.md → Systems Design
+- 存在 game-concept.md（或 `design/game-brief.md`）→ Concept
+- 什么都没有 → Fresh（不是棕地项目 — 建议运行 `/start`）
 
-If the project appears fresh (no artifacts at all), use `AskUserQuestion`:
-- "This looks like a fresh project — no existing artifacts found. `/adopt` is for
-  projects with work to migrate. What would you like to do?"
-  - "Run `/start` — begin guided first-time onboarding"
-  - "My artifacts are in a non-standard location — help me find them"
-  - "Cancel"
+如果项目看起来是全新的（完全没有产出物），使用 `AskUserQuestion`：
+- “这看起来是一个全新项目 — 未找到任何现有产出物。`/adopt` 适用于
+  有工作要迁移的项目。你想怎么做？”
+  - “运行 `/start` — 开始引导式首次上手”
+  - “我的产出物在非标准位置 — 帮我找到它们”
+  - “取消”
 
-`/start` and Cancel end this skill: say which, and stop.
+`/start` 和取消会结束本技能：说明是哪一项，然后停止。
 
-**If they pick "help me find them"**, search before asking anything else:
+**如果他们选择“帮我找到它们”**，先搜索，再询问其他任何内容：
 
-1. Search the folder they named, if they named one; otherwise the whole
-   project, skipping `.claude/`, `.git/`, `docs/engine-reference/`,
-   `studio-tests/`, `node_modules/` and the engine's build and
-   cache folders.
-2. Glob `**/*.md` there, then Grep the matches for the headings each artifact
-   carries: a GDD has `## Overview` with `## Detailed Rules` or
-   `## Detailed Design`; an ADR `## Status` with `## Decision`; a story
-   `## Acceptance Criteria` with a `Status` line; a concept doc
-   `## Elevator Pitch` or `## Game Pillars`; a brief `## Core loop` with
-   `## MVP`.
-3. Show what was found, grouped by type, each with the place every skill reads
-   it from: GDD → `design/gdd/[name].md`; ADR →
-   `docs/architecture/adr-NNNN-[name].md`; story →
-   `production/epics/[epic]/story-NNN-[name].md`; concept →
-   `design/gdd/game-concept.md`; brief → `design/game-brief.md`. If nothing
-   matched, say so, name the folders and headings searched, and offer `/start`.
-4. Ask before moving anything — a move takes the file away from its old path,
-   so it is a `file_deletions` decision: "May I move these [N] files to the
-   standard folders?" — `[A] Move them all` / `[B] Let me pick which` /
-   `[C] Don't move them — I'll do it myself`. Move with `git mv` in a git
-   repository (the file's history follows it), plain `mv` otherwise. Never
-   overwrite a file already at the target: name the clash and skip that file.
-   Files are moved, never edited.
-5. After the moves, run Phase 1 again from the top, so the audit reads the files
-   where every other skill will. With [C], print the moves as a list and stop.
+1. 搜索他们指定的文件夹（若指定了）；否则搜索整个
+   项目，跳过 `.claude/`、`.git/`、`docs/engine-reference/`、
+   `studio-tests/`、`node_modules/` 以及引擎的构建和
+   缓存文件夹。
+2. 在其中 Glob `**/*.md`，然后对匹配结果 Grep 各产出物
+   所带的标题：GDD 有 `## Overview` 与 `## Detailed Rules` 或
+   `## Detailed Design`；ADR 有 `## Status` 与 `## Decision`；用户故事
+   有 `## Acceptance Criteria` 与一行 `Status`；概念文档
+   有 `## Elevator Pitch` 或 `## Game Pillars`；简报有 `## Core loop` 与
+   `## MVP`。
+3. 按类型分组展示找到的内容，并标明每个技能读取它时
+   使用的位置：GDD → `design/gdd/[name].md`；ADR →
+   `docs/architecture/adr-NNNN-[name].md`；用户故事 →
+   `production/epics/[epic]/story-NNN-[name].md`；概念 →
+   `design/gdd/game-concept.md`；简报 → `design/game-brief.md`。如果什么都
+   没有匹配，如实说明，列出搜索过的文件夹和标题，并提供 `/start`。
+4. 移动任何东西之前先询问 — 移动会把文件从旧路径带走，
+   因此这是一个 `file_deletions` 决策：“我可以把这些 [N] 个文件移动到
+   标准文件夹吗？” — `[A] Move them all` / `[B] Let me pick which` /
+   `[C] Don't move them — I'll do it myself`。在 git 仓库中用 `git mv` 移动
+   （文件历史会随之保留），否则用普通 `mv`。绝不覆盖
+   目标位置已存在的文件：指出冲突并跳过该文件。
+   文件只移动，绝不编辑。
+5. 移动完成后，从头重新运行 Phase 1，这样审计就会读取
+   其他所有技能将会读取的文件位置。若选 [C]，则把应做的移动以列表形式打印出来并停止。
 
-Report: "Detected phase: [phase]. Found: [N] GDDs, [M] ADRs, [P] stories."
+报告：“检测到的阶段：[phase]。发现：[N] 份 GDD、[M] 份 ADR、[P] 个用户故事。”
 
 ---

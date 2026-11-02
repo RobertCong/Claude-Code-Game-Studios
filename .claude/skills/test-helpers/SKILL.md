@@ -1,6 +1,6 @@
 ---
 name: test-helpers
-description: "Generate engine-specific test helper libraries — assertion utilities, factory functions, mocks in the engine's test folder. Reduces boilerplate."
+description: "生成引擎专属的测试辅助库 —— 断言工具、工厂函数、Mock，放在引擎的测试文件夹中。减少样板代码。"
 argument-hint: "[system-name | all | scaffold]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Bash(bash "*/.claude/skills/test-helpers/../../hooks/yaml-helper.sh" resolve_config *)
@@ -9,94 +9,93 @@ model: sonnet
 
 !`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation`
 
-**Automation mode**: Resolve `modes.automation` (`project.local.yaml` →
-`project.yaml` → default `collaborative`). Every `AskUserQuestion` call and
-every file write follows `.claude/docs/automation-modes.md`
-(collaborative asks always · guided major-only · autonomous logs and proceeds;
-`automation_always_ask` categories always prompt).
+**自动化模式**：解析 `modes.automation`（`project.local.yaml` →
+`project.yaml` → 默认 `collaborative`）。每次 `AskUserQuestion` 调用和
+每次文件写入都遵循 `.claude/docs/automation-modes.md`
+（collaborative 总是询问 · guided 仅重大事项询问 · autonomous 记录后继续；
+`automation_always_ask` 类别始终提示）。
 
-# Test Helpers
+# 测试辅助库
 
-Writing test cases is faster and more consistent when common setup, teardown,
-and assertion patterns are abstracted into helpers. This skill generates a
-`tests/helpers/` library tailored to the project's actual engine, language,
-and systems — so every developer writes less boilerplate and more assertions.
+当常见的初始化、清理和断言模式被抽象为辅助函数时，编写测试用例
+会更快、更一致。本技能会生成一个 `tests/helpers/` 库，针对项目实际使用的引擎、
+语言和系统量身定制 —— 让每位开发者写更少的样板代码、更多的断言。
 
-**Output:** engine-specific helper files in the engine's **helper root** —
-the only place its test runner compiles them (`.claude/docs/directory-structure.md`):
+**输出**：引擎专属的辅助文件，放在引擎的**辅助根目录**中 ——
+这是其测试运行器唯一会编译它们的位置（`.claude/docs/directory-structure.md`）：
 
-| Engine | Helper root |
+| 引擎 | 辅助根目录 |
 |---|---|
 | Godot | `tests/helpers/` |
-| Unity | `Assets/Tests/EditMode/Helpers/` — inside the `EditModeTests` assembly `/test-setup` creates. If PlayMode tests need the same helpers, ask before creating `Assets/Tests/Helpers/TestHelpers.asmdef` and referencing it from both test assemblies. |
+| Unity | `Assets/Tests/EditMode/Helpers/` —— 位于 `/test-setup` 创建的 `EditModeTests` 程序集内。如果 PlayMode 测试需要相同的辅助函数，在创建 `Assets/Tests/Helpers/TestHelpers.asmdef` 并从两个测试程序集引用它之前先询问。 |
 | Unreal | `Source/<Module>/Private/Tests/Helpers/` |
 
-`tests/helpers/` below means the helper root for the project's engine.
+下文的 `tests/helpers/` 指项目所用引擎的辅助根目录。
 
-**When to run:**
-- After `/test-setup` scaffolds the framework (first time)
-- When multiple test files repeat the same setup boilerplate
-- When starting to write tests for a new system
-
----
-
-## Assertions: use the project's test framework, never bare `assert()`
-
-**Generated helpers must assert through the configured test framework's assertion
-API**, resolved from `testing.framework` — not through GDScript's built-in
-`assert()`.
-
-Two things go wrong with a bare `assert()` in a helper, and both are silent:
-
-1. **It aborts the run instead of failing the test.** A framework assertion
-   records a failure and continues, so one broken expectation yields one red test.
-   A bare `assert()` halts execution, so the first failure hides every result
-   after it.
-2. **It is stripped in release builds.** A helper library built on `assert()`
-   stops asserting entirely in exactly the build you most want checked, and does
-   so without any error — the tests still "pass".
-
-**Look up the assertion form for the configured framework before generating
-code.** Do not copy the forms in this file or in other skills' examples as
-authoritative — they are illustrative and have drifted (`assert_eq`,
-`assert_true` and `assert_that` all appear across the repo). If you cannot
-confirm the correct API for the project's framework, say so and generate no
-helper rather than guessing.
-
-**Helpers must not extend the framework's test-suite base class.** A file in
-`tests/helpers/` that extends the suite type is discovered by the runner as a
-test suite containing zero tests. Helpers are plain classes; only real test files
-extend the suite.
+**何时运行：**
+- 在 `/test-setup` 搭建框架之后（首次）
+- 当多个测试文件重复相同的初始化样板代码时
+- 开始为新系统编写测试时
 
 ---
 
-## 1. Parse Arguments
+## 断言：使用项目的测试框架，绝不使用裸 `assert()`
 
-**Modes:**
-- `/test-helpers [system-name]` — generate helpers for a specific system
-  (e.g., `/test-helpers combat`)
-- `/test-helpers all` — generate helpers for all systems with test files
-- `/test-helpers scaffold` — generate only the base helper library (no
-  system-specific helpers); use this on first run
-- No argument — run `scaffold` if no helpers exist, else `all`
+**生成的辅助函数必须通过已配置测试框架的断言
+API 进行断言**，该框架由 `testing.framework` 解析 —— 而不是通过 GDScript 内置的
+`assert()`。
+
+在辅助函数中使用裸 `assert()` 会出两个问题，而且都是静默的：
+
+1. **它会中止运行，而不是让测试失败。** 框架断言会
+   记录失败并继续，因此一个错误的预期只产生一个红色测试。
+   裸 `assert()` 会停止执行，因此第一个失败会掩盖其后的
+   所有结果。
+2. **它会在发布构建中被剥离。** 基于 `assert()` 构建的辅助库
+   会在你最想检查的那个构建中完全停止断言，而且
+   不会产生任何错误 —— 测试仍然"通过"。
+
+**在生成代码之前，先查清已配置框架的断言语形式。**
+不要将本文件或其他技能示例中的写法当作权威 —— 它们只是
+示意，且已经过时（`assert_eq`、
+`assert_true` 和 `assert_that` 在全仓库中都出现过）。如果无法
+确认项目框架的正确 API，说明这一点并不要生成
+辅助函数，而不是猜测。
+
+**辅助函数不得继承框架的测试套件基类。** `tests/helpers/` 中
+继承套件类型的文件会被运行器发现为一个包含零个测试的
+测试套件。辅助函数是普通类；只有真正的测试文件
+才继承套件。
 
 ---
 
-## 2. Detect Engine and Language
+## 1. 解析参数
 
-Read from `project.yaml` first, falling back to `.claude/docs/technical-preferences.md` for any key that is absent or empty:
-- `engine.name` (else the `Engine:` value)
-- `engine.language` (else the `Language:` value)
-- `testing.framework` (else `Framework:` from the Testing section)
-
-If the engine is not configured in either source: "Engine not configured. Run `/setup-engine` first."
+**模式：**
+- `/test-helpers [system-name]` —— 为特定系统生成辅助函数
+  （例如 `/test-helpers combat`）
+- `/test-helpers all` —— 为所有含测试文件的系统生成辅助函数
+- `/test-helpers scaffold` —— 仅生成基础辅助库（不含
+  系统专属辅助函数）；首次运行时使用
+- 无参数 —— 若无辅助函数则运行 `scaffold`，否则运行 `all`
 
 ---
 
-## 3. Load Existing Test Patterns
+## 2. 检测引擎与语言
 
-Scan the engine's test root for patterns already in use (Godot `tests/`, Unity
-`Assets/Tests/`, Unreal `Source/<Module>/Private/Tests/`):
+先从 `project.yaml` 读取，对任何缺失或为空的键回退到 `.claude/docs/technical-preferences.md`：
+- `engine.name`（否则用 `Engine:` 值）
+- `engine.language`（否则用 `Language:` 值）
+- `testing.framework`（否则用 Testing 节的 `Framework:`）
+
+如果两个来源都未配置引擎："Engine not configured. Run `/setup-engine` first."
+
+---
+
+## 3. 加载现有测试模式
+
+扫描引擎的测试根目录中已在使用的模式（Godot `tests/`，Unity
+`Assets/Tests/`，Unreal `Source/<Module>/Private/Tests/`）：
 
 ```
 Glob pattern="tests/**/*_test.*"                  (Godot)
@@ -104,47 +103,46 @@ Glob pattern="Assets/Tests/**/*Tests.cs"          (Unity)
 Glob pattern="Source/*/Private/Tests/**/*.cpp"    (Unreal)
 ```
 
-For a representative sample (up to 5 files), read the test files and extract:
-- Setup patterns (how `before_each` / `setUp` / fixtures are written)
-- Common assertion patterns (what is being asserted most often)
-- Object creation patterns (how game objects or scenes are instantiated in tests)
-- Mock/stub patterns (how dependencies are replaced)
+对有代表性的样本（最多 5 个文件），读取测试文件并提取：
+- 初始化模式（`before_each` / `setUp` / fixture 是如何编写的）
+- 常见断言模式（最常断言什么）
+- 对象创建模式（测试中如何实例化游戏对象或场景）
+- Mock/桩模式（如何替换依赖）
 
-This ensures generated helpers match the project's existing style, not a
-generic template.
+这能确保生成的辅助函数匹配项目现有风格，而不是
+通用模板。
 
-Also read:
-- `design/gdd/systems-index.md` — to know which systems exist
-- In-scope GDD(s) — to understand what data types and values need testing. Read
-  them by section: find the headings you need with the Grep tool (pattern `^#`,
-  content mode) and Read those ranges with offset and limit.
-- `docs/architecture/tr-registry.yaml` — to map requirements to tested systems
+还要读取：
+- `design/gdd/systems-index.md` —— 了解存在哪些系统
+- 范围内的 GDD —— 了解需要测试哪些数据类型和数值。按节
+  读取它们：用 Grep 工具找到需要的标题（pattern `^#`，
+  content 模式），再用 offset 和 limit 读取那些范围。
+- `docs/architecture/tr-registry.yaml` —— 将需求映射到被测系统
 
 ---
 
-## 4. Generate Engine-Specific Helpers
+## 4. 生成引擎专属辅助函数
 
-### Godot 4 (GDUnit4 / GDScript)
+### Godot 4（GDUnit4 / GDScript）
 
-> **`FAIL_IF(...)` in the example below is a PLACEHOLDER, not an API.** It marks
-> the one line you must resolve from the project's actual test framework before
-> emitting any of this, per the rule in §2. Substitute the framework's real
-> failure call — the form that **registers a failure with the runner and lets the
-> suite continue** — and delete the marker comment.
+> **下面示例中的 `FAIL_IF(...)` 是占位符，不是 API。** 它标记了
+> 在输出任何内容之前，你必须按 §2 的规则从项目实际测试框架中
+> 解析出的那一行。替换为框架真实的失败调用 —— 即**向运行器
+> 登记失败并让套件继续**的形式 —— 并删除标记注释。
 >
-> **It is deliberately not spelled `assert_that`, `assert_eq` or `assert_true`.**
-> All three appear somewhere in this repo, they disagree, and **GdUnit4's API is
-> not covered by `docs/engine-reference/`** — so writing any of them here would be
-> asserting an API this repo cannot source, in the file whose whole job is to stop
-> people doing that. If you cannot confirm the correct call for the configured
-> framework, §2 already tells you the answer: **generate no helper.** An
-> unresolved `FAIL_IF` reaching disk is a bug; a missing helper is a task.
+> **它刻意没有被写成 `assert_that`、`assert_eq` 或 `assert_true`。**
+> 这三种都在本仓库的某处出现过，彼此不一致，而且 **GdUnit4 的 API
+> 不在 `docs/engine-reference/` 的覆盖范围内** —— 因此在此写下其中任何一个，
+> 都是在断言本仓库无法溯源的 API，而且是在这样一个以阻止
+> 他人这么做为全部职责的文件里。如果你无法确认已配置
+> 框架的正确调用，§2 已经告诉你答案：**不要生成辅助函数。** 一个未解析的
+> `FAIL_IF` 落到磁盘上是缺陷；缺少辅助函数是一个任务。
 >
-> Worked examples must obey §2 too — a bare `assert()` here would be the exact
-> form §2 forbids, sixty lines below §2 forbidding it. A rule stated in prose
-> does not reach its own worked example unless someone makes it.
+> 示例同样必须遵守 §2 —— 这里的一个裸 `assert()` 正是 §2 所禁止的
+> 形式，且位于 §2 禁止它之后六十行。以文字陈述的规则
+> 不会自动覆盖到自己的示例，除非有人去落实。
 
-**Base helper** (`tests/helpers/game_assertions.gd`):
+**基础辅助函数**（`tests/helpers/game_assertions.gd`）：
 
 ```gdscript
 ## Game-specific assertion utilities for [Project Name] tests.
@@ -207,7 +205,7 @@ static func assert_node_exists(parent: Node, path: NodePath) -> void:
     )
 ```
 
-**Factory helper** (`tests/helpers/game_factory.gd`):
+**工厂辅助函数**（`tests/helpers/game_factory.gd`）：
 
 ```gdscript
 ## Factory functions for creating test game objects.
@@ -227,7 +225,7 @@ static func make_player(health: int = 100) -> Node:
     return player
 ```
 
-**Scene helper** (`tests/helpers/scene_runner_helper.gd`):
+**场景辅助函数**（`tests/helpers/scene_runner_helper.gd`）：
 
 ```gdscript
 ## Utilities for scene-based integration tests. For input simulation and frame
@@ -248,9 +246,9 @@ static func load_scene_and_wait(host: Node, scene_path: String) -> Node:
 
 ---
 
-### Unity (NUnit / C#)
+### Unity（NUnit / C#）
 
-**Base helper** (`Assets/Tests/EditMode/Helpers/GameAssertions.cs`):
+**基础辅助函数**（`Assets/Tests/EditMode/Helpers/GameAssertions.cs`）：
 
 ```csharp
 using NUnit.Framework;
@@ -290,7 +288,7 @@ public static class GameAssertions
 }
 ```
 
-**Factory helper** (`Assets/Tests/EditMode/Helpers/GameFactory.cs`):
+**工厂辅助函数**（`Assets/Tests/EditMode/Helpers/GameFactory.cs`）：
 
 ```csharp
 using UnityEngine;
@@ -320,9 +318,9 @@ public static class GameFactory
 
 ---
 
-### Unreal Engine (C++)
+### Unreal Engine（C++）
 
-**Base helper** (`Source/<Module>/Private/Tests/Helpers/GameTestHelpers.h`):
+**基础辅助函数**（`Source/<Module>/Private/Tests/Helpers/GameTestHelpers.h`）：
 
 ```cpp
 #pragma once
@@ -377,19 +375,19 @@ namespace GameTestHelpers
 
 ---
 
-## 5. Generate System-Specific Helpers
+## 5. 生成系统专属辅助函数
 
-For `[system-name]` or `all` modes, generate a helper per system:
+对于 `[system-name]` 或 `all` 模式，为每个系统生成一个辅助函数：
 
-Read only the GDD sections this needs — `Grep pattern="^## ([0-9]+\. )?(Formulas|Edge Cases|Detailed Rules|Detailed Design)" path="design/gdd/[system].md" output_mode="content" -A 30` (the optional number matches a reverse-documented GDD's `## 4. Formulas`) — rather than a full read (every peer skill section-greps GDDs; in `all` mode a full read multiplies across each system's 400+-line GDD). Extract:
-- Data types (entity types, component names)
-- Formula variables and their bounds
-- Common test scenarios mentioned in Edge Cases
+只读取所需 GDD 中需要的节 —— `Grep pattern="^## ([0-9]+\. )?(Formulas|Edge Cases|Detailed Rules|Detailed Design)" path="design/gdd/[system].md" output_mode="content" -A 30`（可选编号匹配反向生成的 GDD 的 `## 4. Formulas`）—— 而不是完整读取（每个同类技能都按节 Grep GDD；在 `all` 模式下，完整读取会乘以每个系统 400+ 行的 GDD）。提取：
+- 数据类型（实体类型、组件名称）
+- 公式变量及其边界
+- Edge Cases 中提到的常见测试场景
 
-Generate `tests/helpers/[system]_factory.[ext]` with factory functions
-specific to that system's objects.
+生成 `tests/helpers/[system]_factory.[ext]`，包含该系统对象
+专属的工厂函数。
 
-Example pattern for a `combat` system (Godot/GDScript):
+`combat` 系统的示例模式（Godot/GDScript）：
 
 ```gdscript
 ## Factory and assertion helpers for Combat system tests.
@@ -424,9 +422,9 @@ static func assert_damage_in_bounds(damage: float) -> void:
 
 ---
 
-## 6. Write Output
+## 6. 写出输出
 
-Present a summary of what will be created:
+呈现将要创建内容的摘要：
 
 ```
 ## Test Helpers to Create
@@ -440,34 +438,32 @@ System helpers ([mode]):
 - [helper root]/[system]_factory.[ext]  ← from [system] GDD
 ```
 
-Ask: "May I write these helper files to `[helper root]`?"
+询问："我可以将这些辅助文件写入 `[helper root]` 吗？"
 
-**Never overwrite existing files.** If a file already exists, report:
-"Skipping `[path]` — already exists. Remove the file manually if you want it
-regenerated."
+**绝不覆盖现有文件。** 如果文件已存在，报告：
+"正在跳过 `[path]` —— 已存在。如果你想重新生成，请手动删除该文件。"
 
-After writing: Verdict: **COMPLETE** — helper files created.
+写入之后：结论：**COMPLETE** —— 辅助文件已创建。
 
-"Helper files created. To use them in a test:
-- Godot: `class_name` is auto-imported — no explicit import needed
-- Unity: Add `using` directive or reference the test assembly
-- Unreal: `#include \"Tests/Helpers/GameTestHelpers.h\"` (from inside the module)"
+"辅助文件已创建。在测试中使用它们：
+- Godot：`class_name` 会自动导入 —— 无需显式 import
+- Unity：添加 `using` 指令或引用测试程序集
+- Unreal：`#include \"Tests/Helpers/GameTestHelpers.h\"`（在模块内部）"
 
 ---
 
-## Collaborative Protocol
+## 协作协议
 
-- **Never overwrite existing helpers** — they may contain hand-written
-  customisations. Only generate new files that don't exist yet
-- **Generated code is a starting point** — the generated factory functions use
-  metadata patterns for simplicity; adapt to the actual class structure once
-  the code exists
-- **Helpers should reflect the GDD** — bounds and constants in helpers should
-  trace to GDD Formulas sections, not invented values
-- **Ask before writing** — always confirm before creating files in `tests/`
+- **绝不覆盖现有辅助函数** —— 它们可能包含手写的
+  自定义内容。只生成尚不存在的新文件
+- **生成的代码是起点** —— 生成的工厂函数出于简便使用
+  元数据模式；等实际代码存在后，再调整为实际的类结构
+- **辅助函数应反映 GDD** —— 辅助函数中的边界和常量应
+  可追溯到 GDD 的 Formulas 节，而不是臆造的值
+- **写入前先询问** —— 在 `tests/` 中创建文件前始终确认
 
-## Next Steps
+## 后续步骤
 
-- Run `/test-setup` if the test framework has not been scaffolded yet.
-- Use `/dev-story` to implement stories — helpers reduce boilerplate in new test files.
-- Run `/skill-test` to validate other skills that may need helper coverage.
+- 如果测试框架尚未搭建，运行 `/test-setup`。
+- 使用 `/dev-story` 实现用户故事 —— 辅助函数可减少新测试文件中的样板代码。
+- 运行 `/skill-test` 以验证其他可能需要辅助函数覆盖的技能。

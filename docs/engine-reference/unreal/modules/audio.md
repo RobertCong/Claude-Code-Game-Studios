@@ -1,32 +1,32 @@
-# Unreal Engine 5.8 — Audio Module Reference
+# Unreal Engine 5.8 — 音频模块参考
 
-**Last verified:** 2026-10-17 (UE 5.8 changes block); 2026-02-13 (rest of file, written against 5.7)
-**Knowledge Gap:** UE 5.7 MetaSounds production-ready; UE 5.8 WASAPI default on Windows
+**Last verified:** 2026-10-17（UE 5.8 变更区块）；2026-02-13（文件其余部分，针对 5.7 编写）
+**Knowledge Gap:** UE 5.7 MetaSounds 可用于生产；UE 5.8 Windows 上默认使用 WASAPI
 
-> **UE 5.8 changes:** The default Windows audio backend is now WASAPI
-> (XAudio2 is an opt-in fallback; Epic: "No changes are required on the
-> developers end"). `au.EnableRelativeRenderCostVoiceLimit` is on by default,
-> so fewer sounds may play under the same voice count — revisit voice-count
-> tuning. Attenuation submix sends that were implicitly disabled by
-> `bEnableSubmixSends` may now be audible. Audio Insights is production-ready;
-> Audio Subtitles is Beta; MetaSound Node Configuration and Templates are
-> Experimental. Custom MetaSound nodes: `FNodeClassMetadata::DefaultInterface`
-> now takes `FClassInterface`. Source: UE 5.8 release notes, https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-5-8-release-notes?application_version=5.8
-
----
-
-## Overview
-
-UE 5.8 audio systems:
-- **MetaSounds**: Node-based procedural audio (RECOMMENDED, production-ready)
-- **Sound Cues**: Legacy node-based audio (use for simple cases)
-- **Audio Component**: Play sounds on actors
+> **UE 5.8 变更：** 默认的 Windows 音频后端现在为 WASAPI
+> （XAudio2 是可选的备用方案；Epic 表示："No changes are required on the
+> developers end"）。`au.EnableRelativeRenderCostVoiceLimit` 默认开启，
+> 因此在相同语音数下可能播放更少的音效 — 请重新审视语音数
+> 调优。此前被 `bEnableSubmixSends` 隐式禁用的衰减 submix 发送
+> 现在可能变为可听。Audio Insights 可用于生产；
+> Audio Subtitles 为 Beta；MetaSound Node Configuration 与 Templates 为
+> Experimental。自定义 MetaSound 节点：`FNodeClassMetadata::DefaultInterface`
+> 现在接收 `FClassInterface`。来源：UE 5.8 发布说明，https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-5-8-release-notes?application_version=5.8
 
 ---
 
-## Basic Audio Playback
+## 概述
 
-### Play Sound at Location
+UE 5.8 音频系统：
+- **MetaSounds**：基于节点的程序化音频（推荐，可用于生产）
+- **Sound Cues**：遗留的基于节点音频（用于简单场景）
+- **Audio Component**：在 actor 上播放声音
+
+---
+
+## 基础音频播放
+
+### 在位置处播放声音
 
 ```cpp
 #include "Kismet/GameplayStatics.h"
@@ -43,9 +43,9 @@ UGameplayStatics::PlaySoundAtLocation(GetWorld(), ExplosionSound, GetActorLocati
 
 ---
 
-## Audio Component
+## 音频组件（Audio Component）
 
-### Audio Component (Persistent Sound)
+### 音频组件（持久声音）
 
 ```cpp
 // Create audio component
@@ -68,9 +68,9 @@ AudioComp->SetPitchMultiplier(1.2f);
 
 ---
 
-## 3D Spatial Audio
+## 3D 空间音频
 
-### Attenuation Settings
+### 衰减设置（Attenuation Settings）
 
 ```cpp
 // Create Sound Attenuation asset:
@@ -85,7 +85,7 @@ AudioComp->SetPitchMultiplier(1.2f);
 AudioComp->AttenuationSettings = AttenuationAsset;
 ```
 
-### Attenuation Override in Code
+### 在代码中覆盖衰减
 
 ```cpp
 FSoundAttenuationSettings AttenuationOverride;
@@ -99,20 +99,20 @@ AudioComp->bOverrideAttenuation = true;
 
 ---
 
-## MetaSounds (Procedural Audio)
+## MetaSounds（程序化音频）
 
-### Create MetaSound Source
+### 创建 MetaSound Source
 
 1. Content Browser > Sounds > MetaSound Source
-2. Open MetaSound editor
-3. Build node graph:
-   - **Inputs**: Triggers, parameters
-   - **Generators**: Oscillators, noise, samples
-   - **Modulators**: Envelopes, LFOs
-   - **Effects**: Filters, reverb, delay
-   - **Output**: Audio output
+2. 打开 MetaSound 编辑器
+3. 构建节点图：
+   - **Inputs**：触发器、参数
+   - **Generators**：振荡器、噪声、采样
+   - **Modulators**：包络、LFO
+   - **Effects**：滤波器、混响、延迟
+   - **Output**：音频输出
 
-### Play MetaSound
+### 播放 MetaSound
 
 ```cpp
 // Play MetaSound like any sound
@@ -123,7 +123,7 @@ AudioComp->SetSound(MetaSoundSource);
 AudioComp->Play();
 ```
 
-### Set MetaSound Parameters
+### 设置 MetaSound 参数
 
 ```cpp
 // Define parameter in MetaSound (Input node with exposed parameter)
@@ -135,15 +135,15 @@ AudioComp->SetBoolParameter(FName("EnableReverb"), true);
 
 ---
 
-## Sound Cues (Legacy)
+## Sound Cues（遗留）
 
-### Create Sound Cue
+### 创建 Sound Cue
 
 1. Content Browser > Sounds > Sound Cue
-2. Open Sound Cue editor
-3. Add nodes: Random, Modulator, Mixer, etc.
+2. 打开 Sound Cue 编辑器
+3. 添加节点：Random、Modulator、Mixer 等
 
-### Use Sound Cue
+### 使用 Sound Cue
 
 ```cpp
 // Play like any sound
@@ -152,9 +152,9 @@ UGameplayStatics::PlaySound2D(GetWorld(), SoundCue);
 
 ---
 
-## Sound Classes & Sound Mixes
+## 声音类与声音混合（Sound Class & Sound Mix）
 
-### Sound Class (Volume Groups)
+### Sound Class（音量分组）
 
 ```cpp
 // Create Sound Class: Content Browser > Sounds > Sound Class
@@ -168,7 +168,7 @@ UAudioSettings* AudioSettings = GetMutableDefault<UAudioSettings>();
 // Configure via Sound Class hierarchy
 ```
 
-### Sound Mix (Dynamic Mixing)
+### Sound Mix（动态混音）
 
 ```cpp
 // Create Sound Mix asset
@@ -183,9 +183,9 @@ UGameplayStatics::PopSoundMixModifier(GetWorld(), DuckedMusicMix);
 
 ---
 
-## Audio Occlusion & Reverb
+## 音频遮挡与混响
 
-### Audio Occlusion (Walls Block Sound)
+### 音频遮挡（墙体阻挡声音）
 
 ```cpp
 // Enable in Audio Component:
@@ -194,7 +194,7 @@ AudioComp->bEnableOcclusion = true;
 // Requires geometry with collision
 ```
 
-### Reverb Volumes
+### 混响体积（Reverb Volume）
 
 ```cpp
 // Add Audio Volume to level (Volumes > Audio Volume)
@@ -204,9 +204,9 @@ AudioComp->bEnableOcclusion = true;
 
 ---
 
-## Common Patterns
+## 常见模式
 
-### Footstep Sounds (Random Variation)
+### 脚步声（随机变化）
 
 ```cpp
 // Use Sound Cue with Random node, or:
@@ -219,7 +219,7 @@ void PlayFootstep() {
 }
 ```
 
-### Music Crossfade
+### 音乐交叉淡入淡出
 
 ```cpp
 UAudioComponent* MusicA;
@@ -231,7 +231,7 @@ void CrossfadeMusic(float Duration) {
 }
 ```
 
-### Check if Sound is Playing
+### 检查声音是否正在播放
 
 ```cpp
 if (AudioComp->IsPlaying()) {
@@ -241,9 +241,9 @@ if (AudioComp->IsPlaying()) {
 
 ---
 
-## Audio Concurrency
+## 音频并发（Audio Concurrency）
 
-### Limit Concurrent Sounds
+### 限制同时播放的声音
 
 ```cpp
 // Create Sound Concurrency asset:
@@ -259,9 +259,9 @@ if (AudioComp->IsPlaying()) {
 
 ---
 
-## Performance Tips
+## 性能技巧
 
-### Audio Optimization
+### 音频优化
 
 ```cpp
 // Compression settings (Sound Wave asset):
@@ -280,9 +280,9 @@ if (Distance > MaxAudibleDistance) {
 
 ---
 
-## Debugging
+## 调试
 
-### Audio Debug Commands
+### 音频调试命令
 
 ```cpp
 // Console commands:
@@ -294,6 +294,6 @@ if (Distance > MaxAudibleDistance) {
 
 ---
 
-## Sources
+## 来源
 - https://docs.unrealengine.com/5.7/en-US/audio-in-unreal-engine/
 - https://docs.unrealengine.com/5.7/en-US/metasounds-in-unreal-engine/

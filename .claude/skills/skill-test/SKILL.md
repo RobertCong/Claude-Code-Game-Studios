@@ -1,6 +1,6 @@
 ---
 name: skill-test
-description: "Validate skill files for structural compliance and behavioral correctness. Four modes: static linter, spec, category rubric, audit."
+description: "校验技能文件的结构合规性与行为正确性。四种模式：static 结构检查器、spec 规格测试、category 分类评分量规、audit 审计。"
 argument-hint: "static [skill-name | all] | spec [skill-or-agent-name] | category [skill-or-agent-name | all] | audit"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Bash(bash "*/.claude/skills/skill-test/../../hooks/yaml-helper.sh" resolve_config *), Bash(bash .claude/scripts/agent-check.sh*), Bash(bash .claude/scripts/compat-inventory.sh*)
@@ -9,199 +9,193 @@ model: sonnet
 
 !`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation`
 
-**Automation mode**: Resolve `modes.automation` (`project.local.yaml` →
-`project.yaml` → default `collaborative`). Every `AskUserQuestion` call and
-every file write follows `.claude/docs/automation-modes.md`
-(collaborative asks always · guided major-only · autonomous logs and proceeds;
-`automation_always_ask` categories always prompt).
+**自动化模式**：解析 `modes.automation`（`project.local.yaml` →
+`project.yaml` → 默认 `collaborative`）。每次 `AskUserQuestion` 调用和
+每次文件写入都遵循 `.claude/docs/automation-modes.md`
+（collaborative 始终询问 · guided 仅重大事项 · autonomous 记录并继续；
+`automation_always_ask` 类别始终提示）。
 
-# Skill Test
+# 技能测试
 
-Validates skills (`.claude/skills/*/SKILL.md`) and agents (`.claude/agents/*.md`)
-for structural compliance and behavioral correctness. No external dependencies —
-runs entirely within the existing skill/hook/template architecture.
+校验技能（`.claude/skills/*/SKILL.md`）和 agent（`.claude/agents/*.md`）的
+结构合规性与行为正确性。无外部依赖 —
+完全在现有的技能/钩子/模板架构内运行。
 
-**Four modes:**
+**四种模式：**
 
-| Mode | Command | Purpose | Token Cost |
+| 模式 | 命令 | 用途 | Token 成本 |
 |------|---------|---------|------------|
-| `static` | `/skill-test static [name\|all]` | Structural linter — 7 compliance checks per skill, plus agent, delegation and compatibility observations | Low (~1k/skill) |
-| `spec` | `/skill-test spec [name]` | Behavioral verifier — evaluates assertions in a skill's or agent's test spec | Medium (~5k each) |
-| `category` | `/skill-test category [name\|all]` | Category rubric — checks a skill or agent against its category-specific metrics | Low (~2k each) |
-| `audit` | `/skill-test audit` | Coverage report — skills, agent specs, last test dates | Low (~3k total) |
+| `static` | `/skill-test static [name\|all]` | 结构检查器 — 每个技能 7 项合规检查，外加 agent、委派和兼容性观察项 | 低（约 1k/技能） |
+| `spec` | `/skill-test spec [name]` | 行为验证器 — 评估技能或 agent 的测试规格中的断言 | 中（每个约 5k） |
+| `category` | `/skill-test category [name\|all]` | 分类评分量规 — 按类别专属指标检查技能或 agent | 低（每个约 2k） |
+| `audit` | `/skill-test audit` | 覆盖率报告 — 技能、agent 规格、最近测试日期 | 低（共约 3k） |
 
-**What a pass proves.** Every mode reads files; none runs the skill. `static`:
-the file has the structure a skill needs, not that it behaves. `spec`: read
-closely, the instructions cover each case, not that Claude follows them when it
-runs. `category`: the skill meets its category's rubric as written. `audit`:
-which skills and agents have specs, and when each was last checked. What a skill
-does shows only when it runs: a real request in a throwaway copy of the project,
-on each model you use, with and without the skill (Anthropic's Agent Skills best
-practices, "Build evaluations first").
-
----
-
-## Phase 1: Parse Arguments
-
-Determine mode from the first argument:
-
-- `static [name]` → run 7 structural checks on one skill, or the agent observations on one agent
-- `static all` → run 7 structural checks on all skills (Glob `.claude/skills/*/SKILL.md`), plus the observations for every agent
-- `spec [name]` → read the skill or agent + its test spec, evaluate assertions
-- `category [name]` → run category-specific rubric from `studio-tests/quality-rubric.md`
-- `category all` → run category rubric for every skill and every agent that has a `category:` in catalog
-- `audit` (or no argument) → read catalog, list all skills and agents, show coverage
-
-If the argument is unrecognized, output usage and stop.
-
-**The old spec folder.** Glob `CCGS Skill Testing Framework/catalog.yaml`. When
-it exists, say so first: "`CCGS Skill Testing Framework/` was renamed
-`studio-tests/` in 1.2.0, and this skill reads only `studio-tests/`. Move any
-specs you wrote there; UPGRADING.md (v1.1.3 → v1.2.0, `studio-tests/`) says how."
-Then go on with `studio-tests/`.
-
-**Resolve the name before `spec` or `category`.** Look it up in
-`studio-tests/catalog.yaml`: an entry under `skills:` is a skill
-(`.claude/skills/[name]/SKILL.md`); an entry under `agents:` is an agent
-(`.claude/agents/[name].md`). With no catalog entry, use whichever of those two
-files exists. Only when neither exists, report "'[name]' is neither a skill in
-`.claude/skills/` nor an agent in `.claude/agents/`." and stop. A name that is
-also an ordinary word is still a name: `/skill-test spec help` tests the `/help`
-skill, never a request for this skill's usage.
-
-The 7 checks lint SKILL.md structure, so they are skills-only. Given an agent
-name, `static` runs only the observations below: an agent file has no
-phases or verdict keywords to lint. Never report the agent as missing.
+**一次通过能证明什么。** 每种模式都只读取文件；没有一种会运行技能。`static`：
+文件具备技能所需的结构，而非它行为正确。`spec`：仔细阅读，说明覆盖了
+每种情况，而非 Claude 运行时会遵循它们。`category`：技能按书面内容
+满足其类别的评分量规。`audit`：哪些技能和 agent 有规格，以及各自
+上次检查的时间。技能实际做什么，只有运行时才显现：在一个一次性项目副本中
+发出真实请求，在你使用的每个模型上，分别在有技能和无技能的情况下运行
+（Anthropic 的 Agent Skills 最佳实践，“Build evaluations first”）。
 
 ---
 
-## Phase 2A: Static Mode — Structural Linter
+## Phase 1: 解析参数
 
-For each skill being tested, read its `SKILL.md` and every file in its `references/` folder
-fully, and run all 7 checks on them as one skill — the longest skills keep each
-phase in `references/`. The frontmatter checks (1, 6 and 7) read `SKILL.md`.
+根据第一个参数确定模式：
 
-### Check 1 — Required Frontmatter Fields
-The file must contain all of these in the YAML frontmatter block:
+- `static [name]` → 对一个技能运行 7 项结构检查，或对一个 agent 运行观察项
+- `static all` → 对所有技能运行 7 项结构检查（Glob `.claude/skills/*/SKILL.md`），外加每个 agent 的观察项
+- `spec [name]` → 读取技能或 agent 及其测试规格，评估断言
+- `category [name]` → 运行 `studio-tests/quality-rubric.md` 中类别专属的评分量规
+- `category all` → 对每个技能和每个在 catalog 中带 `category:` 的 agent 运行分类评分量规
+- `audit`（或无参数）→ 读取 catalog，列出所有技能和 agent，展示覆盖率
+
+若参数无法识别，输出用法并停止。
+
+**旧的 spec 文件夹。** Glob `CCGS Skill Testing Framework/catalog.yaml`。若
+它存在，先说明：“`CCGS Skill Testing Framework/` 在 1.2.0 中已更名为
+`studio-tests/`，而本技能只读取 `studio-tests/`。请移动你在那里写过的
+任何规格；UPGRADING.md（v1.1.3 → v1.2.0，`studio-tests/`）说明了方法。”
+然后继续使用 `studio-tests/`。
+
+**在 `spec` 或 `category` 之前先解析名称。** 在
+`studio-tests/catalog.yaml` 中查找：`skills:` 下的条目是技能
+（`.claude/skills/[name]/SKILL.md`）；`agents:` 下的条目是 agent
+（`.claude/agents/[name].md`）。若 catalog 中没有条目，则使用这两个文件中
+存在的那一个。仅当两者都不存在时，报告“‘[name]’ 既不是
+`.claude/skills/` 中的技能，也不是 `.claude/agents/` 中的 agent。”并停止。
+一个同时也是普通单词的名称仍然是名称：`/skill-test spec help` 测试的是 `/help`
+技能，绝不会是对本技能用法的请求。
+
+这 7 项检查针对 SKILL.md 结构做 lint，因此仅适用于技能。给定 agent
+名称时，`static` 只运行下方的观察项：agent 文件没有
+可 lint 的阶段或结论关键词。绝不要把 agent 报告为缺失。
+
+---
+
+## Phase 2A: Static 模式 — 结构检查器
+
+对每个被测技能，完整读取其 `SKILL.md` 及其 `references/` 文件夹中的每个文件，
+并将它们作为一个技能运行全部 7 项检查 — 最长的技能会把每个阶段
+放在 `references/` 中。frontmatter 检查（1、6 和 7）读取 `SKILL.md`。
+
+### Check 1 — 必需的 frontmatter 字段
+文件必须在 YAML frontmatter 块中包含以下全部字段：
 - `name:`
 - `description:`
 - `argument-hint:`
 - `user-invocable:`
 - `allowed-tools:`
 
-**FAIL** if any are absent. A file whose frontmatter does not parse fails Check 1
-too — malformed YAML is a structural defect this check exists to catch, not an
-unassessable file; see the per-skill result rule below.
+若缺少任何一项则 **FAIL**。frontmatter 无法解析的文件同样无法通过 Check 1 —
+格式错误的 YAML 是这项检查存在的目的所要捕获的结构缺陷，而不是
+无法评估的文件；参见下方的单技能结果规则。
 
-### Check 2 — Multiple Phases
-The skill must have ≥2 numbered phase headings. Look for patterns like:
-- `## Phase N` or `## Phase N:`
-- `## N.` (numbered top-level sections)
-- At least 2 distinct `##` headings if phases aren't explicitly numbered
+### Check 2 — 多个阶段
+技能必须具有 ≥2 个带编号的阶段标题。查找类似模式：
+- `## Phase N` 或 `## Phase N:`
+- `## N.`（带编号的顶层章节）
+- 如果阶段未显式编号，至少 2 个不同的 `##` 标题
 
-**FAIL** if fewer than 2 phase-like headings are found.
+若找到的类阶段标题少于 2 个则 **FAIL**。
 
-### Check 3 — Verdict Keywords
+### Check 3 — 结论关键词
 
-The skill must communicate a clear outcome. Accept any of:
+技能必须传达明确的结论。接受以下任一：
+- **质量闸门 / 评审结论** — `PASS`、`FAIL`、`CONCERNS`、`APPROVED`、
+  `BLOCKED`、`COMPLETE`、`READY`、`COMPLIANT`、`NON-COMPLIANT`
+- **Go / no-go 结论** — `PROCEED`、`PIVOT`、`KILL`、`GO`、`NO-GO`
+- **严重程度量表** — `CRITICAL`、`HIGH`、`MEDIUM`、`LOW`。审计技能按
+  严重程度对发现项排序，而不是为整次运行给出一个结论。
 
-- **Gate / review verdicts** — `PASS`, `FAIL`, `CONCERNS`, `APPROVED`,
-  `BLOCKED`, `COMPLETE`, `READY`, `COMPLIANT`, `NON-COMPLIANT`
-- **Go / no-go verdicts** — `PROCEED`, `PIVOT`, `KILL`, `GO`, `NO-GO`
-- **Severity scales** — `CRITICAL`, `HIGH`, `MEDIUM`, `LOW`. Audit skills rank
-  findings by severity instead of issuing one verdict for the whole run.
+若上述均不存在**且**技能产出评估 — 即其
+description 或正文承诺了评审、审计、检查、质量闸门或就绪判断 — 则 **FAIL**。
 
-**FAIL** if none are present **and** the skill produces an assessment — its
-description or body promises a review, audit, check, gate, or readiness
-judgement.
+若上述均不存在，且技能的输出是产出物
+或一个值而非判断，则 **WARN**（绝不 FAIL）。`/settings` 是参考案例：它打印
+并写入配置，没有可给出的结论。不要为了满足这项检查而凭空编造一个。
 
-**WARN** (never FAIL) if none are present and the skill's output is an artifact
-or a value rather than a judgement. `/settings` is the reference case: it prints
-and writes configuration and has no verdict to give. Do not invent one to
-satisfy this check.
+> 一个更窄的列表 — 只有质量闸门结论，其他一律硬性 FAIL — 会因并非
+> 技能自身的问题而错误地使其失败：`/prototype` 和
+> `/vertical-slice` 在自己的 description 中声明 `PROCEED`/`PIVOT`/`KILL`，
+> `/adopt` 和 `/security-audit` 按严重程度排序，而 `/settings` 按设计
+> 本就没有结论。一个对合理模式产生误报失败的检查器将不再被信任。
 
-> A narrower list — gate verdicts only, hard FAIL on anything else — would wrongly
-> fail skills for reasons that are not their fault: `/prototype` and
-> `/vertical-slice` advertise `PROCEED`/`PIVOT`/`KILL` in their own descriptions,
-> `/adopt` and `/security-audit` rank by severity, and `/settings` has no verdict
-> by design. A linter that produces false failures on legitimate patterns stops
-> being trusted.
+### Check 4 — 协作协议用语
+技能必须包含写入前询问的用语。查找：
+- `"May I write"`（规范形式）
+- 文件写入说明附近的 `"before writing"` 或 `"approval"`
+- 同一章节内相近位置出现 `"ask"` + `"write"`
 
-### Check 4 — Collaborative Protocol Language
-The skill must contain ask-before-write language. Look for:
-- `"May I write"` (canonical form)
-- `"before writing"` or `"approval"` near file-write instructions
-- `"ask"` + `"write"` in close proximity (within same section)
+若不存在则 **WARN**（一些只读技能合理地跳过此项）。
+若 `allowed-tools` 包含 `Write` 或 `Edit` 但未找到写入前询问用语，则 **FAIL**。
 
-**WARN** if absent (some read-only skills legitimately skip this).
-**FAIL** if `allowed-tools` includes `Write` or `Edit` but no ask-before-write language is found.
+### Check 5 — 下一步交接
+技能必须以推荐的下一步行动或后续路径结束。查找：
+- 提到另一个技能的最终章节（例如 `/story-done`、`/gate-check`）
+- “Recommended next” 或 “next step” 措辞
+- “Follow-Up” 或 “After this” 章节
 
-### Check 5 — Next-Step Handoff
-The skill must end with a recommended next action or follow-up path. Look for:
-- A final section mentioning another skill (e.g., `/story-done`, `/gate-check`)
-- "Recommended next" or "next step" phrasing
-- A "Follow-Up" or "After this" section
+若不存在则 **WARN**。
 
-**WARN** if absent.
+### Check 6 — Fork 上下文复杂度
+如果 frontmatter 包含 `context: fork`，技能应具有 ≥5 个阶段标题
+（`##` 级别或带编号的 Phase N 标题）。Fork 上下文适用于复杂的多阶段
+技能；简单技能不应使用它。
 
-### Check 6 — Fork Context Complexity
-If frontmatter contains `context: fork`, the skill should have ≥5 phase headings
-(`##` level or numbered Phase N headers). Fork context is for complex multi-phase
-skills; simple skills should not use it.
+若设置了 `context: fork` 但找到的阶段少于 5 个，则 **WARN**。
 
-**WARN** if `context: fork` is set but fewer than 5 phases found.
+### Check 7 — 参数提示合理性
+`argument-hint` 必须非空。如果技能正文提到多种模式
+（例如 “Mode A | Mode B”），提示应反映它们。将
+提示与第一个阶段的 “Parse Arguments” 章节交叉核对。
 
-### Check 7 — Argument Hint Plausibility
-`argument-hint` must be non-empty. If the skill body mentions multiple modes
-(e.g., "Mode A | Mode B"), the hint should reflect them. Cross-reference the
-hint against the first phase's "Parse Arguments" section.
+若提示为 `""` 或记录的模式与提示不匹配，则 **WARN**。
 
-**WARN** if hint is `""` or if documented modes don't match hint.
+### Agent 与委派观察项（不计分）
 
-### Agent and Delegation Observations (not scored)
+对技能运行 `bash .claude/scripts/agent-check.sh --skill [name]`，
+对 agent 运行 `bash .claude/scripts/agent-check.sh --agent [name]`，或在 `static all` 时一次性运行
+`bash .claude/scripts/agent-check.sh`。它打印观察项，从不给出结论，此处任何内容都不会改变
+技能的结论。在 `Observations:` 下报告它们，并逐一评判：
 
-Run `bash .claude/scripts/agent-check.sh --skill [name]` for a skill,
-`bash .claude/scripts/agent-check.sh --agent [name]` for an agent, or
-`bash .claude/scripts/agent-check.sh` once for `static all`. It prints
-observations, never a verdict, and nothing here changes a skill's verdict. Report
-them under `Observations:`, judging each:
+- **`DELEGATION:`** 技能中把工作交给 agent 的部分。阅读它并
+  说明简报是否给出了目标、输出格式、工具与
+  来源以及边界，以及它交给 agent 的是仅需少量
+  工具调用的任务，还是对技能自身工作的复查。它的 `markers:` 是词数
+  标记，用来说明该看哪里，而非评分。
+- **`AGENT:`** 设置中的模型、投入程度和回合上限，以及
+  description 旁边的工具：指出 description 中的任务并不需要的任何工具。
+- **`NOTE:`** 无法解析的 frontmatter；`asks-user`（agent 没有
+  提问工具，因此其问题应放在报告末尾）；被忽略或
+  描述与实际不符的设置（`agent-type-list`、`preload-off`、
+  `disallowed-specifier`、`memory-grants`）。
+- **`OVERLAP:`** 两个共享特征词的 description：说明各自
+  是否仍能单独识别其 agent，或哪个请求会落到错误的那一个。
 
-- **`DELEGATION:`** a part of the skill that hands work to an agent. Read it and
-  say whether the brief gives an objective, an output format, the tools and
-  sources, and boundaries, and whether it hands the agent a job of only a few
-  tool calls or a re-check of the skill's own work. Its `markers:` are word
-  counts that show where to look, not a grade.
-- **`AGENT:`** the model, effort and turn limit as set, and the tools beside the
-  description: name any tool the job in the description does not need.
-- **`NOTE:`** frontmatter that does not parse; `asks-user` (an agent has no
-  question tool, so its questions belong at the end of its report); a setting
-  that is ignored or does more than it says (`agent-type-list`, `preload-off`,
-  `disallowed-specifier`, `memory-grants`).
-- **`OVERLAP:`** two descriptions that share distinctive words: say whether each
-  still singles out its agent, or which request would reach the wrong one.
+如果脚本无法运行，写 `Observations: not run (<reason>)`。绝不省略
+该章节：缺失的章节读起来与干净通过的章节相同。
 
-If the script cannot run, write `Observations: not run (<reason>)`. Never leave
-the section out: a missing section reads the same as a clean one.
+### 兼容性观察项（不计分）
 
-### Compatibility Observations (not scored)
-
-Run `bash .claude/scripts/compat-inventory.sh --skill [name]` for a skill,
-`bash .claude/scripts/compat-inventory.sh --agent [name]` for an agent, or
-`bash .claude/scripts/compat-inventory.sh` once for `static all`. Each `FOUND:`
-line is a place the file depends on something only Claude Code provides, with
-its feature: questions, subagents, skill-loading, shell-lines, arguments,
-frontmatter, instructions, hooks, settings or tools. Claude Code runs all of
-them, so none is a defect and none changes a verdict. Report them under
-`Compatibility:`, one line per feature with its constructs and line numbers;
-for `static all`, give the `COUNT:` totals by feature instead. A `NOT FOUND:`
-line means the name matched no file: say so. If the script cannot run, write
-`Compatibility: not run (<reason>)`.
+对技能运行 `bash .claude/scripts/compat-inventory.sh --skill [name]`，
+对 agent 运行 `bash .claude/scripts/compat-inventory.sh --agent [name]`，或在 `static all` 时一次性运行
+`bash .claude/scripts/compat-inventory.sh`。每条 `FOUND:`
+行都是文件依赖只有 Claude Code 才提供之内容的位置，并标明
+其特性：questions、subagents、skill-loading、shell-lines、arguments、
+frontmatter、instructions、hooks、settings 或 tools。Claude Code 会运行
+所有这些，因此都不是缺陷，也不会改变结论。在
+`Compatibility:` 下报告它们，每个特性一行，注明其构造和行号；
+对于 `static all`，改为按特性给出 `COUNT:` 总计。`NOT FOUND:`
+行表示名称未匹配任何文件：如实说明。如果脚本无法运行，写
+`Compatibility: not run (<reason>)`。
 
 ---
 
-### Static Mode Output Format
+### Static 模式输出格式
 
-For a single skill:
+对单个技能：
 ```
 === Skill Static Check: /[name] ===
 
@@ -225,7 +219,7 @@ Verdict: WARNINGS (1 warning, 0 failures)
 Recommended: Add a "Follow-Up Actions" section at the end of the skill.
 ```
 
-For a single agent there is no verdict, only observations:
+对单个 agent，没有结论，只有观察项：
 ```
 === Agent Static Check: qa-lead ===
 
@@ -238,15 +232,15 @@ Compatibility (not scored):
   frontmatter: tools, tools-string, model, maxTurns (lines 4-6)
 ```
 
-A WARN or FAIL line names its cause in parentheses, and any verdict other than
-COMPLIANT ends with a `Recommended:` line naming the fix.
+WARN 或 FAIL 行会在括号中说明其原因，任何非
+COMPLIANT 的结论都以一行 `Recommended:` 结尾，指出修复方式。
 
-The single-skill `Verdict:` is one of four values, the same as the `static all`
-Result column: **COMPLIANT** (no warnings, no failures), **WARNINGS** (warnings,
-no failures), **NON-COMPLIANT** (any FAIL), or **NOT ASSESSED** (the file could
-not be read or parsed, or its checks could not run — name the reason).
+单技能的 `Verdict:` 是四个值之一，与 `static all` 的
+Result 列相同：**COMPLIANT**（无警告、无失败）、**WARNINGS**（有警告、
+无失败）、**NON-COMPLIANT**（任何 FAIL），或 **NOT ASSESSED**（文件无法
+读取或解析，或其检查无法运行 — 说明原因）。
 
-For `static all`, produce a summary table then list any non-compliant skills:
+对于 `static all`，生成一张摘要表，然后列出任何不合规的技能：
 ```
 === Skill Static Check: All 74 Skills ===
 
@@ -269,129 +263,123 @@ Compatibility (not scored): N FOUND lines in N of N files read
   [feature]: [construct] N files, N hits; ...   (one line per feature)
 ```
 
-**`NOT ASSESSED` is a per-skill result here, not only an aggregate line.** A skill
-whose file is missing or otherwise unreadable (permissions, not found), so no
-check could even start, is reported as `NOT ASSESSED` with the reason — never
-omitted from the table and never counted as COMPLIANT. Ranked **above
-COMPLIANT**, **below WARNINGS and NON-COMPLIANT**. A file that *was* read but
-whose frontmatter does not parse is a different case: Check 1 fails on it (see
-above), so it is reported **NON-COMPLIANT**, not NOT ASSESSED — the defect is in
-the skill, not in the linter's access to it.
+**`NOT ASSESSED` 在此是每个技能的结果，而不只是一行汇总。** 文件缺失或
+其他原因无法读取（权限、未找到），以致任何检查都无法开始
+的技能，会报告为 `NOT ASSESSED` 并附原因 — 绝不从表中
+省略，也绝不计为 COMPLIANT。排序**高于
+COMPLIANT**、**低于 WARNINGS 和 NON-COMPLIANT**。文件*已被*读取但
+frontmatter 无法解析是另一种情况：Check 1 在其上失败（见
+上文），因此报告为 **NON-COMPLIANT**，而非 NOT ASSESSED — 缺陷在
+技能本身，而不在于检查器对它的访问权限。
 
-**And state the denominator.** `All 74 Skills` in the header must be the number
-actually examined, not the number that exist: report `[N] of [M] skills checked`
-whenever they differ. A summary whose counts silently sum to less than its own
-title is the failure this skill is supposed to catch in others.
+**并且要说明分母。** 表头中的 `All 74 Skills` 必须是实际
+检查的数量，而非存在的数量：当两者不同时，报告 `[N] of [M] skills checked`。
+一份计数悄悄加起来小于其自身标题的摘要，正是本技能
+应当在其他技能中捕获的失败。
 
-No file writes in static mode.
+Static 模式下不写入任何文件。
 
 ---
 
-## Phase 2B: Spec Mode — Behavioral Verifier
+## Phase 2B: Spec 模式 — 行为验证器
 
-### Step 1 — Locate Files
+### Step 1 — 定位文件
 
-Use the skill or agent file resolved in Phase 1.
-Look up the spec path from `studio-tests/catalog.yaml` — use the
-`spec:` field on the matching `skills:` or `agents:` entry.
+使用 Phase 1 中解析出的技能或 agent 文件。
+从 `studio-tests/catalog.yaml` 查找规格路径 — 使用匹配的 `skills:` 或 `agents:`
+条目上的 `spec:` 字段。
 
-If either is missing:
-- Missing skill or agent: the Phase 1 message.
-- Missing spec path in catalog: "No spec path set for '[name]' in catalog.yaml."
-- Spec file not found at path: "Spec file missing at [path]. Run `/skill-test audit`
-  to see coverage gaps."
+若任一缺失：
+- 缺少技能或 agent：使用 Phase 1 的消息。
+- catalog 中缺少规格路径：“catalog.yaml 中未为 ‘[name]’ 设置规格路径。”
+- 在路径处未找到规格文件：“规格文件缺失于 [path]。运行 `/skill-test audit`
+  查看覆盖率缺口。”
 
-### Step 2 — Read Both Files
+### Step 2 — 读取两个文件
 
-Read the skill — its `SKILL.md` and every file in its `references/` folder — or
-the agent file, and the test spec file, completely.
+完整读取技能 — 其 `SKILL.md` 及其 `references/` 文件夹中的每个文件 — 或
+agent 文件，以及测试规格文件。
 
-### Step 3 — Evaluate Assertions
+### Step 3 — 评估断言
 
-**Evaluate against what the model running it can see.** A skill runs in a
-session, and a spawned agent in its own context, and both have the project's
-`CLAUDE.md` loaded along with every file it imports on an `@path` line (a
-spawned agent quotes `coordination-rules.md` word for word without reading it).
-Read those files too. A rule stated there counts for every skill and agent —
-cite the file it came from. Where the skill's or agent's own file contradicts
-it, the own file wins: it is the more specific instruction.
+**针对运行它的模型所能看到的内容进行评估。** 技能会在一个
+会话中运行，而派生出的 agent 在其自己的上下文中运行，两者都会加载项目的
+`CLAUDE.md`，以及它在 `@path` 行上导入的每个文件（派生出的 agent
+会逐字引用 `coordination-rules.md` 而无需读取它）。
+也要读取这些文件。其中陈述的规则对每个技能和 agent 都算数 —
+引用其来源文件。当技能或 agent 自身的文件与之矛盾时，
+以自身文件为准：它是更具体的指令。
 
-**For an agent**, the spec's sections are evaluated against the agent file —
-and against every skill its frontmatter lists under `skills:`, which Claude
-Code loads into the agent at launch:
+**对于 agent**，规格的各章节是针对 agent 文件评估的 —
+并且也针对其 frontmatter 在 `skills:` 下列出的每个技能，这些技能会被 Claude
+Code 在启动时加载进 agent：
 
-- **Static Assertions** — check each against the agent's frontmatter and body.
-  An assertion that names a literal value (a `model:` alias, a frontmatter key,
-  a tool name) is an exact comparison with the file: `model: inherit` does not
-  satisfy "Model tier is `sonnet`", and a near match is FAIL, never PARTIAL.
-- **Test Cases** — evaluate each case's expected behavior against the agent's
-  written instructions, the same way a skill's are evaluated below. A case
-  that names a gate ID (`LP-FEASIBILITY`, `CD-PILLARS`, …) is that gate's
-  invocation: the spawning skill has the agent read
-  `.claude/docs/director-gates/[gate-id].md` first, so that file's Prompt and
-  Verdicts are the agent's instructions for the case — read it too.
-- **Redirect and escalation cases** — the agent is asked for work another role
-  owns, or meets a conflict it cannot settle. The case is met when the loaded
-  `coordination-rules.md` covers the step — rule 2 (no binding decisions
-  outside its domain), rule 3 (escalate a conflict to the shared parent) or
-  rule 5 (no files outside its directories without delegation) — **and** the
-  agent's own file names the owning role in its collaborator, delegation,
-  escalation or "must not" lists. Cite both; do not require the agent to
-  restate the redirect in its own words. It is a FAIL when the agent's file
-  claims that work for itself, or when no loaded file names who owns it.
-- **Protocol Compliance** — use the spec's own `## Protocol Compliance` list in
-  place of the four skill checks below.
+- **Static Assertions** — 对照 agent 的 frontmatter 和正文逐条检查。
+  命名了字面值（一个 `model:` 别名、一个 frontmatter 键、
+  一个工具名）的断言是与文件的精确比较：`model: inherit` 不满足
+  “Model tier is `sonnet`”，近似匹配是 FAIL，绝不是 PARTIAL。
+- **Test Cases** — 按下方评估技能的方式，根据 agent 的
+  书面说明评估每个用例的预期行为。命名了质量闸门 ID（`LP-FEASIBILITY`、`CD-PILLARS`、…）的用例
+  就是对该闸门的调用：派生它的技能会让 agent 先读取
+  `.claude/docs/director-gates/[gate-id].md`，因此该文件的 Prompt 和
+  Verdicts 就是 agent 针对该用例的说明 — 也要读取它。
+- **重定向与升级用例** — agent 被要求做另一个角色
+  拥有的工作，或遇到它无法解决的冲突。当已加载的
+  `coordination-rules.md` 覆盖该步骤时，该用例即满足 — 规则 2（不得在其领域之外做约束性决策）、规则 3（将冲突升级给共同的父级）或
+  规则 5（未经委派不得在其目录之外创建文件） — **并且**
+  agent 自身的文件在其协作者、委派、
+  升级或“不得”列表中指明了拥有该职责的角色。两者都要引用；不要要求 agent
+  用自己的话重述该重定向。若 agent 的文件声称该工作归自己所有，
+  或没有已加载的文件指明谁拥有它，则为 FAIL。
+- **Protocol Compliance** — 使用规格自身的 `## Protocol Compliance` 列表
+  代替下方的四项技能检查。
 
-**For a skill**, check each of the spec's **Static Assertions** against the
-skill's frontmatter and body (`SKILL.md` and its `references/` files) the same
-way; a literal value is an exact
-comparison. `/skill-test static` runs only its 7 fixed checks, so a spec's own
-static lines — a verdict keyword, a phase, "May I write" before a named file —
-are evaluated here or nowhere.
+**对于技能**，以相同方式对照技能的前置元数据和正文（`SKILL.md` 及其 `references/` 文件）
+检查规格中的每条 **Static Assertions**；字面值是精确
+比较。`/skill-test static` 只运行其 7 项固定检查，因此规格自身的
+静态行 — 一个结论关键词、一个阶段、在命名文件之前写 “May I write” —
+在此评估，否则就无处评估。
 
-The rest of this step applies to skills and agents alike.
+本步骤的其余部分同样适用于技能和 agent。
 
-For each **Test Case** in the spec:
+对规格中的每个 **Test Case**：
 
-1. Read the **Fixture** description (assumed state of project files)
-2. Read the **Expected behavior** steps
-3. Read each **Assertion** checkbox
+1. 阅读 **Fixture** 描述（假定的项目文件状态）
+2. 阅读 **Expected behavior** 步骤
+3. 阅读每个 **Assertion** 复选框
 
-A case with no **Fixture** reads its **Input** as the fixture; a case with no
-**Assertions** list treats each **Expected behavior** bullet as an assertion —
-most agent specs are written this way, and a case verdict is not left undefined
-just because it has no separate checklist.
+没有 **Fixture** 的用例会把其 **Input** 当作 fixture；没有
+**Assertions** 列表的用例会把每个 **Expected behavior** 要点当作断言 —
+大多数 agent 规格就是这样写的，不会仅因
+没有单独的检查清单就让用例结论悬而未决。
 
-For each assertion, evaluate whether the skill's written instructions, if
-followed correctly given the fixture state, would satisfy it. This is a
-Claude-evaluated reasoning check, not code execution.
+对每条断言，评估若在给定 fixture 状态下正确遵循技能的书面说明，
+是否会满足它。这是由 Claude 评估的推理检查，而非代码执行。
 
-Mark each assertion:
-- **PASS** — skill instructions clearly satisfy this assertion
-- **PARTIAL** — skill instructions partially address it, but with ambiguity
-- **FAIL** — skill instructions would NOT satisfy this assertion given the fixture
-- **NOT ASSESSED** — the assertion could not be evaluated at all: it names a
-  fixture state the spec never defines, depends on runtime behavior no static
-  read can settle, or references a file or section that does not exist (a file
-  that is merely silent on the behaviour is FAIL or PARTIAL, not this). Rank it
-  **above PASS** (an assertion nobody could evaluate has not been satisfied) and
-  **below PARTIAL and FAIL** (an ambiguity somebody identified is more actionable
-  than one nobody could reach). Do not resolve an unevaluable assertion to PASS
-  because the skill "probably" handles it — that judgement is what the spec exists
-  to replace.
+标记每条断言：
+- **PASS** — 技能说明清楚地满足该断言
+- **PARTIAL** — 技能说明部分涉及，但存在歧义
+- **FAIL** — 在给定 fixture 下技能说明不会满足该断言
+- **NOT ASSESSED** — 该断言完全无法评估：它命名的
+  fixture 状态规格从未定义、依赖任何静态阅读都无法确定的运行时行为，
+  或引用了不存在的文件或章节（文件只是
+  对该行为保持沉默，则属于 FAIL 或 PARTIAL，而不是此类）。将其排在
+  **PASS 之上**（无人能评估的断言并未被满足）且
+  **PARTIAL 和 FAIL 之下**（有人已识别的歧义比无人能
+  触及的更可操作）。不要因技能“可能”会处理某条无法评估的断言
+  就将其判为 PASS — 这种判断正是规格存在的目的所要取代的。
 
-For a skill's **Protocol Compliance** section (always present), evaluate each line
-of the spec's own list against the skill's files exactly as you evaluate a case
-assertion — PASS, PARTIAL, FAIL or NOT ASSESSED. Specs put rules there that no
-case repeats ("covered by the protocol compliance assertions above"), so a
-list that is not evaluated is a set of rules nobody checks. These four checks are
-the floor, added when the list does not already cover them:
-- Check whether the skill requires "May I write" before file writes
-- Check whether the skill presents findings before requesting approval
-- Check whether the skill ends with a recommended next step
-- Check whether the skill avoids auto-creating files without approval
+对于技能的 **Protocol Compliance** 章节（始终存在），照评估用例
+断言的方式（PASS、PARTIAL、FAIL 或 NOT ASSESSED）评估规格自身列表的每一行。
+规格会把没有用例重复的规则放在那里（“covered by the protocol compliance assertions above”），
+因此未被评估的列表就是一套无人检查的规则。这四项检查是
+下限，在列表尚未覆盖它们时添加：
+- 检查技能是否要求文件写入前先 “May I write”
+- 检查技能是否在请求批准前呈现发现项
+- 检查技能是否以推荐的下一步结束
+- 检查技能是否避免未经批准自动创建文件
 
-### Step 4 — Build Report
+### Step 4 — 构建报告
 
 ```
 === Skill Spec Test: /[name] ===
@@ -423,78 +411,78 @@ Protocol Compliance:
 Overall Verdict: FAIL (1 case failed, 1 protocol line partial)
 ```
 
-A Case Verdict is the worst result among its assertions, and the Overall
-Verdict the worst across the static assertions, the cases and Protocol
-Compliance, in this order:
-FAIL, PARTIAL, NOT ASSESSED, PASS. An assertion nobody could evaluate keeps the
-overall result from reading PASS.
+Case Verdict 是其断言中最差的结果，Overall
+Verdict 是静态断言、用例和 Protocol
+Compliance 中最差的结果，顺序为：
+FAIL、PARTIAL、NOT ASSESSED、PASS。无人能评估的断言会阻止
+整体结果读作 PASS。
 
-For an agent, the header is `=== Agent Spec Test: [name] ===`, `Spec:` is its
-path under `studio-tests/agents/`, and a `Static Assertions:`
-block comes before Case 1.
+对于 agent，表头为 `=== Agent Spec Test: [name] ===`，`Spec:` 是其在
+`studio-tests/agents/` 下的路径，并且 Case 1 之前会有一个 `Static Assertions:`
+块。
 
-### Step 5 — Offer to Write Results
+### Step 5 — 提供写入结果
 
-"May I write these results to `studio-tests/results/skill-test-spec-[name]-[date].md`
-and update `studio-tests/catalog.yaml`?"
+“我可以把这些结果写入 `studio-tests/results/skill-test-spec-[name]-[date].md`
+并更新 `studio-tests/catalog.yaml` 吗？”
 
-If yes:
-- Write results file to `studio-tests/results/`
-- Update the skill's or agent's entry in `studio-tests/catalog.yaml`:
+若是：
+- 将结果文件写入 `studio-tests/results/`
+- 更新 `studio-tests/catalog.yaml` 中技能或 agent 的条目：
   - `last_spec: [date]`
-  - `last_spec_result: PASS|PARTIAL|FAIL|NOT ASSESSED` — the Overall Verdict
+  - `last_spec_result: PASS|PARTIAL|FAIL|NOT ASSESSED` — 即 Overall Verdict
 
 ---
 
-## Phase 2D: Category Mode — Rubric Evaluation
+## Phase 2D: Category 模式 — 评分量规评估
 
-### Step 1 — Locate Skill and Category
+### Step 1 — 定位技能与类别
 
-Use the skill or agent file resolved in Phase 1.
-Look up the `category:` field on its `skills:` or `agents:` entry in
-`studio-tests/catalog.yaml`.
+使用 Phase 1 中解析出的技能或 agent 文件。
+在 `studio-tests/catalog.yaml` 中查找其 `skills:` 或 `agents:` 条目上的 `category:`
+字段。
 
-If neither file exists: the Phase 1 message.
-If no `category:` field: "No category assigned for '[name]' in catalog.yaml.
-Add `category: [name]` to its entry first."
+若两个文件都不存在：使用 Phase 1 的消息。
+若没有 `category:` 字段：“catalog.yaml 中未为 ‘[name]’ 分配类别。
+先在其条目中添加 `category: [name]`。”
 
-For `category all`: collect every skill and every agent with a `category:` field
-and process each, reporting skills and agents in separate tables.
-`category: utility` skills are evaluated against U1 (static checks pass) and U2
-(gate mode correct if applicable) only — skip to the static mode for U1.
-Cross-check against `.claude/skills/*/SKILL.md` and `.claude/agents/*.md`
-(Audit mode's Step 2 glob): list any skill or agent missing from the catalog, or
-catalogued with no `category:`, by name as **NOT ASSESSED** — never silently
-excluded from the run.
+对于 `category all`：收集每个带 `category:` 字段的技能和 agent
+并逐一处理，技能和 agent 分别在两个表中报告。
+`category: utility` 的技能仅按 U1（静态检查通过）和 U2
+（质量闸门模式正确，若适用）评估 — U1 跳到 static 模式。
+对照 `.claude/skills/*/SKILL.md` 和 `.claude/agents/*.md`
+交叉检查（Audit 模式的 Step 2 glob）：按名称列出任何未在 catalog 中的技能或 agent，
+或已编目但没有 `category:` 的，标记为 **NOT ASSESSED** — 绝不悄悄
+排除在运行之外。
 
-### Step 2 — Read Rubric Section
+### Step 2 — 读取评分量规章节
 
-Read `studio-tests/quality-rubric.md`.
-Extract the section matching the category (e.g., `### gate`, `### team`; an
-agent's category is under `## Agent Categories`, e.g. `### director`).
-If the rubric has no section for the category, the result is **NOT ASSESSED**:
-name the missing section, and never borrow another category's metrics.
+读取 `studio-tests/quality-rubric.md`。
+提取与该类别匹配的章节（例如 `### gate`、`### team`；agent 的类别
+在 `## Agent Categories` 下，例如 `### director`）。
+若评分量规中没有该类别的章节，结果为 **NOT ASSESSED**：
+指明缺失的章节，绝不借用其他类别的指标。
 
-### Step 3 — Read Skill
+### Step 3 — 读取技能
 
-Read the skill's `SKILL.md` and every file in its `references/` folder, or the
-agent's `.claude/agents/[name].md`, fully,
-and the project context Phase 2B Step 3 describes — a metric met by a rule in
-`CLAUDE.md` or a file it imports is met, citing that file. Its rule for
-redirect and escalation cases decides the domain, deferral and escalation
-metrics too (D2, D3, L2, S1–S3, O2).
+完整读取技能的 `SKILL.md` 及其 `references/` 文件夹中的每个文件，或
+agent 的 `.claude/agents/[name].md`，
+以及 Phase 2B Step 3 描述的项目上下文 — 由
+`CLAUDE.md` 或其导入文件中的规则满足的指标即算满足，并引用该文件。其针对
+重定向与升级用例的规则也决定领域、推迟和升级
+指标（D2、D3、L2、S1–S3、O2）。
 
-### Step 4 — Evaluate Rubric Metrics
+### Step 4 — 评估评分量规指标
 
-For each metric in the category's rubric table:
-1. Check whether the skill's or agent's written instructions clearly satisfy the criterion
-2. Mark PASS, FAIL, WARN, or NOT ASSESSED (the metric could not be evaluated — name why)
-3. For FAIL/WARN/NOT ASSESSED, identify the exact gap in the text (quote the
-   relevant section, note its absence, or name what could not be evaluated)
+对类别评分量规表中的每个指标：
+1. 检查技能或 agent 的书面说明是否清楚地满足该标准
+2. 标记 PASS、FAIL、WARN 或 NOT ASSESSED（该指标无法评估 — 说明原因）
+3. 对于 FAIL/WARN/NOT ASSESSED，指出文本中的确切缺口（引用
+   相关章节、注明其缺失，或指明无法评估的内容）
 
-### Step 5 — Output Report
+### Step 5 — 输出报告
 
-For an agent, the header is `=== Agent Category Check: [name] ([category]) ===`.
+对于 agent，表头为 `=== Agent Category Check: [name] ([category]) ===`。
 
 ```
 === Skill Category Check: /[name] ([category]) ===
@@ -511,54 +499,54 @@ Fix: Size the Phase 3 panel from `modes.workflow` — PR at `minimal`, TD + PR a
      `standard`, all four at `full` — and name any perspective a narrower panel leaves out.
 ```
 
-The category verdict, first match wins: **FAIL** when any metric fails; else
-**WARNINGS** when any metric warns; else **NOT ASSESSED** when any metric could
-not be evaluated (a rubric section missing, a file unreadable); else **PASS**
-when every metric passes — the same ranking as static and spec mode. It is
-`last_category_result` in the catalog.
+类别结论按首个匹配优先：任何指标失败时为 **FAIL**；否则
+任何指标警告时为 **WARNINGS**；否则任何指标无法
+评估（评分量规章节缺失、文件无法读取）时为 **NOT ASSESSED**；否则
+所有指标通过时为 **PASS** — 与 static 和 spec 模式相同的排序。它就是
+catalog 中的 `last_category_result`。
 
-### Step 6 — Offer to Update Catalog
+### Step 6 — 提供更新 Catalog
 
-"May I update `studio-tests/catalog.yaml` to record this category check
-(`last_category`, `last_category_result`) for [name]?"
+“我可以更新 `studio-tests/catalog.yaml`，为 [name] 记录本次类别检查
+（`last_category`、`last_category_result`）吗？”
 
 ---
 
-## Phase 2C: Audit Mode — Coverage Report
+## Phase 2C: Audit 模式 — 覆盖率报告
 
-### Step 1 — Read Catalog
+### Step 1 — 读取 Catalog
 
-Read `studio-tests/catalog.yaml`. If missing, note that catalog doesn't exist
-yet (first-run state).
+读取 `studio-tests/catalog.yaml`。若缺失，注明 catalog 尚不存在
+（首次运行状态）。
 
-### Step 2 — Enumerate All Skills and Agents
+### Step 2 — 枚举所有技能和 Agent
 
-Glob `.claude/skills/*/SKILL.md` to get the complete list of skills.
-Extract skill name from each path (directory name).
+Glob `.claude/skills/*/SKILL.md` 获取完整的技能列表。
+从每个路径（目录名）提取技能名称。
 
-Glob `.claude/agents/*.md` for the complete list of agents — the repo itself,
-not the catalog, is the covered set (`.claude/rules/skill-authoring.md` §5:
-gates derive their covered set, they do not enumerate it). Compare both globs
-against the catalog's `skills:`/`agents:` entries and report any skill or agent
-missing from the catalog by name, so an uncatalogued one cannot drop out silently.
+Glob `.claude/agents/*.md` 获取完整的 agent 列表 — 仓库本身，
+而非 catalog，才是被覆盖集合（`.claude/rules/skill-authoring.md` §5：
+质量闸门从被覆盖集合推导，而非枚举它）。将两个 glob 的结果
+与 catalog 的 `skills:`/`agents:` 条目比较，并按名称报告任何
+未在 catalog 中的技能或 agent，这样未编目的就不会悄悄漏掉。
 
-### Step 3 — Build Skill Coverage Table
+### Step 3 — 构建技能覆盖率表
 
-For each skill:
-- Check if a spec file exists (use the `spec:` path from catalog, or glob `studio-tests/skills/*/[name].md`)
-- Look up `last_static`, `last_static_result`, `last_spec`, `last_spec_result`,
-  `last_category`, `last_category_result`, `category` from catalog (or mark as
-  "never" / "—" if not in catalog)
-- Priority comes from catalog `priority:` field (critical/high/medium/low)
+对每个技能：
+- 检查规格文件是否存在（使用 catalog 中的 `spec:` 路径，或 glob `studio-tests/skills/*/[name].md`）
+- 从 catalog 查找 `last_static`、`last_static_result`、`last_spec`、`last_spec_result`、
+  `last_category`、`last_category_result`、`category`（若不在 catalog 中则标记为
+  “never” / “—”）
+- 优先级来自 catalog 的 `priority:` 字段（critical/high/medium/low）
 
-### Step 3b — Build Agent Coverage Table
+### Step 3b — 构建 Agent 覆盖率表
 
-For each agent in catalog's `agents:` section:
-- Check if a spec file exists (use the `spec:` path from catalog, or glob `studio-tests/agents/*/[name].md`)
-- Look up `last_spec`, `last_spec_result`, `last_category`,
-  `last_category_result`, `category` from catalog
+对 catalog `agents:` 章节中的每个 agent：
+- 检查规格文件是否存在（使用 catalog 中的 `spec:` 路径，或 glob `studio-tests/agents/*/[name].md`）
+- 从 catalog 查找 `last_spec`、`last_spec_result`、`last_category`、
+  `last_category_result`、`category`
 
-### Step 4 — Output Report
+### Step 4 — 输出报告
 
 ```
 === Skill Test Coverage Audit ===
@@ -589,26 +577,26 @@ Skill coverage:  73/74 specs (99%)
 Agent coverage:  49/49 specs (100%)
 ```
 
-No file writes in audit mode.
+Audit 模式下不写入任何文件。
 
-Offer: "Would you like to run `/skill-test static all` to check structural
-compliance across all skills? `/skill-test category all` to run category rubric
-checks? Or `/skill-test spec [name]` to run a specific behavioral test?"
+提供：“你想运行 `/skill-test static all` 来检查所有技能的
+结构合规性吗？`/skill-test category all` 来运行分类评分量规
+检查？或 `/skill-test spec [name]` 来运行特定的行为测试？”
 
 ---
 
-## Phase 3: Recommended Next Steps
+## Phase 3: 建议的下一步
 
-After any mode completes, offer contextual follow-up:
+任何模式完成后，提供与上下文相关的后续建议：
 
-- After `static [name]`: "Run `/skill-test spec [name]` to validate behavioral
-  correctness if a test spec exists."
-- After `static all` with failures: "Address NON-COMPLIANT skills first. Run
-  `/skill-test static [name]` individually for detailed remediation guidance."
-- After `spec [name]` PASS: "Update `studio-tests/catalog.yaml` to record this
-  pass date. Consider running `/skill-test audit` to find the next spec gap."
-- After `spec [name]` FAIL: "Review the failing assertions and update the skill
-  or agent, or the test spec, to resolve the mismatch."
-- After `audit`: "Start with the critical-priority gaps. Use the spec template
-  at `studio-tests/templates/skill-test-spec.md` (agents:
-  `agent-test-spec.md`) to create new specs."
+- 在 `static [name]` 之后：“若存在测试规格，运行 `/skill-test spec [name]` 来验证行为
+  正确性。”
+- 在带失败的 `static all` 之后：“先处理 NON-COMPLIANT 技能。对每个技能单独运行
+  `/skill-test static [name]` 以获取详细的修复指导。”
+- 在 `spec [name]` 通过之后：“更新 `studio-tests/catalog.yaml` 记录本次
+  通过日期。考虑运行 `/skill-test audit` 以找到下一个规格缺口。”
+- 在 `spec [name]` 失败之后：“审查失败的断言，并更新技能
+  或 agent，或测试规格，以解决不匹配。”
+- 在 `audit` 之后：“从 critical 优先级的缺口开始。使用
+  `studio-tests/templates/skill-test-spec.md` 的规格模板（agent 用：
+  `agent-test-spec.md`）创建新规格。”

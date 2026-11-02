@@ -2,39 +2,39 @@
 
 ## Skill Summary
 
-[One paragraph describing what this skill does, what inputs it takes, and what outputs it produces.]
+[用一段话描述该技能做什么、接受哪些输入、产出什么输出。]
 
 ---
 
 ## Static Assertions (Structural)
 
-Checked against the SKILL.md by `/skill-test spec` — no fixture needed.
+由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] Frontmatter has all required fields (`name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`)
-- [ ] 2+ phase headings found
-- [ ] Contains the skill's verdict keywords — any that `/skill-test static` Check 3 accepts (gate or review verdicts, go/no-go verdicts, or a severity scale), plus `NOT ASSESSED` when anything depends on the verdict; none needed when the skill outputs an artifact rather than a judgement
-- [ ] If `allowed-tools` includes Write/Edit: `"May I write"` language present
-- [ ] Next-step handoff section present at end
+- [ ] Frontmatter 包含所有必填字段（`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`）
+- [ ] 找到 2 个及以上 phase 标题
+- [ ] 包含该技能的结论关键词——即 `/skill-test static` 检查项 3 所接受的任意一种（gate 或 review 结论、go/no-go 结论，或严重程度等级），并在任何依赖该结论之处加上 `NOT ASSESSED`；若该技能输出的是产出物而非判断，则无需任何结论词
+- [ ] 若 `allowed-tools` 包含 Write/Edit：存在 `"May I write"` 表述
+- [ ] 结尾存在下一步交接章节
 
 ---
 
 ## Director Gate Checks
 
-[Describe which director gates this skill triggers (if any), and under what review mode conditions.]
+[描述该技能会触发哪些总监质量闸门（如有），以及在何种评审模式条件下触发。]
 
-- **Full mode**: [gates triggered — e.g., CD-PHASE-GATE, TD-PHASE-GATE, PR-PHASE-GATE, AD-PHASE-GATE]
-- **Lean mode**: [phase gates only — for `/gate-check`, the panel `modes.workflow` sets (PR only at `minimal`, TD + PR at `standard`, all four at `full`); other skills skip their non-phase gates, each noted `[GATE-ID] skipped — Lean mode`]
-- **Solo mode**: [no gates — skill runs without director review; each skip is noted, e.g. `[GATE-ID] skipped — Solo mode`]
-- **N/A**: [if this skill never triggers gates, explain why]
+- **Full mode**: [触发的闸门——例如 CD-PHASE-GATE、TD-PHASE-GATE、PR-PHASE-GATE、AD-PHASE-GATE]
+- **Lean mode**: [仅 phase 闸门——对 `/gate-check` 而言，即由 `modes.workflow` 设定的闸门组合（`minimal` 时仅 PR，`standard` 时 TD + PR，`full` 时全部四个）；其他技能跳过其非 phase 闸门，每一处均标注 `[GATE-ID] skipped — Lean mode`]
+- **Solo mode**: [不触发任何闸门——技能在没有总监评审的情况下运行；每次跳过均有标注，例如 `[GATE-ID] skipped — Solo mode`]
+- **N/A**: [若该技能从不触发闸门，说明原因]
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置
+`modes.rigor: minimal` 与 `modes.automation: collaborative`，且不含
+`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` §
+Fixture defaults。
 
 ---
 
@@ -42,19 +42,19 @@ Fixture defaults.
 
 ### Case 1: Happy Path — [brief name]
 
-**Fixture** (assumed project state):
-- [file/condition 1]
-- [file/condition 2]
+**Fixture**（假定的项目状态）：
+- [文件/条件 1]
+- [文件/条件 2]
 
-**Expected behavior**:
-1. [Step 1]
-2. [Step 2]
-3. [Step 3]
+**Expected behavior**：
+1. [步骤 1]
+2. [步骤 2]
+3. [步骤 3]
 
-**Assertions**:
-- [ ] [Assertion 1]
-- [ ] [Assertion 2]
-- [ ] [Assertion 3]
+**Assertions**：
+- [ ] [断言 1]
+- [ ] [断言 2]
+- [ ] [断言 3]
 
 **Case Verdict**: PASS / FAIL / PARTIAL / NOT ASSESSED
 
@@ -62,18 +62,18 @@ Fixture defaults.
 
 ### Case 2: Failure / Blocked — [brief name]
 
-**Fixture**:
-- [missing or invalid condition]
+**Fixture**：
+- [缺失或无效的条件]
 
-**Expected behavior**:
-1. [Skill detects the problem]
-2. [Skill reports FAIL/BLOCKED]
-3. [Skill does NOT proceed]
+**Expected behavior**：
+1. [技能检测到问题]
+2. [技能报告 FAIL/BLOCKED]
+3. [技能不继续执行]
 
-**Assertions**:
-- [ ] Skill stops before producing the artifact and reports BLOCKED or NOT ASSESSED, naming the missing input
-- [ ] Correct error/block message displayed
-- [ ] No files written without user approval
+**Assertions**：
+- [ ] 技能在产出产出物之前停止，并报告 BLOCKED 或 NOT ASSESSED，同时指明缺失的输入
+- [ ] 显示正确的错误/阻塞消息
+- [ ] 未经用户批准不写入任何文件
 
 **Case Verdict**: PASS / FAIL / PARTIAL / NOT ASSESSED
 
@@ -81,16 +81,16 @@ Fixture defaults.
 
 ### Case 3: Mode Variant — [brief name]
 
-**Fixture**:
-- [standard project state]
-- [specific mode or flag set]
+**Fixture**：
+- [标准项目状态]
+- [设置特定的模式或标志]
 
-**Expected behavior**:
-1. [Behavior differs from happy path because of mode]
+**Expected behavior**：
+1. [因模式不同，行为与 happy path 不同]
 
-**Assertions**:
-- [ ] [Mode-specific assertion]
-- [ ] [Output differs correctly from Case 1]
+**Assertions**：
+- [ ] [模式相关的断言]
+- [ ] [输出与 Case 1 正确地区分]
 
 **Case Verdict**: PASS / FAIL / PARTIAL / NOT ASSESSED
 
@@ -98,15 +98,15 @@ Fixture defaults.
 
 ### Case 4: Edge Case — [brief name]
 
-**Fixture**:
-- [unusual or boundary condition]
+**Fixture**：
+- [非常规或边界条件]
 
-**Expected behavior**:
-1. [Skill handles gracefully]
+**Expected behavior**：
+1. [技能优雅处理]
 
-**Assertions**:
-- [ ] [Edge case handled without crash or silent failure]
-- [ ] [Correct output or message]
+**Assertions**：
+- [ ] [边缘情况处理不崩溃、无静默失败]
+- [ ] [正确的输出或消息]
 
 **Case Verdict**: PASS / FAIL / PARTIAL / NOT ASSESSED
 
@@ -114,19 +114,19 @@ Fixture defaults.
 
 ### Case 5: Director Gate — [brief name]
 
-**Fixture**:
-- [project state that triggers a gate check]
+**Fixture**：
+- [会触发闸门检查的项目状态]
 - Review mode: [full | lean | solo]
 
-**Expected behavior**:
-1. [Gate fires / does not fire based on mode]
-2. [Correct director agents spawned or skipped]
+**Expected behavior**：
+1. [闸门根据模式触发/不触发]
+2. [正确地派生或跳过总监代理]
 
-**Assertions**:
-- [ ] In full mode: [specific gates spawn]
-- [ ] In lean mode: [phase gates only, at the width `modes.workflow` sets — or each gate skipped with `[GATE-ID] skipped — Lean mode`]
-- [ ] In solo mode: no director gates spawn, and the output names each skip
-- [ ] Skill does not auto-advance past a CONCERNS, FAIL or NOT ASSESSED verdict
+**Assertions**：
+- [ ] Full mode 下：[具体闸门被派生]
+- [ ] Lean mode 下：[仅 phase 闸门，宽度由 `modes.workflow` 设定——或每个闸门均跳过并标注 `[GATE-ID] skipped — Lean mode`]
+- [ ] Solo mode 下：不派生任何总监闸门，且输出逐项指明每次跳过
+- [ ] 技能不会在 CONCERNS、FAIL 或 NOT ASSESSED 结论之后自动推进
 
 **Case Verdict**: PASS / FAIL / PARTIAL / NOT ASSESSED
 
@@ -134,18 +134,18 @@ Fixture defaults.
 
 ### Case 6: Could Not Assess — [brief name]
 
-**Fixture**:
-- [an input the skill needs is missing, unreadable, empty or placeholder-only — or a check it must run cannot run]
+**Fixture**：
+- [技能所需的某项输入缺失、不可读、为空或仅含占位符——或某项必须运行的检查无法运行]
 
-**Expected behavior**:
-1. [Skill detects that part of its scope could not be evaluated]
-2. [Skill reports NOT ASSESSED, naming what it could not assess and why]
-3. [Skill does NOT resolve the unknown to a pass]
+**Expected behavior**：
+1. [技能检测到其部分范围无法评估]
+2. [技能报告 NOT ASSESSED，指明无法评估的内容及原因]
+3. [技能不将未知情况判定为通过]
 
-**Assertions**:
-- [ ] Verdict is NOT ASSESSED — never the pass value — and names the missing or unreadable input
-- [ ] A failure found alongside it still takes the failure verdict (NOT ASSESSED ranks above the pass value, below the failure values)
-- [ ] The check that could not run is named in the output, not silently omitted
+**Assertions**：
+- [ ] 结论为 NOT ASSESSED——绝不用通过值——并指明缺失或不可读的输入
+- [ ] 同时发现的失败仍按失败结论处理（NOT ASSESSED 高于通过值，低于失败值）
+- [ ] 无法运行的检查在输出中被点名，而非被静默省略
 
 **Case Verdict**: PASS / FAIL / PARTIAL / NOT ASSESSED
 
@@ -153,14 +153,14 @@ Fixture defaults.
 
 ## Protocol Compliance
 
-- [ ] Uses `"May I write"` before any file writes (or is read-only and skips this)
-- [ ] Presents findings/draft to user before requesting approval
-- [ ] Ends with a recommended next step or follow-up action
-- [ ] Does not auto-create files without user approval
+- [ ] 在任何文件写入前使用 `"May I write"`（或本身为只读并跳过此项）
+- [ ] 在请求批准前向用户呈现发现/草稿
+- [ ] 以建议的下一步或后续行动结尾
+- [ ] 未经用户批准不自动创建文件
 
 ---
 
 ## Coverage Notes
 
-[Any gaps in coverage, known edge cases not tested, or conditions that would require
-a live skill run to verify.]
+[覆盖率方面的任何缺口、已知但未测试的边缘情况，或需要实际运行技能才能验证的
+条件。]

@@ -1,25 +1,25 @@
-# /create-architecture — Phase 4: API Boundaries
+# /create-architecture — Phase 4: API 边界
 
-> Part of `/create-architecture`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> 属于 `/create-architecture`。`SKILL.md` 指明了何时读取此文件；它所解析的
+> 设置以及其后续标题下的规则在这里同样适用。
 
-## Phase 4: API Boundaries
+## Phase 4: API 边界
 
-Define the public contracts between modules. For each boundary:
+定义模块之间的公共契约。对每个边界：
 
-- What is the interface a module exposes to the rest of the system?
-- What are the entry points (functions/signals/properties)?
-- What invariants must callers respect?
-- What must the module guarantee to callers?
+- 模块向系统其余部分暴露的接口是什么？
+- 入口点（函数/信号/属性）有哪些？
+- 调用方必须遵守哪些不变量？
+- 模块必须向调用方保证什么？
 
-Write in pseudocode or the project's actual language (from technical preferences).
-These become the contracts programmers implement against.
+用伪代码或项目实际使用的语言（来自技术偏好）编写。
+这些会成为程序员实现所依据的契约。
 
-**Engine awareness check**: If any interface uses engine-specific types (e.g.
-`Node`, `Resource`, `Signal` in Godot), flag the version and verify the type
-exists and has not changed signature in the target engine version.
+**引擎感知检查**：如果任何接口使用引擎专属类型（例如
+Godot 中的 `Node`、`Resource`、`Signal`），标出版本，并验证该类型
+在目标引擎版本中存在且签名未变更。
 
-Get user approval on the API boundaries, then record them in
-`production/session-state/active.md`; they are written at Phase 7.
+取得用户对 API 边界的批准，然后记录到
+`production/session-state/active.md`；它们在 Phase 7 写入。
 
 ---

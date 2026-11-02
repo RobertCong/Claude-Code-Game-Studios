@@ -1,6 +1,6 @@
 ---
 name: team-ui
-description: "Orchestrate the UI team through the UX pipeline — authoring, visual design, implementation, review, polish. Uses /ux-design, /ux-review, studio templates."
+description: "编排 UI 团队走完 UX 流水线——撰写、视觉设计、实现、评审、打磨。使用 /ux-design、/ux-review 和工作室模板。"
 argument-hint: "[UI feature description] [--review full|lean|solo]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, TaskCreate, TaskGet, TaskList, TaskUpdate, Bash(bash "*/.claude/skills/team-ui/../../hooks/yaml-helper.sh" resolve_config *)
@@ -8,297 +8,281 @@ model: sonnet
 ---
 # Team UI
 
-If no argument is provided, output usage guidance and exit without spawning any agents or reading any design files:
-> Usage: `/team-ui [UI feature description] [--review full|lean|solo]` — describe the screen or UI feature to build (e.g., `inventory screen`, `main menu`, `combat HUD`). Do not use `AskUserQuestion` here; output the guidance directly.
+如果没有提供参数，输出用法指引并退出，不派生任何代理，也不读取任何设计文件：
+> 用法：`/team-ui [UI feature description] [--review full|lean|solo]`——描述要构建的屏幕或 UI 功能（例如 `inventory screen`、`main menu`、`combat HUD`）。此处不要使用 `AskUserQuestion`；直接输出指引。
 
-When this skill is invoked, orchestrate the UI team through a structured pipeline.
+当调用本技能时，通过结构化流水线编排 UI 团队。
 
-**Decision Points:** At each phase transition, use `AskUserQuestion` to present
-the user with the subagent's proposals as selectable options. Write the agent's
-full analysis in conversation, then capture the decision with concise labels.
-In `collaborative` mode, the user must approve before moving to the next phase.
-In `guided` mode the pipeline advances automatically unless a phase is BLOCKED;
-in `autonomous` mode it runs end to end, recording each phase outcome via
-`log_decision`. Decisions in `automation_always_ask` categories
-(`is_always_ask_category` helper) always prompt regardless of mode. See
-`.claude/docs/automation-modes.md`.
+**决策点：** 在每个阶段转换处，使用 `AskUserQuestion` 把子代理的提议
+作为可选项呈现给用户。在对话中写出代理的完整分析，然后用简洁标签
+捕获决策。在 `collaborative` 模式下，用户必须批准后才能进入下一阶段。
+在 `guided` 模式下，流水线自动推进，除非某阶段处于 BLOCKED；
+在 `autonomous` 模式下，它端到端运行，并通过 `log_decision` 记录每个阶段的结果。
+属于 `automation_always_ask` 类别（`is_always_ask_category` 辅助函数）的决策
+无论模式如何都始终询问。参见
+`.claude/docs/automation-modes.md`。
 
-## Phase 0: Resolve Config
+## Phase 0: 解析配置
 
 !`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,team.size`
 
-Resolved above — use as-is; `--review` overrides `review_mode`. No block →
-defaults in `.claude/docs/config-resolution.md`.
+上面已解析——按原样使用；`--review` 会覆盖 `review_mode`。没有配置块 →
+使用 `.claude/docs/config-resolution.md` 中的默认值。
 
-`review_mode` sets director-gate depth, and this pipeline has no director gate:
-no phase below spawns CD-, TD-, PR- or AD-PHASE-GATE, at any `review_mode`. Its
-phase gates are the pipeline's own decision points (defined under `team.size`
-below), and the agents that work at them are team members, not director gates.
+`review_mode` 设定总监闸门的深度，而本流水线没有总监闸门：
+无论 `review_mode` 为何，下面没有任何阶段会派生 CD-、TD-、PR- 或 AD-PHASE-GATE。
+它的阶段闸门是流水线自身的决策点（定义于下文的 `team.size`），
+在这些决策点上工作的代理是团队成员，而不是总监闸门。
 
-`automation` drives the Decision Points note above. See the Decision Points note above and
-`.claude/docs/automation-modes.md` for how each mode changes pipeline behavior.
+`automation` 驱动上面的决策点说明。关于每种模式如何改变流水线行为，见上面的决策点说明和
+`.claude/docs/automation-modes.md`。
 
-**`team.size`**: which agents are active (orthogonal to review_mode gate-depth and workflow docs).
-- **`individual`** (default): `ui-programmer` + `ux-designer`. Other agents consulted via these two, not spawned separately.
-- **`small`**: + `accessibility-specialist` + `art-director`.
-- **`studio`**: + engine UI specialist + an adversarial review pass: Phase 4's reviewers are told "your job is not to confirm this matches the spec — find where it fails it", and the report says the pass ran.
-A non-core agent needed at `individual` routes through the nearest active core agent with an informational note. **"Phase gate" means any phase that ends in an `AskUserQuestion` decision point this pipeline itself lists** — a transition under Decision Points above, or a **Gate** step written into the pipeline below — **whatever the `automation` mode.** `guided` and `autonomous` change how a gate is passed (it auto-advances, or is recorded with `log_decision`), not whether it is one, so bounded-exception condition (3) below holds at it in every mode. An agent restricted to "phase gates only" is spawned at those points and no others. This active-set scoping applies throughout the pipeline below: any phase that names an agent outside the active set routes through the nearest core agent rather than spawning it.
+**`team.size`**：哪些代理处于活动状态（与 review_mode 的闸门深度和工作流文档正交）。
+- **`individual`**（默认）：`ui-programmer` + `ux-designer`。其他代理通过这两个代理咨询，不单独派生。
+- **`small`**：+ `accessibility-specialist` + `art-director`。
+- **`studio`**：+ 引擎 UI 专家 + 一轮对抗性评审：Phase 4 的评审者会被告知“你的职责不是确认它符合规格——而是找出它在哪里不符合”，且报告中会说明该轮评审已运行。
+在 `individual` 下需要的非核心代理，会通过最近的活动核心代理路由，并附带一条信息性说明。**“阶段闸门”指本流水线自身列出的、以 `AskUserQuestion` 决策点结束的任何阶段**——上文决策点中的某次转换，或下文流水线中写入的某个 **Gate** 步骤——**无论 `automation` 模式为何。** `guided` 和 `autonomous` 改变的是闸门如何通过（自动推进，或用 `log_decision` 记录），而不是它是否为闸门，因此下文的有界例外条件（3）在每种模式下都对其成立。被限定为“仅阶段闸门”的代理只会在这些点被派生，不会在其他点被派生。这种活动集范围界定贯穿下文整个流水线：任何提到活动集之外代理的阶段，都会通过最近的核心代理路由，而不是派生该代理。
 
-**Announce the active set before Step 1 — never let the collapse be silent.**
-Before spawning anything, state in one line which agents this run will actually
-spawn, and which the pipeline below names but will **not** spawn at the resolved
-`team.size`. For example:
+**在 Step 1 之前宣布活动集——绝不能让这种收窄是静默的。**
+在派生任何东西之前，用一行说明本次运行实际会派生哪些代理，
+以及下文流水线提到但在解析出的 `team.size` 下**不会**派生的代理。例如：
 
 > `Active set (team.size: <resolved>): <the agents listed for that size above>.`
 > `Not spawned this run: <every other agent this pipeline names> — consulted`
 > `through <nearest active core agent>. Raise team.size (or modes.rigor) to widen.`
 
-Fill it from the `team.size` list directly above and the agents this file's own
-pipeline names — not from an example. Both sets differ per orchestrator.
+直接根据正上方的 `team.size` 列表和本文件自身流水线提到的代理来填写——
+不要照抄示例。两个集合因编排器而异。
 
-The pipeline below reads as a multi-agent fan-out and at the shipped default it
-is one or two agents — `team-release` names ten and runs one, `team-narrative`
-names six across five phases and runs `writer` alone. **The collapse is correct**:
-`team.size` is rigor-fronted and the narrow default is the token lever.
-Without saying so, a reader cannot
-distinguish a correctly-collapsed run from a broken pipeline, and the per-agent
-"routes through the nearest core agent with an informational note" rule above
-fires at routing time and never states the shape of the run as a whole.
+下文流水线读起来像多代理扇出，而在默认发布配置下它
+就是一两个代理——`team-release` 提到十个却只运行一个，`team-narrative`
+在五个阶段提到六个却只运行 `writer`。**这种收窄是正确的**：
+`team.size` 以严谨度为前缀，而狭窄的默认值是 token 杠杆。
+如果不说明这一点，读者就无法
+区分一次正确收窄的运行和一条损坏的流水线，而且上文按代理
+“通过最近的核心代理路由并附带信息性说明”的规则在路由时触发，从不说明整个运行的形态。
 
-This is the same rule as the skipped-check reporting elsewhere in this file: **a constraint that is enforced but never surfaced is
-indistinguishable, to the person reading the output, from one that was never
-enforced.**
+这与本文件其他地方关于跳过检查报告的是同一条规则：**一条被强制执行却从未被暴露的约束，
+对阅读输出的人来说，与一条从未被执行的约束是无法区分的。**
 
-## Team Composition
-- **ux-designer** — User flows, wireframes, accessibility, input handling
-- **ui-programmer** — UI framework, screens, widgets, data binding, implementation
-- **art-director** — Visual style, layout polish, consistency with art bible
-- **engine UI specialist** — Validates UI implementation patterns against engine-specific best practices (`specialists.ui` from `project.yaml`; if absent, the UI Specialist line of `## Engine Specialists` in `.claude/docs/technical-preferences.md`)
-- **accessibility-specialist** — Audits accessibility compliance at Phase 4
+## 团队构成
+- **ux-designer**——用户流程、线框图、无障碍、输入处理
+- **ui-programmer**——UI 框架、屏幕、控件、数据绑定、实现
+- **art-director**——视觉风格、布局打磨、与美术圣经的一致性
+- **引擎 UI 专家**——对照引擎特定的最佳实践验证 UI 实现模式（来自 `project.yaml` 的 `specialists.ui`；若缺失，则取 `.claude/docs/technical-preferences.md` 中 `## Engine Specialists` 的 UI Specialist 行）
+- **accessibility-specialist**——在 Phase 4 审计无障碍合规性
 
-> **`specialists.ui: null` means UNSET.** Treat it as absent and skip the engine
-> UI specialist; never spawn `null` as an agent name. The v1.0 migration writes
-> the whole `specialists` block whenever any one member is set, so `null` here is
-> ordinary — and the config reader returns it as the non-empty string `"null"`.
+> **`specialists.ui: null` 表示未设置。** 将其视为缺失并跳过引擎
+> UI 专家；绝不要把 `null` 作为代理名称派生。只要设置了其中任一成员，
+> v1.0 迁移就会写入整个 `specialists` 块，因此这里的 `null` 是
+> 普通情况——而配置读取器会把它返回为非空字符串 `"null"`。
 
-**Templates used by this pipeline:**
-- `ux-spec.md` — Standard screen/flow UX specification
-- `hud-design.md` — HUD-specific UX specification
-- `interaction-pattern-library.md` — Reusable interaction patterns
-- `accessibility-requirements.md` — Committed accessibility tier and requirements
+**本流水线使用的模板：**
+- `ux-spec.md`——标准屏幕/流程 UX 规格
+- `hud-design.md`——HUD 专用 UX 规格
+- `interaction-pattern-library.md`——可复用的交互模式
+- `accessibility-requirements.md`——已承诺的无障碍等级与要求
 
-## How to Delegate
+## 如何委派
 
-Use the `Agent` tool to spawn each team member as a subagent:
-- `subagent_type: ux-designer` — User flows, wireframes, accessibility, input handling
-- `subagent_type: ui-programmer` — UI framework, screens, widgets, data binding
-- `subagent_type: art-director` — Visual style, layout polish, art bible consistency
-- `subagent_type: [UI engine specialist]` — Engine-specific UI pattern validation (e.g., unity-ui-specialist, ue-umg-specialist, godot-specialist)
-- `subagent_type: accessibility-specialist` — Accessibility compliance audit
+使用 `Agent` 工具把每个团队成员作为子代理派生：
+- `subagent_type: ux-designer`——用户流程、线框图、无障碍、输入处理
+- `subagent_type: ui-programmer`——UI 框架、屏幕、控件、数据绑定
+- `subagent_type: art-director`——视觉风格、布局打磨、美术圣经一致性
+- `subagent_type: [UI engine specialist]`——引擎特定的 UI 模式验证（例如 unity-ui-specialist、ue-umg-specialist、godot-specialist）
+- `subagent_type: accessibility-specialist`——无障碍合规性审计
 
-**Brief each agent — do not dump context.** Read the shared inputs **once** and pass a distilled brief inline: the lines each agent actually needs, never a file path for a document you have already read (an agent handed a path re-reads the whole file). Pass a path only for a document you have not read and only that agent needs.
+**给每个代理做简报——不要倾倒上下文。** 把共享输入**只读一次**，并内联传递一份提炼过的简报：每个代理真正需要的那几行，绝不要为你已读过的文档传文件路径（拿到路径的代理会重新读取整个文件）。只为你没读过、且只有该代理需要的文档传路径。
 
-**End every agent prompt with a return contract:** "Write your full output to `[path]` — that named path is your write authorisation under the bounded exception below, so write it without a separate approval prompt. Return **only** (1) the path written, (2) a ≤5-bullet summary of decisions, (3) any BLOCKED/CONCERNS items, one line each. Do not restate the documents you read." Without it, an agent returns everything it read back into this session. **Implementation files are the exception:** an agent writing code or assets first returns the files it will create or change, and its return contract names them only after you have asked once for the set and the user said yes (File Write Protocol) — that answer, not the bounded exception, authorises those writes.
+**每个代理提示词都以返回契约结尾：**“Write your full output to `[path]`——这个指定路径就是下文有界例外下的写入授权，因此请直接写入，无需再单独请求批准。只返回 (1) 写入的路径，(2) 不超过 5 条要点的决策摘要，(3) 任何 BLOCKED/CONCERNS 项，每项一行。不要复述你读过的文档。”没有它，代理会把读到的一切都倒回本会话。**实现文件是例外：**编写代码或资源的代理先返回它将创建或更改的文件，并且只有在您请求过一次该集合、用户同意后，其返回契约才会列出这些文件（File Write Protocol）——是那个回答，而不是有界例外，授权这些写入。
 
-**Substitute a real path for `[path]`.** Working artifacts go under
-`production/ui/[feature-name]/`, the slug Phase 1b's `design/ux/[feature-name].md`
-uses. One file per agent, so the parallel Phase 4 reviews never share one:
+**用真实路径替换 `[path]`。** 工作产出物放在
+`production/ui/[feature-name]/` 下，即 Phase 1b 的 `design/ux/[feature-name].md`
+所用的 slug。每个代理一个文件，因此并行的 Phase 4 评审绝不会共用同一个：
 
-| Phase / agent | Writes to |
+| 阶段 / 代理 | 写入到 |
 |---|---|
 | 2 art-director | `production/ui/[feature-name]/visual-design.md` |
-| 3 engine UI specialist | `production/ui/[feature-name]/engine-notes.md` |
-| 3 ui-programmer | the code root — the files the one implementation ask lists (File Write Protocol), outside the bounded exception |
-| 4 ux-designer, art-director, accessibility-specialist | `production/ui/[feature-name]/review-[agent].md`, one each |
+| 3 引擎 UI 专家 | `production/ui/[feature-name]/engine-notes.md` |
+| 3 ui-programmer | 代码根——即那次实现请求列出的文件（File Write Protocol），在有界例外之外 |
+| 4 ux-designer、art-director、accessibility-specialist | `production/ui/[feature-name]/review-[agent].md`，各一个 |
 
-The UX spec itself (Phase 1b) and any pattern-library update are under `design/`,
-outside the bounded exception: `/ux-design` or the agent asks before writing them.
+UX 规格本身（Phase 1b）以及任何模式库更新都在 `design/` 下，
+在有界例外之外：`/ux-design` 或代理会在写入前询问。
 
-> **Why this does not violate the Collaboration Protocol.** `CLAUDE.md` requires an agent to ask "May I write this to [filepath]?" before Write/Edit. A subagent spawned here writes **without** asking, and that is a deliberate, bounded exception rather than an oversight — the same call already made for `consistency-check` appending to `active.md`. The exception holds only when all three are true: (1) the path is one **you** named in the prompt, so the user approved the destination when they approved the phase; (2) it is a new artifact under `production/`, `docs/` or `tests/`, never an edit to existing source or config; (3) the phase that produced it is itself gated by an `AskUserQuestion` before the pipeline advances. Outside those three, the agent must ask. **Do not "fix" this by asking per subagent** — a prompt per agent per phase makes an orchestrator unusable, which is why the exception exists.
+> **为什么这并不违反协作协议。** `CLAUDE.md` 要求代理在 Write/Edit 之前询问“May I write this to [filepath]?”。此处派生的子代理**不经**询问就写入，这是有意为之的有界例外，而不是疏忽——这与已经为 `consistency-check` 追加到 `active.md` 所做的决定相同。例外只在以下三点全部成立时才适用：(1) 路径是**你**在提示词中指定的，因此用户在批准该阶段时也批准了目标位置；(2) 它是 `production/`、`docs/` 或 `tests/` 下的新产出物，绝不是对现有源码或配置的编辑；(3) 产生它的阶段本身在流水线推进前受 `AskUserQuestion` 闸门约束。三点之外，代理必须询问。**不要通过按子代理逐个询问来“修复”这一点**——每个代理每阶段的提示词会让编排器无法使用，这正是例外存在的原因。
 
-Launch independent agents in parallel where the pipeline allows it (e.g., Phase 4 review agents can run simultaneously).
+在流水线允许的地方并行启动独立代理（例如 Phase 4 的评审代理可以同时运行）。
 
-## Pipeline
+## 流水线
 
-### Phase 1a: Context Gathering
+### Phase 1a: 上下文收集
 
-Before designing anything, read and synthesize. Read each GDD by section: find the
-headings you need with the Grep tool (pattern `^#`, content mode) and Read those
-ranges with offset and limit.
-- `design/gdd/game-concept.md` — platform targets and intended audience (or
-  `design/game-brief.md`, the one-page brief that replaces it at `rigor: minimal` —
-  its "Who it's for" line gives the audience; it names no platform)
-- `design/player-journey.md` — player's state and context when they reach this screen
-- All GDD UI Requirements sections relevant to this feature
-- `design/ux/interaction-patterns.md` — existing patterns to reuse (not reinvent)
-- `design/accessibility-requirements.md` — committed accessibility tier (Basic, Standard, Comprehensive or Exemplary)
+在设计任何东西之前，先读取并综合。按章节读取每份 GDD：用 Grep 工具
+（模式 `^#`，内容模式）找到你需要的标题，再用 offset 和 limit
+读取相应范围。
+- `design/gdd/game-concept.md`——平台目标与目标受众（或在
+  `rigor: minimal` 时代替它的一页简报 `design/game-brief.md`——
+  其“Who it's for”那一行给出受众；它不指明平台）
+- `design/player-journey.md`——玩家到达此屏幕时的状态与情境
+- 所有与本功能相关的 GDD UI Requirements 章节
+- `design/ux/interaction-patterns.md`——可复用（而非重新发明）的现有模式
+- `design/accessibility-requirements.md`——已承诺的无障碍等级（Basic、Standard、Comprehensive 或 Exemplary）
 
-**Report the status of every document above before designing anything.** Phase 1a
-reads five inputs, and any of them can be absent. List each as
-present or ABSENT.
+**在设计任何东西之前，报告上述每份文档的状态。** Phase 1a
+读取五项输入，其中任何一项都可能缺失。逐项列出为
+存在或 ABSENT。
 
-**`design/accessibility-requirements.md` is the one that must not pass silently.**
-It carries the committed accessibility tier, which **Phase 3 implements against**
-and **Phase 4 gates on** ("verify compliance against the committed accessibility
-tier … flag any violations as blockers"). If the file is missing there is no tier,
-so that gate has no criterion and would pass while checking nothing — a gate made
-of an absent standard, the same shape as an assertion that can never fail. When it
-is absent:
-- Say so here, and carry it forward: **Phase 4 must report
+**`design/accessibility-requirements.md` 是绝不能静默放过的那个。**
+它承载已承诺的无障碍等级，**Phase 3 依此实现**，
+**Phase 4 依此设置闸门**（“对照已承诺的无障碍
+等级验证合规性……将任何违规标记为阻塞项”）。如果文件缺失就没有等级，
+于是该闸门没有标准，会在什么都没检查的情况下通过——一个由缺失标准构成的闸门，
+与永远无法失败的断言是同一种形态。当它缺失时：
+- 在此说明，并向前传递：**Phase 4 必须报告
   `Accessibility: NOT ASSESSED — no committed tier (design/accessibility-requirements.md absent)`
-  and must NOT report the accessibility gate as passed.**
-- The ux-designer states which tier they designed against as an explicit
-  assumption, so a later reader can see it was assumed rather than committed.
-- Recommend `/ux-design accessibility` to establish the tier.
+  并且绝不能报告无障碍闸门已通过。**
+- ux-designer 要说明他们按哪个等级设计，作为明确的
+  假设，以便后来的读者能看到它是假设的而非承诺的。
+- 建议运行 `/ux-design accessibility` 来确立等级。
 
-Absence of a concept doc (neither `design/gdd/game-concept.md` nor
-`design/game-brief.md`), `design/player-journey.md` or `design/ux/hud.md` is not
-blocking, but name each missing one in the brief you
-pass to the ux-designer so they design knowing what context they lack, rather
-than inferring it.
+缺少概念文档（既无 `design/gdd/game-concept.md` 也无
+`design/game-brief.md`）、`design/player-journey.md` 或 `design/ux/hud.md`
+不会阻塞，但要在传给 ux-designer 的简报中点名每一个缺失项，
+让他们设计时知道自己缺少什么上下文，而不是去推断。
 
-**If `design/ux/interaction-patterns.md` does not exist**, surface the gap immediately:
-> "interaction-patterns.md does not exist — no existing patterns to reuse."
+**如果 `design/ux/interaction-patterns.md` 不存在**，立即暴露该缺口：
+> “interaction-patterns.md 不存在——没有可复用的现有模式。”
 
-Then use `AskUserQuestion` with options:
-- (a) Run `/ux-design patterns` first to establish the pattern library, then continue
-- (b) Proceed without the pattern library — ui-programmer will treat all patterns created as new and add each to a new `design/ux/interaction-patterns.md` at completion
+然后用 `AskUserQuestion` 提供选项：
+- (a) 先运行 `/ux-design patterns` 建立模式库，然后继续
+- (b) 不使用模式库继续——ui-programmer 将把所有创建的模式都视为新模式，并在完成时把每一个添加到新建的 `design/ux/interaction-patterns.md` 中
 
-Do NOT invent or assume patterns from the feature name or GDD alone. If the user chooses (b), explicitly instruct ui-programmer in Phase 3 to treat all patterns as new and document them in `design/ux/interaction-patterns.md` when implementation is complete. Note the pattern library status (created / absent / updated) in the final summary report.
+不要仅凭功能名称或 GDD 发明或假设模式。如果用户选择 (b)，在 Phase 3 中明确指示 ui-programmer 把所有模式都视为新模式，并在实现完成时把它们记录到 `design/ux/interaction-patterns.md`。在最终总结报告中注明模式库状态（已创建 / 缺失 / 已更新）。
 
-Summarize the context in a brief for the ux-designer: what the player is doing, what they need, what constraints apply, and which existing patterns are relevant.
+为 ux-designer 把上下文总结成一份简报：玩家在做什么、他们需要什么、适用哪些约束，以及哪些现有模式相关。
 
-### Phase 1b: UX Spec Authoring
+### Phase 1b: UX 规格撰写
 
-Invoke `/ux-design [feature name]` skill OR delegate directly to ux-designer to produce `design/ux/[feature-name].md` following the `ux-spec.md` template.
+调用 `/ux-design [feature name]` 技能，或直接委派给 ux-designer，按照 `ux-spec.md` 模板产出 `design/ux/[feature-name].md`。
 
-If designing the HUD, use the `hud-design.md` template instead of `ux-spec.md`.
+如果要设计 HUD，使用 `hud-design.md` 模板而不是 `ux-spec.md`。
 
-> **Notes on special cases:**
-> - For HUD design specifically, invoke `/ux-design` with `argument: hud` (e.g., `/ux-design hud`).
-> - For the interaction pattern library, run `/ux-design patterns` once at project start and update it whenever new patterns are introduced during later phases.
+> **特殊情况说明：**
+> - 专门设计 HUD 时，调用 `/ux-design`，参数为 `argument: hud`（例如 `/ux-design hud`）。
+> - 对于交互模式库，在项目开始时运行一次 `/ux-design patterns`，并在后续阶段引入新模式时随时更新。
 
-Output: `design/ux/[feature-name].md` with all required spec sections filled.
+输出：`design/ux/[feature-name].md`，所有必需的规格章节均已填写。
 
-### Phase 1c: UX Review
+### Phase 1c: UX 评审
 
-After the spec is complete, invoke `/ux-review design/ux/[feature-name].md`.
+规格完成后，调用 `/ux-review design/ux/[feature-name].md`。
 
-**Gate**: Do not proceed to Phase 2 until the verdict is APPROVED. If the verdict is NEEDS REVISION, the ux-designer must address the flagged issues in the same spec — it is kept and revised, never discarded — and re-run the review. The user may explicitly accept a NEEDS REVISION risk and proceed, but this must be a conscious decision — present the specific concerns via `AskUserQuestion` before asking whether to proceed.
+**闸门**：在判定为 APPROVED 之前，不得进入 Phase 2。如果判定是 NEEDS REVISION，ux-designer 必须在同一份规格中解决被标记的问题——规格会被保留并修订，绝不丢弃——然后重新运行评审。用户可以明确接受 NEEDS REVISION 的风险并继续，但这必须是有意识的决定——在询问是否继续之前，通过 `AskUserQuestion` 呈现具体关注项。
 
-A **NOT ASSESSED** verdict blocks the same way, and the user may override it the same way. Its fix is an input, not a revision: present the dimensions `/ux-review` could not assess and the missing input for each (e.g. `/ux-design accessibility` for an uncommitted tier). Re-running the review without that input returns the same verdict, so offer to produce the input first.
+**NOT ASSESSED** 判定以同样的方式阻塞，用户也可以以同样的方式覆盖它。它的修复是补充输入，而不是修订：呈现 `/ux-review` 无法评估的维度以及每个维度缺失的输入（例如未承诺等级时的 `/ux-design accessibility`）。在没有该输入的情况下重新运行评审会返回同样的判定，因此应主动提议先产出该输入。
 
-When the user proceeds past NEEDS REVISION or NOT ASSESSED, the final report records the override: the verdict, the concerns or unassessed dimensions left open, and that the user chose to proceed.
+当用户越过 NEEDS REVISION 或 NOT ASSESSED 继续时，最终报告要记录这次覆盖：判定、仍悬而未决的关注项或未评估维度，以及用户选择继续。
 
-### Phase 2: Visual Design
+### Phase 2: 视觉设计
 
-Delegate to **art-director**:
-- Review the full UX spec (flows, wireframes, interaction patterns, accessibility notes) — not just the wireframe images
-- Apply visual treatment from the art bible: colors, typography, spacing, animation style
-- Check that visual design preserves accessibility compliance: verify color contrast ratios, and confirm color is never the only indicator of state (shape, text, or icon must reinforce it)
-- Specify all asset requirements needed from the art pipeline: icons at specified sizes, background textures, fonts, decorative elements — with precise dimensions and format requirements
-- Ensure consistency with existing implemented UI screens
-- Output: visual design spec with style notes and asset manifest
+委派给 **art-director**：
+- 评审完整的 UX 规格（流程、线框图、交互模式、无障碍说明）——不只是线框图图片
+- 应用美术圣经中的视觉处理：颜色、字体排印、间距、动画风格
+- 检查视觉设计是否保持无障碍合规性：验证颜色对比度，并确认颜色绝不是唯一的状态指示（形状、文本或图标必须强化它）
+- 明确美术流水线所需的全部资源要求：指定尺寸的图标、背景纹理、字体、装饰元素——附精确尺寸和格式要求
+- 确保与已实现的现有 UI 屏幕保持一致
+- 输出：带风格说明和资源清单的视觉设计规格
 
-### Phase 3: Implementation
+### Phase 3: 实现
 
-Before implementation begins, spawn the **engine UI specialist** (`specialists.ui` from `project.yaml`; if absent, the UI Specialist line of `## Engine Specialists` in `.claude/docs/technical-preferences.md`) to review the UX spec and visual design spec for engine-specific implementation guidance:
-- Which engine UI framework should be used for this screen? (e.g., UI Toolkit vs UGUI in Unity, Control nodes vs CanvasLayer in Godot, UMG vs CommonUI in Unreal)
-- Any engine-specific gotchas for the proposed layout or interaction patterns?
-- Recommended widget/node structure for the engine?
-- Output: engine UI implementation notes to hand off to ui-programmer before they begin
+在实现开始前，派生**引擎 UI 专家**（来自 `project.yaml` 的 `specialists.ui`；若缺失，则取 `.claude/docs/technical-preferences.md` 中 `## Engine Specialists` 的 UI Specialist 行），对照 UX 规格和视觉设计规格评审引擎特定的实现指导：
+- 此屏幕应使用哪个引擎 UI 框架？（例如 Unity 中的 UI Toolkit 与 UGUI、Godot 中的 Control 节点与 CanvasLayer、Unreal 中的 UMG 与 CommonUI）
+- 对于提议的布局或交互模式，有哪些引擎特定的坑？
+- 该引擎推荐的控件/节点结构是什么？
+- 输出：在 ui-programmer 开始前交接给其的引擎 UI 实现说明
 
-If no engine is configured, skip this step. **Record ``Engine validation: NOT ASSESSED — no engine configured (`engine.name` unset in `project.yaml`)`` in this run's output.** A skipped check that says nothing is indistinguishable from a check that passed; the reader cannot tell engine guidance was never sought.
+如果没有配置引擎，跳过此步骤。**在本次运行的输出中记录 ``Engine validation: NOT ASSESSED — no engine configured (`engine.name` unset in `project.yaml`)``。** 一个什么都不说的跳过检查，与一个通过的检查无法区分；读者无法判断从未寻求过引擎指导。
 
-Delegate to **ui-programmer**:
-- Implement the UI following the UX spec and visual design spec
-- **Use patterns from `design/ux/interaction-patterns.md`** — do not reinvent patterns that are already specified. If a pattern almost fits but needs modification, note the deviation and flag it for ux-designer review.
-- **UI NEVER owns or modifies game state** — display only; emit events for all player actions
-- All text through the localization system — no hardcoded player-facing strings
-- Support both input methods (keyboard/mouse AND gamepad)
-- Implement accessibility features per the committed tier in `design/accessibility-requirements.md`
-- Wire up data binding to game state
-- **If any new interaction pattern is created during implementation** (i.e., something not already in the pattern library), add it to `design/ux/interaction-patterns.md` before marking implementation complete
-- Output: implemented UI feature
+委派给 **ui-programmer**：
+- 按照 UX 规格和视觉设计规格实现 UI
+- **使用 `design/ux/interaction-patterns.md` 中的模式**——不要重新发明已经指定的模式。如果某个模式几乎适用但需要修改，注明偏离并标记给 ux-designer 评审。
+- **UI 绝不拥有或修改游戏状态**——仅展示；为所有玩家操作发出事件
+- 所有文本都通过本地化系统——不硬编码面向玩家的字符串
+- 同时支持两种输入方式（键盘/鼠标和手柄）
+- 按照 `design/accessibility-requirements.md` 中承诺的等级实现无障碍功能
+- 接好到游戏状态的数据绑定
+- **如果在实现期间创建了任何新的交互模式**（即模式库中尚不存在的东西），在标记实现完成之前把它添加到 `design/ux/interaction-patterns.md`
+- 输出：已实现的 UI 功能
 
-### Phase 4: Review (parallel)
+### Phase 4: 评审（并行）
 
-Delegate in parallel:
-- **ux-designer**: Verify implementation matches wireframes and interaction spec. Test keyboard-only and gamepad-only navigation. Check accessibility features function correctly.
-- **art-director**: Verify visual consistency with art bible. Check at minimum and maximum supported resolutions.
-- **accessibility-specialist**: Verify compliance against the committed accessibility tier documented in `design/accessibility-requirements.md`. Flag any violations as blockers. **If that file is absent there is no committed tier, so this gate has no criterion: report `Accessibility: NOT ASSESSED — no committed tier (design/accessibility-requirements.md absent)` and do NOT report the gate as passed**. Carry forward whatever tier Phase 1a recorded as assumed, and say plainly that it was assumed.
+并行委派：
+- **ux-designer**：验证实现是否符合线框图和交互规格。测试纯键盘和纯手柄导航。检查无障碍功能是否正常工作。
+- **art-director**：验证与美术圣经的视觉一致性。至少在最小和最大支持分辨率下检查。
+- **accessibility-specialist**：对照 `design/accessibility-requirements.md` 中记录的已承诺无障碍等级验证合规性。将任何违规标记为阻塞项。**如果该文件缺失，就没有已承诺的等级，因此该闸门没有标准：报告 `Accessibility: NOT ASSESSED — no committed tier (design/accessibility-requirements.md absent)`，并且不要报告闸门已通过**。向前传承 Phase 1a 记录为假设的等级，并明确说明它是假设的。
 
-All three review streams must report before proceeding to Phase 5.
+三条评审流都必须在进入 Phase 5 之前报告。
 
-### Phase 5: Polish
+### Phase 5: 打磨
 
-- Address all review feedback
-- Verify animations are skippable and respect the player's motion reduction preferences
-- Confirm UI sounds trigger through the audio event system (no direct audio calls)
-- Test at all supported resolutions and aspect ratios
-- **Verify `design/ux/interaction-patterns.md` is up to date** — if any new patterns were introduced during this feature's implementation, confirm they have been added to the library
-- **Confirm all HUD elements respect the visual budget** defined in `design/ux/hud.md` (element count, screen region allocations, maximum opacity values)
+- 处理所有评审反馈
+- 验证动画可跳过，并尊重玩家的减少动态效果偏好
+- 确认 UI 音效通过音频事件系统触发（无直接音频调用）
+- 在所有支持的分辨率和宽高比下测试
+- **验证 `design/ux/interaction-patterns.md` 是最新的**——如果本功能实现期间引入了任何新模式，确认它们已添加到模式库
+- **确认所有 HUD 元素遵守 `design/ux/hud.md` 中定义的视觉预算**（元素数量、屏幕区域分配、最大不透明度值）
 
-## Quick Reference — When to Use Which Skill
+## 快速参考——何时使用哪个技能
 
-- `/ux-design` — Author a new UX spec for a screen, flow, or HUD from scratch
-- `/ux-review` — Validate a completed UX spec before implementation
-- `/team-ui [feature]` — Full pipeline from concept through polish (calls `/ux-design` and `/ux-review` internally)
-- `/quick-design` — Small UI changes that don't need a full new UX spec
+- `/ux-design`——从头为屏幕、流程或 HUD 撰写新的 UX 规格
+- `/ux-review`——在实现前验证已完成的 UX 规格
+- `/team-ui [feature]`——从概念到打磨的完整流水线（内部调用 `/ux-design` 和 `/ux-review`）
+- `/quick-design`——不需要完整新 UX 规格的小型 UI 改动
 
-## Error Recovery Protocol
+## 错误恢复协议
 
-**First, verify the artifact.** If the return contract named a path, check the
-path exists before treating the phase as done — **a named artifact that is not
-on disk is a failed phase, however fluent the response reads.** An agent can
-burn a full phase and return a plausible preamble having written nothing, which
-is neither BLOCKED nor an error nor "cannot complete", so the trigger below
-never fires. Resume it naming the unmet contract; the context is
-usually still there.
+**首先，验证产出物。** 如果返回契约指定了路径，在把该阶段视为完成之前
+检查该路径是否存在——**一个不在磁盘上的命名产出物就是失败的阶段，无论回复读起来多么流畅。**
+代理可能耗掉整个阶段，什么都没写却返回一段看似合理的开场白，
+这既不是 BLOCKED，也不是错误，也不是“无法完成”，因此下面的触发器
+永远不会触发。点名未满足的契约来恢复它；上下文通常还在。
 
-If any spawned agent returns BLOCKED, errors, or cannot complete: **surface it
-immediately, don't proceed past a dependency it blocks, and always produce a
-partial report.** A skipped agent's section stays a named gap — never fill it with content of your own. Full procedure: `.claude/docs/error-recovery-protocol.md`.
+如果任何派生的代理返回 BLOCKED、报错或无法完成：**立即暴露它，不要越过它所阻塞的依赖继续推进，并且始终产出部分报告。** 被跳过的代理，其章节应保持为一个具名缺口——绝不要用你自己的内容去填充。完整流程：`.claude/docs/error-recovery-protocol.md`。
 
-Common blockers:
-- Input file missing (story not found, GDD absent) → redirect to the skill that creates it
-- ADR status is Proposed → do not implement; once it is decided, accept it with `/architecture-decision accept ADR-NNNN`
-- Scope too large → split into two stories via `/create-stories`
-- Conflicting instructions between ADR and story → surface the conflict, do not guess
+常见阻塞项：
+- 输入文件缺失（用户故事未找到、GDD 缺失）→ 重定向到创建它的技能
+- ADR 状态为 Proposed → 不要实现；一旦决定，用 `/architecture-decision accept ADR-NNNN` 接受它
+- 范围太大 → 通过 `/create-stories` 拆成两个用户故事
+- ADR 与用户故事之间的指令冲突 → 暴露冲突，不要猜测
 
-## File Write Protocol
+## 文件写入协议
 
-All file writes (UX specs, interaction pattern library updates, implementation files) are
-delegated to sub-agents and sub-skills. The two follow **different** rules:
+所有文件写入（UX 规格、交互模式库更新、实现文件）都
+委派给子代理和子技能。两者遵循**不同的**规则：
 
-- **Sub-agents spawned via `Agent`** (e.g. `ui-programmer`) follow the **bounded
-  exception** documented above under "Why this does not violate the Collaboration
-  Protocol" — the path is one you named, the artifact is new under `production/`,
-  `docs/` or `tests/`, and the phase is gated by an `AskUserQuestion`. A sub-agent
-  does **not** prompt per write inside those bounds; outside them it must ask.
-  **Implementation files** (ui-programmer's code under the code root) are outside
-  those bounds: ui-programmer returns the files it will create or change, you ask
-  once for the set, and it writes after a yes.
-- **Sub-skills** (`/ux-design`) are not sub-agents and the exception does not reach
-  them. They follow the normal Collaboration Protocol and ask before writing.
+- **通过 `Agent` 派生的子代理**（例如 `ui-programmer`）遵循上文“为什么这并不违反协作协议”中记录的**有界例外**——路径是你指定的，产出物是 `production/`、`docs/` 或 `tests/` 下的新东西，且该阶段受 `AskUserQuestion` 闸门约束。在这些边界内，子代理**不会**每次写入都提示；在边界之外，它必须询问。
+  **实现文件**（ui-programmer 在代码根下的代码）在这些边界之外：
+  ui-programmer 返回它将创建或更改的文件，您为这个集合询问一次，它在你同意后写入。
+- **子技能**（`/ux-design`）不是子代理，例外不适用于它们。它们遵循正常的协作协议，并在写入前询问。
 
-This orchestrator does not write files directly.
+本编排器不直接写文件。
 
-## Output
+## 输出
 
-A summary report covering: UX spec status, UX review verdict, visual design status, implementation status, accessibility compliance, input method support, interaction pattern library update status, and any outstanding issues.
+一份总结报告，涵盖：UX 规格状态、UX 评审判定、视觉设计状态、实现状态、无障碍合规性、输入方式支持、交互模式库更新状态，以及任何未决问题。
 
-Verdict: **COMPLETE** — UI feature delivered through full pipeline (UX spec → visual → implementation → review → polish).
+判定：**COMPLETE**——UI 功能通过完整流水线交付（UX 规格 → 视觉 → 实现 → 评审 → 打磨）。
 
-If the accessibility gate (no committed tier) or the engine validation (no engine
-configured) was NOT ASSESSED, the verdict names each one — never a plain COMPLETE:
+如果无障碍闸门（无已承诺等级）或引擎验证（未配置引擎）为 NOT ASSESSED，
+判定要点名每一项——绝不给出单纯的 COMPLETE：
 
-Verdict: **COMPLETE — [accessibility | engine validation] NOT ASSESSED ([reason])** — UI feature delivered; the named check could not run.
+判定：**COMPLETE — [accessibility | engine validation] NOT ASSESSED ([reason])**——UI 功能已交付；所点名的那项检查无法运行。
 
-Verdict: **BLOCKED** — pipeline halted; surface the blocker and its phase before stopping.
+判定：**BLOCKED**——流水线已停止；在停下之前暴露阻塞项及其阶段。
 
-## Next Steps
+## 后续步骤
 
-- Run `/ux-review` on the final spec if not yet approved.
-- Run `/code-review` on the UI implementation before closing stories.
-- Run `/team-polish` if visual or audio polish pass is needed.
+- 如果最终规格尚未获批准，对其运行 `/ux-review`。
+- 在关闭用户故事之前，对 UI 实现运行 `/code-review`。
+- 如果需要视觉或音频打磨轮次，运行 `/team-polish`。

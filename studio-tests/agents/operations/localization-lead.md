@@ -1,81 +1,81 @@
 # Agent Test Spec: localization-lead
 
 ## Agent Summary
-- **Domain**: Internationalization (i18n) architecture, string extraction workflows, locale testing methodology, translation pipeline design (extraction → translation → import), string key and context standards, locale-specific formatting rules (plurals, RTL, date/number formats), fonts and character sets, glossary and translation memory
-- **Does NOT own**: Game narrative content and dialogue writing (writer), translation work itself (translators), UI design decisions (ux-designer), game design decisions (game-designer), which languages to support (producer); it coordinates text rendering and RTL support with ui-programmer and extraction automation with tools-programmer
-- **Gate IDs**: None; reports to producer for scheduling, language support scope, and budget
+- **Domain**: 国际化（i18n）架构、字符串提取工作流、区域设置测试方法论、翻译流水线设计（提取 → 翻译 → 导入）、字符串键与上下文标准、区域特定格式规则（复数、RTL、日期/数字格式）、字体与字符集、术语表与翻译记忆库
+- **Does NOT own**: 游戏叙事内容与对话撰写（writer）、翻译工作本身（译者）、UI 设计决策（ux-designer）、游戏设计决策（game-designer）、支持哪些语言（producer）；它与 ui-programmer 协调文本渲染和 RTL 支持，与 tools-programmer 协调提取自动化
+- **Gate IDs**: None；排期、语言支持范围与预算向 producer 汇报
 
 ---
 
 ## Static Assertions (Structural)
 
-- [ ] `description:` field is present and domain-specific (references i18n, string extraction, locale pipeline, localization)
-- [ ] `tools:` reads `Read, Glob, Grep, Write, Edit, Bash` — Bash for string-extraction tooling; writing translations and narrative content is excluded by the body's "What This Agent Must NOT Do" list, not by the tool list
-- [ ] Model tier is `inherit` — frontmatter `model:` reads exactly `inherit` (tiers: `.claude/docs/model-tiers.md`)
-- [ ] Agent definition does not claim authority over narrative content, game code implementation, or translation quality
+- [ ] `description:` 字段存在且限定于本领域（引用 i18n、字符串提取、区域流水线、本地化）
+- [ ] `tools:` 为 `Read, Glob, Grep, Write, Edit, Bash` —— Bash 用于字符串提取工具；撰写翻译和叙事内容由正文的「What This Agent Must NOT Do」清单排除，而非工具清单
+- [ ] 模型档位为 `inherit` —— frontmatter `model:` 精确为 `inherit`（档位见：`.claude/docs/model-tiers.md`）
+- [ ] 代理定义未声称对叙事内容、游戏代码实现或翻译质量拥有权限
 
 ---
 
 ## Test Cases
 
-### Case 1: In-domain request — string extraction pipeline for a Unity project
-**Input**: "Set up a string extraction pipeline for our Unity game. We need to get all localizable strings into a format translators can work with."
+### Case 1: In-domain request — Unity 项目的字符串提取流水线
+**Input**: "为我们的 Unity 游戏搭建字符串提取流水线。我们需要把所有可本地化字符串整理成译者可用的格式。"
 **Expected behavior**:
-- Lays out the workflow its String Extraction Workflow defines: strings enter through the localization API (never raw text), land in the base locale file with a context comment, extraction tooling collects new and modified strings, and they go to translators with context, screenshots, and character limits, then come back into the locale files
-- Scopes extraction to player-facing text from code, UI, and content — "Ensure no hardcoded strings reach production"
-- Specifies structured locale files (JSON, CSV, or a project-appropriate format), one file per language per system or feature area (the `locales/en/ui_menu.json` pattern)
-- Uses hierarchical dot-notation keys that describe context (`menu.settings.audio.volume_label`) — not positional or index-based keys — each with a context comment giving where it appears, its character limit, and its variables
-- Names `tools-programmer` for the extraction automation and `ui-programmer` for text rendering (Delegation Map), and asks before writing any pipeline document
+- 列出其 String Extraction Workflow 定义的工作流：字符串通过本地化 API 进入（绝不使用原始文本），落到基础区域文件并带上下文注释，提取工具收集新增和修改的字符串，连同上下文、截图和字符限制交给译者，然后回到区域文件中
+- 将提取范围限定为来自代码、UI 和内容的面向玩家文本 ——「Ensure no hardcoded strings reach production」
+- 指定结构化的区域文件（JSON、CSV 或适合项目的格式），每个系统或功能区域每种语言一个文件（`locales/en/ui_menu.json` 模式）
+- 使用描述上下文的层级点号键（`menu.settings.audio.volume_label`）—— 而非位置或索引式键 —— 每个键都带上下文注释，说明出现位置、字符限制和变量
+- 指明由 `tools-programmer` 负责提取自动化、`ui-programmer` 负责文本渲染（Delegation Map），并在写入任何流水线文档前先询问
 
-### Case 2: Out-of-domain request — translate game dialogue
-**Input**: "Translate the following English dialogue into French: 'Well met, traveler. The road ahead is treacherous.'"
+### Case 2: Out-of-domain request — 翻译游戏对话
+**Input**: "把下面这段英文对话翻译成法语：'Well met, traveler. The road ahead is treacherous.'"
 **Expected behavior**:
-- Does not produce a French translation
-- States that it owns the pipeline, quality standards and workflow, and that translation itself is done by human translators or approved vendors (its "Write actual translations" must-not line)
-- Optionally notes what information a translator would need: context (who is speaking, to whom, game genre/tone), character limit constraints if any, glossary terms (e.g., if "traveler" has a game-specific translation)
+- 不产出法语翻译
+- 说明它负责流水线、质量标准和流程，而翻译本身由人类译者或经批准的供应商完成（其「Write actual translations」禁止项）
+- 可选地说明译者需要哪些信息：上下文（谁对谁说话、游戏类型/语气）、字符限制（若有）、术语表词条（例如「traveler」是否有游戏专属译法）
 
-### Case 3: Domain boundary — missing plural forms in Russian locale
-**Input**: "Our Russian locale files only have a singular form for item quantity strings. Russian requires multiple plural forms (1 item, 2-4 items, 5+ items use different forms)."
+### Case 3: Domain boundary — 俄语区域缺少复数形式
+**Input**: "我们的俄语区域文件中，物品数量字符串只有单数形式。俄语需要多种复数形式（1 个物品、2-4 个物品、5+ 个物品使用不同形式）。"
 **Expected behavior**:
-- Identifies this as a locale-specific plural form gap: CLDR/Unicode plural rules give Russian four categories — one, few, many and other (`other` covers fractional quantities, and ICU MessageFormat requires it in every plural message) — so a single string is insufficient
-- Flags it as a localization quality bug, not a minor style issue — incorrect plural forms are grammatically wrong and visible to players
-- Recommends the fix its Pluralization standard names: plural rules through ICU MessageFormat (or equivalent) with the language's plural categories, and flags to the translators that Russian strings need every plural form
-- Treats it as a pipeline-wide fix — quantity strings in every supported locale move to ICU plural rules — not a Russian-only patch (Polish, Czech, and Arabic have the same problem)
-- Does NOT suggest using a numeric threshold workaround as a substitute for proper plural rules
+- 将其识别为区域特定的复数形式缺口：CLDR/Unicode 复数规则给俄语四个类别 —— one、few、many 和 other（`other` 覆盖小数数量，且 ICU MessageFormat 在每个复数消息中都要求它）—— 因此单一字符串不够
+- 将其标记为本地化质量缺陷，而非轻微的样式问题 —— 错误的复数形式在语法上是错的，且玩家可见
+- 建议按其 Pluralization 标准命名的修复：通过 ICU MessageFormat（或等价方案）使用该语言的复数类别实现复数规则，并提醒译者俄语字符串需要所有复数形式
+- 将其视为流水线范围的修复 —— 所有受支持区域中的数量字符串都改用 ICU 复数规则 —— 而非仅针对俄语的补丁（波兰语、捷克语和阿拉伯语有同样问题）
+- 不建议用数字阈值变通方案替代规范的复数规则
 
-### Case 4: String key naming conflict between two systems
-**Input**: "Our UI system uses keys like 'button_confirm' and 'button_cancel'. Our dialogue system uses 'confirm' and 'cancel' for the same concepts. Translators are confused about which to use."
+### Case 4: 两个系统之间的字符串键命名冲突
+**Input**: "我们的 UI 系统使用 'button_confirm' 和 'button_cancel' 这样的键。我们的对话系统对相同概念使用 'confirm' 和 'cancel'。译者不知道该用哪个。"
 **Expected behavior**:
-- Identifies the conflict: two systems use different key naming conventions for semantically identical strings, creating duplicate translation work and translator confusion
-- Produces a naming convention resolution in its hierarchical dot-notation standard (e.g., `ui.button.confirm`, `ui.button.cancel`) — all systems use the same key for shared concepts
-- Recommends that shared UI primitives (Confirm, Cancel, Back, OK) use a single canonical key in a shared namespace, referenced by both systems, and records the terms in the glossary
-- Plans the key change so nothing breaks: every reference in both systems moves to the new key, no lookup is left pointing at a retired key (its Key naming convention rule, and Fallback chains: "never display raw keys to players"), existing translations carry over through translation memory, and the code change in both systems is coordinated with their owners before it is made
-- Does NOT recommend maintaining two separate keys for the same concept
+- 识别冲突：两个系统对语义相同的字符串使用不同的键命名约定，造成重复翻译工作和译者困惑
+- 按其层级点号命名标准产出命名约定解决方案（例如 `ui.button.confirm`、`ui.button.cancel`）—— 所有系统对共享概念使用同一个键
+- 建议共享 UI 基础项（Confirm、Cancel、Back、OK）在共享命名空间中使用单一规范键，由两个系统共同引用，并将这些术语记录到术语表
+- 规划键变更以确保不出问题：两个系统中的每个引用都迁移到新键，没有查找仍指向已退役的键（其 Key naming convention 规则及 Fallback chains：「never display raw keys to players」），现有翻译通过翻译记忆库延续，且两个系统中的代码变更在实施前与各自负责人协调
+- 不建议为同一概念维护两个独立的键
 
-### Case 5: Context pass — pipeline accommodates RTL languages
-**Input context**: Target locales include English (en), French (fr), German (de), Arabic (ar), and Hebrew (he).
-**Input**: "Design the localization pipeline for this project."
+### Case 5: Context pass — 流水线适配 RTL 语言
+**Input context**: 目标区域包括英语（en）、法语（fr）、德语（de）、阿拉伯语（ar）和希伯来语（he）。
+**Input**: "为这个项目设计本地化流水线。"
 **Expected behavior**:
-- Identifies Arabic and Hebrew as RTL languages — explicitly calls this out as a pipeline requirement
-- Designs the pipeline to include its RTL requirements: mirrored UI layout, bidirectional text in the same string, numbers kept LTR inside RTL text, flipped directional UI, and testing with native RTL speakers — with RTL rendering coordinated with `ui-programmer`
-- Does NOT design a pipeline that only accounts for LTR languages when RTL locales are specified
-- Covers the Arabic/Hebrew font needs (RTL shaping, ligatures, contextual forms) and plural rules through ICU MessageFormat for every locale
-- Includes all five locales: a fallback chain, and its Locale-Specific Testing Requirements (dates, numbers, currency, time, sorting, input, text rendering) applied to each language, not just the default (en)
+- 识别阿拉伯语和希伯来语为 RTL 语言 —— 明确将其列为流水线要求
+- 设计流水线时纳入其 RTL 要求：镜像 UI 布局、同一字符串中的双向文本、RTL 文本中的数字保持 LTR、翻转方向性 UI，以及由母语 RTL 使用者测试 —— 并与 `ui-programmer` 协调 RTL 渲染
+- 当指定了 RTL 区域时，不会设计只考虑 LTR 语言的流水线
+- 涵盖阿拉伯语/希伯来语字体需求（RTL 字形整形、连字、上下文形式），以及每个区域通过 ICU MessageFormat 处理的复数规则
+- 包含全部五个区域：回退链，以及其 Locale-Specific Testing Requirements（日期、数字、货币、时间、排序、输入、文本渲染）应用到每种语言，而不只是默认语言（en）
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Stays within declared domain (pipeline, extraction, string quality, locale formats, i18n architecture)
-- [ ] Does not produce translations — redirects translation work to human translators/vendors
-- [ ] Flags locale-specific gaps (plural forms, RTL) as quality bugs requiring pipeline changes
-- [ ] Produces a unified key naming convention when conflicts arise, migrated so no lookup is left on a retired key — does not accept dual conventions
-- [ ] Incorporates all provided target locales, including RTL languages, into pipeline design
+- [ ] 保持在声明领域内（流水线、提取、字符串质量、区域格式、i18n 架构）
+- [ ] 不产出翻译 —— 将翻译工作重定向到人类译者/供应商
+- [ ] 将区域特定缺口（复数形式、RTL）标记为需要流水线变更的质量缺陷
+- [ ] 冲突出现时产出统一的键命名约定，并完成迁移使没有查找留在已退役的键上 —— 不接受双重约定
+- [ ] 将所提供的所有目标区域（包括 RTL 语言）纳入流水线设计
 
 ---
 
 ## Coverage Notes
-- Case 3 (plural forms) and Case 5 (RTL) are locale-correctness tests — these affect shipping quality in non-English markets
-- Case 4 (key naming conflict) is a pipeline hygiene test — duplicate keys cause ongoing translator confusion and cost
-- Case 5 requires the target locale list to be in context; if it is not provided, the agent should ask rather than choose — which languages to support is producer's decision
-- No automated runner; review manually or via `/skill-test`
+- Case 3（复数形式）和 Case 5（RTL）是区域正确性测试 —— 这些影响非英语市场的交付质量
+- Case 4（键命名冲突）是流水线卫生测试 —— 重复键会导致持续的译者困惑和成本
+- Case 5 要求目标区域列表在上下文中；若未提供，代理应询问而非自行选择 —— 支持哪些语言是 producer 的决定
+- 无自动运行器；请手动审查或通过 `/skill-test`

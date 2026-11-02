@@ -1,6 +1,6 @@
 ---
 name: ux-design
-description: "Section-by-section UX spec authoring for a screen, flow or HUD. Reads the player journey to provide context; also project-wide accessibility."
+description: "为屏幕、流程或 HUD 逐节撰写 UX 规格。读取玩家旅程以提供上下文；也涵盖项目级无障碍要求。"
 argument-hint: "[screen/flow name] or 'hud' or 'patterns' or 'accessibility'"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Agent, Bash(bash "*/.claude/skills/ux-design/../../hooks/yaml-helper.sh" resolve_config *)
@@ -9,184 +9,180 @@ model: sonnet
 
 !`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow,docs.density`
 
-Resolved above — use as-is. No block → defaults in
-`.claude/docs/config-resolution.md`.
+已在上方解析 — 直接使用。若没有配置块 → 使用
+`.claude/docs/config-resolution.md` 中的默认值。
 
-# UX Design
+# UX 设计
 
-When this skill is invoked:
+当此技能被调用时：
 
-Every `AskUserQuestion` call follows `.claude/docs/automation-modes.md`
-(collaborative asks always · guided major-only · autonomous logs and proceeds;
-`automation_always_ask` categories always prompt).
+每一次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+（collaborative 总是询问 · guided 仅主要节点询问 · autonomous 记录并继续；
+`automation_always_ask` 类别的提问始终弹出）。
 
-**Authoring guidance**: the skeletons below are self-contained — author from them
-directly. When a section needs depth (worked examples, pattern catalogs,
-accessibility criteria), the matching guide has it:
+**撰写指导**：下面的骨架是自包含的 — 直接依据它们撰写。当某个小节需要更深入的说明（示例、模式目录、
+无障碍标准）时，对应的指南可以提供：
 
-| Producing | Guide |
+| 产出 | 指南 |
 |---|---|
-| UX spec | `.claude/docs/templates/guidance/ux-spec-guide.md` |
-| HUD design | `.claude/docs/templates/guidance/hud-design-guide.md` |
-| Interaction patterns | `.claude/docs/templates/guidance/interaction-pattern-library-guide.md` (routes to three topic files) |
-| Accessibility requirements | `.claude/docs/templates/guidance/accessibility-requirements-guide.md` |
+| UX 规格 | `.claude/docs/templates/guidance/ux-spec-guide.md` |
+| HUD 设计 | `.claude/docs/templates/guidance/hud-design-guide.md` |
+| 交互模式 | `.claude/docs/templates/guidance/interaction-pattern-library-guide.md`（会路由到三个主题文件） |
+| 无障碍要求 | `.claude/docs/templates/guidance/accessibility-requirements-guide.md` |
 
-**Load a guide per-section, never whole** — each is organised by section and the
-pointers in the templates name the exact section to read.
+**按小节加载指南，绝不要整份加载** — 每份指南都按小节组织，模板中的指引会指出需要阅读的确切小节。
 
-**`workflow`** (see `.claude/docs/workflow-modes.md`):
-- `full` — a UX spec is required per screen.
-- `standard` — core screens only (main menu, HUD, primary game loop).
-- `minimal` — not required. Can still be run voluntarily.
+**`workflow`**（见 `.claude/docs/workflow-modes.md`）：
+- `full` — 每个屏幕都需要一份 UX 规格。
+- `standard` — 仅核心屏幕（主菜单、HUD、主游玩循环）。
+- `minimal` — 不要求。也可主动运行。
 
-**`docs.density`** — it controls per-section *depth*, where `workflow`
-controls which screens are specced. `modes.rigor` sets both together; set
-`docs.density` explicitly to vary depth alone: `terse` (the default, via `rigor: minimal`) = wireframe descriptions +
-interaction bullets; `balanced` = wireframes + paragraph descriptions of flows
-(`rigor: standard`); `thorough` = full prose including user-research summaries and
-alternative flow considerations. Apply it to every section you author.
+**`docs.density`** — 它控制每个小节的*深度*，而 `workflow` 控制哪些屏幕需要编写规格。`modes.rigor` 会同时设置两者；若只想单独调整深度，可显式设置
+`docs.density`：`terse`（默认，通过 `rigor: minimal`）= 线框图描述 +
+交互要点；`balanced` = 线框图 + 流程的段落式描述
+（`rigor: standard`）；`thorough` = 完整散文，包括用户研究摘要和
+备选流程考量。把它应用到你撰写的每个小节。
 
-## 1. Parse Arguments & Determine Mode
+## 1. 解析参数并确定模式
 
-Four authoring modes exist based on the argument:
+根据参数存在四种撰写模式：
 
-| Argument | Mode | Output file |
+| 参数 | 模式 | 输出文件 |
 |----------|------|-------------|
-| `hud` | HUD design | `design/ux/hud.md` |
-| `patterns` | Interaction pattern library | `design/ux/interaction-patterns.md` |
-| `accessibility` | Project-wide accessibility requirements | `design/accessibility-requirements.md` |
-| Any other value (e.g., `main-menu`, `inventory`) | UX spec for a screen or flow | `design/ux/[argument].md` |
-| No argument | Ask the user | (see below) |
+| `hud` | HUD 设计 | `design/ux/hud.md` |
+| `patterns` | 交互模式库 | `design/ux/interaction-patterns.md` |
+| `accessibility` | 项目级无障碍要求 | `design/accessibility-requirements.md` |
+| 任何其他值（例如 `main-menu`、`inventory`） | 某个屏幕或流程的 UX 规格 | `design/ux/[argument].md` |
+| 无参数 | 询问用户 | （见下文） |
 
-> **`accessibility` is the only mode that writes outside `design/ux/`.** Its
-> output is a project-wide standard the per-screen specs consult, not a spec for
-> one screen — `.claude/docs/workflow-catalog.yaml`, the Pre-Production and
-> Polish gates, and `/architecture-review` all check
-> `design/accessibility-requirements.md` at that exact path. Do not "tidy" it
-> under `design/ux/`: every one of those checks would stop matching, and the
-> Technical Setup → Pre-Production gate would become unpassable.
+> **`accessibility` 是唯一会写入 `design/ux/` 之外的模式。** 它的
+> 输出是各屏幕规格所参照的项目级标准，而不是针对单一屏幕的规格
+> — `.claude/docs/workflow-catalog.yaml`、Pre-Production 与
+> Polish 质量闸门（gate），以及 `/architecture-review` 都会按该确切路径检查
+> `design/accessibility-requirements.md`。不要把它“整理”到
+> `design/ux/` 下：上述每一项检查都会因此不再匹配，而且
+> Technical Setup → Pre-Production 质量闸门将变得无法通过。
 
-**If no argument is provided**, do not fail — ask instead. Use `AskUserQuestion`:
-- "What are we designing today?"
-  - Options: "A specific screen or flow (I'll name it)", "The game HUD", "The interaction pattern library", "The project-wide accessibility requirements", "I'm not sure — help me figure it out"
+**如果未提供参数**，不要失败 — 改为询问。使用 `AskUserQuestion`：
+- “我们今天要设计什么？”
+  - 选项：“某个具体的屏幕或流程（我来命名）”、“游戏 HUD”、“交互模式库”、“项目级无障碍要求”、“我不确定 —— 帮我一起梳理”
 
-If the user selects "I'll name it" or types a screen name, normalize it to kebab-case
-for the filename (e.g., "Main Menu" becomes `main-menu`).
+如果用户选择“我来命名”或输入某个屏幕名称，将其规范化为 kebab-case
+作为文件名（例如 “Main Menu” 变为 `main-menu`）。
 
 ---
 
-## 2. Gather Context (Read Phase)
+## 2. 收集上下文（读取阶段）
 
-**Read `references/2-gather-context.md` now and follow it** — this phase's steps are in that file, not here. Read it again if the conversation was compacted or resumed during this phase.
+**现在阅读 `references/2-gather-context.md` 并按其执行** — 这一阶段的步骤在该文件中，不在这里。如果本阶段对话被压缩或恢复过，请重新阅读它。
 
-## 3. Create File Skeleton
+## 3. 创建文件骨架
 
-**Read `references/3-file-skeleton.md` now and follow it** — this phase's steps are in that file, not here. Read it again if the conversation was compacted or resumed during this phase.
+**现在阅读 `references/3-file-skeleton.md` 并按其执行** — 这一阶段的步骤在该文件中，不在这里。如果本阶段对话被压缩或恢复过，请重新阅读它。
 
-## 4. Section-by-Section Authoring
+## 4. 逐节撰写
 
-**Read `references/4-authoring.md` now and follow it** — this phase's steps are in that file, not here. Read it again if the conversation was compacted or resumed during this phase.
+**现在阅读 `references/4-authoring.md` 并按其执行** — 这一阶段的步骤在该文件中，不在这里。如果本阶段对话被压缩或恢复过，请重新阅读它。
 
-### Section guidance — read the ONE file for the active mode
+### 小节指导 — 只读取当前模式对应的那一个文件
 
-Per-section authoring guidance lives in its own file per mode. **When you reach
-Phase 4, read only the file matching the mode resolved in Section 1; never load
-the other two.**
+各模式的小节撰写指导存放于各自的文件中。**当你进入
+Phase 4 时，只读取与第 1 节中确定的模式相匹配的那个文件；绝不要加载
+另外两个。**
 
-| Mode | Guidance file |
+| 模式 | 指导文件 |
 |------|---------------|
-| UX Spec (screen or flow) | `references/sections-ux-spec.md` |
-| HUD Design | `references/sections-hud.md` |
-| Interaction Pattern Library | `references/sections-patterns.md` |
-| Accessibility Requirements | `.claude/docs/templates/guidance/accessibility-requirements-guide.md` |
+| UX 规格（屏幕或流程） | `references/sections-ux-spec.md` |
+| HUD 设计 | `references/sections-hud.md` |
+| 交互模式库 | `references/sections-patterns.md` |
+| 无障碍要求 | `.claude/docs/templates/guidance/accessibility-requirements-guide.md` |
 
-> The accessibility guidance lives under `templates/guidance/` rather than this
-> skill's `references/` because the template it documents
-> (`.claude/docs/templates/accessibility-requirements.md`) is consumed by
-> `/ux-review` and the gate files too. Same rule applies: load only the part
-> covering the section you are authoring, never the whole file.
+> 无障碍指导位于 `templates/guidance/` 而不是本技能的 `references/`，
+> 因为它所记录的模板
+> （`.claude/docs/templates/accessibility-requirements.md`）也被
+> `/ux-review` 以及各质量闸门文件使用。规则相同：只加载覆盖你正在撰写的那个小节的部分，
+> 绝不要加载整个文件。
 
-Apply `docs.density` (Section 1) to whatever that file tells you to author — it
-controls the depth of each section, not which sections exist.
+将 `docs.density`（第 1 节）应用到该文件要求你撰写的任何内容上 — 它
+控制每个小节的深度，而不是存在哪些小节。
 
-## 5. Cross-Reference Check
+## 5. 交叉参照检查
 
-**Read `references/5-crossref-handoff.md` now and follow it** — this phase's steps are in that file, not here. Read it again if the conversation was compacted or resumed during this phase.
+**现在阅读 `references/5-crossref-handoff.md` 并按其执行** — 这一阶段的步骤在该文件中，不在这里。如果本阶段对话被压缩或恢复过，请重新阅读它。
 
-## 7. Recovery & Resume
+## 7. 恢复与续写
 
-If the session is interrupted (compaction, crash, new session):
+如果会话被中断（压缩、崩溃、新会话）：
 
-1. Read `production/session-state/active.md` — it records the current screen
-   and which sections are complete.
-2. Read `design/ux/[filename].md` — sections with real content are done;
-   sections with `[To be designed]` still need work.
-3. Resume from the next incomplete section — no need to re-discuss completed ones.
+1. 读取 `production/session-state/active.md` — 它记录了当前屏幕
+   以及哪些小节已完成。
+2. 读取 `design/ux/[filename].md` — 含有真实内容的小节已完成；
+   仍为 `[To be designed]` 的小节还需要处理。
+3. 从下一个未完成的小节继续 — 无需重新讨论已完成的小节。
 
-This is why incremental writing matters: every approved section survives any
-disruption.
+这就是增量写入重要性的原因：每个已批准的小节都能在任何中断后保留下来。
 
 ---
 
-## 8. Specialist Agent Routing
+## 8. 专家代理路由
 
-This skill uses `ux-designer` as the primary agent (set in frontmatter). For
-specific sub-topics, additional context or coordination may be needed:
+此技能使用 `ux-designer` 作为主代理（在 frontmatter 中设置）。对于
+特定子主题，可能需要额外的上下文或协调：
 
-| Topic | Coordinate with |
+| 主题 | 协调对象 |
 |-------|----------------|
-| Visual aesthetics, color, layout feel | `art-director` — UX spec defines zones; art defines how they look |
-| Implementation feasibility (engine constraints) | `ui-programmer` — before finalizing component inventory |
-| Gameplay data requirements | `game-designer` — when data ownership is unclear |
-| Narrative/lore visible in the UI | `narrative-director` — for flavor text, item names, lore panels |
-| Accessibility tier decisions | Recorded by this session (`/ux-design accessibility`; the user picks the tier) against the criteria `accessibility-specialist` defines and audits — consult it when a requirement's criterion is unclear |
+| 视觉美学、色彩、布局感受 | `art-director` — UX 规格定义分区；美术定义它们的外观 |
+| 实现可行性（引擎约束） | `ui-programmer` — 在最终确定组件清单之前 |
+| 玩法数据需求 | `game-designer` — 当数据归属不明确时 |
+| UI 中可见的叙事/背景设定 | `narrative-director` — 用于风味文本、物品名称、背景设定面板 |
+| 无障碍等级决策 | 由本会话记录（`/ux-design accessibility`；由用户选择等级），依据 `accessibility-specialist` 定义并审核的标准 — 当某项要求的判定标准不明确时咨询它 |
 
-When delegating to another agent via the `Agent` tool:
-- Provide: screen name, game concept summary, the specific question needing expert input
-- The agent returns analysis to this session
-- This session presents the agent's output to the user
-- The user decides; this session writes to file
-- Agents do NOT write to files directly — this session owns all file writes
-
----
-
-## Collaborative Protocol
-
-**In `collaborative` mode (the default).** For `guided` and `autonomous` modes,
-see the per-mode rules in `.claude/docs/automation-modes.md` — the steps below
-describe what collaborative mode requires, not what applies universally.
-
-This skill follows the collaborative design principle at every step:
-
-1. **Question -> Options -> Decision -> Draft -> Approval** for every section
-2. **AskUserQuestion** at every decision point (Explain -> Capture pattern):
-   - Phase 2: "Ready to start, or need more context?"
-   - Phase 3: "May I create the skeleton?"
-   - Phase 4 (each section): design questions, approach options, draft approval
-   - Phase 5: "Run cross-reference check? What's next?"
-3. **"May I write to [filepath]?"** before the skeleton and before each section write
-4. **Incremental writing**: Each section is written to file immediately after approval
-5. **Session state updates**: After every section write
-
-**Aesthetic deference**: When layout or visual choices come down to personal taste,
-present the options and ask. Do not select a layout because it is "standard" — always
-confirm. The user is the creative director.
-
-**Conflict surfacing**: When a GDD requirement and the available screen real estate
-conflict, surface the conflict and present resolution options. Never silently drop
-a requirement. Never silently expand the layout without flagging it.
-
-**Never** auto-generate the full spec and present it as a fait accompli.
-**Never** write a section without user approval.
-**Never** contradict an existing approved UX spec without flagging the conflict.
-**Always** show where decisions come from (GDD requirements, player journey, user choices).
-
-Verdict: **COMPLETE** — UX spec written and approved section by section.
+通过 `Agent` 工具委派给其他代理时：
+- 提供：屏幕名称、游戏概念摘要、需要专家输入的具体问题
+- 代理将分析结果返回本会话
+- 本会话向用户展示代理的输出
+- 由用户做决定；由本会话写入文件
+- 代理**不**直接写文件 — 本会话负责所有文件写入
 
 ---
 
-## Recommended Next Steps
+## 协作协议
 
-- Run `/ux-review [filename]` to validate this spec before it enters the implementation pipeline
-- Run `/ux-design [next-screen]` to continue designing remaining screens or flows
-- Run `/gate-check production` once all key screens have approved UX specs
+**在 `collaborative` 模式（默认）下适用。** 对于 `guided` 与 `autonomous` 模式，
+见 `.claude/docs/automation-modes.md` 中的各模式规则 — 下面的步骤
+描述的是 collaborative 模式的要求，而非普遍适用的行为。
+
+此技能在每一步都遵循协作设计原则：
+
+1. 每个小节都遵循 **提问 -> 选项 -> 决策 -> 草稿 -> 批准**
+2. 在每个决策点使用 **AskUserQuestion**（解释 -> 捕获 模式）：
+   - Phase 2：“准备好开始了吗，还是需要更多上下文？”
+   - Phase 3：“我可以创建骨架吗？”
+   - Phase 4（每个小节）：设计问题、方案选项、草稿批准
+   - Phase 5：“要运行交叉参照检查吗？接下来做什么？”
+3. 在创建骨架之前以及每次写入小节之前，询问 **“我可以写入 [filepath] 吗？”**
+4. **增量写入**：每个小节在批准后立即写入文件
+5. **会话状态更新**：每次写入小节之后
+
+**美学上的尊重**：当布局或视觉选择归结为个人品味时，
+展示选项并询问。不要因为某个布局是“标准做法”就选择它 — 始终
+确认。用户才是创意总监。
+
+**冲突显性化**：当 GDD 要求与可用的屏幕空间发生
+冲突时，显性呈现冲突并提供解决选项。绝不要悄悄舍弃某项要求。
+绝不要在未提示的情况下悄悄扩展布局。
+
+**绝不**自动生成完整规格并把它当作既成事实呈现。
+**绝不**在未获用户批准的情况下写入任何小节。
+**绝不**在未提示冲突的情况下违背已有的、已批准的 UX 规格。
+**始终**展示决策的来源（GDD 要求、玩家旅程、用户选择）。
+
+结论：**COMPLETE** — UX 规格已逐节完成撰写并获得批准。
+
+---
+
+## 推荐后续步骤
+
+- 运行 `/ux-review [filename]`，在规格进入实现流水线之前进行验证
+- 运行 `/ux-design [next-screen]`，继续设计剩余的屏幕或流程
+- 当所有关键屏幕的 UX 规格都已批准后，运行 `/gate-check production`

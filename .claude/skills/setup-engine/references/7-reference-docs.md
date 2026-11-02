@@ -1,72 +1,72 @@
-# /setup-engine — Section 7: Populate Engine Reference Docs
+# /setup-engine — 第 7 节：填充引擎参考资料
 
-> Part of `/setup-engine`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> 属于 `/setup-engine` 的一部分。`SKILL.md` 指明何时读取本文件；它解析出的
+> 设置及其后续标题下的规则在此仍然适用。
 
-## 7. Populate Engine Reference Docs
+## 7. 填充引擎参考资料
 
-**In this file:**
+**本文件内容：**
 
-- First: does a reference set already exist for this engine?
-- Sourcing rule for everything written in this section
-- If WITHIN training data (LOW RISK):
-- If BEYOND training data (MEDIUM or HIGH RISK):
+- 首先：此引擎是否已有参考资料集？
+- 本节所有内容的取材来源规则
+- 如果在训练数据之内（LOW RISK）：
+- 如果超出训练数据（MEDIUM 或 HIGH RISK）：
 
-### First: does a reference set already exist for this engine?
+### 首先：此引擎是否已有参考资料集？
 
-**Check before doing anything else.** The template ships
-`docs/engine-reference/godot/`, `unity/` and `unreal/` **already populated**, so
-"the directory exists and pins a version" is the state of *every* fresh project,
-not an edge case. Both branches below say "create", and following either one
-literally on a pre-populated directory either overwrites curated content or
-leaves `project.yaml` and the CLAUDE.md-imported reference disagreeing.
+**在做任何其他事情之前先检查。** 模板自带
+**已填充**的 `docs/engine-reference/godot/`、`unity/` 和 `unreal/`，因此
+"目录存在并固定了版本"是*每个*新项目的状态，
+而不是边缘情况。下面的两个分支都写着"创建"，若在已预填充的目录上
+照字面执行其中任何一个，要么覆盖精心整理的内容，要么
+让 `project.yaml` 与 CLAUDE.md 导入的参考资料互不一致。
 
-Read `docs/engine-reference/<engine>/VERSION.md` and compare its
-**Engine Version** to the version chosen in Section 3:
+读取 `docs/engine-reference/<engine>/VERSION.md`，将其
+**Engine Version** 与第 3 节选定的版本比较：
 
-- **No directory, or no `VERSION.md`** → create, using the risk branch below.
-- **Same version** → nothing to regenerate. Refresh `Last Docs Verified` only if you
-  actually re-verified against the docs this run. Do not restamp a date you did
-  not check. The one row still written is `Installed at pin time`, from
-  Section 3 — its probe result is recorded whatever the outcome, after asking
-  "May I record `Installed at pin time: [result]` in
-  `docs/engine-reference/<engine>/VERSION.md`?" (it is a tracked file).
-- **Directory pins an OLDER version than the one chosen** → **update, do not
-  replace.** This is the common case. Show the changes below, then ask "May I
-  update the `docs/engine-reference/<engine>/` files for [version]?" before editing.
-  1. Edit `VERSION.md` in place: new **Engine Version**, new **Project Pinned**
-     and **Last Docs Verified**, the `Installed at pin time` row from Section 3,
-     and a new row in the post-cutoff timeline for each version added.
-  2. **Append** to `breaking-changes.md`, `deprecated-apis.md` and
-     `current-best-practices.md` under a heading naming the version span
-     (`## 4.6 → 4.7`). Never truncate the older spans — a project migrating
-     across two versions still needs the earlier one.
-  3. Re-grade the older timeline rows if the cutoff moved past them.
-- **Directory pins a NEWER version than the one chosen** → stop and ask. Someone
-  pinned forward deliberately, or the version choice is wrong. Do not silently
-  downgrade a curated reference.
+- **无目录，或无 `VERSION.md`** → 创建，使用下面的风险分支。
+- **版本相同** → 无需重新生成。仅当你确实在本次运行中对照文档重新验证过时，
+  才刷新 `Last Docs Verified`。不要重新盖上你未核实的日期。
+  仍要写入的一行是 `Installed at pin time`，来自
+  第 3 节 — 无论结果如何都要记录其探测结果，先询问
+  "我可以在 `docs/engine-reference/<engine>/VERSION.md` 中记录
+  `Installed at pin time: [result]` 吗？"（这是受跟踪的文件）。
+- **目录固定的版本比所选版本更旧** → **更新，而不是替换。**
+  这是常见情况。展示下面的更改，然后询问"我可以更新
+  `docs/engine-reference/<engine>/` 中针对 [version] 的文件吗？"再编辑。
+  1. 就地编辑 `VERSION.md`：新的 **Engine Version**、新的 **Project Pinned**
+     和 **Last Docs Verified**、第 3 节的 `Installed at pin time` 行，
+     以及为每个新增版本在截止后时间线中新增一行。
+  2. 在 `breaking-changes.md`、`deprecated-apis.md` 和
+     `current-best-practices.md` 中**追加**内容，标题指明版本跨度
+     （`## 4.6 → 4.7`）。绝不要截断更早的跨度 — 跨两个版本
+     迁移的项目仍然需要更早的那个。
+  3. 如果截止时间已越过更早的时间线行，重新评级这些行。
+- **目录固定的版本比所选版本更新** → 停止并询问。要么是有人
+  有意向前固定，要么是版本选择有误。不要静默降级
+  精心整理的参考资料。
 
-### Sourcing rule for everything written in this section
+### 本节所有内容的取材来源规则
 
-**Never fill a gap from training data. Write the gap down instead.**
+**绝不要用训练数据填补空白。把空白写下来。**
 
-The whole purpose of these files is to be the thing agents consult *instead of*
-their training data. A confidently wrong entry here is worse than no entry: it
-produces work that looks verified and is not.
+这些文件的全部意义在于成为 agent *替代*其训练数据
+查阅的东西。这里一条自信的错误条目比没有条目更糟：它
+会产生看起来已验证、实际并未验证的工作。
 
-- Every claim must come from a page you fetched this run. Record the URL.
-- If the official docs do not state something the template asks for — a release
-  date, a subsystem's behaviour, web-export specifics — write
-  **`NOT SOURCEABLE — <what>, not stated at <url>`** and move on.
-- A `NOT SOURCEABLE` line is a successful outcome, not a failure to finish.
-- Do not infer one fact from an adjacent one. "The migration guide lists no
-  physics change" is not "the physics default is unchanged"; if you record the
-  inference, label it as an inference and name what it rests on.
+- 每一项声明都必须来自你在本次运行中抓取的页面。记录 URL。
+- 如果官方文档没有说明模板要求的内容 — 发布日期、
+  子系统行为、Web 导出细节 — 写入
+  **`NOT SOURCEABLE — <what>, not stated at <url>`** 并继续。
+- `NOT SOURCEABLE` 行是成功的结果，不是未能完成。
+- 不要从一个相邻事实推断另一个事实。"迁移指南未列出物理变更"
+  不等于"物理默认值未变"；如果你记录了推断，将其标注为推断，
+  并说明它依据什么。
 
-### If WITHIN training data (LOW RISK):
+### 如果在训练数据之内（LOW RISK）：
 
-Ask: "May I create `docs/engine-reference/<engine>/VERSION.md`?" Wait for
-confirmation, then create this minimal file:
+询问："我可以创建 `docs/engine-reference/<engine>/VERSION.md` 吗？"等待
+确认，然后创建这个最小文件：
 
 ```markdown
 # [Engine] — Version Reference
@@ -87,29 +87,29 @@ docs are optional but can be added later if agents suggest incorrect APIs.
 Run `/setup-engine refresh` to populate full reference docs at any time.
 ```
 
-Do NOT create breaking-changes.md, deprecated-apis.md, etc. — they would
-add context cost with minimal value.
+不要创建 breaking-changes.md、deprecated-apis.md 等 — 它们会增加
+上下文成本，却价值有限。
 
-### If BEYOND training data (MEDIUM or HIGH RISK):
+### 如果超出训练数据（MEDIUM 或 HIGH RISK）：
 
-Create the full reference doc set by searching the web:
+通过网络搜索创建完整的参考资料集：
 
-1. **Search for the official migration/upgrade guide**:
+1. **搜索官方迁移/升级指南**：
    - `"[engine] [old version] to [new version] migration guide"`
    - `"[engine] [version] breaking changes"`
    - `"[engine] [version] changelog"`
    - `"[engine] [version] deprecated API"`
 
-2. **Fetch and extract** from official documentation:
-   - Breaking changes between each version from the training cutoff to current
-   - Deprecated APIs with replacements
-   - New features and best practices
+2. **从官方文档中抓取并提取**：
+   - 从训练截止时间到当前版本之间每个版本的破坏性变更
+   - 弃用的 API 及其替代方案
+   - 新功能与最佳实践
 
-Ask: "May I create the engine reference docs under `docs/engine-reference/<engine>/`?"
+询问："我可以创建 `docs/engine-reference/<engine>/` 下的引擎参考资料吗？"
 
-Wait for confirmation before writing any files.
+在写入任何文件之前等待确认。
 
-3. **Create the full reference directory**:
+3. **创建完整的参考资料目录**：
    ```
    docs/engine-reference/<engine>/
    ├── VERSION.md              # Version pin + knowledge gap analysis
@@ -119,11 +119,10 @@ Wait for confirmation before writing any files.
    └── modules/                # Per-subsystem references (create as needed)
    ```
 
-4. **Populate each file** using real data from the web searches, following
-   the format established in existing reference docs. Every file must have
-   a "Last verified: [date]" header.
+4. **使用网络搜索中的真实数据填充每个文件**，遵循
+   现有参考资料中确立的格式。每个文件都必须有
+   "Last verified: [date]" 头部。
 
-5. **For module files**: Only create modules for subsystems where significant
-   changes occurred. Don't create empty or minimal module files.
+5. **对于模块文件**：只为发生了重大变更的子系统创建模块。不要创建空白或最简的模块文件。
 
 ---

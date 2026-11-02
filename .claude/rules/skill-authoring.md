@@ -4,93 +4,57 @@ paths:
   - ".claude/agents/**"
 ---
 
-# Skill and Gate Authoring
+# 技能与质量闸门编写规范
 
-**A check that cannot report that it did not run is not a check.**
+**一个无法报告「自己没有运行」的检查，不是检查。**
 
-The same shape recurs across unrelated subsystems, so treat it as the default
-risk in any check you write, not as an unusual mistake.
+同样的形态在不同子系统中反复出现，因此请把它当作你编写的任何检查的默认风险，而不是不寻常的错误。
 
-The failure is always the same trade: a step that could not run produces output
-indistinguishable from a step that ran and found nothing. Nobody reading the
-output can tell which happened, and the permissive reading is the one that gets
-believed, because it is the one that lets work proceed.
+失败总是同一种取舍：一个无法运行的步骤，其输出与一个运行了但什么也没发现的步骤无法区分。读输出的人无法分辨是哪种情况，而宽松的解读总是被相信，因为它让工作得以继续。
 
-## The five obligations
+## 五项义务
 
-### 1. Every gating verdict needs a "could not assess" value
+### 1. 每个门禁结论都需要一个「无法评估」值
 
-If a skill emits a verdict something else depends on, its vocabulary must include
-one — `NOT ASSESSED`, or the local equivalent — and the report must say *which*
-of the reasons applied. A vocabulary of three confident verdicts forces every
-unknown into a claim.
+如果一个技能会给出别的环节所依赖的结论，它的词汇表就必须包含一个——`NOT ASSESSED`，或本地等价物——并且报告必须说明适用的是*哪一条*原因。只有三个自信结论的词汇表会把每个未知都逼成一个断言。
 
-**Rank it deliberately.** It must outrank the pass value: a run that could not
-assess part of its scope has not established that the scope is good. It must
-**not** outrank the failure values: a known problem is more actionable than an
-unknown, and demoting a real failure behind an access problem buries it.
+**刻意给它排位。** 它必须高于通过值：一次无法评估部分范围的运行，并没有确立该范围是好的。它必须**不**高于失败值：已知问题比未知问题更可行动，把真实失败降到访问问题之后会把它掩埋。
 
-**`NOT ASSESSED` is not a gentler failure verdict.** "I looked and found nothing"
-and "I could not look" have different fixes — one needs work done, the other
-needs access granted or an input classified. Collapsing them sends the reader to
-the wrong fix.
+**`NOT ASSESSED` 不是更温和的失败结论。** 「我看了，什么也没发现」和「我无法查看」有不同的修复方式——一个需要做事，另一个需要授予访问权限或对输入进行分类。把两者混为一谈会把读者引向错误的修复。
 
-### 2. An absent value may not default to the permissive one
+### 2. 缺失值不得默认为宽松值
 
-Especially when **nothing in the framework writes that key**. Before defaulting,
-check who sets it: a key with a reader and no writer takes its default branch on
-every project that ever runs, so that branch is not an edge case — it is the
-behaviour.
+尤其是当**框架中没有任何东西写入该键**时。在采用默认值之前，先检查谁设置它：一个只有读者、没有写者的键，会在每个运行过的项目上走默认分支，因此那个分支不是边缘情况——它就是行为。
 
-Over-running a check costs minutes. Under-running one ships the category unrun.
+过度运行一个检查只花几分钟。欠运行一个检查则会让整个类别未被检查就发布。
 
-### 3. A skipped step announces itself
+### 3. 跳过的步骤要自我声明
 
-In the output, not only in the source. If a phase, category, or agent did not run
-— wrong engine, missing config, unavailable input, a `team.size` that collapses
-the pipeline — the artifact must say so by name. A silent skip and a successful
-one are the same artifact.
+在输出中声明，而不仅在源码中。如果某个阶段、类别或代理没有运行——引擎不对、配置缺失、输入不可用、`team.size` 使流水线塌缩——产出物必须点名说明。静默跳过和成功跳过会产出同样的产出物。
 
-A rule enforced in the body and never surfaced in the output is, to the reader,
-identical to no rule at all.
+只在正文中执行、从不出现在输出中的规则，对读者来说与没有规则完全相同。
 
-### 4. Never assert what you cannot source — and wire the gap to the verdict
+### 4. 绝不断言你无法溯源的内容——并把缺口接到结论上
 
-Where this repo pins external facts (`docs/engine-reference/**`), do not fill a
-gap from training data. Write the gap down instead: `NOT SOURCEABLE — <what> is
-not covered by <path>`.
+在本仓库固定外部事实的地方（`docs/engine-reference/**`），不要用训练数据填补缺口。把缺口写下来：`NOT SOURCEABLE — <what> is not covered by <path>`。
 
-**Flagging alone is not enough.** A named gap that does not reach the verdict is
-just a comment. Wire it: a category with no sourced inputs must force obligation
-1's value, so the gap makes the pass unreachable rather than sitting beside it.
+**仅标记是不够的。** 一个没有到达结论的具名缺口只是一句注释。把它接上：没有可溯源输入的类别必须强制采用义务 1 的值，使缺口让通过不可达，而不是与通过并列存在。
 
-A confidently wrong pattern list is worse than an absent one — it produces a scan
-that looks thorough, finds nothing, and reads as a pass.
+一个自信但错误的模式列表比缺失的列表更糟——它会产出一个看起来彻底、什么也没找到、却被读成通过的扫描。
 
-### 5. Gates derive their covered set; they do not enumerate it
+### 5. 质量闸门推导其覆盖集合，而不是枚举它
 
-An allowlist pins what was known when it was written and is silent about
-everything added since. Derive the set from what the repo actually contains, so a
-new skill or agent cannot ship outside coverage by simply not being on a list.
+允许列表固定了编写时已知的内容，并对之后新增的一切保持沉默。从仓库实际包含的内容推导集合，这样新技能或新代理就不能仅仅因为不在列表上而游离于覆盖范围之外。
 
-**If the category is not mechanically crisp, say so in the gate and keep the
-list.** A gate that fires on forty files does not get fixed, it gets muted — and
-a muted gate is worse than a narrow one, because it reads as coverage. When you
-keep a list, record *why* derivation failed and state the obligation to extend it.
+**如果类别在机械上不清晰，就在闸门中说明，并保留列表。** 一个对四十个文件触发的闸门不会被修复，只会被静音——而静音的闸门比狭窄的闸门更糟，因为它读起来像覆盖。当你保留列表时，记录推导*为什么*失败，并声明扩展它的义务。
 
-Two further gate rules:
+另外两条闸门规则：
 
-- **Assert something that cannot be true by accident.** A check for the word
-  "unity" is satisfied by a file path, and case-insensitively by "community".
-  Assert a distinctive token instead.
-- **A gate you have not watched fail is not a gate.** Break the thing it guards,
-  confirm it fails, restore. One mutation per tool invocation — a batch that
-  times out leaves the repo holding a broken file, and `trap … EXIT` does not
-  survive `SIGTERM`.
+- **断言一些不可能偶然为真的事情。** 检查单词「unity」会被文件路径满足，也会被「community」大小写不敏感地满足。改为断言一个独特标记。
+- **没有亲眼见它失败的闸门不是闸门。** 破坏它守护的东西，确认它失败，再恢复。每次工具调用只做一次变异——一批超时会留下仓库中一个损坏的文件，而 `trap … EXIT` 无法在 `SIGTERM` 下存活。
 
-## The test to apply
+## 要应用的测试
 
-Before shipping a skill or gate, ask: **if this step silently did not run, what
-would the output look like?**
+在发布技能或闸门前，问：**如果这一步静默地没有运行，输出会是什么样？**
 
-If the answer is "the same", it is not finished.
+如果答案是「一样」，它就没有完成。

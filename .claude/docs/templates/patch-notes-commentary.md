@@ -1,4 +1,4 @@
 ## Developer Commentary
 ### [Topic]
-> [Developer insight into a major change — why it was made, what was considered,
-> what the team learned. Written in first-person team voice.]
+> [开发者对重大改动的洞察——为何做出该改动、考虑过什么、
+> 团队学到了什么。以团队第一人称口吻书写。]

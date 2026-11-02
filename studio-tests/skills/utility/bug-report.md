@@ -2,289 +2,257 @@
 
 ## Skill Summary
 
-`/bug-report` has four modes, chosen from the argument: a plain description
-(**Description Mode**), `analyze [path]` (**Analyze Mode** — read code and
-report potential bugs), `verify [BUG-ID]` (**Verify Mode**) and `close [BUG-ID]`
-(**Close Mode**). With no argument it asks for a bug description first.
+`/bug-report` 有四种模式，由参数选择：纯描述（**Description Mode**）、`analyze [path]`（**Analyze Mode**——读取代码并报告潜在缺陷）、`verify [BUG-ID]`（**Verify Mode**）和 `close [BUG-ID]`（**Close Mode**）。无参数时，它先询问缺陷描述。
 
-Description Mode parses the description, searches the codebase with Grep/Glob
-for related files, and drafts the report template: Title, ID `BUG-[NNNN]`,
-Severity on the `S1-Critical / S2-High / S3-Medium / S4-Low` scale, Priority
-on the `P1-Fix this sprint / P2-Fix soon / P3-Backlog / P4-Won't fix` ladder
-(which must match `/bug-triage`), Status `Open`, Classification (Category,
-System, Frequency, Regression — for a bug spanning systems, `System` is the one
-whose code must change), Environment (Build, Platform, Scene/Level),
-Reproduction Steps with Expected and Actual Result, and Technical Context
-(likely affected files, related systems). It presents the report and asks
-"May I write this to `production/qa/bugs/BUG-[NNNN].md`?" — `Verdict: **COMPLETE**`
-on write, `Verdict: **BLOCKED**` if declined. The ID is the highest existing
-number plus one; several reports in one run (Analyze Mode) take consecutive IDs,
-and one ask names every file. Next steps: `/bug-triage`, and
-`/hotfix [BUG-ID]` for S1/S2. No director gates are used.
+Description Mode 解析描述，用 Grep/Glob 搜索代码库中相关文件，并起草报告模板：Title、ID `BUG-[NNNN]`、Severity 采用 `S1-Critical / S2-High / S3-Medium / S4-Low` 量表、Priority 采用 `P1-Fix this sprint / P2-Fix soon / P3-Backlog / P4-Won't fix` 阶梯（必须与 `/bug-triage` 一致）、Status `Open`、Classification（Category、System、Frequency、Regression——对于跨系统缺陷，`System` 是代码必须变更的那个系统）、Environment（Build、Platform、Scene/Level）、带 Expected 和 Actual Result 的 Reproduction Steps，以及 Technical Context（可能受影响的文件、相关系统）。它展示报告并询问 "May I write this to `production/qa/bugs/BUG-[NNNN].md`?"——写入后为 `Verdict: **COMPLETE**`，被拒绝时为 `Verdict: **BLOCKED**`。ID 为现有最大编号加一；一次运行中生成多个报告（Analyze Mode）会使用连续 ID，一次询问会指明所有文件。下一步：`/bug-triage`，S1/S2 用 `/hotfix [BUG-ID]`。不使用任何总监闸门。
 
-Verify and Close Mode find the bug file by its number, whatever its padding —
-an older three-digit file with a slug included. Verify runs a related test with
-`commands.test` from `project.yaml` (never a runner line from memory). When no
-test ran — none covers the bug, `commands.test` is unset, or the run did not
-complete — or the bug is Visual or UI, it asks whether the user played the
-reproduction steps: `[No longer occurs]` → VERIFIED FIXED, recorded as a manual
-verification with the build; `[Still occurs]` → STILL PRESENT; `[Not played yet]`
-→ CANNOT VERIFY. It asks "May I update" before setting the Status; only a
-`Verified Fixed` bug can be closed, and Close Mode shows the closure record and
-asks before it writes anything.
+Verify 和 Close Mode 按编号查找缺陷文件，无论其补零形式如何——包括带 slug 的旧式三位数文件。Verify 使用 `project.yaml` 中的 `commands.test` 运行相关测试（绝不凭记忆写运行器命令行）。当没有测试运行——没有测试覆盖该缺陷、`commands.test` 未设置或运行未完成——或缺陷为 Visual 或 UI 时，它会询问用户是否复现了步骤：`[No longer occurs]` → VERIFIED FIXED，记录为针对该构建的人工验证；`[Still occurs]` → STILL PRESENT；`[Not played yet]` → CANNOT VERIFY。它在设置 Status 前询问 "May I update"；只有 `Verified Fixed` 的缺陷才能关闭，Close Mode 会展示关闭记录并在写入任何内容前询问。
 
 ---
 
 ## Static Assertions (Structural)
 
-Checked against the SKILL.md by `/skill-test spec` — no fixture needed.
+由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] Has required frontmatter fields: `name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`
-- [ ] Has ≥2 phase headings
-- [ ] Contains verdict keywords: COMPLETE, BLOCKED (and VERIFIED FIXED / STILL PRESENT / CANNOT VERIFY for Verify Mode)
-- [ ] Contains "May I write" language before writing the report and "May I update" before changing an existing bug file
-- [ ] Has a next-step handoff (`/bug-triage`; `/hotfix [BUG-ID]` for S1/S2; `/bug-report verify` → `close`)
+- [ ] 具备必需的前置元数据字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 至少有 ≥2 个阶段标题
+- [ ] 包含结论关键词：COMPLETE、BLOCKED（以及 Verify Mode 的 VERIFIED FIXED / STILL PRESENT / CANNOT VERIFY）
+- [ ] 在写入报告前包含 "May I write" 用语，在更改现有缺陷文件前包含 "May I update"
+- [ ] 具备下一步交接（`/bug-triage`；S1/S2 用 `/hotfix [BUG-ID]`；`/bug-report verify` → `close`）
 
 ---
 
 ## Director Gate Checks
 
-None. `/bug-report` is an operational documentation skill. No director gates apply.
+无。`/bug-report` 是一个运维文档技能。不适用任何总监闸门。
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非某个用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且不存在 `project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
 
 ---
 
 ## Test Cases
 
-### Case 1: Happy Path — User describes a crash, full report produced
+### Case 1: 正常路径 — 用户描述崩溃，生成完整报告
 
 **Fixture:**
-- `production/qa/bugs/` does not exist yet
-- The code root contains a boss-arena scene script
+- `production/qa/bugs/` 尚不存在
+- 代码根目录包含一个首领竞技场场景脚本
 
 **Input:** `/bug-report The game crashes to desktop every time the player enters the boss arena — progress is blocked`
 
 **Expected behavior:**
-1. Description Mode (no keyword)
-2. Skill parses the description and greps the codebase for boss-arena files
-3. Drafts the report template: Category `Crash`, Severity `S1-Critical`,
-   Status `Open`, reproduction steps, Expected Result (no crash) and Actual
-   Result (crash to desktop), likely affected files from the search
-4. Globs `production/qa/bugs/BUG-*.md`, finds none, allocates `BUG-0001`, presents the
-   report and asks "May I write this to `production/qa/bugs/BUG-0001.md`?"
-5. On approval writes the file, creating `production/qa/bugs/`; Verdict is COMPLETE
-6. Next steps: `/bug-triage`, and `/hotfix [BUG-ID]` because the bug is S1
+1. Description Mode（无关键词）
+2. 技能解析描述并 grep 代码库中的首领竞技场文件
+3. 起草报告模板：Category `Crash`、Severity `S1-Critical`、
+   Status `Open`、复现步骤、Expected Result（无崩溃）和 Actual
+   Result（崩溃到桌面）、根据搜索得到的可能受影响文件
+4. glob `production/qa/bugs/BUG-*.md`，未找到任何文件，分配 `BUG-0001`，展示
+   报告并询问 "May I write this to `production/qa/bugs/BUG-0001.md`?"
+5. 获批后写入文件，并创建 `production/qa/bugs/`；结论为 COMPLETE
+6. 下一步：`/bug-triage`，以及因为缺陷为 S1 而使用 `/hotfix [BUG-ID]`
 
 **Assertions:**
-- [ ] Report contains Title, ID, Severity, Priority, Status, Category, System, Build, Reproduction Steps, Expected Result and Actual Result
-- [ ] Severity uses the S1–S4 scale (`S1-Critical` here) and Priority uses the P1–P4 labels
-- [ ] "Likely affected files" is filled from the codebase search
-- [ ] "May I write" names `production/qa/bugs/BUG-0001.md` — no bug files exist yet
-- [ ] Variant — with `BUG-0001.md` and `BUG-0003.md` already present, the new ID is
-      `BUG-0004`: the highest existing number plus one, not the file count plus one
-- [ ] Verdict is COMPLETE after the write
-- [ ] `/hotfix [BUG-ID]` is suggested because severity is S1
+- [ ] 报告包含 Title、ID、Severity、Priority、Status、Category、System、Build、Reproduction Steps、Expected Result 和 Actual Result
+- [ ] Severity 使用 S1–S4 量表（此处为 `S1-Critical`），Priority 使用 P1–P4 标签
+- [ ] "Likely affected files" 根据代码库搜索填写
+- [ ] "May I write" 指明 `production/qa/bugs/BUG-0001.md`——尚不存在任何缺陷文件
+- [ ] 变体——若已存在 `BUG-0001.md` 和 `BUG-0003.md`，新 ID 为
+      `BUG-0004`：现有最大编号加一，而不是文件数量加一
+- [ ] 写入后结论为 COMPLETE
+- [ ] 因为严重程度为 S1，建议使用 `/hotfix [BUG-ID]`
 
 ---
 
-### Case 2: No Argument — Asks for a description before drafting
+### Case 2: 无参数 — 起草前先询问描述
 
 **Fixture:**
-- No existing bug reports
+- 没有现有缺陷报告
 
 **Input:** `/bug-report`
 
 **Expected behavior:**
-1. No argument → skill asks the user for a bug description before proceeding
-2. No template is drafted and nothing is written until a description arrives
-3. Once the user answers ("Sometimes the audio cuts out"), Description Mode proceeds;
-   unknown values (e.g. Build, Frequency) remain visible in the draft for the user to correct
-4. "May I write" is asked before the file is created
+1. 无参数 → 技能在继续之前询问用户缺陷描述
+2. 在收到描述之前，不起草任何模板，也不写入任何内容
+3. 用户回答后（"Sometimes the audio cuts out"），Description Mode 继续；
+   未知值（例如 Build、Frequency）保留在草稿中可见，由用户更正
+4. 创建文件前询问 "May I write"
 
 **Assertions:**
-- [ ] Skill asks for a description instead of drafting from nothing
-- [ ] No report is drafted or written before the description is given
-- [ ] "May I write" precedes the write
-- [ ] Verdict is COMPLETE only after the file is written
+- [ ] 技能询问描述，而不是凭空起草
+- [ ] 在给出描述之前不起草或写入任何报告
+- [ ] 写入之前进行 "May I write" 询问
+- [ ] 仅在文件写入后结论为 COMPLETE
 
 ---
 
-### Case 3: Close Mode — Bug not yet verified is refused
+### Case 3: Close Mode — 尚未验证的缺陷被拒绝关闭
 
 **Fixture:**
-- `production/qa/bugs/BUG-0007.md` exists with `**Status**: Open`
+- `production/qa/bugs/BUG-0007.md` 存在，`**Status**: Open`
 
 **Input:** `/bug-report close BUG-0007`
 
 **Expected behavior:**
-1. Close Mode reads `production/qa/bugs/BUG-0007.md`
-2. Status is not `Verified Fixed`, so the skill stops:
+1. Close Mode 读取 `production/qa/bugs/BUG-0007.md`
+2. Status 不是 `Verified Fixed`，因此技能停止：
    "Bug BUG-0007 must be Verified Fixed before it can be closed. Run `/bug-report verify BUG-0007` first."
-3. No Closure Record is appended and the Status field is not changed
+3. 不追加 Closure Record，Status 字段也不改变
 
 **Assertions:**
-- [ ] The "must be Verified Fixed before it can be closed" message is shown
-- [ ] `/bug-report verify BUG-0007` is named as the next step
-- [ ] No Closure Record is written and `BUG-0007.md` is not edited
-- [ ] No "May I update" ask is issued (nothing to update)
+- [ ] 显示 "must be Verified Fixed before it can be closed" 消息
+- [ ] 指明 `/bug-report verify BUG-0007` 为下一步
+- [ ] 不写入 Closure Record，也不编辑 `BUG-0007.md`
+- [ ] 不发出 "May I update" 询问（没有可更新的内容）
 
 ---
 
-### Case 4: Multi-System Bug — One report, primary and related systems
+### Case 4: 多系统缺陷 — 一份报告，主系统与相关系统
 
 **Fixture:**
-- No existing reports
-- The code root has a save manager and a level-complete UI screen
+- 没有现有报告
+- 代码根目录有一个存档管理器和一关卡完成 UI 界面
 
 **Input:** `/bug-report After finishing a level, the save system freezes and the UI doesn't show the completion screen`
 
 **Expected behavior:**
-1. Description Mode drafts **one** report
-2. Classification `System` names the save system — its freeze is what must be
-   fixed, and the missing completion screen follows from it; Technical Context
-   "Related systems" lists the UI; "Likely affected files" lists files for both
-   from the codebase search
-3. Skill asks "May I write" once for one `BUG-[NNNN].md`
-4. Verdict is COMPLETE after the write
+1. Description Mode 起草 **一份** 报告
+2. Classification 的 `System` 指明存档系统——其冻结才是必须
+   修复的问题，完成界面缺失是它的后果；Technical Context
+   的 "Related systems" 列出 UI；"Likely affected files" 根据代码库搜索列出两者
+   相关文件
+3. 技能为一份 `BUG-[NNNN].md` 只询问一次 "May I write"
+4. 写入后结论为 COMPLETE
 
 **Assertions:**
-- [ ] A single report is created (not one per system)
-- [ ] `System` is the save system, the one whose code must change; the UI is under Related systems
-- [ ] Likely affected files cover both systems
-- [ ] Verdict is COMPLETE
+- [ ] 只创建一份报告（不是每个系统一份）
+- [ ] `System` 为存档系统，即代码必须变更的那个；UI 位于 Related systems 下
+- [ ] Likely affected files 覆盖两个系统
+- [ ] 结论为 COMPLETE
 
 ---
 
-### Case 5: Director Gate Check — Analyze Mode, no gate
+### Case 5: 总监闸门检查 — Analyze Mode，无闸门
 
 **Fixture:**
-- `src/save/save_manager.gd` exists and contains an unguarded null dereference and an unclosed file handle
-- `production/qa/bugs/` holds `BUG-0011.md` (the highest existing number)
+- 存在 `src/save/save_manager.gd`，其中包含未防护的空引用解引用和未关闭的文件句柄
+- `production/qa/bugs/` 中有 `BUG-0011.md`（现有最大编号）
 
 **Input:** `/bug-report analyze src/save/save_manager.gd`
 
 **Expected behavior:**
-1. Analyze Mode reads the target file
-2. Identifies potential bugs (null reference, resource leak) and drafts one report
-   per bug with the trigger scenario and a recommended fix
-3. Allocates consecutive IDs, `BUG-0012` and `BUG-0013`, one per report
-4. Presents the reports and asks once, naming both files: "May I write these to
+1. Analyze Mode 读取目标文件
+2. 识别潜在缺陷（空引用、资源泄漏），并为每个缺陷起草一份报告，
+   包含触发场景和建议修复
+3. 分配连续 ID `BUG-0012` 和 `BUG-0013`，每份报告一个
+4. 展示报告并询问一次，指明两个文件："May I write these to
    `production/qa/bugs/BUG-0012.md`, `production/qa/bugs/BUG-0013.md`?"
-5. No director agents are spawned; no gate IDs appear
+5. 不生成任何总监代理；不出现闸门 ID
 
 **Assertions:**
-- [ ] One report per potential bug, each with a trigger scenario and recommended fix
-- [ ] The two reports get different, consecutive IDs (`BUG-0012`, `BUG-0013`) — never the same ID twice
-- [ ] The single "May I write" ask names every file before any report is saved
-- [ ] No director gate is invoked and no gate skip messages appear
-- [ ] If the user declines, Verdict is BLOCKED and nothing is written
+- [ ] 每个潜在缺陷一份报告，各自包含触发场景和建议修复
+- [ ] 两份报告获得不同且连续的 ID（`BUG-0012`、`BUG-0013`）——绝不复用同一 ID
+- [ ] 单次 "May I write" 询问在保存任何报告前指明所有文件
+- [ ] 未调用任何总监闸门，也不出现闸门跳过消息
+- [ ] 若用户拒绝，结论为 BLOCKED，且不写入任何内容
 
 ---
 
-### Case 6: Verify Mode — older three-digit file found by its number, CANNOT VERIFY
+### Case 6: Verify Mode — 按编号找到旧式三位数文件，CANNOT VERIFY
 
 **Fixture:**
-- `production/qa/bugs/` holds a bug file for bug 42 written in the older form:
-  a three-digit number followed by a slug (`-save-corruption.md`), with
+- `production/qa/bugs/` 中有一个编号为 42 的缺陷文件，采用旧格式：
+  三位数编号后跟 slug（`-save-corruption.md`），且
   `**Status**: Fixed — Pending Verification`
-- The bug's root-cause code path is gone from `src/save/`, but no test in
-  `tests/` covers the save system, and the reproduction needs a console suspend
-  that no automated check can drive
+- 该缺陷的根本原因代码路径已从 `src/save/` 中移除，但 `tests/` 中没有测试
+  覆盖存档系统，且复现需要控制台挂起，
+  任何自动化检查都无法驱动
 
 **Input:** `/bug-report verify BUG-0042`
 
 **Expected behavior:**
-1. Verify Mode globs `production/qa/bugs/BUG-*.md` and takes the file whose
-   number is 42 — the three-digit, slugged file — instead of stopping on a
-   missing `BUG-0042.md`
-2. It checks the root-cause code path (changed) and looks for a related test
-   (none), then greps for the pattern recurring
-3. No test ran, so it asks via `AskUserQuestion` whether the user played the
-   reproduction steps on a build with the fix — `[No longer occurs]` /
-   `[Still occurs]` / `[Not played yet]`; the user answers `[Not played yet]`
-4. The verdict is **CANNOT VERIFY**: it names what is missing (no related test)
-   and says that playing the reproduction steps settles it
-5. It asks "May I update `production/qa/bugs/[that file]` to set Status: … Cannot
-   Verify?", naming the file it found
-6. It does not suggest `/bug-report close` — only a `Verified Fixed` bug can be
-   closed
+1. Verify Mode glob `production/qa/bugs/BUG-*.md`，并取编号为 42 的文件
+   ——即带 slug 的三位数文件——而不是因缺失 `BUG-0042.md` 而停止
+2. 它检查根本原因代码路径（已变更）并查找相关测试
+   （无），然后 grep 该模式是否复发
+3. 没有测试运行，因此通过 `AskUserQuestion` 询问用户是否在包含修复的构建上
+   复现了步骤——`[No longer occurs]` /
+   `[Still occurs]` / `[Not played yet]`；用户回答 `[Not played yet]`
+4. 结论为 **CANNOT VERIFY**：它指出缺失的内容（没有相关测试），
+   并说明复现步骤可以解决问题
+5. 它询问 "May I update `production/qa/bugs/[that file]` to set Status: … Cannot
+   Verify?"，并指明它找到的文件
+6. 不建议 `/bug-report close`——只有 `Verified Fixed` 的缺陷才能
+   关闭
 
 **Assertions:**
-- [ ] The older three-digit file is found by its number; the skill does not report "No bug BUG-0042"
-- [ ] The manual-play question is asked, with the three answers, before a verdict is given
-- [ ] Verdict is CANNOT VERIFY, not VERIFIED FIXED — the changed code path is not taken as a pass, and "Not played yet" is not a pass
-- [ ] Playing the reproduction steps is named as what would settle it
-- [ ] The "May I update" ask names the file actually found, before the Status changes
-- [ ] Close is not offered while the verdict is CANNOT VERIFY
+- [ ] 按编号找到旧式三位数文件；技能不报告 "No bug BUG-0042"
+- [ ] 在给出结论前询问人工试玩问题，并提供三个答案
+- [ ] 结论为 CANNOT VERIFY，而非 VERIFIED FIXED——变更的代码路径不被视为通过，"Not played yet" 也不被视为通过
+- [ ] 说明复现步骤是解决问题的方式
+- [ ] "May I update" 询问在 Status 变更前指明实际找到的文件
+- [ ] 结论为 CANNOT VERIFY 期间不提供 Close
 
 ---
 
-### Case 7: Verify then Close — no test covers the bug, the user's play settles it
+### Case 7: 先 Verify 后 Close — 没有测试覆盖缺陷，用户试玩确认
 
 **Fixture:**
-- `project.yaml` has no `modes` block (so `qa.level: minimal` — tests are waived)
-  and no `commands` block
-- `production/qa/bugs/BUG-0005.md`: Category `UI`, System `HUD`, "health bar does
-  not update after healing", `**Status**: Fixed — Pending Verification`
-- No test in the engine's test root covers the HUD
+- `project.yaml` 没有 `modes` 块（因此 `qa.level: minimal`——测试被豁免）
+  且没有 `commands` 块
+- `production/qa/bugs/BUG-0005.md`：Category `UI`、System `HUD`，"health bar does
+  not update after healing"、`**Status**: Fixed — Pending Verification`
+- 引擎测试根目录中没有测试覆盖 HUD
 
-**Input:** `/bug-report verify BUG-0005`, then `/bug-report close BUG-0005`
+**Input:** `/bug-report verify BUG-0005`，然后 `/bug-report close BUG-0005`
 
 **Expected behavior:**
-1. Verify finds no related test and runs no runner line of its own — `commands.test`
-   is unset, and it says so
-2. It asks via `AskUserQuestion` whether the user played the reproduction steps
-   on a build with the fix, and which build — `[No longer occurs]` /
-   `[Still occurs]` / `[Not played yet]`; the user answers `[No longer occurs]`,
-   build `0.3.1`
-3. Verdict **VERIFIED FIXED**, a manual verification; it asks "May I update
-   `production/qa/bugs/BUG-0005.md` to set Status: Verified Fixed …?" and, on
-   yes, writes the Status with `**Verified by**: [user], manual, build 0.3.1`
-4. Next step: `/bug-report close BUG-0005`
-5. Close reads `Verified Fixed`, shows the closure record (`Verified by` from the
-   verify record, `Regression test: Manual verification`) and the Status change,
-   and asks "May I update `production/qa/bugs/BUG-0005.md` to mark it Closed?"
-   before appending anything or changing the Status
-6. On yes it appends the Closure Record and sets `**Status**: Closed`
+1. Verify 找不到相关测试，也不自行运行任何运行器命令行——`commands.test`
+   未设置，且它会说明这一点
+2. 通过 `AskUserQuestion` 询问用户是否在包含修复的构建上复现了步骤，
+   以及是哪个构建——`[No longer occurs]` /
+   `[Still occurs]` / `[Not played yet]`；用户回答 `[No longer occurs]`，
+   构建 `0.3.1`
+3. 结论 **VERIFIED FIXED**，为人工验证；它询问 "May I update
+   `production/qa/bugs/BUG-0005.md` to set Status: Verified Fixed …?"，并在
+   同意后写入 Status 以及 `**Verified by**: [user], manual, build 0.3.1`
+4. 下一步：`/bug-report close BUG-0005`
+5. Close 读取 `Verified Fixed`，展示关闭记录（`Verified by` 来自
+   verify 记录，`Regression test: Manual verification`）和 Status 变更，
+   并在追加任何内容或更改 Status 前询问 "May I update `production/qa/bugs/BUG-0005.md` to mark it Closed?"
+6. 同意后，它追加 Closure Record 并设置 `**Status**: Closed`
 
 **Assertions:**
-- [ ] No test command is written from memory; the unset `commands.test` is named
-- [ ] The manual-play question is asked with the three answers and the build is recorded as the user gave it
-- [ ] Verdict is VERIFIED FIXED, recorded as manual (`[user], manual, build 0.3.1`) — a bug no test covers can reach Verified Fixed
-- [ ] Close asks "May I update … to mark it Closed?" before the Closure Record is appended or the Status changed
-- [ ] The Closure Record's Regression test reads "Manual verification"
-- [ ] Variant — answering `[Still occurs]` gives STILL PRESENT (the bug is reopened and `/hotfix [BUG-ID]` suggested); answering `[Not played yet]` gives CANNOT VERIFY
+- [ ] 不凭记忆写入任何测试命令；明确指出未设置的 `commands.test`
+- [ ] 人工试玩问题附带三个答案询问，并按用户给出的内容记录构建
+- [ ] 结论为 VERIFIED FIXED，记录为人工验证（`[user], manual, build 0.3.1`）——没有测试覆盖的缺陷也可以达到 Verified Fixed
+- [ ] 在追加 Closure Record 或更改 Status 前，Close 询问 "May I update … to mark it Closed?"
+- [ ] Closure Record 的 Regression test 显示 "Manual verification"
+- [ ] 变体——回答 `[Still occurs]` 得到 STILL PRESENT（缺陷重新打开并建议 `/hotfix [BUG-ID]`）；回答 `[Not played yet]` 得到 CANNOT VERIFY
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Selects the mode from the argument; asks for a description when none is given
-- [ ] Uses the S1–S4 severity scale and the P1–P4 priority labels shared with `/bug-triage`
-- [ ] Verify runs a related test with `commands.test` from `project.yaml`, never a runner line written from memory
-- [ ] Verify says VERIFIED FIXED only when every check that applies passed — the related tests ran and passed, or, with no test run (or for a Visual or UI bug), the user played the reproduction steps on a named build and it no longer occurs, recorded as a manual verification; "Not played yet" with nothing else to settle it is CANNOT VERIFY
-- [ ] The Reporter field never holds an email address or account ID taken from the session
-- [ ] Searches the codebase for affected files before drafting
-- [ ] Asks "May I write this to `production/qa/bugs/BUG-[NNNN].md`?" before writing
-- [ ] Asks "May I update" before changing an existing bug file (Verify / Close); Close Mode shows the closure record and asks before appending it
-- [ ] Finds the bug file by its number in Verify and Close Mode, and never closes a bug that is not `Verified Fixed`
-- [ ] Verdict is COMPLETE on write, BLOCKED when the user declines
+- [ ] 从参数选择模式；未提供参数时询问描述
+- [ ] 使用与 `/bug-triage` 共享的 S1–S4 严重程度量表和 P1–P4 优先级标签
+- [ ] Verify 使用 `project.yaml` 中的 `commands.test` 运行相关测试，绝不凭记忆写运行器命令行
+- [ ] 仅当所有适用的检查都通过时，Verify 才说明 VERIFIED FIXED——相关测试运行并通过，或者在没有测试运行（或缺陷为 Visual 或 UI）时，用户在具名构建上复现步骤且问题不再出现，记录为人工验证；若为 "Not played yet" 且没有其他可确认方式，则为 CANNOT VERIFY
+- [ ] Reporter 字段绝不包含从会话中获取的电子邮件地址或账号 ID
+- [ ] 起草前搜索代码库以找到受影响文件
+- [ ] 写入前询问 "May I write this to `production/qa/bugs/BUG-[NNNN].md`?"
+- [ ] 在更改现有缺陷文件（Verify / Close）前询问 "May I update"；Close Mode 展示关闭记录并在追加前询问
+- [ ] 在 Verify 和 Close Mode 中按编号查找缺陷文件，且绝不关闭不是 `Verified Fixed` 的缺陷
+- [ ] 写入时结论为 COMPLETE，用户拒绝时为 BLOCKED
 
 ---
 
 ## Coverage Notes
 
-- Verify Mode on a bug whose related test runs and passes (VERIFIED FIXED with
-  no manual question) is not separately tested; Case 6 covers CANNOT VERIFY,
-  Case 7 a manual VERIFIED FIXED and, as variants, STILL PRESENT.
-- Close Mode's triage-report reference note is not separately tested.
-- Verify or close with a number no file carries ("No bug [BUG-ID] in
-  `production/qa/bugs/`", Verdict BLOCKED) is not separately tested.
+- 未单独测试相关测试运行并通过的缺陷在 Verify Mode 下的行为（VERIFIED FIXED 且没有人工问题）；Case 6 覆盖 CANNOT VERIFY，Case 7 覆盖人工 VERIFIED FIXED 以及作为变体的 STILL PRESENT。
+- Close Mode 的分类报告引用说明未单独测试。
+- 使用没有任何文件携带的编号进行 verify 或 close（"No bug [BUG-ID] in
+  `production/qa/bugs/`"，结论 BLOCKED）未单独测试。

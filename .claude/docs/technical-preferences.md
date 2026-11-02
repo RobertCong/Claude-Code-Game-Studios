@@ -1,33 +1,33 @@
-# Technical Preferences
+# 技术偏好（Technical Preferences）
 
-<!-- project.yaml at the repo root is the machine-readable source of truth for
-     engine, specialists, naming, performance, platform, and testing.framework.
-     This file is the human-readable LEGACY FALLBACK: agents and skills resolve
-     each key from project.yaml first and fall back here only when the
-     project.yaml key is absent. /setup-engine dual-writes both.
-     Forbidden patterns and allowed libraries are NOT migrated — they live only
-     in this file. Populated by /setup-engine; updated as decisions are made. -->
+<!-- 仓库根目录的 project.yaml 是 engine、specialists、naming、performance、platform
+     和 testing.framework 的机器可读事实来源。
+     本文件是人类可读的 LEGACY FALLBACK（旧版回退）：代理与技能优先从 project.yaml
+     解析每个键，仅当 project.yaml 中缺失该键时才回退到这里。/setup-engine 会同时写入
+     两处。
+     禁止模式（Forbidden patterns）与允许的库（allowed libraries）不做迁移 — 它们只
+     存在于本文件。由 /setup-engine 填充；随着决策的产生而更新。 -->
 
-## Engine & Language
+## 引擎与语言（Engine & Language）
 
-- **Engine**: [TO BE CONFIGURED — run /setup-engine]
+- **Engine**: [TO BE CONFIGURED]
 - **Language**: [TO BE CONFIGURED]
 - **Rendering**: [TO BE CONFIGURED]
 - **Physics**: [TO BE CONFIGURED]
 
-## Input & Platform
+## 输入与平台（Input & Platform）
 
-<!-- Written by /setup-engine. Read by /ux-design, /ux-review, /test-setup, /team-ui, and /dev-story -->
-<!-- to scope interaction specs, test helpers, and implementation to the correct input methods. -->
+<!-- 由 /setup-engine 写入。由 /ux-design、/ux-review、/test-setup、/team-ui 和 /dev-story 读取 -->
+<!-- 用于把交互规格、测试辅助工具和实现限定到正确的输入方式。 -->
 
-- **Target Platforms**: [TO BE CONFIGURED — e.g., PC, Console, Mobile, Web]
-- **Input Methods**: [TO BE CONFIGURED — e.g., Keyboard/Mouse, Gamepad, Touch, Mixed]
-- **Primary Input**: [TO BE CONFIGURED — the dominant input for this game]
-- **Gamepad Support**: [TO BE CONFIGURED — Full / Partial / None]
-- **Touch Support**: [TO BE CONFIGURED — Full / Partial / None]
-- **Platform Notes**: [TO BE CONFIGURED — any platform-specific UX constraints]
+- **Target Platforms**: [TO BE CONFIGURED]
+- **Input Methods**: [TO BE CONFIGURED]
+- **Primary Input**: [TO BE CONFIGURED]
+- **Gamepad Support**: [TO BE CONFIGURED]
+- **Touch Support**: [TO BE CONFIGURED]
+- **Platform Notes**: [TO BE CONFIGURED]
 
-## Naming Conventions
+## 命名约定（Naming Conventions）
 
 - **Classes**: [TO BE CONFIGURED]
 - **Variables**: [TO BE CONFIGURED]
@@ -36,57 +36,57 @@
 - **Scenes/Prefabs**: [TO BE CONFIGURED]
 - **Constants**: [TO BE CONFIGURED]
 
-## Performance Budgets
+## 性能预算（Performance Budgets）
 
 - **Target Framerate**: [TO BE CONFIGURED]
 - **Frame Budget**: [TO BE CONFIGURED]
 - **Draw Calls**: [TO BE CONFIGURED]
 - **Memory Ceiling**: [TO BE CONFIGURED]
 
-## Testing
+## 测试（Testing）
 
 - **Framework**: [TO BE CONFIGURED]
 - **Minimum Coverage**: [TO BE CONFIGURED]
-- **Required Tests**: Balance formulas, gameplay systems, networking (if applicable)
+- **Required Tests**: 平衡性公式、玩法系统、网络（如适用）
 
-## Forbidden Patterns
+## 禁止模式（Forbidden Patterns）
 
-<!-- Add patterns that should never appear in this project's codebase -->
-- [None configured yet — add as architectural decisions are made]
+<!-- 添加绝不应出现在本项目代码库中的模式 -->
+- [尚未配置 — 做出架构决策时添加]
 
-## Allowed Libraries / Addons
+## 允许的库 / 插件（Allowed Libraries / Addons）
 
-<!-- Add approved third-party dependencies here -->
-- [None configured yet — add as dependencies are approved]
+<!-- 在此添加已批准的第三方依赖 -->
+- [尚未配置 — 依赖获批时添加]
 
-## Architecture Decisions Log
+## 架构决策日志（Architecture Decisions Log）
 
-<!-- Quick reference linking to full ADRs in docs/architecture/ -->
-- [No ADRs yet — use /architecture-decision to create one]
+<!-- 快速索引，链接到 docs/architecture/ 中的完整 ADR -->
+- [尚无 ADR — 使用 /architecture-decision 创建]
 
-## Engine Specialists
+## 引擎专家（Engine Specialists）
 
-<!-- Written by /setup-engine when engine is configured. -->
-<!-- Read by /code-review, /architecture-decision, /architecture-review, and team skills -->
-<!-- to know which specialist to spawn for engine-specific validation. -->
+<!-- 配置引擎时由 /setup-engine 写入。 -->
+<!-- 由 /code-review、/architecture-decision、/architecture-review 和团队技能读取 -->
+<!-- 用于确定派生哪位专家进行引擎相关验证。 -->
 
-- **Primary**: [TO BE CONFIGURED — run /setup-engine]
+- **Primary**: [TO BE CONFIGURED]
 - **Language/Code Specialist**: [TO BE CONFIGURED]
 - **Shader Specialist**: [TO BE CONFIGURED]
 - **UI Specialist**: [TO BE CONFIGURED]
 - **Additional Specialists**: [TO BE CONFIGURED]
 - **Routing Notes**: [TO BE CONFIGURED]
 
-### File Extension Routing
+### 文件扩展名路由（File Extension Routing）
 
-<!-- Skills use this table to select the right specialist per file type. -->
-<!-- If a row says [TO BE CONFIGURED], fall back to Primary for that file type. -->
+<!-- 技能使用此表按文件类型选择正确的专家。 -->
+<!-- 如果某行显示 [TO BE CONFIGURED]，则该文件类型回退到 Primary。 -->
 
-| File Extension / Type | Specialist to Spawn |
+| 文件扩展名 / 类型 | 要派生的专家 |
 |-----------------------|---------------------|
-| Game code (primary language) | [TO BE CONFIGURED] |
-| Shader / material files | [TO BE CONFIGURED] |
-| UI / screen files | [TO BE CONFIGURED] |
-| Scene / prefab / level files | [TO BE CONFIGURED] |
-| Native extension / plugin files | [TO BE CONFIGURED] |
-| General architecture review | Primary |
+| 游戏代码（主要语言） | [TO BE CONFIGURED] |
+| 着色器 / 材质文件 | [TO BE CONFIGURED] |
+| UI / 界面文件 | [TO BE CONFIGURED] |
+| 场景 / 预制体 / 关卡文件 | [TO BE CONFIGURED] |
+| 原生扩展 / 插件文件 | [TO BE CONFIGURED] |
+| 通用架构评审 | Primary |

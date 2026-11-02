@@ -1,73 +1,73 @@
 ---
 name: estimate
-description: "Estimate task effort from complexity, dependencies, velocity, risk. Structured estimate with confidence levels."
+description: "根据复杂度、依赖、速度和风险估算任务工作量。给出带置信度等级的结构化估算。"
 argument-hint: "[task-description]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep
 model: sonnet
 ---
 
-# Estimate
+# 估算
 
-## Phase 1: Understand the Task
+## Phase 1: 理解任务
 
-Read the task description from the argument. If the description is too vague to estimate meaningfully, ask for clarification before proceeding.
+从参数中读取任务描述。如果描述过于含糊、无法进行有意义的估算，请先请求澄清再继续。
 
-Read CLAUDE.md for project context: tech stack, coding standards, architectural patterns, and any estimation guidelines.
+阅读 CLAUDE.md 了解项目背景：技术栈、编码规范、架构模式以及任何估算准则。
 
-Read relevant design documents from `design/gdd/` if the task relates to a documented feature or system. Read them by section: find the headings you need with the Grep tool (pattern `^#`, content mode) and Read those ranges with offset and limit.
-
----
-
-## Phase 2: Scan Affected Code
-
-Identify files and modules that would need to change:
-
-- Measure size and branching with Grep, per affected file — Read, Glob and Grep
-  are this skill's only tools, so these counts are the measurement:
-  - **Size:** `Grep pattern="[^[:space:]]" path="[file]" output_mode="count"` —
-    non-blank lines.
-  - **Branching:** `Grep pattern="(^|[^A-Za-z0-9_])(if|elif|for|foreach|while|match|switch|case|catch)([^A-Za-z0-9_]|$)|&&|[|][|]" path="[file]" output_mode="count"` —
-    lines holding a branch or a boolean operator. The count
-    approximates cyclomatic complexity (comments and strings count too); report
-    it as that, never as a measured complexity.
-  - **Dependencies:** what each file pulls in — `preload`/`load(` (GDScript),
-    `using` (C#), `#include` (C++) — and which other files reference it.
-  - Name any file Grep could not count (missing, binary, unreadable) under Notes
-    and Assumptions rather than leaving it out of the totals.
-- Identify integration points with other systems
-- Check for existing test coverage in the affected areas
-- Read past sprint data from `production/sprints/` for similar completed tasks and historical velocity.
-  **If there is none**, say so under Notes and Assumptions — "No sprint history found;
-  this estimate is not calibrated to the team's velocity" — and treat that as a risk
-  in the confidence level, not as a silent padding of the figures.
+如果任务涉及已记录的功能或系统，请阅读 `design/gdd/` 中相关的设计文档。按章节阅读：用 Grep 工具（模式 `^#`，content 模式）找到所需标题，再用 offset 和 limit 读取相应区间。
 
 ---
 
-## Phase 3: Analyze Complexity Factors
+## Phase 2: 扫描受影响的代码
 
-**Code Complexity:**
-- Size and branching of the affected files (Phase 2's Grep counts)
-- Number of dependencies and coupling level
-- Whether this touches core/engine code vs leaf/feature code
-- Whether existing patterns can be followed or new patterns are needed
+识别需要改动的文件与模块：
 
-**Scope:**
-- Number of systems touched
-- New code vs modification of existing code
-- Amount of new test coverage required
-- Data migration or configuration changes needed
-
-**Risk:**
-- New technology or unfamiliar libraries
-- Unclear or ambiguous requirements
-- Dependencies on unfinished work
-- Cross-system integration complexity
-- Performance sensitivity
+- 对每个受影响文件，用 Grep 测量规模与分支数——Read、Glob 和 Grep
+  是本技能仅有的工具，因此这些计数就是测量结果：
+  - **规模：** `Grep pattern="[^[:space:]]" path="[file]" output_mode="count"`——
+    统计非空行。
+  - **分支数：** `Grep pattern="(^|[^A-Za-z0-9_])(if|elif|for|foreach|while|match|switch|case|catch)([^A-Za-z0-9_]|$)|&&|[|][|]" path="[file]" output_mode="count"`——
+    统计包含分支或布尔运算符的行。该计数近似圈复杂度
+    （注释和字符串也会计入）；请按近似值报告，
+    绝不要当作实测的复杂度。
+  - **依赖：** 每个文件引入了什么——`preload`/`load(`（GDScript）、
+    `using`（C#）、`#include`（C++）——以及哪些其他文件引用了它。
+  - 把 Grep 无法计数的文件（缺失、二进制、不可读）列入“备注
+    与假设”，而不是从总数中遗漏。
+- 识别与其他系统的集成点
+- 检查受影响区域中现有的测试覆盖率
+- 从 `production/sprints/` 读取过往冲刺数据，寻找类似的已完成任务和历史速度。
+  **如果没有**，请在“备注与假设”中说明——“未找到冲刺历史；
+  本估算未按团队速度校准”——并把它视为置信度等级中的一项风险，
+  而不是悄悄给数字加余量。
 
 ---
 
-## Phase 4: Generate the Estimate
+## Phase 3: 分析复杂度因素
+
+**代码复杂度：**
+- 受影响文件的规模与分支数（第 2 阶段的 Grep 计数）
+- 依赖数量与耦合程度
+- 是否触及核心/引擎代码，还是叶子/功能代码
+- 可以沿用现有模式，还是需要新模式
+
+**范围：**
+- 涉及的系统数量
+- 新代码与现有代码修改的比例
+- 需要新增的测试覆盖量
+- 所需的数据迁移或配置变更
+
+**风险：**
+- 新技术或不熟悉的库
+- 不清楚或含糊的需求
+- 对未完成工作的依赖
+- 跨系统集成的复杂度
+- 性能敏感度
+
+---
+
+## Phase 4: 生成估算
 
 ```markdown
 ## Task Estimate: [Task Name]
@@ -129,22 +129,22 @@ Generated: [Date]
 - [Any caveats about scope boundaries]
 ```
 
-Output the estimate with a brief summary: recommended budget, confidence level, and the single biggest risk factor.
+输出估算，并附一段简要总结：推荐预算、置信度等级以及最大的单一风险因素。
 
-This skill is read-only — no files are written. Verdict: **COMPLETE** — estimate generated.
+本技能是只读的——不写入任何文件。结论：**COMPLETE**——已生成估算。
 
 ---
 
-## Phase 5: Next Steps
+## Phase 5: 下一步
 
-- If confidence is Low: recommend a time-boxed spike (`/prototype`) before committing.
-- If the task is > 10 days: recommend breaking it into smaller stories via `/create-stories`.
-- To schedule the task: run `/sprint-plan update` to add it to the next sprint (if the project has no sprint plan, as on the default minimal workflow, add it to the brief's build order instead).
+- 如果置信度为低：建议在做出承诺前先做一个限时调研（`/prototype`）。
+- 如果任务超过 10 天：建议通过 `/create-stories` 将其拆分为更小的用户故事。
+- 若要安排该任务：运行 `/sprint-plan update` 把它加入下一个冲刺（如果项目没有冲刺计划，例如默认的 minimal 工作流，则改为加入简报的构建顺序）。
 
-### Guidelines
+### 指导原则
 
-- Always give a range (optimistic / expected / pessimistic), never a single number
-- The recommended budget should be the expected estimate, not the optimistic one
-- Round to half-day increments — estimating in hours implies false precision for tasks longer than a day
-- Do not pad estimates silently — call out risk explicitly so the team can decide
-- Confidence is Low whenever the approach is undecided or the core requirements are still TBD — a range built on an unmade decision is a guess
+- 始终给出区间（乐观 / 预期 / 悲观），绝不给单一数字
+- 推荐预算应取预期估算，而不是乐观估算
+- 按半天粒度取整——用小时估算会给超过一天的任务带来虚假的精确感
+- 不要悄悄加余量——明确点出风险，让团队自行决定
+- 当方案尚未确定或核心需求仍待定时，置信度一律为低——建立在未定决策上的区间只是猜测

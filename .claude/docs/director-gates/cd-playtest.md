@@ -1,24 +1,22 @@
-> Gate definition. The spawning skill passes this file's path to the director agent; the AGENT reads it — the parent session should not.
+> 质量闸门定义。发起调用的技能会把本文件路径传给总监代理；由该 AGENT 读取——父会话不应读取。
 
-# CD-PLAYTEST — Player Experience Validation
+# CD-PLAYTEST — 玩家体验验证
 
-Agent: `creative-director` | Model tier: Opus | Domain: Vision, pillars, player experience
+Agent：`creative-director` | 模型层级：session（继承） | 领域：愿景、支柱、玩家体验
 
-**Trigger**: After playtest reports are generated (`/playtest-report`), or after
-any session that produces player feedback
+**触发时机**：试玩测试报告生成之后（`/playtest-report`），或在任何产生玩家反馈的
+测试会话之后
 
-**Context to pass**:
-- Playtest report — its file path, or its content inline when the calling skill
-  reviews before saving (`/playtest-report` does)
-- Game pillars and core fantasy statement
-- The specific hypothesis being tested
+**需传入的上下文**：
+- 试玩测试报告——其文件路径；若调用方技能在保存前先评审（`/playtest-report`
+  即是如此），则传入其内联内容
+- 游戏支柱与核心幻想陈述
+- 正在检验的具体假设
 
-**Prompt**:
-> "Review this playtest report against the game's design pillars and core fantasy.
-> Is the player experience matching the intended fantasy? Are there systematic issues
-> that represent pillar drift — mechanics that feel fine in isolation but undermine
-> the intended experience? Return APPROVE (core fantasy is landing), CONCERNS [gaps
-> between intended and actual experience], or REJECT [core fantasy is not present —
-> redesign needed before further playtesting]."
+**提示词**：
+> "对照游戏设计支柱与核心幻想审查这份试玩测试报告。玩家体验是否匹配预期幻想？
+> 是否存在代表支柱漂移的系统性问题——即孤立来看尚可、却损害预期体验的机制？
+> 返回 APPROVE（核心幻想正在落地）、CONCERNS [预期体验与实际体验之间的缺口]，
+> 或 REJECT [核心幻想尚未出现——需要重新设计后再继续试玩测试]。"
 
-**Verdicts**: APPROVE / CONCERNS / REJECT
+**结论**：APPROVE / CONCERNS / REJECT

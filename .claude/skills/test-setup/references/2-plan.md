@@ -1,11 +1,11 @@
-# /test-setup — Phase 2: Present Plan
+# /test-setup — Phase 2: 呈现计划
 
-> Part of `/test-setup`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> `/test-setup` 的一部分。`SKILL.md` 说明何时读取本文件；它解析出的设置
+> 以及其后续标题下的规则在此仍然适用。
 
-## Phase 2: Present Plan
+## Phase 2: 呈现计划
 
-Based on the engine detected and the existing state, present a plan:
+根据检测到的引擎和现有状态，呈现一份计划：
 
 ```
 ## Test Setup Plan — [Engine]
@@ -32,12 +32,12 @@ production/qa/
 Estimated time: ~5 minutes to create all files.
 ```
 
-Ask: "May I create these files? I will not overwrite any test files that
-already exist at these paths."
+询问：“May I create these files? I will not overwrite any test files that
+already exist at these paths.”
 
-**At `collaborative` and `guided`** — do not proceed without approval. These are
-**new** files, and `automation-modes.md:81` gates new-file writes in `guided` too,
-so the answer is the same in both modes. **At `autonomous`** — create them and log
-the decision; do not block.
+**在 `collaborative` 和 `guided` 下** — 未经批准不要继续。这些是
+**新**文件，且 `automation-modes.md:81` 在 `guided` 下也会对新文件写入设闸，
+因此两种模式下的答案相同。**在 `autonomous` 下** — 创建它们并记录
+该决策；不要阻塞。
 
 ---

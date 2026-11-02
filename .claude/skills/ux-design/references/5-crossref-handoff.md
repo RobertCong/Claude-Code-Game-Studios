@@ -1,77 +1,75 @@
-# /ux-design — Sections 5 and 6: Cross-Reference Check and Handoff
+# /ux-design — 第 5 与 6 节：交叉引用检查与交接
 
-> Part of `/ux-design`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> 属于 `/ux-design` 的一部分。`SKILL.md` 指明了何时阅读本文件；它
+> 解析出的设置以及其后各标题下的规则在此仍然适用。
 
-## 5. Cross-Reference Check
+## 5. 交叉引用检查
 
-Before marking the spec as ready for review, run these checks:
+在将规格标记为可提交评审之前，运行以下检查：
 
-**1. GDD requirement coverage**: Does every GDD UI Requirement that references
-this screen have a corresponding element in this spec? Present any gaps.
+**1. GDD 需求覆盖**：GDD UI 要求中引用此屏幕的每一条，在本规格中是否都有
+对应元素？列出所有缺口。
 
-**2. Pattern library alignment**: Are all interaction patterns used in this spec
-referenced by name? If a new pattern was invented during this spec session, flag
-it for addition to the pattern library:
-Use `AskUserQuestion`:
-- "This spec uses [pattern name], which isn't in the pattern library yet. What should we do?"
-- Options: "Add it to the pattern library now", "Flag it as a gap and continue", "Skip — this pattern is one-off"
+**2. 模式库一致性**：本规格使用的所有交互模式是否都以名称引用？如果本次
+规格会话中发明了新模式，标记它以便加入模式库：
+使用 `AskUserQuestion`：
+- “本规格使用了 [pattern name]，它尚未出现在模式库中。我们应当怎么做？”
+- 选项：“现在就把它加入模式库”、“标记为缺口并继续”、“跳过 — 这个模式是一次性的”
 
-**3. Navigation consistency**: Do the entry/exit points in this spec match the
-navigation map in any related specs? Flag mismatches.
+**3. 导航一致性**：本规格中的进入/退出点是否与任何相关规格中的导航图一致？
+标记不一致之处。
 
-**4. Accessibility coverage**: Does the spec address the accessibility tier
-committed to in `design/accessibility-requirements.md`? If not, flag open questions.
+**4. 无障碍覆盖**：本规格是否覆盖了 `design/accessibility-requirements.md` 中
+承诺的无障碍级别？如果没有，标记待解决问题。
 
-**5. Empty states**: Does every data-dependent element have an empty state defined?
-Flag any that don't.
+**5. 空状态**：每个依赖数据的元素是否都定义了空状态？
+标记任何缺失空状态的元素。
 
-Present the check results:
-> **Cross-Reference Check: [Screen Name]**
-> - GDD requirements: [N of M covered / all covered]
-> - New patterns to add to library: [list or "none"]
-> - Navigation mismatches: [list or "none"]
-> - Accessibility gaps: [list or "none"]
-> - Missing empty states: [list or "none"]
+呈现检查结果：
+> **交叉引用检查：[Screen Name]**
+> - GDD 需求：[N of M covered / all covered]
+> - 需新增到模式库的新模式：[list or "none"]
+> - 导航不一致：[list or "none"]
+> - 无障碍缺口：[list or "none"]
+> - 缺失的空状态：[list or "none"]
 
 ---
 
-## 6. Handoff
+## 6. 交接
 
-When all sections are approved and written:
+当所有小节均已批准并写入后：
 
-### 6a: Update Session State
+### 6a：更新会话状态
 
-Update `production/session-state/active.md` with:
-- Task: [screen-name] UX spec
-- Status: Complete (or In Review)
-- File: design/ux/[filename].md
-- Sections: All written
-- Next: [suggestion]
+用以下内容更新 `production/session-state/active.md`：
+- 任务：[screen-name] UX 规格
+- 状态：Complete（或 In Review）
+- 文件：design/ux/[filename].md
+- 小节：全部已写入
+- 下一步：[suggestion]
 
-### 6b: Suggest Next Step
+### 6b：提出下一步建议
 
-Before presenting options, state clearly:
+在呈现选项之前，明确说明：
 
-> "This spec should be validated with `/ux-review` before it enters the
-> implementation pipeline. The Production gate (`/gate-check production`)
-> requires all key screen specs to have passed `/ux-review` at `workflow: full`
-> (recommended at `standard`)."
+> “本规格在进入实现流水线之前，应先通过 `/ux-review` 验证。Production 质量闸门
+> （gate）（`/gate-check production`）要求所有关键屏幕规格在 `workflow: full`
+> 下通过 `/ux-review`（在 `standard` 下为推荐）。”
 
-Then use `AskUserQuestion`:
-- "Run `/ux-review [filename]` now, or do something else first?"
-  - Options:
-    - "Run `/ux-review` now — validate this spec"
-    - "Design another screen first, then review all specs together"
-    - "Update the interaction pattern library with new patterns from this spec"
-    - "Stop here for this session"
+然后使用 `AskUserQuestion`：
+- “现在就运行 `/ux-review [filename]`，还是先做别的事？”
+  - 选项：
+    - “现在运行 `/ux-review` — 验证本规格”
+    - “先设计另一个屏幕，然后一起评审所有规格”
+    - “用本规格中的新模式更新交互模式库”
+    - “本次会话到此为止”
 
-If the user picks "Design another screen first", add a note: "Reminder: run
-`/ux-review` on all completed specs before running `/gate-check production`."
+如果用户选择“先设计另一个屏幕”，添加一条说明：“提醒：在运行
+`/gate-check production` 之前，先对所有已完成的规格运行 `/ux-review`。”
 
-### 6c: Cross-Link Related Specs
+### 6c：交叉链接相关规格
 
-If other UX specs link to or from this screen, note which ones should reference
-this spec. Do not edit those files without asking — just name them.
+如果其他 UX 规格链接到本屏幕或从本屏幕链接出去，注明哪些应引用
+本规格。未经询问不要编辑那些文件 — 只列出它们的名称。
 
 ---

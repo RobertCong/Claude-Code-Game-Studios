@@ -1,6 +1,6 @@
 ---
 name: prototype
-description: "Concept prototype before GDDs — throwaway HTML, Engine or Paper build, PROCEED/PIVOT/KILL/NOT ASSESSED. After /brainstorm and /setup-engine."
+description: "GDD 之前的概念原型——一次性 HTML、引擎或纸面构建，结论为 PROCEED/PIVOT/KILL/NOT ASSESSED。在 /brainstorm 和 /setup-engine 之后使用。"
 argument-hint: "[concept-description] [--path html|engine|paper] [--review full|lean|solo] [--spike]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, Bash(bash "*/.claude/skills/prototype/../../hooks/yaml-helper.sh" resolve_config *)
@@ -9,92 +9,85 @@ model: sonnet
 
 !`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,workflow`
 
-Resolved above — use as-is; `--review` overrides `review_mode` for this run. No
-block → defaults in `.claude/docs/config-resolution.md`.
+上述内容已解析完成——请直接使用；本次运行中 `--review` 会覆盖 `review_mode`。若没有输出
+解析块 → 使用 `.claude/docs/config-resolution.md` 中的默认值。
 
-# Prototype
+# 原型（Prototype）
 
-## Purpose
+## 目的
 
-This is the **concept prototype** — a fast, throwaway build that answers one question:
-*"Is this core idea actually fun to interact with?"*
+这是**概念原型**——一个快速的、一次性的构建，用于回答一个问题：
+*“这个核心想法真的有趣、值得与之交互吗？”*
 
-**Default use** — run right after `/brainstorm` and `/setup-engine`, before writing
-GDDs or architecture docs. Its verdict determines whether the concept is worth the
-investment of full design documentation.
+**默认用途**——在 `/brainstorm` 和 `/setup-engine` 之后立即运行，早于编写
+GDD 或架构文档。它的结论决定这个概念是否值得投入完整的设计文档。
 
-**Mid-production?** You can also run this at any stage to test a specific mechanic,
-design change, or technical question. Pass `--spike` to activate spike mode: a
-lightweight ~4-hour build with no GDD prerequisites and no phase gate implications.
+**处于中后期制作？** 你也可以在任何阶段运行它，来验证某个具体机制、设计变更或
+技术问题。传入 `--spike` 可启用 spike 模式：一个轻量的约 4 小时构建，没有 GDD
+前置条件，也不涉及阶段闸门（gate）。
 
-**Already have GDDs and architecture complete?** To validate the full game loop
-before committing to Production, run `/vertical-slice` instead.
+**GDD 与架构已经完成？** 若要在进入制作（Production）前验证完整游戏循环，请运行
+`/vertical-slice` 替代。
 
 ---
 
-## Phase 1: Define the Question
+## Phase 1: 定义问题
 
-**Read `references/1-question.md` now and follow it** — this phase's steps are in that file, not here. Read it again if the conversation was compacted or resumed during this phase.
+**现在阅读 `references/1-question.md` 并遵循其中的步骤**——本阶段的步骤在该文件中，不在本文件里。如果本阶段进行中对话被压缩或恢复，请重新阅读。
 
-## Phase 2: Load Concept Context
+## Phase 2: 加载概念上下文
 
-**Read `references/2-load-context.md` now and follow it** — this phase's steps are in that file, not here. Read it again if the conversation was compacted or resumed during this phase.
+**现在阅读 `references/2-load-context.md` 并遵循其中的步骤**——本阶段的步骤在该文件中，不在本文件里。如果本阶段进行中对话被压缩或恢复，请重新阅读。
 
-## Phase 3: Choose the Prototype Path
+## Phase 3: 选择原型路径
 
-**Read `references/3-choose-path.md` now and follow it** — this phase's steps are in that file, not here. Read it again if the conversation was compacted or resumed during this phase.
+**现在阅读 `references/3-choose-path.md` 并遵循其中的步骤**——本阶段的步骤在该文件中，不在本文件里。如果本阶段进行中对话被压缩或恢复，请重新阅读。
 
-## Phase 4: Plan the Prototype
+## Phase 4: 规划原型
 
-**Read `references/4-plan.md` now and follow it** — this phase's steps are in that file, not here. Read it again if the conversation was compacted or resumed during this phase.
+**现在阅读 `references/4-plan.md` 并遵循其中的步骤**——本阶段的步骤在该文件中，不在本文件里。如果本阶段进行中对话被压缩或恢复，请重新阅读。
 
-## Phase 5: Implement
+## Phase 5: 实现
 
-**Read `references/5-implement.md` now and follow it** — this phase's steps are in that file, not here. Read it again if the conversation was compacted or resumed during this phase.
+**现在阅读 `references/5-implement.md` 并遵循其中的步骤**——本阶段的步骤在该文件中，不在本文件里。如果本阶段进行中对话被压缩或恢复，请重新阅读。
 
-## Phase 6: Playtest Debrief
+## Phase 6: 试玩测试复盘
 
-**Read `references/6-debrief.md` now and follow it** — this phase's steps are in that file, not here. Read it again if the conversation was compacted or resumed during this phase.
+**现在阅读 `references/6-debrief.md` 并遵循其中的步骤**——本阶段的步骤在该文件中，不在本文件里。如果本阶段进行中对话被压缩或恢复，请重新阅读。
 
-## Phase 7: Generate Prototype Report
+## Phase 7: 生成原型报告
 
-**Read `references/7-report.md` now and follow it** — this phase's steps are in that file, not here. Read it again if the conversation was compacted or resumed during this phase.
+**现在阅读 `references/7-report.md` 并遵循其中的步骤**——本阶段的步骤在该文件中，不在本文件里。如果本阶段进行中对话被压缩或恢复，请重新阅读。
 
-## Phase 8: Creative Director Review
+## Phase 8: 创意总监评审
 
-**Read `references/8-cd-review.md` now and follow it** — this phase's steps are in that file, not here. Read it again if the conversation was compacted or resumed during this phase.
+**现在阅读 `references/8-cd-review.md` 并遵循其中的步骤**——本阶段的步骤在该文件中，不在本文件里。如果本阶段进行中对话被压缩或恢复，请重新阅读。
 
-## Phase 9: Summary and Next Steps
+## Phase 9: 总结与后续步骤
 
-**Read `references/9-summary.md` now and follow it** — this phase's steps are in that file, not here. Read it again if the conversation was compacted or resumed during this phase.
+**现在阅读 `references/9-summary.md` 并遵循其中的步骤**——本阶段的步骤在该文件中，不在本文件里。如果本阶段进行中对话被压缩或恢复，请重新阅读。
 
-## Spike Mode
+## Spike 模式
 
-**Triggered by:** `--spike` flag OR "Mid-production spike" entry choice in Phase 1.
+**触发方式：** `--spike` 标志，或 Phase 1 中选择“Mid-production spike”入口。
 
-**Read `references/spike-mode.md` now and follow it** — this phase's steps are in that file, not here. Read it again if the conversation was compacted or resumed during this phase.
+**现在阅读 `references/spike-mode.md` 并遵循其中的步骤**——本阶段的步骤在该文件中，不在本文件里。如果本阶段进行中对话被压缩或恢复，请重新阅读。
 
-### Important Constraints
+### 重要约束
 
-- Prototype code must NEVER import from production source files
-- Production code must NEVER import from prototype directories
-- If the recommendation is PROCEED, production implementation is written from
-  scratch — prototype code is never refactored into production
-- Total effort is hard-capped at 1 day (concept prototypes test one mechanic)
-- Test ONE mechanic — if scope grows, stop and simplify the question
-- No polish. No menus, no game over, no music, no UI unless it IS the mechanic
-- If stuck after 2 hours of engine iteration, reframe the question or switch paths
-- **3 PIVOT iterations → force a KILL decision.** If this is the third time the
-  same concept has produced a PIVOT verdict, the concept likely doesn't work.
-  Ask: "Is this the right idea, or am I in the sunk cost trap?" A new concept
-  prototyped fresh will almost always beat a fourth iteration of a struggling one.
-- Building 2-3 different concept variants and picking the best one is a healthier
-  strategy than iterating one concept to death. Natural selection between prototypes
-  beats willpower.
-- **Networked/multiplayer games:** A local prototype cannot validate the feel of a
-  networked mechanic. Latency fundamentally changes how combat, movement, and
-  prediction feel — a prototype running at 0ms local will feel entirely different at
-  80ms network delay. Use a local prototype to validate that the mechanic is
-  *interesting*. Do not use it as evidence that it *feels good* under real network
-  conditions. Network feel requires real peers or simulated latency (e.g., throttle
-  tools, network condition simulators).
+- 原型代码绝不允许从生产源码文件中导入
+- 生产代码绝不允许从原型目录中导入
+- 如果结论是 PROCEED，生产实现将从零开始编写——原型代码永远不会被重构进生产代码
+- 总工作量硬性上限为 1 天（概念原型只验证一个机制）
+- 只测试一个机制——如果范围扩大，停下来并简化问题
+- 不做打磨。不做菜单、不做游戏结束、不做音乐、不做 UI，除非 UI 本身就是该机制
+- 如果在引擎上迭代 2 小时后仍卡住，重新表述问题或切换路径
+- **3 次 PIVOT 迭代 → 强制做出 KILL 决定。** 如果同一个概念第三次给出 PIVOT 结论，
+  这个概念很可能不成立。问自己：“这是对的想法，还是我陷入了沉没成本陷阱？” 一个
+  全新原型化的新概念，几乎总是胜过挣扎中的概念的第四次迭代。
+- 构建 2-3 个不同的概念变体并挑选最好的一个，是比把一个概念迭代到死更健康的策略。
+  原型之间的自然选择胜过硬撑。
+- **联网/多人游戏：** 本地原型无法验证联网机制的手感。延迟会从根本上改变战斗、移动
+  和预测的手感——在本地 0ms 下运行的原型，放到 80ms 网络延迟下会感觉完全不同。用
+  本地原型验证机制是否*有趣*。不要把它当作该机制在真实网络条件下*手感良好*的证据。
+  网络手感需要真实对端或模拟延迟（例如限流工具、网络状况模拟器）。

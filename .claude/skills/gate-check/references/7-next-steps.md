@@ -1,32 +1,29 @@
-# /gate-check — Sections 7 and 8: Next Step and Follow-Up
+# /gate-check —— 第 7 与 8 节：下一步与后续行动
 
-> Part of `/gate-check`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> 属于 `/gate-check` 的一部分。`SKILL.md` 会指明何时读取本文件；它
+> 解析出的设置及其后续各标题下的规则在此仍然适用。
 
-## 7. Closing Next-Step Widget
+## 7. 收尾的下一步控件
 
-**In this file:**
+**本文件包含：**
 
-- 7. Closing Next-Step Widget: per gate, and the `workflow: minimal` route
-- 8. Follow-Up Actions
+- 7. 收尾的下一步控件：逐闸门的选项，以及 `workflow: minimal` 路线
+- 8. 后续行动
 
-After the verdict is presented and any stage update is complete (project.yaml + stage.txt), close with a structured next-step prompt using `AskUserQuestion`.
+在呈现结论并完成任何阶段更新（project.yaml + stage.txt）之后，用 `AskUserQuestion` 以结构化下一步提示收尾。
 
-**Tailor the options to the gate that just ran.** The argument names the phase
-being entered, so `/gate-check systems-design` is the Concept → Systems Design gate.
+**按刚运行的闸门定制选项。** 参数点名的是即将进入的阶段，因此 `/gate-check systems-design` 是 Concept → Systems Design 闸门。
 
-**At `workflow: minimal`, skip the menus below.** They walk the phase ladder, and
-the minimal route is not the ladder: offer the first incomplete step of
-`paths.minimal` instead (the `--path minimal` rows from Section 3):
-`/setup-engine`, then `/brainstorm` (or `/reverse-document design [code root]`
-when the code root already holds the game: it writes the brief from what is
-built), then `/create-stories`, then `/dev-story` on the next story — the route
-`/help` gives.
+**在 `workflow: minimal` 下，跳过下面的菜单。** 它们沿着阶段阶梯走，
+而 minimal 路线不是这个阶梯：改为提供
+`paths.minimal` 中的第一个未完成步骤（第 3 节中的 `--path minimal` 行）：
+`/setup-engine`，然后 `/brainstorm`（当代码根中已有游戏时，用
+`/reverse-document design [code root]`：它会根据已构建的内容写出简报），然后 `/create-stories`，然后对下一个用户故事运行 `/dev-story`——
+这就是 `/help` 给出的路线。
 
-For **Concept → Systems Design** (`/gate-check systems-design`) PASS — option [A] is
-`/map-systems` when `design/gdd/systems-index.md` does not exist yet (many
-projects write it during Concept, as the workflow catalog orders it), otherwise
-`/design-system [first system in the index's design order]`:
+对于 **Concept → Systems Design**（`/gate-check systems-design`）PASS——当 `design/gdd/systems-index.md` 尚不存在时，选项 [A] 是
+`/map-systems`（许多项目会在 Concept 期间编写它，正如工作流目录所排序的那样），否则是
+`/design-system [索引设计顺序中的第一个系统]`：
 ```
 Gate passed. What would you like to do next?
 [A] Run /map-systems — decompose the concept into systems and a design order (recommended next step)
@@ -35,7 +32,7 @@ Gate passed. What would you like to do next?
 [C] Stop here for this session
 ```
 
-For **Systems Design → Technical Setup** (`/gate-check technical-setup`) PASS:
+对于 **Systems Design → Technical Setup**（`/gate-check technical-setup`）PASS：
 ```
 Gate passed. What would you like to do next?
 [A] Run /create-architecture — produce your master architecture blueprint and ADR work plan (recommended next step)
@@ -43,9 +40,9 @@ Gate passed. What would you like to do next?
 [C] Stop here for this session
 ```
 
-> **Note for the Systems Design → Technical Setup PASS**: `/create-architecture` is the required next step before writing any ADRs. It produces the master architecture document and a prioritized list of ADRs to write. Running `/architecture-decision` without this step means writing ADRs without a blueprint — skip it at your own risk.
+> **Systems Design → Technical Setup PASS 的注意事项**：`/create-architecture` 是撰写任何 ADR 之前必需的下一步。它会产出一份主架构文档以及一份待撰写 ADR 的优先级列表。跳过这一步就直接运行 `/architecture-decision`，意味着在没有蓝图的情况下写 ADR——后果自负。
 
-For **Technical Setup → Pre-Production** (`/gate-check pre-production`) PASS:
+对于 **Technical Setup → Pre-Production**（`/gate-check pre-production`）PASS：
 ```
 Gate passed. What would you like to do next?
 [A] Run /create-control-manifest — generate the layer rules manifest from your Accepted ADRs (first, if docs/architecture/control-manifest.md does not exist yet)
@@ -54,67 +51,67 @@ Gate passed. What would you like to do next?
 [D] Stop here for this session
 ```
 
-> **Note for the Technical Setup → Pre-Production PASS**: The Pre-Production sequence is deliberately ordered
-> to validate fun before committing to detailed planning:
+> **Technical Setup → Pre-Production PASS 的注意事项**：Pre-Production 的顺序是刻意安排的，
+> 目的是在投入详细规划之前先验证趣味性：
 >
-> 1. `/create-control-manifest` — extract technical rules from Accepted ADRs, if not done yet (`/create-epics` requires it at `full`)
-> 2. `/vertical-slice` — build the Vertical Slice **FIRST**, before writing epics or stories
-> 3. Playtest → `/playtest-report` — at least 1 documented session, 3+ better before committing the full team. `/gate-check production` treats the slice as recommended: skipped → CONCERNS, unplayed → NOT ASSESSED
-> 4. `/ux-design [screen]` — UX specs for main menu, core HUD, pause menu (if not done)
-> 5. `/create-epics layer:foundation` then `/create-epics layer:core` — plan after fun is validated
-> 6. `/create-stories [epic-slug]` for each epic
+> 1. `/create-control-manifest` —— 如果尚未完成，从 Accepted 的 ADR 中提取技术规则（`/create-epics` 在 `full` 下要求它）
+> 2. `/vertical-slice` —— **首先**构建垂直切片，在编写史诗或用户故事之前
+> 3. 试玩测试 → `/playtest-report` —— 至少 1 次有记录的会话，投入完整团队前最好 3 次以上。`/gate-check production` 把切片视为推荐项：跳过 → CONCERNS，未玩过 → NOT ASSESSED
+> 4. `/ux-design [screen]` —— 主菜单、核心 HUD、暂停菜单的 UX 规格（若尚未完成）
+> 5. `/create-epics layer:foundation` 然后 `/create-epics layer:core` —— 在趣味性得到验证后再规划
+> 6. 对每个史诗运行 `/create-stories [epic-slug]`
 > 7. `/sprint-plan new`
 >
-> **Why prototype before epics?** If the prototype reveals the core loop needs to change,
-> epics written before that discovery will be partially wrong. Validate fun cheaply first,
-> then plan in detail. This is the #1 lesson from GDC postmortem data.
+> **为什么先做原型再做史诗？** 如果原型表明核心循环需要改变，
+> 在那项发现之前写好的史诗会部分出错。先以低成本验证趣味性，
+> 再详细规划。这是 GDC 复盘数据中的头号教训。
 
-For all other gates, offer the two most logical next steps for that phase plus "Stop here".
+对于其他所有闸门，提供该阶段最合乎逻辑的两个下一步，外加“在此停止”。
 
 ---
 
-## 8. Follow-Up Actions
+## 8. 后续行动
 
-Based on the verdict, suggest specific next steps:
+根据结论，建议具体的下一步：
 
-- **No art bible?** → `/art-bible` to create the visual identity specification
-- **Art bible exists but no asset specs?** → `/asset-spec system:[name]` to generate per-asset visual specs and generation prompts from approved GDDs
-- **No game concept?** → `/brainstorm` to create one
-- **No systems index?** → `/map-systems` to decompose the concept into systems
-- **Missing design docs?** → `/reverse-document` or delegate to `game-designer`
-- **Small design change needed?** → `/quick-design` for changes under about one week of implementation (bypasses full GDD pipeline)
-- **No UX specs?** → `/ux-design [screen name]` to author specs, or `/team-ui [feature]` for full pipeline
-- **UX specs not reviewed?** → `/ux-review [file]` or `/ux-review all` to validate
-- **No accessibility requirements doc?** → `/ux-design accessibility` to write `design/accessibility-requirements.md`
-- **No interaction pattern library?** → `/ux-design patterns` to initialize it
-- **Concept or a GDD not reviewed?** → `/design-review [doc]`
-- **GDDs not cross-reviewed?** → `/review-all-gdds` (run after all MVP GDDs are individually approved)
-- **Cross-GDD consistency issues?** → fix flagged GDDs, then re-run `/review-all-gdds`
-- **No test framework?** → `/test-setup` to scaffold the framework for your engine
-- **No QA plan for current sprint?** → `/qa-plan sprint` to generate one before implementation begins
-- **Missing ADRs?** → `/architecture-decision` for individual decisions
-- **No master architecture doc?** → `/create-architecture` for the full blueprint
-- **ADRs missing engine compatibility sections?** → Re-run `/architecture-decision`
-  or manually add Engine Compatibility sections to existing ADRs
-- **Missing control manifest?** → `/create-control-manifest` (requires Accepted ADRs)
-- **Missing epics?** → `/create-epics layer: foundation` then `/create-epics layer: core` (requires control manifest)
-- **Missing stories for an epic?** → `/create-stories [epic-slug]` (run after each epic is created)
-- **Stories not implementation-ready?** → `/story-readiness` to validate stories before developers pick them up
-- **Tests failing?** → delegate to `lead-programmer` or `qa-tester`
-- **No playtest data?** → `/playtest-report`
-- **No playtest sessions beyond the minimum?** → Additional sessions give more reliable signal. 3+ total is recommended before committing the full team. Use `/playtest-report` to structure findings.
-- **No Difficulty Curve doc?** → Author `design/difficulty-curve.md` by hand from the template at `.claude/docs/templates/difficulty-curve.md`. (`/quick-design` is a related session but writes to `design/quick-specs/`, not to this path — use it to think the curve through, then copy the outcome here.)
-- **No player journey map?** → Author `design/player-journey.md` by hand from the template at `.claude/docs/templates/player-journey.md`.
+- **没有美术圣经？** → `/art-bible` 创建视觉识别规格
+- **美术圣经存在但没有资源规格？** → `/asset-spec system:[name]` 从已批准的 GDD 生成逐资源的视觉规格与生成提示
+- **没有游戏概念？** → `/brainstorm` 创建一个
+- **没有系统索引？** → `/map-systems` 把概念分解为系统
+- **缺少设计文档？** → `/reverse-document`，或委托给 `game-designer`
+- **需要小的设计变更？** → `/quick-design` 用于实现工作量约一周以内的变更（绕过完整 GDD 流水线）
+- **没有 UX 规格？** → `/ux-design [screen name]` 撰写规格，或 `/team-ui [feature]` 走完整流水线
+- **UX 规格未评审？** → `/ux-review [file]` 或 `/ux-review all` 进行校验
+- **没有无障碍需求文档？** → `/ux-design accessibility` 写入 `design/accessibility-requirements.md`
+- **没有交互模式库？** → `/ux-design patterns` 初始化它
+- **概念或某个 GDD 未评审？** → `/design-review [doc]`
+- **GDD 未做交叉评审？** → `/review-all-gdds`（在所有 MVP GDD 单独批准后运行）
+- **存在跨 GDD 一致性问题？** → 修正被标记的 GDD，然后重新运行 `/review-all-gdds`
+- **没有测试框架？** → `/test-setup` 为你的引擎搭建框架脚手架
+- **当前冲刺没有 QA 计划？** → `/qa-plan sprint` 在实现开始前生成一份
+- **缺少 ADR？** → `/architecture-decision` 处理个别决策
+- **没有主架构文档？** → `/create-architecture` 生成完整蓝图
+- **ADR 缺少引擎兼容性章节？** → 重新运行 `/architecture-decision`
+  或手动为现有 ADR 添加 Engine Compatibility 章节
+- **缺少控制清单？** → `/create-control-manifest`（需要 Accepted 的 ADR）
+- **缺少史诗？** → `/create-epics layer: foundation` 然后 `/create-epics layer: core`（需要控制清单）
+- **某个史诗缺少用户故事？** → `/create-stories [epic-slug]`（每个史诗创建后运行）
+- **用户故事未达可实施状态？** → `/story-readiness` 在开发者领取前校验用户故事
+- **测试失败？** → 委托给 `lead-programmer` 或 `qa-tester`
+- **没有试玩数据？** → `/playtest-report`
+- **试玩测试会话未超过最低要求？** → 更多会话能提供更可靠的信号。投入完整团队前推荐总计 3 次以上。用 `/playtest-report` 整理发现。
+- **没有难度曲线文档？** → 按 `.claude/docs/templates/difficulty-curve.md` 的模板手工撰写 `design/difficulty-curve.md`。（`/quick-design` 是相关的会话，但写入 `design/quick-specs/`，而不是这个路径——可以用它把曲线想清楚，再把结果复制到这里。）
+- **没有玩家旅程地图？** → 按 `.claude/docs/templates/player-journey.md` 的模板手工撰写 `design/player-journey.md`。
 
-> **Neither of these has a skill that writes it — do not name one.**
-> "`/ux-design` Phase 2b" is the step that *reads* `design/player-journey.md`,
-> so it lands the user back at the check that just failed. `/quick-design`
-> writes `design/quick-specs/[name]-[date].md` and leaves this gate still
-> failing. Say plainly that both docs are hand-authored from their templates.
-- **Need a quick sprint check?** → `/sprint-status` for current sprint progress snapshot
-- **Performance unknown?** → `/perf-profile`
-- **Not localized?** → `/localize`
-- **No security audit, or open CRITICAL/HIGH findings?** → `/security-audit` (after fixes, `/security-audit quick` to confirm)
-- **Ready for release?** → `/launch-checklist`
+> **这两者都没有负责写入的技能——不要点名任何技能。**
+> “`/ux-design` Phase 2b” 是*读取* `design/player-journey.md` 的步骤，
+> 因此它会把用户带回刚刚失败的检查。`/quick-design`
+> 写入的是 `design/quick-specs/[name]-[date].md`，并让本闸门
+> 仍然失败。请直说这两份文档都需要按各自模板手工撰写。
+- **需要快速冲刺检查？** → `/sprint-status` 获取当前冲刺进度快照
+- **性能未知？** → `/perf-profile`
+- **未本地化？** → `/localize`
+- **没有安全审计，或存在未关闭的 CRITICAL/HIGH 发现项？** → `/security-audit`（修复后，用 `/security-audit quick` 确认）
+- **准备好发布了？** → `/launch-checklist`
 
 ---

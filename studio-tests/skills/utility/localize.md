@@ -2,256 +2,254 @@
 
 ## Skill Summary
 
-`/localize` runs the localization pipeline through one required subcommand:
-`scan`, `extract`, `validate`, `status`, `brief`, `cultural-review`,
-`vo-pipeline`, `rtl-check`, `freeze` or `qa`. It works on a single source string
-table under `assets/data/strings/` (`strings-en.json` is the English source; the
-other locales sit beside it) and writes reports under `production/localization/`.
+`/localize` 通过一个必需的子命令运行本地化流水线：
+`scan`、`extract`、`validate`、`status`、`brief`、`cultural-review`、
+`vo-pipeline`、`rtl-check`、`freeze` 或 `qa`。它作用于 `assets/data/strings/` 下的单一源字符串表
+（`strings-en.json` 是英文源；其他语言环境与之并列），
+并将报告写入 `production/localization/`。
 
-`scan`, `validate` and `status` are read-only. `extract` shows a diff of new
-keyed entries and asks "May I write these new entries to
-`assets/data/strings/strings-en.json`?" before appending only the diff; its
-verdict is **COMPLETE**. With no subcommand the skill prints usage and stops with
-verdict **FAIL** — missing required subcommand. A scan whose code root cannot be
-resolved reports `NOT ASSESSED — code root unresolved`; a status run with no
-string table reports `NOT ASSESSED — no string table found`. `cultural-review`
-and `qa` spawn `localization-lead`; `qa` issues a per-locale
-PASS / PASS WITH CONDITIONS / NOT ASSESSED / FAIL verdict, first match FAIL →
-NOT ASSESSED → PASS WITH CONDITIONS → PASS. Its checks are playthrough-based, so a
-locale nobody has played is NOT ASSESSED, and the release gate does not count it
-as passed. No director gates apply.
+`scan`、`validate` 与 `status` 是只读的。`extract` 会展示新增键条目的差异，
+并在仅追加该差异之前询问 "May I write these new entries to
+`assets/data/strings/strings-en.json`?"；其结论为 **COMPLETE**。
+没有子命令时，技能打印用法并以结论 **FAIL** 停止——缺少必需子命令。
+无法解析代码根的扫描会报告 `NOT ASSESSED — code root unresolved`；
+没有字符串表的状态运行会报告 `NOT ASSESSED — no string table found`。`cultural-review`
+与 `qa` 会派发 `localization-lead`；`qa` 按语言环境给出
+PASS / PASS WITH CONDITIONS / NOT ASSESSED / FAIL 结论，首个命中顺序为 FAIL →
+NOT ASSESSED → PASS WITH CONDITIONS → PASS。其检查基于试玩，因此
+无人试玩过的语言环境为 NOT ASSESSED，发布质量闸门不会将其
+计为通过。不适用任何总监闸门。
 
 ---
 
 ## Static Assertions (Structural)
 
-Checked against the SKILL.md by `/skill-test spec` — no fixture needed.
+由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] Has required frontmatter fields: `name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`
-- [ ] Has ≥2 phase headings
-- [ ] Contains verdict keywords: COMPLETE, FAIL, NOT ASSESSED, PASS WITH CONDITIONS
-- [ ] Contains "May I write" collaborative protocol language before writing the string table or a report
-- [ ] Has a next-step handoff (the Recommended Workflow chain ending in `/gate-check release`)
-- [ ] The QA gate note is tiered: at `workflow: full` the Polish → Release gate requires PASS or PASS WITH CONDITIONS for every translated locale being shipped (recommended at `standard`, dropped at `minimal`)
-- [ ] The `freeze` question names the file it writes — "This writes `production/localization/freeze-status.md`" — before the user answers
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 有 ≥2 个 phase 标题
+- [ ] 包含结论关键词：COMPLETE、FAIL、NOT ASSESSED、PASS WITH CONDITIONS
+- [ ] 在写入字符串表或报告之前包含 "May I write" 协作协议用语
+- [ ] 有下一步交接（以 `/gate-check release` 结尾的 Recommended Workflow 链）
+- [ ] QA 闸门说明是分层的：在 `workflow: full` 下，Polish → Release 闸门要求每个要交付的已翻译语言环境为 PASS 或 PASS WITH CONDITIONS（在 `standard` 下为建议，在 `minimal` 下舍弃）
+- [ ] `freeze` 提问在用户回答前指明它将写入的文件——"This writes `production/localization/freeze-status.md`"
 
 ---
 
 ## Director Gate Checks
 
-None. `/localize` is a pipeline utility and spawns no director. The only agent
-it spawns is `localization-lead` (an operations-tier agent), and only in the
-`cultural-review` and `qa` modes.
+无。`/localize` 是流水线工具，不派发任何总监。它唯一派发的代理
+是 `localization-lead`（运营层级的代理），且仅在
+`cultural-review` 与 `qa` 模式下。
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非某个用例自己的 Fixture 另有说明，否则每个用例的 `project.yaml` 都设置
+`modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。
+规则见：`studio-tests/CLAUDE.md` §
+Fixture defaults。
 
 ---
 
 ## Test Cases
 
-### Case 1: Extract — New Strings Keyed and Appended After Approval
+### Case 1: Extract — 新字符串建立键并在批准后追加
 
 **Fixture:**
-- `project.yaml` has `engine.name: Godot`, so the code root is `src/`
-- `src/ui/hud.gd` wraps three strings in `tr()` that have no entry in
-  `assets/data/strings/strings-en.json`
-- No `production/localization/freeze-status.md` exists
+- `project.yaml` 中有 `engine.name: Godot`，因此代码根为 `src/`
+- `src/ui/hud.gd` 用 `tr()` 包裹了三个字符串，而它们在
+  `assets/data/strings/strings-en.json` 中没有条目
+- 不存在 `production/localization/freeze-status.md`
 
 **Input:** `/localize extract`
 
 **Expected behavior:**
-1. Skill scans source files for localized string references and compares them
-   against the table in `assets/data/strings/`
-2. Skill proposes one new entry per unkeyed string, with a key in the form
-   `[category].[subcategory].[description]` (e.g. `ui.hud.health_label`)
-3. Each new entry carries a `context` field: where it appears, maximum length,
-   placeholder meaning
-4. Skill presents the diff and asks "May I write these new entries to
+1. 技能扫描源文件中的本地化字符串引用，并与
+   `assets/data/strings/` 中的表进行比对
+2. 技能为每个未建键的字符串提议一个新条目，键的形式为
+   `[category].[subcategory].[description]`（例如 `ui.hud.health_label`）
+3. 每个新条目都带有 `context` 字段：出现位置、最大长度、
+   占位符含义
+4. 技能展示差异并询问 "May I write these new entries to
    `assets/data/strings/strings-en.json`?"
-5. On approval it writes only the new entries (not a full replacement);
-   verdict is COMPLETE
+5. 批准后只写入新条目（而非整表替换）；
+   结论为 COMPLETE
 
 **Assertions:**
-- [ ] Proposed keys follow `[category].[subcategory].[description]`
-- [ ] Every new entry includes a `context` field
-- [ ] The diff is shown and "May I write" names `assets/data/strings/strings-en.json` before any write
-- [ ] Only the three new entries are written — existing entries are not rewritten
-- [ ] Verdict is COMPLETE
+- [ ] 提议的键遵循 `[category].[subcategory].[description]`
+- [ ] 每个新条目都包含 `context` 字段
+- [ ] 在任何写入之前展示差异，且 "May I write" 指明 `assets/data/strings/strings-en.json`
+- [ ] 只写入这三个新条目——现有条目不被重写
+- [ ] 结论为 COMPLETE
 
 ---
 
-### Case 2: No Subcommand — Usage and FAIL
+### Case 2: 无子命令 — 打印用法并 FAIL
 
 **Fixture:**
-- Any project state
+- 任意项目状态
 
 **Input:** `/localize`
 
 **Expected behavior:**
-1. Skill finds no subcommand in the argument
-2. Skill outputs usage (the ten modes) and stops
-3. Verdict is FAIL — missing required subcommand
+1. 技能在参数中找不到任何子命令
+2. 技能输出用法（十个模式）并停止
+3. 结论为 FAIL——缺少必需子命令
 
 **Assertions:**
-- [ ] Usage listing the available modes is printed
-- [ ] Verdict is FAIL with the reason "missing required subcommand"
-- [ ] No scan, extract or validation work is performed
-- [ ] No file is written and no "May I write" ask appears
+- [ ] 打印列出可用模式的用法
+- [ ] 结论为 FAIL，原因为 "missing required subcommand"
+- [ ] 不执行任何扫描、提取或校验工作
+- [ ] 不写入任何文件，也不出现 "May I write" 询问
 
 ---
 
-### Case 3: Validate — Gaps Reported by Locale, Nothing Written
+### Case 3: Validate — 按语言环境报告缺口，不写入任何内容
 
 **Fixture:**
-- `assets/data/strings/` holds `strings-en.json`, `strings-fr.json` and
+- `assets/data/strings/` 中有 `strings-en.json`、`strings-fr.json` 与
   `strings-de.json`
-- `strings-de.json` lacks 4 keys present in the English source
-- One French entry omits the `{playerName}` placeholder its English source has
+- `strings-de.json` 缺少英文源中存在的 4 个键
+- 一个法语条目缺少其英文源具有的 `{playerName}` 占位符
 
 **Input:** `/localize validate`
 
 **Expected behavior:**
-1. Skill reads every string table file in `assets/data/strings/`
-2. For `de` it reports the 4 keys as Completeness gaps
-3. For `fr` it reports a Placeholder mismatch on the affected key
-4. Results are grouped by locale and severity
-5. Skill writes nothing — validate is read-only
+1. 技能读取 `assets/data/strings/` 中的每个字符串表文件
+2. 对 `de`，将这 4 个键报告为 Completeness 缺口
+3. 对 `fr`，在受影响键上报告 Placeholder 不匹配
+4. 结果按语言环境与严重程度分组
+5. 技能不写入任何内容——validate 是只读的
 
 **Assertions:**
-- [ ] The 4 missing keys are named and attributed to the `de` locale
-- [ ] The placeholder mismatch is reported against the `fr` locale and its key
-- [ ] Output is grouped by locale and severity
-- [ ] No file is written or modified, and no "May I write" ask appears
+- [ ] 点名这 4 个缺失的键并归因到 `de` 语言环境
+- [ ] 占位符不匹配针对 `fr` 语言环境及其键报告
+- [ ] 输出按语言环境与严重程度分组
+- [ ] 不写入或修改任何文件，也不出现 "May I write" 询问
 
 ---
 
-### Case 4: Status With No String Table — NOT ASSESSED
+### Case 4: 无字符串表时的 Status — NOT ASSESSED
 
 **Fixture:**
-- `assets/data/strings/` does not exist
+- `assets/data/strings/` 不存在
 
 **Input:** `/localize status`
 
 **Expected behavior:**
-1. Skill looks for the source string table and finds none
-2. The whole status output is `NOT ASSESSED — no string table found`
-3. Skill does not produce a coverage matrix of zeros, and does not pre-fill the
-   source row as `100%`
+1. 技能查找源字符串表但找不到
+2. 整个 status 输出为 `NOT ASSESSED — no string table found`
+3. 技能不生成全为零的覆盖率矩阵，也不把
+   源语言行预填为 `100%`
 
 **Assertions:**
-- [ ] Output is `NOT ASSESSED — no string table found`
-- [ ] No coverage matrix with zero counts is produced
-- [ ] The source locale is not reported as `100%` coverage
-- [ ] No file is written (status is read-only)
+- [ ] 输出为 `NOT ASSESSED — no string table found`
+- [ ] 不生成计数为零的覆盖率矩阵
+- [ ] 源语言不被报告为 `100%` 覆盖率
+- [ ] 不写入任何文件（status 是只读的）
 
 ---
 
-### Case 5: Director Gate Check — None; Cultural Review Uses localization-lead
+### Case 5: 总监闸门检查 — 无；文化评审使用 localization-lead
 
 **Fixture:**
-- `assets/data/strings/strings-en.json` exists with player-facing strings
-- Any review mode
+- `assets/data/strings/strings-en.json` 存在并含有面向玩家的字符串
+- 任意评审模式
 
 **Input:** `/localize cultural-review`
 
 **Expected behavior:**
-1. Skill spawns `localization-lead` to audit strings and assets for cultural
-   sensitivity
-2. Findings are presented as a table with a severity of BLOCKING, ADVISORY or
-   NOTE per finding
-3. Skill asks "May I write this cultural review report to
+1. 技能派发 `localization-lead`，审计字符串与资源的文化
+   敏感性
+2. 发现以表格呈现，每条发现的严重程度为 BLOCKING、ADVISORY 或
+   NOTE
+3. 技能询问 "May I write this cultural review report to
    `production/localization/cultural-review-[date].md`?"
-4. No director agent is spawned and no gate ID appears in output
+4. 不派发任何总监代理，输出中也不出现闸门 ID
 
 **Assertions:**
-- [ ] `localization-lead` is the only agent spawned
-- [ ] No director gate (creative, technical, producer, art) is invoked and no gate skip message appears
-- [ ] Each finding carries BLOCKING, ADVISORY or NOTE severity
-- [ ] "May I write" names `production/localization/cultural-review-[date].md` before the report is written
+- [ ] `localization-lead` 是唯一派发的代理
+- [ ] 不调用任何总监闸门（creative、technical、producer、art），也不出现闸门跳过消息
+- [ ] 每条发现都带有 BLOCKING、ADVISORY 或 NOTE 严重程度
+- [ ] "May I write" 在报告写入前指明 `production/localization/cultural-review-[date].md`
 
 ---
 
-### Case 6: Scan With an Unresolved Code Root — NOT ASSESSED, never "no hardcoded strings"
+### Case 6: 代码根无法解析时的 Scan — NOT ASSESSED，绝不报 "no hardcoded strings"
 
 **Fixture:**
-- `project.yaml` has no `engine.name`; `.claude/docs/technical-preferences.md`
-  reads `[TO BE CONFIGURED]`
-- Both `src/` and `Assets/` exist and hold UI code with hardcoded strings
-  (ambiguous tree)
+- `project.yaml` 没有 `engine.name`；`.claude/docs/technical-preferences.md`
+  内容为 `[TO BE CONFIGURED]`
+- `src/` 与 `Assets/` 都存在，且都含有带硬编码字符串的 UI 代码
+  （目录树有歧义）
 
 **Input:** `/localize scan`
 
 **Expected behavior:**
-1. Skill tries to resolve the code root and cannot (no engine, two candidate roots)
-2. It reports `NOT ASSESSED — code root unresolved` for the hardcoded-string
-   search and says which checks did not run
-3. It does not guess `src/`, and does not report zero hits or "no hardcoded
-   strings found" — that would read as "nothing to localize"
-4. Nothing is written — scan is read-only
+1. 技能尝试解析代码根但无法做到（没有引擎，且有两个候选根）
+2. 对硬编码字符串搜索报告 `NOT ASSESSED — code root unresolved`，
+   并说明哪些检查未运行
+3. 它不猜测 `src/`，也不报告零命中或 "no hardcoded
+   strings found"——那会被读成"没有需要本地化的内容"
+4. 不写入任何内容——scan 是只读的
 
 **Assertions:**
-- [ ] Output reads `NOT ASSESSED — code root unresolved` for the code search
-- [ ] No "no hardcoded strings" or zero-hit result is reported
-- [ ] The code root is not assumed to be `src/`
-- [ ] No file is written and no "May I write" ask appears
+- [ ] 代码搜索的输出为 `NOT ASSESSED — code root unresolved`
+- [ ] 不报告 "no hardcoded strings" 或零命中结果
+- [ ] 不假定代码根为 `src/`
+- [ ] 不写入任何文件，也不出现 "May I write" 询问
 
 ---
 
-### Case 7: QA on a Locale Nobody Has Played — NOT ASSESSED
+### Case 7: 对无人试玩过的语言环境执行 QA — NOT ASSESSED
 
 **Fixture:**
-- `assets/data/strings/strings-en.json` and `strings-fr.json` exist and validate
-  cleanly
-- No one has played the French build: there are no in-game observations for the
-  functional, overflow, contextual-accuracy or VO checks
+- `assets/data/strings/strings-en.json` 与 `strings-fr.json` 存在且校验
+  通过
+- 无人试玩过法语构建：对功能、溢出、语境准确性或 VO 检查
+  都没有游戏内观察记录
 
 **Input:** `/localize qa`
 
 **Expected behavior:**
-1. Skill spawns `localization-lead` for the QA plan
-2. The playthrough-based checks have no results, and no BLOCKING finding is open,
-   so the French verdict is **NOT ASSESSED**, naming each check that did not run
-3. The verdict is not PASS or PASS WITH CONDITIONS on the strength of the string
-   tables alone
-4. Skill asks "May I write this localization QA report to
-   `production/localization/loc-qa-fr-[date].md`?"; the report says the locale
-   has not passed QA for the release gate
+1. 技能派发 `localization-lead` 制定 QA 计划
+2. 基于试玩的检查没有结果，且没有未解决的 BLOCKING 发现，
+   因此法语结论为 **NOT ASSESSED**，并点名每项未运行的检查
+3. 不会仅凭字符串表就给出 PASS 或 PASS WITH CONDITIONS 结论
+4. 技能询问 "May I write this localization QA report to
+   `production/localization/loc-qa-fr-[date].md`?"；报告说明该语言环境
+   尚未通过发布闸门的 QA
 
 **Assertions:**
-- [ ] The French Status is NOT ASSESSED, with the unrun checks named
-- [ ] No PASS or PASS WITH CONDITIONS is issued for an unplayed locale
-- [ ] "May I write" names the loc-qa report path before it is written
-- [ ] The report does not present the locale as cleared for the Polish → Release gate
+- [ ] 法语 Status 为 NOT ASSESSED，并点名未运行的检查
+- [ ] 对未试玩的语言环境不给出 PASS 或 PASS WITH CONDITIONS
+- [ ] "May I write" 在写入前指明 loc-qa 报告路径
+- [ ] 报告不将该语言环境呈现为已清关进入 Polish → Release 闸门
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Stops with usage and verdict FAIL when no subcommand is given
-- [ ] `scan`, `validate` and `status` write no files
-- [ ] Asks "May I write" with the target path before writing the string table (extract) or any report (brief, cultural-review, vo-pipeline script, rtl-check, qa)
-- [ ] Extract writes only the diff of new entries, never a full replacement of the table
-- [ ] Reports NOT ASSESSED instead of zero results when the code root or the string table is missing
-- [ ] `qa` issues PASS, PASS WITH CONDITIONS, NOT ASSESSED or FAIL per locale, first match FAIL → NOT ASSESSED → PASS WITH CONDITIONS → PASS
-- [ ] Ends with the Recommended Workflow chain / `/gate-check release` handoff
+- [ ] 未给出子命令时以用法和结论 FAIL 停止
+- [ ] `scan`、`validate` 与 `status` 不写入任何文件
+- [ ] 在写入字符串表（extract）或任何报告（brief、cultural-review、vo-pipeline 脚本、rtl-check、qa）之前，以目标路径询问 "May I write"
+- [ ] Extract 只写入新条目的差异，绝不整表替换
+- [ ] 代码根或字符串表缺失时报告 NOT ASSESSED，而不是零结果
+- [ ] `qa` 按语言环境给出 PASS、PASS WITH CONDITIONS、NOT ASSESSED 或 FAIL，首个命中顺序为 FAIL → NOT ASSESSED → PASS WITH CONDITIONS → PASS
+- [ ] 以 Recommended Workflow 链 / `/gate-check release` 交接结束
 
 ---
 
 ## Coverage Notes
 
-- `scan` with a resolved code root (findings with file paths and line numbers)
-  is not separately tested; Case 6 covers the unresolved root.
-- `extract` while `freeze-status.md` shows Status: ACTIVE (new keys appended to
-  `## Post-Freeze Changes` with a freeze-violation warning) is not tested.
-- `freeze` (pre-freeze checklist and `AskUserQuestion` [A]/[B]), `brief`,
-  `vo-pipeline` and `rtl-check` are not exercised by a dedicated case; `qa` is
-  covered only for its NOT ASSESSED branch (Case 7).
-- The `qa` gate note — a FAIL blocks release for that locale only — needs a live
-  run with multiple locales to verify.
+- 代码根已解析的 `scan`（带文件路径与行号的发现）
+  未单独测试；Case 6 覆盖无法解析的代码根。
+- 当 `freeze-status.md` 显示 Status: ACTIVE 时的 `extract`（新键追加到
+  `## Post-Freeze Changes` 并给出冻结违规警告）未测试。
+- `freeze`（冻结前清单与 `AskUserQuestion` [A]/[B]）、`brief`、
+  `vo-pipeline` 与 `rtl-check` 没有专门用例覆盖；`qa` 仅
+  覆盖其 NOT ASSESSED 分支（Case 7）。
+- `qa` 闸门说明——FAIL 只阻塞该语言环境的发布——需要
+  多语言环境的实机运行来验证。

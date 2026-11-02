@@ -1,23 +1,21 @@
-> Gate definition. The spawning skill passes this file's path to the director agent; the AGENT reads it — the parent session should not.
+> 质量闸门定义。发起调用的技能会把本文件路径传给总监代理；由该 AGENT 读取——父会话不应读取。
 
-# TD-ADR — Architecture Decision Review
+# TD-ADR — 架构决策评审
 
-Agent: `technical-director` | Model tier: Opus | Domain: Architecture, engine risk, performance
+Agent：`technical-director` | 模型层级：session（继承） | 领域：架构、引擎风险、性能
 
-**Trigger**: After an individual ADR is authored (`/architecture-decision`), before
-it is marked Accepted
+**触发时机**：单份 ADR 编写完成后（`/architecture-decision`），在其被标记为
+Accepted 之前
 
-**Context to pass**:
-- ADR file path
-- Engine version and knowledge gap risk level for the domain
-- Related ADRs (if any)
+**需传入的上下文**：
+- ADR 文件路径
+- 引擎版本与该领域的知识缺口风险等级
+- 相关 ADR（如有）
 
-**Prompt**:
-> "Review this Architecture Decision Record. Does it have a clear problem statement
-> and rationale? Are the rejected alternatives genuinely considered? Does the
-> Consequences section acknowledge the trade-offs honestly? Is the engine version
-> stamped? Are post-cutoff API risks flagged? Does it link to the GDD requirements
-> it covers? Return APPROVE, CONCERNS [specific gaps], or REJECT [the decision is
-> underspecified or makes unsound technical assumptions]."
+**提示词**：
+> "审查这份架构决策记录（ADR）。它是否有清晰的问题陈述与理由？被否决的备选方案
+> 是否得到了真正的考虑？Consequences 章节是否如实承认了取舍？引擎版本是否已标注？
+> 截止日期之后的 API 风险是否已标出？是否链接到它所覆盖的 GDD 需求？返回 APPROVE、
+> CONCERNS [具体缺口]，或 REJECT [决策规定不足，或做出了不健全的技术假设]。"
 
-**Verdicts**: APPROVE / CONCERNS / REJECT
+**结论**：APPROVE / CONCERNS / REJECT

@@ -1,13 +1,13 @@
 ## Where You Are: Minimal path — [N] of [M] stories complete
 
-**In progress:** [from active.md, if any]
+**In progress:** [若有，来自 active.md]
 
 ### ✓ Done
-- Engine: [engine] · Game brief · [N] stories
+- 引擎：[engine] · 游戏简报 · [N] 个用户故事
 
 ### → Next up
-**[Story NNN: title]** — [what it delivers]
-Command: `/story-done [story-path]` for an In Review story, or an In Progress one whose work is written; otherwise `/dev-story [story-path]`
+**[Story NNN: title]** — [它交付了什么]
+Command: `/story-done [story-path]`（用于 In Review 状态的故事，或工作已写完的 In Progress 故事）；否则用 `/dev-story [story-path]`
 
 ### Coming up after that
-- [the next Ready stories in build order, at most 3]
+- [按构建顺序接下来的 Ready 状态故事，最多 3 个]

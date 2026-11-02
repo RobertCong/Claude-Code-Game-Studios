@@ -1,39 +1,38 @@
 # Quick Design Spec: [Title]
 
 **Type**: New Small System
-**Scope**: [1-2 sentence description of what this system does and doesn't do]
+**Scope**: [用 1-2 句话描述此系统做什么、不做什么]
 **Date**: [today]
 **Estimated Implementation**: [hours]
 
 ## Overview
 
-[One paragraph a new team member could understand. What does this system do,
-when does it activate, and what does it produce?]
+[一段新团队成员也能看懂的话。此系统做什么、
+何时激活、产出什么？]
 
 ## Core Rules
 
-[Unambiguous rules for the system. Use numbered lists for sequential behavior
-and bullet lists for conditions. Be precise enough that a programmer can
-implement without asking questions.]
+[该系统无歧义的规则。行为按顺序时用编号列表，
+条件用项目符号列表。精确到程序员无需提问即可实现。]
 
 ## Tuning Knobs
 
 | Knob | Default | Range | Category | Rationale |
 |------|---------|-------|----------|-----------|
-| [name] | [value] | [min–max] | [feel/curve/gate] | [why this default] |
+| [name] | [value] | [min–max] | [feel/curve/gate] | [为何采用此默认值] |
 
-All values must live in `assets/data/[appropriate-file].json`, not hardcoded.
+所有数值必须放在 `assets/data/[appropriate-file].json` 中，不得硬编码。
 
 ## Acceptance Criteria
 
-- [ ] [Functional criterion: does the right thing]
-- [ ] [Functional criterion: handles the edge case]
-- [ ] [Experiential criterion: feels right — what a playtest validates]
-- [ ] [Regression criterion: does not break adjacent system]
+- [ ] [功能标准：做正确的事]
+- [ ] [功能标准：处理边界情况]
+- [ ] [体验标准：手感正确——由试玩测试验证的内容]
+- [ ] [回归标准：不破坏相邻系统]
 
 ## Systems Index
 
-This system is not currently in `design/gdd/systems-index.md`.
-[If it should be added: suggest which layer and priority tier.]
-[If it is too small to track: state "This system is below systems-index
-tracking threshold — quick spec is sufficient."]
+此系统目前不在 `design/gdd/systems-index.md` 中。
+[若应加入：建议放在哪一层及哪个优先级档位。]
+[若小到无需跟踪：写明「此系统低于 systems-index
+跟踪阈值——快速规格已足够。」]

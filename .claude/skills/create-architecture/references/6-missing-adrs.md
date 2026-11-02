@@ -1,21 +1,21 @@
-# /create-architecture — Phase 6: Missing ADR List
+# /create-architecture — Phase 6: 缺失 ADR 列表
 
-> Part of `/create-architecture`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> 属于 `/create-architecture`。`SKILL.md` 指明了何时读取此文件；它所解析的
+> 设置以及其后续标题下的规则在这里同样适用。
 
-## Phase 6: Missing ADR List
+## Phase 6: 缺失 ADR 列表
 
-Based on the full architecture, produce a complete list of ADRs that should exist
-but don't yet. Group by priority:
+基于完整架构，生成一份应存在但尚未存在的 ADR 的完整列表。
+按优先级分组：
 
-**Must have before coding starts (Foundation & Core decisions):**
-- [e.g. "Scene management and scene loading strategy"]
-- [e.g. "Event bus vs direct signal architecture"]
+**编码开始前必须有（Foundation 与 Core 决策）：**
+- [例如"场景管理与场景加载策略"]
+- [例如"事件总线 vs 直接信号架构"]
 
-**Should have before the relevant system is built:**
-- [e.g. "Inventory serialisation format"]
+**相关系统构建前应有：**
+- [例如"库存序列化格式"]
 
-**Can defer to implementation:**
-- [e.g. "Specific shader technique for water"]
+**可推迟到实现阶段：**
+- [例如"水面渲染的具体着色器技术"]
 
 ---

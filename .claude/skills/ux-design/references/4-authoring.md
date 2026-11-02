@@ -1,31 +1,31 @@
-# /ux-design — Section 4: Section-by-Section Authoring
+# /ux-design — 第 4 节：逐节撰写
 
-> Part of `/ux-design`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> 属于 `/ux-design` 的一部分。`SKILL.md` 指明了何时阅读本文件；它
+> 解析出的设置以及其后各标题下的规则在此仍然适用。
 
-## 4. Section-by-Section Authoring
+## 4. 逐节撰写
 
-Walk through each section in order. For **each section**, follow this cycle:
+按顺序走完每个小节。对**每个小节**，遵循以下循环：
 
 ```
 Context  ->  Questions  ->  Options  ->  Decision  ->  Draft  ->  Approval  ->  Write
 ```
 
-1. **Context**: State what this section needs to contain and surface any relevant
-   constraints from context gathered in Phase 2.
-2. **Questions**: Ask what is needed to draft this section. Use `AskUserQuestion`
-   for constrained choices, conversational text for open-ended exploration.
-3. **Options**: Where design choices exist, present 2-4 approaches with pros/cons.
-   Explain reasoning in conversation, then use `AskUserQuestion` to capture the decision.
-4. **Decision**: User picks an approach or provides custom direction.
-5. **Draft**: Write the section content in conversation for review. Flag provisional
-   assumptions explicitly.
-6. **Approval**: Use `AskUserQuestion`:
-   - "Does this capture the [section name] correctly?"
-   - Options: "Yes — write it to the file", "Small changes needed (describe below)", "Major rethink needed"
-   Do not proceed to step 7 until the user selects "Yes".
-7. **Write**: Use `AskUserQuestion`: "May I write the [section name] section to `[filepath]`?"
-   - Options: "Yes, write it", "Wait — one more change"
-   Once confirmed, use `Edit` to replace the `[To be designed]` placeholder with approved content.
+1. **上下文**：说明该小节需要包含什么，并呈现第 2 阶段收集的上下文中
+   任何相关的约束。
+2. **提问**：询问起草该小节需要哪些信息。对于受约束的选择使用 `AskUserQuestion`，
+   对于开放式探索使用对话式文字。
+3. **选项**：凡存在设计选择之处，给出 2-4 种方案及其优缺点。
+   在对话中解释理由，然后用 `AskUserQuestion` 捕获决策。
+4. **决策**：用户选择一个方案或给出自定义方向。
+5. **草稿**：在对话中写出该小节的内容以供评审。明确标注
+   暂定假设。
+6. **批准**：使用 `AskUserQuestion`：
+   - “这准确表达了 [section name] 吗？”
+   - 选项：“是 — 写入文件”、“需要小幅修改（在下方描述）”、“需要大幅重做”
+   在用户选择“是”之前，不要进入第 7 步。
+7. **写入**：使用 `AskUserQuestion`：“我可以把 [section name] 小节写入 `[filepath]` 吗？”
+   - 选项：“是，写入”、“等等 — 还有一处改动”
+   确认之后，使用 `Edit` 将 `[To be designed]` 占位符替换为已批准的内容。
 
-After writing each section, update `production/session-state/active.md`.
+每写完一个小节后，更新 `production/session-state/active.md`。

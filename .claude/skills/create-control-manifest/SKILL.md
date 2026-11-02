@@ -1,6 +1,6 @@
 ---
 name: create-control-manifest
-description: "Builds a short list of must-do and never-do coding rules per system from accepted ADRs. Use when the user wants programmer rules or a cheat sheet from the ADRs, or needs it regenerated after ADR changes."
+description: "根据已接受的 ADR，按系统构建一份简短的必做与禁做编码规则清单。当用户想要面向程序员的规则或基于 ADR 的速查表，或在 ADR 变更后需要重新生成时使用。"
 argument-hint: "[update — regenerate from current ADRs] [--review full|lean|solo]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Agent, AskUserQuestion, Bash(bash "*/.claude/skills/create-control-manifest/../../hooks/yaml-helper.sh" resolve_config *), Bash(bash .claude/scripts/adr-status.sh*), Bash(bash .claude/scripts/md-section.sh *)
@@ -9,130 +9,92 @@ model: sonnet
 
 !`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,review_gate,automation`
 
-Resolved above — use as-is; `--review` overrides `review_mode` for this run. No
-block → defaults in `.claude/docs/config-resolution.md`.
+已在上方解析——直接使用；`--review` 在本次运行中覆盖 `review_mode`。若无
+输出块 → 使用 `.claude/docs/config-resolution.md` 中的默认值。
 
-Ask with the question tool. Without one, list the options numbered and end your turn
-to wait. A skipped or dismissed question is not an answer: ask again in plain text.
+用问题工具提问。若没有该工具，则列出编号选项并结束本轮等待。跳过或忽略的问题不算回答：用纯文本再问一次。
 
-# Create Control Manifest
+# 创建控制清单（Create Control Manifest）
 
-The control manifest is a flat rules sheet for programmers: what to do and what
-never to do, by architectural layer, taken from the Accepted ADRs, the project's
-technical preferences and the engine reference docs. The ADRs say *why*; the
-manifest says *what*.
+控制清单（control manifest）是给程序员的扁平规则表：按架构层列出该做什么、绝不该做什么，内容取自已接受的 ADR（架构决策记录）、项目的技术偏好以及引擎参考文档。ADR 说明*为什么*；清单说明*做什么*。
 
-**Writes:** `docs/architecture/control-manifest.md`, after the user's yes.
-**When:** after `/architecture-review` passes and the ADRs are Accepted. Run it
-again whenever an ADR is accepted or revised.
+**写入：** `docs/architecture/control-manifest.md`，在用户同意之后。
+**时机：** 在 `/architecture-review` 通过且 ADR 已被接受之后。每当有 ADR 被接受或修订时重新运行。
 
-Asks follow `.claude/docs/automation-modes.md` (collaborative always asks, guided
-asks on major choices, autonomous logs and goes on; `automation_always_ask`
-categories always ask).
+询问遵循 `.claude/docs/automation-modes.md`（协作模式总是询问，引导模式仅重大选择询问，自主模式记录后继续；`automation_always_ask` 类别始终询问）。
 
-## Phase 1: Load the inputs
+## Phase 1: 加载输入
 
-### ADRs
+### ADR
 
-`bash .claude/scripts/adr-status.sh` reads every `docs/architecture/adr-*.md` in one
-pass: the counts first (`adrs`, then `accepted`, `proposed`, `deprecated`,
-`superseded`, `unfilled`, `other`, `no_status`), then one row per ADR with its
-status and layer. Establish the denominator first: decide from the counts, before
-reading any ADR:
+`bash .claude/scripts/adr-status.sh` 一次读取所有 `docs/architecture/adr-*.md`：先输出计数（`adrs`，然后是 `accepted`、`proposed`、`deprecated`、`superseded`、`unfilled`、`other`、`no_status`），然后每条 ADR 一行，含其状态与层。先确定分母：在读取任何 ADR 之前，依据计数做决定：
 
-| Counts | Meaning | Action |
+| 计数 | 含义 | 行动 |
 |---|---|---|
-| `adrs 0` | No ADRs. | "No ADRs found — run `/architecture-decision` before building a control manifest." Stop. |
-| `accepted` ≥ 1 | Normal. | The Accepted rows are the set **A**. Name every other ADR, with its status, in the Phase 4 preview: the user approves a manifest knowing what it leaves out. |
-| `accepted 0`, some with a status | No Accepted ADRs. | "[N] ADRs found, none Accepted. A manifest built from Proposed ADRs would encode decisions that may still change." Ask whether to go on with the Proposed ones or stop. **Never write an empty manifest silently.** |
-| every ADR `no_status` | **Malformed ADRs, not an empty Accepted set.** | "[N] ADRs found, none has a `## Status` section, so acceptance cannot be told. Run `/architecture-decision retrofit [file]` on each." Stop. Never treat them as Accepted. |
+| `adrs 0` | 没有 ADR。 | "未找到 ADR —— 在构建控制清单前请运行 `/architecture-decision`。" 停止。 |
+| `accepted` ≥ 1 | 正常。 | Accepted 行构成集合 **A**。在 Phase 4 预览中逐一点名其他每条 ADR 及其状态：用户是在知道清单遗漏了什么的情况下批准清单的。 |
+| `accepted 0`，部分带状态 | 没有 Accepted 的 ADR。 | "找到 [N] 条 ADR，均未被接受。基于 Proposed ADR 构建的清单会写入可能仍会变化的决策。" 询问是继续使用 Proposed 的 ADR 还是停止。**绝不要静默写入空清单。** |
+| 每条 ADR 都是 `no_status` | **ADR 格式错误，而不是 Accepted 集合为空。** | "找到 [N] 条 ADR，均没有 `## Status` 章节，因此无法判断是否被接受。请对每一条运行 `/architecture-decision retrofit [file]`。" 停止。绝不要把它们当作 Accepted。 |
 
-Each stop above ends with `Verdict: BLOCKED — [the reason]`. Note the number and
-title of every ADR a rule comes from.
+上述每个停止都以 `Verdict: BLOCKED — [the reason]` 结束。记录每条规则来源 ADR 的编号与标题。
 
-### Project config
+### 项目配置
 
-- `naming.*` and `performance.*` from `project.yaml`; for any key absent or empty,
-  `.claude/docs/technical-preferences.md`.
-- Approved libraries and forbidden patterns from
-  `.claude/docs/technical-preferences.md` (not migrated to `project.yaml`).
+- `naming.*` 与 `performance.*` 取自 `project.yaml`；对任何缺失或为空的键，
+  取自 `.claude/docs/technical-preferences.md`。
+- 已批准的库与禁止的模式取自
+  `.claude/docs/technical-preferences.md`（尚未迁移到 `project.yaml`）。
 
-### Engine reference
+### 引擎参考
 
-- `docs/engine-reference/[engine]/VERSION.md` for the engine and version.
-- `docs/engine-reference/[engine]/deprecated-apis.md`: these become forbidden APIs.
-- `docs/engine-reference/[engine]/current-best-practices.md`, when it exists.
+- `docs/engine-reference/[engine]/VERSION.md` 用于获取引擎与版本。
+- `docs/engine-reference/[engine]/deprecated-apis.md`：这些成为禁止使用的 API。
+- `docs/engine-reference/[engine]/current-best-practices.md`（若存在）。
 
-### What exists already
+### 已存在的内容
 
-`docs/architecture/control-manifest.md` present: this run regenerates it; read it
-before the Phase 5 write, which replaces it. `production/epics/*/EPIC.md` present:
-epics exist. Phase 6 picks its next step from both.
+`docs/architecture/control-manifest.md` 存在：本次运行会重新生成它；在 Phase 5 写入（会替换它）之前先读取它。`production/epics/*/EPIC.md` 存在：说明存在史诗（epic）。Phase 6 依据两者选择下一步。
 
-Report: "Loaded [A] Accepted ADRs of [N], engine: [name + version]."
+报告："已加载 [N] 条 Accepted ADR 中的 [A] 条，引擎：[name + version]。"
 
-## Phase 2: Extract the rules from each ADR
+## Phase 2: 从每条 ADR 提取规则
 
-For each ADR in **A**, read only four sections, never the whole file:
+对 **A** 中的每条 ADR，只读取四个章节，绝不读整个文件：
 
 ```
 bash .claude/scripts/md-section.sh extract docs/architecture/[adr-file].md "Decision"
 ```
 
-and the same for `Alternatives Considered`, `Performance Implications` and `Engine
-Compatibility`. Context, Consequences, Migration Plan and Validation Criteria say why
-a decision was made; the manifest records what to do. A section an ADR lacks: note
-it for that ADR and go on. A section missing from **every** ADR in A: report "No
-Accepted ADR has a `[section]` section — the manifest's [category] rules will be
-empty. Verify this is intended." Read beyond the four only when a section points
-outside itself ("subject to the constraints in Context"), and then that one section.
+对 `Alternatives Considered`、`Performance Implications` 与 `Engine
+Compatibility` 同样处理。Context、Consequences、Migration Plan 与 Validation Criteria 说明为何做出决定；清单记录该做什么。某条 ADR 缺少某章节：为该 ADR 记下这一点并继续。A 中**每条** ADR 都缺少的某章节：报告"没有任何 Accepted ADR 包含 `[section]` 章节——清单的 [category] 规则将为空。请确认这是有意为之。" 仅当某章节指向自身之外时（"subject to the constraints in Context"），才读取四个章节之外的内容，且只读那一个章节。
 
-From each ADR:
+从每条 ADR 中提取：
 
-- **Required patterns** (Decision): every "must", "should", "required to",
-  "always", and every pattern or approach it mandates, including any `### Implementation
-  Guidelines` inside it. Never look for that sub-heading alone: many ADRs state
-  their mandates directly under Decision, and a scan for the sub-heading alone
-  yields an empty section.
-- **Forbidden approaches** (Alternatives Considered): every rejected alternative,
-  with why it was rejected as the rule ("never use X because Y"), and any named
-  anti-pattern.
-- **Performance guardrails** (Performance Implications): budgets ("max N ms per
-  frame for this system") and memory limits.
-- **Engine API constraints** (Engine Compatibility): post-cutoff APIs that need
-  verifying, behaviour that differs from what a model would assume, fields or
-  methods that changed in the pinned version.
+- **必需模式（Required patterns）**（Decision）：每个 "must"、"should"、"required to"、"always"，以及它所要求的每种模式或做法，包括其中的任何 `### Implementation Guidelines` 子标题。绝不要只查找该子标题：许多 ADR 直接在 Decision 下陈述其要求，仅扫描该子标题会得到空章节。
+- **禁止做法（Forbidden approaches）**（Alternatives Considered）：每个被否决的备选方案，以其被否决的原因作为规则（"never use X because Y"），以及任何被点名的反模式。
+- **性能护栏（Performance guardrails）**（Performance Implications）：预算（"max N ms per frame for this system"）与内存限制。
+- **引擎 API 约束（Engine API constraints）**（Engine Compatibility）：需要验证的截止版本之后（post-cutoff）的 API、与模型假设不同的行为、在固定版本中已变更的字段或方法。
 
-**Layer.** Each rule goes under the layer of the system it governs, the ADR's
-`layer` column where it has one:
+**层（Layer）。** 每条规则归入其所治理系统所在的层，若 ADR 有 `layer` 列则以其为准：
 
-- **Foundation:** scene management, event architecture, save/load, engine start-up
-- **Core:** core gameplay loop, main player systems, physics and collision
-- **Feature:** secondary systems and mechanics, AI
-- **Presentation:** rendering, audio, UI, VFX, shaders
+- **Foundation：** 场景管理、事件架构、存档/读档、引擎启动
+- **Core：** 核心玩法循环、主要玩家系统、物理与碰撞
+- **Feature：** 次要系统与机制、AI
+- **Presentation：** 渲染、音频、UI、VFX、着色器
 
-An ADR that spans layers puts its rule in each one.
+跨层的 ADR 将其规则放入每一层。
 
-## Phase 3: Add the global rules
+## Phase 3: 添加全局规则
 
-Rules for every layer, each with its source (the `project.yaml` key,
-`technical-preferences.md`, or the engine-reference file), as a layer rule has:
+适用于所有层的规则，每条都带来源（`project.yaml` 键、`technical-preferences.md`，或引擎参考文件），与层规则一样：
 
-- **Naming** from `naming.*`: classes, variables, signals and events, files,
-  constants.
-- **Performance budgets** from `performance.*`: target frame rate, frame budget,
-  draw calls, memory ceiling.
-- **Forbidden APIs** from `deprecated-apis.md`, **only those that apply to what this
-  project builds.** Never copy the table whole: its `GodotPhysics3D → Jolt Physics
-  3D` row is 3D-only, and a 2D project does not use that engine. When you cannot
-  tell whether an entry applies (2D or 3D, a module the project may not include),
-  scope the rule ("when using 3D physics: …") or leave it out and list it as
-  unresolved. `/create-stories` reads this file, and rules that do not apply are
-  rules nobody reads.
-- **Required patterns** from `current-best-practices.md`, when it exists.
-- **Forbidden patterns** from `technical-preferences.md`, copied as written.
+- **命名（Naming）** 取自 `naming.*`：类、变量、信号与事件、文件、常量。
+- **性能预算（Performance budgets）** 取自 `performance.*`：目标帧率、帧预算、绘制调用、内存上限。
+- **禁止的 API（Forbidden APIs）** 取自 `deprecated-apis.md`，**仅限适用于本项目所构建内容的部分。** 绝不要整表照抄：其中 `GodotPhysics3D → Jolt Physics 3D` 一行仅适用于 3D，2D 项目不使用该引擎。当你无法判断某条目是否适用时（2D 还是 3D、项目可能不包含的模块），限定规则范围（"when using 3D physics: …"）或将其略去并列为未决项。`/create-stories` 会读取此文件，而不适用的规则是没人会读的规则。
+- **必需模式（Required patterns）** 取自 `current-best-practices.md`（若存在）。
+- **禁止模式（Forbidden patterns）** 取自 `technical-preferences.md`，照原文复制。
 
-## Phase 4: Show the summary, then the review
+## Phase 4: 展示摘要，然后评审
 
 ```
 ## Control Manifest Preview
@@ -148,42 +110,34 @@ Rules extracted:
 Unresolved: [engine entries left out because whether they apply is unclear, or "None"]
 ```
 
-Ask: "Does this rule summary look complete?" Options: Yes — review and write it /
-Add rules — I have more to include / Remove rules — some should be dropped / Stop —
-I need to review the ADRs first.
+询问："这份规则摘要看起来完整吗？" 选项：是 —— 评审并写入 /
+添加规则 —— 我还有要补充的 / 移除规则 —— 有些应当删掉 / 停止 ——
+我需要先审阅这些 ADR。
 
-**The technical review.** Read the `review_gate` line above. `skill-gates=skip`
-(solo or lean): no agent; note `TD-MANIFEST skipped — [Solo | Lean] mode`.
-`skill-gates=run`: hand the review to the `technical-director` agent with gate
-**TD-MANIFEST** (`.claude/docs/director-gates/td-manifest.md`; the agent reads it
-itself). Brief:
+**技术评审。** 读取上方的 `review_gate` 行。`skill-gates=skip`
+（solo 或 lean）：不调用代理；注明 `TD-MANIFEST skipped — [Solo | Lean] mode`。
+`skill-gates=run`：将评审交给 `technical-director` 代理，闸门（gate）为
+**TD-MANIFEST**（`.claude/docs/director-gates/td-manifest.md`；该代理会自行读取）。简报：
 
-- **Objective:** check the extracted rules before they are written.
-- **Give it:** the preview above with the full rule list, the ADRs covered, the
-  engine version, and the rules taken from technical preferences or the engine
-  reference.
-- **Check:** every mandatory ADR pattern is captured and stated accurately; the
-  forbidden approaches are complete and correctly attributed; no rule lacks a source
-  ADR or preference document; the guardrails agree with the ADRs' constraints.
-- **Return:** APPROVE, CONCERNS, REJECT, or NOT ASSESSED naming a missing input.
-- **Boundaries:** it writes no file.
+- **目标：** 在规则被写入之前检查已提取的规则。
+- **提供：** 上方的预览（含完整规则列表）、所覆盖的 ADR、引擎版本，以及取自技术偏好或引擎参考的规则。
+- **检查：** 每条强制性的 ADR 模式都被捕获且表述准确；禁止做法完整且归属正确；没有规则缺少来源 ADR 或偏好文档；护栏与 ADR 的约束一致。
+- **返回：** APPROVE、CONCERNS、REJECT，或 NOT ASSESSED 并点名缺失的输入。
+- **边界：** 它不写入任何文件。
 
-Act on the verdict:
+依据结论行动：
 
-- **APPROVE:** go to Phase 5.
-- **CONCERNS:** ask: "The technical director raised concerns. How do you want to go
-  on?" Options: Revise the flagged rules / Accept and go on / Discuss further.
-- **REJECT:** write nothing; fix the flagged rules and show the summary again.
-- **NOT ASSESSED:** it is not an approval (`.claude/docs/director-gates.md`). Name
-  what was missing, then supply it and run the review again; or, when the user
-  chooses to go on without it, go to Phase 5 and state `TD-MANIFEST: NOT ASSESSED —
-  [input]` in the reply and the final verdict line.
+- **APPROVE：** 进入 Phase 5。
+- **CONCERNS：** 询问："技术总监提出了关注项。你想如何继续？" 选项：修订被标记的规则 / 接受并继续 / 进一步讨论。
+- **REJECT：** 不写入任何内容；修正被标记的规则并再次展示摘要。
+- **NOT ASSESSED：** 这不是批准（`.claude/docs/director-gates.md`）。说明缺少什么，然后补齐并再次运行评审；或者，当用户选择在不补齐的情况下继续时，进入 Phase 5 并在回复与最终结论行中写明 `TD-MANIFEST: NOT ASSESSED —
+  [input]`。
 
-## Phase 5: Write the control manifest
+## Phase 5: 写入控制清单
 
-Ask: "May I write the control manifest to `docs/architecture/control-manifest.md`?"
-Options: Yes, write it / Show me the full draft first, then ask again / Not yet — I
-want more changes. Write only on an explicit yes.
+询问："我可以把控制清单写入 `docs/architecture/control-manifest.md` 吗？"
+选项：是，写入 / 先给我看完整草稿，然后再问一次 / 还不行 ——
+我想做更多修改。仅在明确同意后写入。
 
 ```markdown
 # Control Manifest
@@ -290,14 +244,12 @@ These APIs are deprecated or unverified for [engine + version]:
 - [constraint that applies in every layer] — source: [ADR-NNNN, preference key or engine-reference file]
 ```
 
-## Phase 6: Next steps
+## Phase 6: 后续步骤
 
-- No epics yet: "Run `/create-epics layer: foundation`, then `/create-stories
-  [epic-slug]`: stories embed this manifest's rules and version."
-- A regeneration: "Updated. Tell the team about the changed rules, above all any
-  new Forbidden entries."
+- 尚无史诗（epic）："运行 `/create-epics layer: foundation`，然后运行 `/create-stories
+  [epic-slug]`：用户故事会嵌入此清单的规则与版本。"
+- 一次重新生成："已更新。把变更的规则告知团队，尤其是任何
+  新的 Forbidden 条目。"
 
-Every rule traces to an ADR, a technical preference or an engine reference doc;
-none is invented, and none is paraphrased in a way that changes its meaning. End
-with `Verdict: COMPLETE — control manifest written` after the write, or `Verdict:
-BLOCKED — user declined the write` when declined.
+每条规则都可追溯到某条 ADR、某项技术偏好或某份引擎参考文档；没有一条是编造的，也没有一条被改述到改变其含义。写入后以 `Verdict: COMPLETE — control manifest written` 结束，被拒绝时以 `Verdict:
+BLOCKED — user declined the write` 结束。

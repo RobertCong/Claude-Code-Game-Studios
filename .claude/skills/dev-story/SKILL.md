@@ -1,6 +1,6 @@
 ---
 name: dev-story
-description: "Implements one story in code with tests, following its ADRs. Use when the user says to build, implement or start working on a story. Not for checking readiness beforehand or closing the story after."
+description: "在代码中实现单个用户故事并编写测试，遵循其 ADR。当用户要求构建、实现或开始处理某个用户故事时使用。不用于事先检查就绪状态，也不用于在之后关闭该用户故事。"
 argument-hint: "[story-path]"
 user-invocable: true
 disable-model-invocation: true
@@ -10,31 +10,31 @@ model: sonnet
 
 !`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow,qa.level,gate_level,engine_values,specialists,perf_budgets,system_overrides`
 
-Resolved above — use as-is. No block → defaults in
-`.claude/docs/config-resolution.md`.
+上述内容已解析完成——请直接使用。若没有解析块 → 使用
+`.claude/docs/config-resolution.md` 中的默认值。
 
-Ask with the question tool. Without one, list the options numbered and end your turn
-to wait. A skipped or dismissed question is not an answer: ask again in plain text.
+使用提问工具提问。若没有提问工具，就把选项编号列出并结束本轮
+以等待回答。被跳过或忽略的问题不算回答：请用纯文本再次询问。
 
 # Dev Story
 
-Implements one story: checks it can start, marks it In Progress, hands the code to
-the right programmer agent with a brief built from the story, then checks the
-result parses and looks right, and hands off.
+实现一个用户故事：检查它能否开始，标记为 In Progress，用根据故事构建的
+简报把代码交给合适的程序员 agent，然后检查结果能否解析、看起来是否正确，并
+完成交接。
 
-**Writes** (each after an ask that names it): the story's `Status`, `Last Updated`
-and `## Files`, and its `production/sprint-status.yaml` entry. The programmer agents
-write the code and tests under the code root and test root
-(`.claude/docs/code-root-resolution.md`). The session checkpoint and the evidence
-stamp are written without an ask.
-**Next:** `/story-done [story-path]`; at `standard` and `full`, `/code-review
-[files]` first.
+**写入**（每次都在点明它的问题之后）：故事的 `Status`、`Last Updated`
+和 `## Files`，以及它在 `production/sprint-status.yaml` 中的条目。程序员 agent
+在代码根目录和测试根目录下编写代码和测试
+（`.claude/docs/code-root-resolution.md`）。会话检查点和证据
+戳记无需询问即可写入。
+**下一步：** `/story-done [story-path]`；在 `standard` 和 `full` 下，先
+`/code-review [files]`。
 
-Asks follow `.claude/docs/automation-modes.md` (collaborative always asks, guided
-asks on major choices, autonomous logs and goes on; `automation_always_ask`
-categories always ask).
+询问遵循 `.claude/docs/automation-modes.md`（协作模式总是询问，引导模式
+在重大选择时询问，自主模式记录并继续；`automation_always_ask`
+类别总是询问）。
 
-Checklist (copy it and tick as you go):
+检查清单（复制它并随进度勾选）：
 
 ```
 - [ ] Phase 1: story found, tier resolved
@@ -46,216 +46,212 @@ Checklist (copy it and tick as you go):
 - [ ] Phase 7: summary, ## Files, checkpoint, closing block
 ```
 
-## Phase 1: The story
+## Phase 1: 用户故事
 
-The text typed after the skill name is the story path. With nothing typed, take the
-story the checkpoint in `production/session-state/active.md` names and confirm it:
-"Continuing work on [title] — is that correct?" None there: ask "Which story are we
-implementing?" with the `TODO` rows of `bash .claude/scripts/story-facts.sh --all`
-as options. No story file under `production/epics/` at all: stop with
-"No stories found in `production/epics/` — run `/create-stories [epic-slug]` to make them (at `standard` and `full`, run `/create-epics` first if there is no epic yet)."
+技能名之后输入的文本就是故事路径。如果没有输入，就取
+`production/session-state/active.md` 检查点中指定的故事并确认：
+“继续处理 [title]——对吗？” 若那里没有：询问“我们要实现哪个用户故事？”
+并把 `bash .claude/scripts/story-facts.sh --all` 的 `TODO` 行
+作为选项。如果 `production/epics/` 下完全没有故事文件：以如下信息停止：
+“No stories found in `production/epics/` — run `/create-stories [epic-slug]` to make them (at `standard` and `full`, run `/create-epics` first if there is no epic yet).”
 
-`bash .claude/scripts/story-facts.sh <story-path>` gives its type, layer, TR-IDs,
-ADRs and dependencies. Then read the story in full.
+`bash .claude/scripts/story-facts.sh <story-path>` 给出它的类型、层、TR-ID、
+ADR 和依赖。然后完整阅读该用户故事。
 
-**Tier.** `workflow` for the story's system, keyed on the GDD filename stem of its
-`GDD:` path (`design/gdd/<stem>.md` → `<stem>`; the `[system]` of its TR-ID only when
-there is no GDD path): that system's `system_overrides` row if there is one, else the
-project value. Say it in your first reply: `Tier: workflow [value]`. That value, never
-`rigor` or `qa.level`, picks the Phase 2 column and the closing Next step.
+**层级（Tier）。** 故事所属系统的 `workflow`，依据其
+`GDD:` 路径的 GDD 文件名主干确定（`design/gdd/<stem>.md` → `<stem>`；仅在没有 GDD
+路径时才使用其 TR-ID 中的 `[system]`）：如果该系统有 `system_overrides` 行就用它，
+否则使用项目值。在你第一次回复中说明：`Tier: workflow [value]`。该值——绝不是
+`rigor` 或 `qa.level`——决定 Phase 2 的列和结尾的下一步。
 
-## Phase 2: Can it start?
+## Phase 2: 能否开始？
 
-| Input | `full` | `standard` | `minimal` |
+| 输入 | `full` | `standard` | `minimal` |
 |---|---|---|---|
-| TR registry `docs/architecture/tr-registry.yaml` | missing: **stop**, "Run `/architecture-review` to bootstrap it" | optional | not expected |
-| The ADR the story names | missing, `Proposed`, `Deprecated` or `Superseded`: **stop** | the same, only when the story names one | the same, only when the story names one |
-| Control manifest `docs/architecture/control-manifest.md` | missing: warn, go on | missing: warn, go on | not expected |
+| TR 注册表 `docs/architecture/tr-registry.yaml` | 缺失：**停止**，“Run `/architecture-review` to bootstrap it” | 可选 | 不要求 |
+| 故事指定的 ADR | 缺失、`Proposed`、`Deprecated` 或 `Superseded`：**停止** | 同上，仅当故事指定了 ADR 时 | 同上，仅当故事指定了 ADR 时 |
+| 控制清单 `docs/architecture/control-manifest.md` | 缺失：警告，继续 | 缺失：警告，继续 | 不要求 |
 
-A story whose ADR field reads `N/A — [reason]` names none.
+如果故事的 ADR 字段为 `N/A — [reason]`，表示它没有指定 ADR。
 
-**The ADR.** `bash .claude/scripts/adr-status.sh <ADR id>` gives its status and
-`version`. Stop messages: `Proposed` — "ADR-NNNN is still Proposed. Accept it with
-`/architecture-decision accept ADR-NNNN` before implementing." `Deprecated` or
-`Superseded` — "ADR-NNNN is [status]; point the story at [successor] (edit its ADR
-field; `/create-stories` never rewrites an existing story) before implementing."
-`NOT_FOUND` — "ADR file not found. Run `/architecture-decision`, or correct the
-story's ADR field."
+**ADR。** `bash .claude/scripts/adr-status.sh <ADR id>` 给出其状态和
+`version`。停止消息：`Proposed` ——“ADR-NNNN is still Proposed. Accept it with
+`/architecture-decision accept ADR-NNNN` before implementing.” `Deprecated` 或
+`Superseded` ——“ADR-NNNN is [status]; point the story at [successor] (edit its ADR
+field; `/create-stories` never rewrites an existing story) before implementing.”
+`NOT_FOUND` ——“ADR file not found. Run `/architecture-decision`, or correct the
+story's ADR field.”
 
-**Do not open the ADR.** The story's ADR Decision Summary and Implementation Notes
-are what the programmer reads instead. Compare the ADR's `version` with the story's
-`ADR Version`:
+**不要打开 ADR。** 程序员读的是故事中的 ADR Decision Summary 和 Implementation Notes。
+将 ADR 的 `version` 与故事的 `ADR Version` 比较：
 
-- equal, or the story has no `ADR Version` (written before the stamp), or both are
-  `unversioned`: trust the story. Note the last two in the summary ("summary
-  trusted unverified").
-- they differ, or the ADR is `unversioned` but the story names a date: read
-  `references/version-mismatch.md`. On a match, do not load it.
+- 相等，或故事没有 `ADR Version`（在戳记之前编写），或两者都是
+  `unversioned`：信任故事。在后两种情况下在总结中注明（“summary
+  trusted unverified”）。
+- 它们不同，或 ADR 是 `unversioned` 但故事指定了日期：阅读
+  `references/version-mismatch.md`。匹配时，不要加载它。
 
-Never treat an absent stamp as a stale one: unknown falls back to the story, and
-`/story-readiness` and `/code-review` are the checks that catch drift later.
+不要把缺失的戳记当作过期的戳记：未知时回退到故事，
+`/story-readiness` 和 `/code-review` 是之后发现漂移的检查。
 
-**The manifest.** When it exists, compare its `Manifest Version` line with the
-story's. They differ: read `references/version-mismatch.md`.
+**清单。** 当它存在时，将它的 `Manifest Version` 行与
+故事的比较。若不同：阅读 `references/version-mismatch.md`。
 
-**Dependencies.** For each path on the story's Depends on line,
-`bash .claude/scripts/story-facts.sh <path>`. Not `COMPLETE`: ask "[this story]
+**依赖。** 对故事 Depends on 行上的每个路径，运行
+`bash .claude/scripts/story-facts.sh <path>`。如果不是 `COMPLETE`：询问“[this story]
 depends on [dependency], which is [status], not Complete. How do you want to go
-on?" Options: Proceed anyway — I accept the risk / Stop — I'll finish the
-dependency first / It is done, the status was never updated — mark it Complete.
-Stop: the story is BLOCKED (Phase 7), no agent. Mark it: ask "May I set [path]
-Status to Complete?" first. Proceed: note it under Deviations. `NOT_FOUND`: warn
-"Dependency story not found: [path]".
+on?” 选项：Proceed anyway — I accept the risk / Stop — I'll finish the
+dependency first / It is done, the status was never updated — mark it Complete。
+停止：故事为 BLOCKED（Phase 7），不运行 agent。标记为完成：先询问“May I set [path]
+Status to Complete?”。继续：在 Deviations 下注明。`NOT_FOUND`：警告
+“Dependency story not found: [path]”。
 
-Any stop above: no agent runs. Go to Phase 7 and write the BLOCKED checkpoint.
+上述任何停止：不运行 agent。转到 Phase 7 并编写 BLOCKED 检查点。
 
-## Phase 3: Mark it In Progress
+## Phase 3: 标记为 In Progress
 
-Before any agent, ask once: "May I mark this story In Progress? This sets `Status`
+在任何 agent 之前，询问一次：“May I mark this story In Progress? This sets `Status`
 and `Last Updated` in [story path] and its entry in `production/sprint-status.yaml`,
-and at the end lists the files changed under its `## Files`." Leave the sprint file
-out of the question when it does not exist. Put what you will do next before the
-question: the question is the last thing in the reply. On yes:
+and at the end lists the files changed under its `## Files`.” 如果冲刺文件不存在，
+就把它排除在问题之外。把接下来要做的事放在
+问题之前：问题应是回复中的最后内容。若同意：
 
-- `bash .claude/scripts/md-section.sh set-field <story> Status "In Progress"`, then
-  `set-field <story> "Last Updated" <YYYY-MM-DD> --after Status`. At `minimal` the
-  story file is the only record of progress.
-- `production/sprint-status.yaml`: this story's entry gets `status: in-progress` and
-  the top-level `updated` today. No file: say `Sprint status not updated:
-  production/sprint-status.yaml absent`.
+- `bash .claude/scripts/md-section.sh set-field <story> Status "In Progress"`，然后
+  `set-field <story> "Last Updated" <YYYY-MM-DD> --after Status`。在 `minimal` 下，
+  故事文件是唯一的进度记录。
+- `production/sprint-status.yaml`：该故事的条目设为 `status: in-progress`，
+  顶层 `updated` 设为今天。没有该文件：说明 `Sprint status not updated:
+  production/sprint-status.yaml absent`。
 
-Declined: change neither, print `Story not marked In Progress — declined` in the
-summary, and go on.
+被拒绝：两者都不改，在总结中打印 `Story not marked In Progress — declined`，
+然后继续。
 
-## Phase 4: Who implements it
+## Phase 4: 由谁实现
 
-**Config/Data stories need no agent.** Show each value change as from → to, ask "May
-I write [data file]?", and edit it. Go to Phase 6.
+**Config/Data 故事不需要 agent。** 把每个值变更以 from → to 形式展示，询问“May
+I write [data file]?”，然后编辑它。转到 Phase 6。
 
-| Story | Programmer agent |
+| 故事 | 程序员 agent |
 |---|---|
-| Foundation layer, any type | `engine-programmer` |
+| 基础层，任意类型 | `engine-programmer` |
 | Type UI | `ui-programmer` |
 | Type Visual/Feel | `gameplay-programmer` |
-| Core or Feature, gameplay | `gameplay-programmer` |
-| Core or Feature, AI or pathfinding | `ai-programmer` |
-| Core or Feature, networking | `network-programmer` |
+| Core 或 Feature，玩法 | `gameplay-programmer` |
+| Core 或 Feature，AI 或寻路 | `ai-programmer` |
+| Core 或 Feature，网络 | `network-programmer` |
 
-**The engine specialist, for every code story.** From the `specialists` line above:
-`code` (`specialists.code`, the language specialist: it tells a Godot C# project
-from a GDScript one, which `engine.name` cannot), plus `shader` when the story
-touches shaders or materials and `ui` for a UI story; `primary` (the generic engine
-specialist) when `code` is `unset`. Name no specialist from memory: the line is the project's
-choice. Every value `unset` and no `primary`: say "No engine specialist configured"
-and go on without one.
+**引擎专家，适用于每个代码故事。** 来自上面的 `specialists` 行：
+`code`（`specialists.code`，语言专家：它能区分 Godot C# 项目和 GDScript 项目，
+而 `engine.name` 做不到），加上当故事涉及着色器或材质时的 `shader`，以及 UI
+故事的 `ui`；当 `code` 为 `unset` 时用 `primary`（通用引擎专家）。不要凭记忆指定
+专家：那一行是项目的选择。所有值都是 `unset` 且没有 `primary`：说明“No engine specialist configured”
+并在没有专家的情况下继续。
 
-## Phase 5: Hand out the work
+## Phase 5: 分发工作
 
-Hand the implementation to the programmer agent. The brief points at files; never
-paste whole documents into it.
+把实现交给程序员 agent。简报指向文件；绝不要把整份文档
+粘贴进去。
 
-- **Objective:** implement [story path] against its acceptance criteria, within its
-  Out of Scope boundaries.
-- **Sources:**
-  1. The story file. It carries the criteria, the boundaries and the QA test cases.
-  2. Each TR-ID (`TR-[system]-NNN`) to look up: in
-     `docs/architecture/tr-registry.yaml`, the lines matching `id: <TR-ID>\s*$`.
-     Its `requirement` text is the source of truth, not text quoted in the story.
-  3. The ADR guidance, **inline**: the story's ADR Decision Summary and
-     Implementation Notes. Never the ADR path.
-  4. The control manifest's [Layer] Layer Rules, by section.
-  5. `naming.*` in `project.yaml` and the `perf_budgets` line above.
-  6. The test file path from the story's Test Evidence section.
-- **Tests,** by `qa.level`, for Logic and Integration stories:
-  - `minimal`: "Do not write a test file for this story — test evidence is waived at
-    `qa.level: minimal`." Say it: an omitted line and a forgotten one look the same
-    to the agent.
-  - `standard`: "Write the test at [path] with the code. Each acceptance criterion
-    needs at least one test function." Naming per engine from
-    `.claude/rules/test-standards.md`. No random seeds, no time-dependent
-    assertions, no external I/O.
-  - `full`: the same, and "every criterion must be covered: `/story-done` blocks on
-    any untested one."
-- **Output:** the files created or changed, the test functions written, any
-  question or blocker, and whether it finished.
-- **Boundaries:** write code only under the resolved code root and tests only under
-  the test root. Code root unresolved: write nothing and report it. Touch no file
-  outside the story's scope: report the need instead. Doc comments on public APIs.
-  An architectural choice the ADR does not cover: report the plan, don't decide it.
-  No helper or abstraction for a one-time use, no error handling for cases that
-  cannot happen (validate at input and data-file boundaries only), and general logic,
-  never a value special-cased so a test passes.
+- **目标：** 依据验收标准实现 [story path]，保持在其
+  Out of Scope 边界内。
+- **来源：**
+  1. 故事文件。它包含验收标准、边界和 QA 测试用例。
+  2. 每个要查找的 TR-ID（`TR-[system]-NNN`）：在
+     `docs/architecture/tr-registry.yaml` 中匹配 `id: <TR-ID>\s*$` 的行。
+     其 `requirement` 文本是事实来源，而不是故事中引用的文本。
+  3. ADR 指导，**内联**：故事的 ADR Decision Summary 和
+     Implementation Notes。绝不要给 ADR 路径。
+  4. 控制清单中的 [Layer] Layer Rules，按节。
+  5. `project.yaml` 中的 `naming.*` 和上面的 `perf_budgets` 行。
+  6. 故事 Test Evidence 章节中的测试文件路径。
+- **测试**，按 `qa.level`，针对 Logic 和 Integration 故事：
+  - `minimal`：“Do not write a test file for this story — test evidence is waived at
+    `qa.level: minimal`.” 要明确说出：省略一行和忘记一行
+    在 agent 看来是一样的。
+  - `standard`：“Write the test at [path] with the code. Each acceptance criterion
+    needs at least one test function.” 按引擎命名，见
+    `.claude/rules/test-standards.md`。不使用随机种子、不使用依赖时间的
+    断言、不使用外部 I/O。
+  - `full`：同上，并加上“every criterion must be covered: `/story-done` blocks on
+    any untested one.”
+- **产出：** 创建或修改的文件、编写的测试函数、任何
+  问题或阻塞项，以及它是否完成。
+- **边界：** 只在解析出的代码根目录下写代码，测试只在
+  测试根目录下写。代码根目录未解析：什么也不写并报告。不要触碰故事范围之外的
+  文件：改为报告需求。公共 API 要有文档注释。ADR 未覆盖的架构选择：
+  报告计划，不要自行决定。不为一次性使用创建辅助函数或抽象，不为不可能发生的情况
+  编写错误处理（只在输入和数据文件边界验证），编写通用逻辑，
+  绝不为了通过测试而对某个值做特殊处理。
 
-**Say what the brief leaves out, to both readers.** Inputs Phase 2 found absent
-(the TR registry, an ADR, the manifest) are left out: tell the agent "No [input] is
-passed — it does not exist at this tier; do not go looking for it", and tell the
-user one line before handing out: `Briefing omits: [inputs] — implementing against
+**向两位读者说明简报省略了什么。** Phase 2 发现缺失的输入
+（TR 注册表、ADR、清单）会被省略：告诉 agent “No [input] is
+passed — it does not exist at this tier; do not go looking for it”，并在分发前
+告诉用户一行：`Briefing omits: [inputs] — implementing against
 the acceptance criteria and the [GDD | brief].`
 
-**Then hand the engine check to the specialist** once the programmer reports.
-Brief: check the changed files for engine-API use that is wrong or changed in
-[engine + version], against `docs/engine-reference/<engine>/`; return a list of
-file, line, problem, fix; edit nothing. A problem that breaks a criterion goes back
-to the programmer once; the rest go in the summary.
+**然后在程序员报告后把引擎检查交给专家。**
+简报：检查变更文件中针对 [engine + version] 错误或已变更的引擎 API 用法，
+对照 `docs/engine-reference/<engine>/`；返回文件、行、问题、修复的列表；
+不要编辑任何内容。破坏验收标准的问题退回给程序员一次；其余写入总结。
 
-## Phase 6: Check the result
+## Phase 6: 检查结果
 
-**Did the agent finish?** It stopped early, hit a limit, or its report ends
-mid-task: the story is **INCOMPLETE**. Say so as the headline, list what exists,
-name the breakage, offer to resume the agent. Never print "Implementation Complete"
-over it, and leave the status as it is.
+**agent 完成了吗？** 它提前停止、触及限制，或其报告在任务中途结束：
+故事为 **INCOMPLETE**。以此为标题说明，列出已存在的内容，
+指出破损处，提出恢复该 agent。绝不在此之上打印“Implementation Complete”，
+并保持状态不变。
 
-**Did it write what it said?** First verify the artifact: a file the agent's report
-names that is not on disk is a failed step, however fluent the report: resume the agent and name the missing
-file. A report of BLOCKED, an error, or "cannot complete": say so at once, go no
-further past what it blocks, and give a partial report
-(`.claude/docs/error-recovery-protocol.md`). Scope too large: split it with
-`/create-stories`. The ADR and the story disagree: report the conflict; never guess.
+**它写了它所说的内容吗？** 先验证产出物：agent 报告点名的文件若不在磁盘上，
+就是失败的步骤，无论报告多么流畅：恢复 agent 并点明缺失的
+文件。报告为 BLOCKED、错误或“cannot complete”：立即说明，不要
+越过它阻塞的范围继续，并给出部分报告
+（`.claude/docs/error-recovery-protocol.md`）。范围太大：用
+`/create-stories` 拆分。ADR 与故事不一致：报告冲突；绝不猜测。
 
-**Is the test there?** At `qa.level: standard` and `full`, for a Logic or Integration
-story, look for the file at the Test Evidence path. Missing: at the type's BLOCKING
-level on the `gate_level` line, flag "story unverifiable — test required before
-`/story-done`"; at ADVISORY, note it as a recommendation. At `minimal` there is
-nothing to check: tests are waived.
+**测试在那里吗？** 在 `qa.level: standard` 和 `full` 下，对于 Logic 或 Integration
+故事，查看 Test Evidence 路径的文件。缺失：如果该类型在 `gate_level` 行上处于
+BLOCKING 级别，标记“story unverifiable — test required before
+`/story-done`”；如果是 ADVISORY，作为建议注明。在 `minimal` 下
+无需检查：测试被豁免。
 
-**Does it parse?** Run the check whose exit code answers it, and report the
-command, the exit code and any error lines:
+**它能解析吗？** 运行其退出码能回答该问题的检查，并报告
+命令、退出码和任何错误行：
 
-- **Godot:** `godot --headless --path . --import` once, then
-  `godot --headless --path . -s res://.claude/scripts/godot-parse-check.gd -- res://<each changed .gd>`.
-  Exit 1 means a script did not load; its `PARSE FAIL:` line names it. Never use
-  `--check-only`, and `--import` alone is no parse check. The executable is the one
-  `commands.test` names when its file name says godot (a wrapper such as `bash
-  run-tests.sh` is not the editor), else `engine.path`, else `godot`. Never search the disk for
-  one: when none of the three runs, the check is not verified.
-- **Unity, Unreal:** read `references/engine-checks.md`.
-- **No engine executable:** `parse NOT VERIFIED — engine binary not available`.
-  Never infer from reading the code that it parses.
+- **Godot：** 先运行一次 `godot --headless --path . --import`，然后
+  `godot --headless --path . -s res://.claude/scripts/godot-parse-check.gd -- res://<each changed .gd>`。
+  退出码 1 表示某个脚本未能加载；其 `PARSE FAIL:` 行会点名它。绝不使用
+  `--check-only`，仅 `--import` 不是解析检查。可执行文件优先取
+  `commands.test` 在其文件名标明 godot 时指定的那个（像 `bash
+  run-tests.sh` 这样的包装脚本不是编辑器），否则取 `engine.path`，再否则取 `godot`。绝不要
+  在磁盘上搜索一个：三者都无法运行时，该检查就是未验证。
+- **Unity、Unreal：** 阅读 `references/engine-checks.md`。
+- **没有引擎可执行文件：** `parse NOT VERIFIED — engine binary not available`。
+  绝不通过阅读代码推断它能解析。
 
-**Run it and look** (`.claude/docs/run-and-observe.md`). For every story a player
-can see (every Visual/Feel and UI story, and any other with a surface): launch
-straight into the scene the story touched, capture a screenshot straight into
-`production/qa/evidence/[story-slug]/` (`[story-slug]` is the story file's name
-without `.md`; `mkdir -p` the folder first), stamp it with
-`bash .claude/scripts/review-receipts.sh hash <each changed file> > production/qa/evidence/[story-slug]/stamp.txt`,
-then open the image and compare it with the criteria. Not waived at `qa.level:
-minimal`. Report exactly one line, plain text starting `Run result:` (no bold:
-`/story-done` reads it as written):
+**运行并观察**（`.claude/docs/run-and-observe.md`）。对于玩家能看到的每个故事
+（每个 Visual/Feel 和 UI 故事，以及任何其他有可见界面的故事）：直接启动到
+故事触及的场景，将截图直接捕获到
+`production/qa/evidence/[story-slug]/`（`[story-slug]` 是故事文件名
+去掉 `.md`；先用 `mkdir -p` 创建文件夹），用
+`bash .claude/scripts/review-receipts.sh hash <each changed file> > production/qa/evidence/[story-slug]/stamp.txt`
+为其打戳记，然后打开图片并与验收标准比较。在 `qa.level:
+minimal` 下不豁免。只报告一行纯文本，以 `Run result:` 开头（不加粗：
+`/story-done` 按原样读取）：
 
-- `Run result: OBSERVED — <what was on screen>` with the retained path;
-- `Run result: NOT VERIFIED — <reason>` (no engine, nothing captured); at the
-  default gate level this blocks a Visual/Feel or UI story at `/story-done`;
-- `Run result: N/A — <reason>` for a story with nothing observable; the reason says
-  why nothing is (`/story-done` does not accept "it's a Logic story").
+- `Run result: OBSERVED — <what was on screen>`，并附保留路径；
+- `Run result: NOT VERIFIED — <reason>`（没有引擎，未捕获任何内容）；在默认
+  闸门级别下，这会阻止 Visual/Feel 或 UI 故事通过 `/story-done`；
+- `Run result: N/A — <reason>`，适用于没有可观察内容的故事；原因说明
+  为何没有（`/story-done` 不接受“it's a Logic story”）。
 
-Only the feel half of a Visual/Feel criterion (timing, weight) is DEFERRED to
-`/team-qa`: a still cannot show it.
+Visual/Feel 验收标准中只有手感那一半（时机、重量）DEFERRED 到
+`/team-qa`：静态截图无法展示它。
 
-This skill pre-approves `godot` on PATH. An engine run through `engine.path` or
-the executable `commands.test` names asks first: the user approves it once, or
-adds `Bash(<that executable> *)` to `.claude/settings.local.json`.
+本技能预批准 PATH 上的 `godot`。通过 `engine.path` 或
+`commands.test` 指定的可执行文件运行的引擎会先询问：用户批准一次，或
+把 `Bash(<that executable> *)` 加入 `.claude/settings.local.json`。
 
-## Phase 7: Summary, files, checkpoint
+## Phase 7: 总结、文件、检查点
 
 ```
 ## Implementation Complete: [title]
@@ -274,22 +270,22 @@ adds `Bash(<that executable> *)` to `.claude/settings.local.json`.
 **Blockers**: [None | each]
 ```
 
-At `qa.level: standard` and `full`, add: "Run your test suite and confirm the new
+在 `qa.level: standard` 和 `full` 下，添加：“Run your test suite and confirm the new
 tests pass before `/story-done`: it checks that the test file exists, and runs
-nothing." At `minimal` leave that out: there are no tests to run. For a Visual/Feel
-or UI story with no retained image, add: "A retained screenshot under
-`production/qa/evidence/[story-slug]/` is required before `/story-done`" (and, for
-Visual/Feel, the sign-off in `production/qa/evidence/[story-slug]-evidence.md`).
+nothing.” 在 `minimal` 下省略该句：没有测试可运行。对于没有保留图像的 Visual/Feel
+或 UI 故事，添加：“A retained screenshot under
+`production/qa/evidence/[story-slug]/` is required before `/story-done`”（并且，对于
+Visual/Feel，`production/qa/evidence/[story-slug]-evidence.md` 中的签核）。
 
-**`## Files`.** Replace the section's body with the list of changed code and test
-files, one per line, as the Phase 3 ask said:
-`bash .claude/scripts/md-section.sh replace <story> "Files"` with the list on stdin.
-A story with no such section: add `## Files` and the list at its end, with a file
-edit, never a shell command (a shell write skips the project's write checks). Skip
-this when the Phase 3 ask was declined.
+**`## Files`。** 按 Phase 3 询问所述，将本节正文替换为变更的代码和测试
+文件列表，每行一个：
+通过 stdin 把列表传给 `bash .claude/scripts/md-section.sh replace <story> "Files"`。
+没有该节的故事：用文件编辑在其末尾添加 `## Files` 和列表，
+绝不用 shell 命令（shell 写入会跳过项目的写入检查）。如果 Phase 3 的询问
+被拒绝，跳过这一步。
 
-**The checkpoint**, on every outcome. Pipe the block to
-`bash .claude/scripts/session-state.sh checkpoint`, which replaces the old one:
+**检查点**，在每种结果下都执行。把该块通过管道传给
+`bash .claude/scripts/session-state.sh checkpoint`，它会替换旧的检查点：
 
 ```
 **Updated:** [date]
@@ -302,12 +298,12 @@ this when the Phase 3 ask was declined.
 **Open questions:** [none, or one line each]
 ```
 
-**The run's last reply ends with this block**, the only place the `Run result:` line
-is printed: print it nowhere else in the reply. The Next step goes by the tier you stated in Phase 1 (the `workflow` line,
-never `rigor` or `qa.level`). The Next step: at `minimal`, `/story-done [path]`. At `standard` and `full`,
-`/code-review [files]`, then `/story-done [path]`. INCOMPLETE: `/dev-story [path]`
-to resume. BLOCKED: the action that unblocks it (`/architecture-decision accept
-ADR-NNNN`, the dependency to finish, the diff to review).
+**本次运行的最后一个回复以此块结尾**，这是唯一打印 `Run result:` 行的
+地方：不要在回复的其他任何地方打印它。下一步依据你在 Phase 1 声明的层级（`workflow` 行，
+绝不是 `rigor` 或 `qa.level`）。下一步：在 `minimal` 下，`/story-done [path]`。在 `standard` 和 `full` 下，
+`/code-review [files]`，然后 `/story-done [path]`。INCOMPLETE：`/dev-story [path]`
+以恢复。BLOCKED：解除阻塞的操作（`/architecture-decision accept
+ADR-NNNN`、要完成的依赖、要评审的 diff）。
 
 ```
 Story: [path] — [Implemented | INCOMPLETE — <breakage> | BLOCKED — <reason>]

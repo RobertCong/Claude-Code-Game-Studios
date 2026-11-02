@@ -2,493 +2,488 @@
 
 ## Skill Summary
 
-`/dev-story` implements one story. It finds the story (argument, else the active
-story in `production/session-state/active.md`), resolves the workflow tier for the
-story's system, verifies required inputs per tier (TR registry, governing ADR,
-control manifest), reads the ADR's `## Status`, `## Last Verified` and `## Date` in
-one grep — a `Proposed`, `Deprecated` or `Superseded` status blocks the story at
-every tier, while a story whose ADR field reads `N/A` references none — and checks ADR
-freshness by comparing the story's `ADR Version` with the ADR's current version
-(`Last Verified`, else `Date`, else `unversioned` — the rule `/create-stories`
-stamps with). It checks the story's `Manifest Version` and its dependencies, asks
-to mark the story `In Progress`, and routes implementation to a programmer agent
-plus the project's engine specialist. It does not write source code itself, and
-every file it does write — story fields, `sprint-status.yaml`, a dependency's
-`Status`, a Config/Data file, Unity's `ScreenshotOnArg.cs` — follows an ask that
-names it; only the session-state checkpoint is written without one.
+`/dev-story` 实现一个用户故事。它定位该用户故事（参数，否则使用
+`production/session-state/active.md` 中的活跃用户故事），解析该用户故事所属
+系统的工作流层级，按层级校验所需输入（TR 注册表、主导 ADR、控制清单），用一次
+grep 读取 ADR 的 `## Status`、`## Last Verified` 和 `## Date` —— `Proposed`、
+`Deprecated` 或 `Superseded` 状态会在所有层级阻塞该用户故事，而 ADR 字段为
+`N/A` 的用户故事不引用任何 ADR —— 并通过将用户故事的 `ADR Version` 与 ADR
+当前版本（`Last Verified`，否则 `Date`，否则 `unversioned` —— 即
+`/create-stories` 写入的规则）比较来检查 ADR 的新鲜度。它检查用户故事的
+`Manifest Version` 及其依赖，请求把用户故事标记为 `In Progress`，并把实现
+路由给程序员代理（programmer agent）及项目引擎专家。它本身不写源代码，且它
+写入的每个文件 —— 用户故事字段、`sprint-status.yaml`、依赖项的 `Status`、
+Config/Data 文件、Unity 的 `ScreenshotOnArg.cs` —— 都遵循点名该文件的询问；
+只有会话状态检查点无需询问即可写入。
 
-After the agent returns it verifies the agent finished, runs the engine parse
-check, launches the build to observe anything player-visible (`Run result:`
-line), prints an "Implementation Complete" summary and overwrites the CHECKPOINT
-block in `active.md`, whose **Next step** follows the result: `/story-done` after
-Implementation Complete, `/dev-story` to resume after INCOMPLETE, the unblocking
-action after BLOCKED. It never closes the story it implements — `/story-done`
-does that; `/code-review` is recommended first at `standard`/`full`. At
-`qa.level: minimal` a Logic or Integration story's test requirement is waived and
-the waiver is printed; a UI or Visual/Feel story's screenshot is never waived, and
-the run-and-observe step runs at every level.
+代理返回后，它验证代理已完成，运行引擎解析检查（parse check），启动构建以观察
+任何玩家可见的内容（`Run result:` 行），打印 "Implementation Complete" 摘要，
+并覆盖 `active.md` 中的 CHECKPOINT 块，其 **Next step** 依据结果而定：
+Implementation Complete 后为 `/story-done`，INCOMPLETE 后为 `/dev-story` 继续，
+BLOCKED 后为解除阻塞的操作。它从不关闭自己实现的用户故事 —— 那是
+`/story-done` 的职责；在 `standard`/`full` 下会先推荐 `/code-review`。在
+`qa.level: minimal` 下，Logic 或 Integration 用户故事的测试要求被豁免并打印
+豁免说明；UI 或 Visual/Feel 用户故事的截图绝不被豁免，且运行并观察步骤在所有
+层级都会执行。
 
 ---
 
 ## Static Assertions (Structural)
 
-Checked against the SKILL.md by `/skill-test spec` — no fixture needed.
+由 `/skill-test spec` 针对 SKILL.md 检查 —— 无需 fixture。
 
-- [ ] Has required frontmatter fields: `name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`
-- [ ] Has ≥2 phase headings
-- [ ] Contains status keywords: BLOCKED, INCOMPLETE, In Progress, NOT VERIFIED
-- [ ] Contains "May I write" collaborative protocol language (its own asks for the files it writes; source and tests delegated to sub-agents)
-- [ ] Has a next-step handoff at the end (`/story-done`, with `/code-review` first at standard/full)
-- [ ] Documents per-tier input requirements (`full` / `standard` / `minimal`)
-- [ ] Notes that implementation is delegated to specialist agents (not done directly)
+- [ ] 具有必需的前置元数据字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 至少有 2 个阶段标题
+- [ ] 包含状态关键词：BLOCKED、INCOMPLETE、In Progress、NOT VERIFIED
+- [ ] 包含 "May I write" 协作协议用语（针对它写入的文件自行询问；源代码和测试委托给子代理）
+- [ ] 结尾有下一步交接（`/story-done`，standard/full 下先 `/code-review`）
+- [ ] 说明逐层级的输入要求（`full` / `standard` / `minimal`）
+- [ ] 说明实现委托给专家代理（不直接执行）
 
 ---
 
 ## Director Gate Checks
 
-No director gates. `/dev-story` spawns implementation agents (a primary programmer
-and the engine specialist), not director review gates, and does not resolve
-`review_mode`. Code review is the separate `/code-review` skill, named as the next
-step at `standard`/`full`.
+无总监质量闸门。`/dev-story` 派发实现代理（一名主程序员和引擎专家），而非总监
+评审闸门，也不解析 `review_mode`。代码评审由单独的 `/code-review` 技能负责，
+在 `standard`/`full` 下被列为下一步。
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非某个用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置
+`modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有
+`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
 
 ---
 
 ## Test Cases
 
-### Case 1: Happy Path — Logic story implemented at full workflow
+### Case 1: 正常路径 —— 在 full 工作流下实现 Logic 用户故事
 
 **Fixture:**
-- `project.yaml`: `engine.name: Godot`, `specialists.code: godot-gdscript-specialist`,
-  `modes.workflow: full`, `qa.level: standard`
-- `production/epics/combat/story-001-damage-calc.md`: `Status: Ready`, Layer Core,
-  Type Logic, `Requirement: TR-combat-001`, `ADR Governing Implementation: ADR-0003`,
-  an `ADR Version` equal to ADR-0003's `## Last Verified` date, a `Manifest Version`
-  equal to the manifest header date, Dependencies None, Test Evidence
+- `project.yaml`：`engine.name: Godot`、`specialists.code: godot-gdscript-specialist`、
+  `modes.workflow: full`、`qa.level: standard`
+- `production/epics/combat/story-001-damage-calc.md`：`Status: Ready`、Layer Core、
+  Type Logic、`Requirement: TR-combat-001`、`ADR Governing Implementation: ADR-0003`、
+  `ADR Version` 等于 ADR-0003 的 `## Last Verified` 日期、`Manifest Version`
+  等于清单头部日期、Dependencies 为 None、Test Evidence 为
   `tests/unit/combat/combat_damage_calc_test.gd`
-- `docs/architecture/tr-registry.yaml` has `TR-combat-001`; ADR-0003 exists and is
-  Accepted; `docs/architecture/control-manifest.md` exists
-- `production/sprint-status.yaml` does not exist
+- `docs/architecture/tr-registry.yaml` 含 `TR-combat-001`；ADR-0003 存在且为
+  Accepted；`docs/architecture/control-manifest.md` 存在
+- `production/sprint-status.yaml` 不存在
 
 **Input:** `/dev-story production/epics/combat/story-001-damage-calc.md`
 
 **Expected behavior:**
-1. Reads the story and greps `id: TR-combat-001` from the registry
-2. Greps ADR-0003's `^## (Status|Last Verified|Date)` — Status is Accepted and its
-   current version (the `Last Verified` date) matches the story, so the ADR is not read
-3. Greps `^## Core Layer Rules` from the manifest; Manifest Version matches, no ask
-4. Asks "May I mark this story In Progress?", naming the story file (and not the
-   absent `sprint-status.yaml`); on yes sets the story's `Status:` to `In Progress`
-   and its `Last Updated:`; prints "Sprint status not updated:
+1. 读取用户故事并从注册表 Grep `id: TR-combat-001`
+2. Grep ADR-0003 的 `^## (Status|Last Verified|Date)` —— Status 为 Accepted 且其
+   当前版本（`Last Verified` 日期）与用户故事一致，因此不读取该 ADR
+3. 从清单 Grep `^## Core Layer Rules`；Manifest Version 匹配，不询问
+4. 询问 "May I mark this story In Progress?"，点名用户故事文件（而非不存在的
+   `sprint-status.yaml`）；确认后把用户故事的 `Status:` 设为 `In Progress`
+   及其 `Last Updated:`；打印 "Sprint status not updated:
    production/sprint-status.yaml absent"
-5. Spawns `gameplay-programmer` with `godot-gdscript-specialist` as secondary,
-   briefing the story path, TR-ID lookup, the story's ADR Decision Summary and
-   Implementation Notes inline, the Core layer rules, and the test file path
-   with the test requirement
-6. Confirms the agent finished, runs the Godot parse check and reports its exit code
-7. Prints "Implementation Complete: [title]" with files, test function count,
-   Verification and a `Run result:` line; next step `/code-review` then `/story-done`
-8. Overwrites the `<!-- CHECKPOINT -->` block in `active.md`
+5. 派发 `gameplay-programmer`，以 `godot-gdscript-specialist` 为副手，
+   简报中内联用户故事路径、TR-ID 查找、用户故事的 ADR Decision Summary 和
+   Implementation Notes、Core 层规则，以及带测试要求的测试文件路径
+6. 确认代理完成，运行 Godot 解析检查并报告其退出码
+7. 打印 "Implementation Complete: [title]"，含文件、测试函数数量、
+   Verification 和 `Run result:` 行；下一步为 `/code-review` 然后 `/story-done`
+8. 覆盖 `active.md` 中的 `<!-- CHECKPOINT -->` 块
 
 **Assertions:**
-- [ ] ADR-0003 is not read in full when its `Last Verified` matches the story's `ADR Version`
-- [ ] The In Progress ask names the story file; `Status:` becomes `In Progress` only after it and before any agent is spawned, and the sprint-status-absent line is printed
-- [ ] Primary is `gameplay-programmer`; secondary comes from `specialists.code`, not the roster table
-- [ ] The ADR guidance is passed inline, not as the ADR path
-- [ ] The brief names `tests/unit/combat/combat_damage_calc_test.gd` (`[system]_[feature]_test.gd`) and requires one test per acceptance criterion
-- [ ] The parse check's command and exit code are reported, and exactly one `Run result:` line appears
-- [ ] Story is NOT marked Complete; the handoff is `/code-review` then `/story-done`
-- [ ] The CHECKPOINT block in `active.md` is overwritten, not appended to
+- [ ] 当 ADR-0003 的 `Last Verified` 与用户故事的 `ADR Version` 匹配时，不完整读取该 ADR
+- [ ] In Progress 询问点名用户故事文件；`Status:` 仅在其之后、任何代理派发之前变为 `In Progress`，并打印 sprint-status 缺失提示
+- [ ] 主代理为 `gameplay-programmer`；副手来自 `specialists.code`，不是名册表
+- [ ] ADR 指导以内联方式传递，而不是 ADR 路径
+- [ ] 简报点名 `tests/unit/combat/combat_damage_calc_test.gd`（`[system]_[feature]_test.gd`），并要求每个验收标准一个测试
+- [ ] 报告解析检查的命令和退出码，且恰好出现一行 `Run result:`
+- [ ] 用户故事未被标记为 Complete；交接为 `/code-review` 然后 `/story-done`
+- [ ] `active.md` 中的 CHECKPOINT 块被覆盖，而非追加
 
 ---
 
-### Case 2: Failure Path — Referenced ADR is Proposed
+### Case 2: 失败路径 —— 引用的 ADR 为 Proposed
 
 **Fixture:**
-- `project.yaml`: `modes.workflow: standard`
-- Story file with `Status: Ready` and `ADR Governing Implementation: ADR-0005`
-- `docs/architecture/adr-0005-*.md` exists with `## Status` Proposed
+- `project.yaml`：`modes.workflow: standard`
+- 用户故事文件 `Status: Ready`，`ADR Governing Implementation: ADR-0005`
+- `docs/architecture/adr-0005-*.md` 存在，`## Status` 为 Proposed
 
 **Input:** `/dev-story production/epics/[epic-slug]/story-[NNN]-[slug].md`
 
 **Expected behavior:**
-1. Skill reads the story and resolves the `standard` tier
-2. Skill determines that the referenced ADR-0005 is Proposed
-3. Story is set BLOCKED in session state; no programmer agent is spawned
-4. Output names ADR-0005 and recommends `/architecture-decision accept ADR-0005`
-5. A partial report is produced; the story file's `Status:` is not changed
+1. 技能读取用户故事并解析为 `standard` 层级
+2. 技能判断所引用的 ADR-0005 为 Proposed
+3. 用户故事在会话状态中被置为 BLOCKED；不派发任何程序员代理
+4. 输出点名 ADR-0005 并推荐 `/architecture-decision accept ADR-0005`
+5. 生成部分报告；用户故事文件的 `Status:` 不变
 
 **Assertions:**
-- [ ] The Proposed status is read from ADR-0005's `## Status` section, not inferred
-- [ ] No programmer or engine-specialist agent is spawned
-- [ ] Output names ADR-0005 and recommends `/architecture-decision`
-- [ ] The story header stays `Status: Ready`, and no "May I mark this story In Progress?" ask is shown
-- [ ] BLOCKED is recorded in session state, and the checkpoint's **Next step** names `/architecture-decision accept ADR-0005` — not `/story-done`
+- [ ] Proposed 状态取自 ADR-0005 的 `## Status` 小节，而非推断
+- [ ] 不派发任何程序员或引擎专家代理
+- [ ] 输出点名 ADR-0005 并推荐 `/architecture-decision`
+- [ ] 用户故事头部保持 `Status: Ready`，且不显示 "May I mark this story In Progress?" 询问
+- [ ] BLOCKED 记录在会话状态中，且检查点的 **Next step** 点名 `/architecture-decision accept ADR-0005` —— 而不是 `/story-done`
 
 ---
 
-### Case 2b: Failure Path — Proposed ADR at the `full` tier
+### Case 2b: 失败路径 —— `full` 层级的 Proposed ADR
 
-The `full` column of the file-check table has its own STOP rule, so the
-`standard` case above does not exercise it.
+文件检查表的 `full` 列有自己的 STOP 规则，因此上面的 `standard` 用例
+并未覆盖它。
 
 **Fixture:**
-- `project.yaml`: `modes.workflow: full`
-- Story file with `Status: Ready`, `ADR Governing Implementation: ADR-0005` and an
-  `ADR Version` older than ADR-0005's `## Last Verified` date
-- `docs/architecture/adr-0005-*.md` exists with `## Status` Proposed;
-  `docs/architecture/tr-registry.yaml` and the control manifest exist
+- `project.yaml`：`modes.workflow: full`
+- 用户故事文件 `Status: Ready`、`ADR Governing Implementation: ADR-0005`，且
+  `ADR Version` 早于 ADR-0005 的 `## Last Verified` 日期
+- `docs/architecture/adr-0005-*.md` 存在，`## Status` 为 Proposed；
+  `docs/architecture/tr-registry.yaml` 和控制清单存在
 
 **Input:** `/dev-story production/epics/[epic-slug]/story-[NNN]-[slug].md`
 
 **Expected behavior:**
-1. Skill greps ADR-0005's `^## (Status|Last Verified|Date)` and reads `Proposed`
-2. It stops before the freshness comparison: "ADR [path] is still Proposed. Accept
+1. 技能 Grep ADR-0005 的 `^## (Status|Last Verified|Date)` 并读到 `Proposed`
+2. 在新鲜度比较之前停止："ADR [path] is still Proposed. Accept
    it with `/architecture-decision accept ADR-0005` before implementing."
-3. Story is set BLOCKED in session state; no programmer agent is spawned
+3. 用户故事在会话状态中被置为 BLOCKED；不派发任何程序员代理
 
 **Assertions:**
-- [ ] The stop happens at `full`
-- [ ] The Status decides before the freshness check: no ADR-version mismatch prompt is shown although the versions differ, and the ADR is not read beyond the one Grep
-- [ ] No programmer or engine-specialist agent is spawned, and the story stays `Status: Ready`
+- [ ] 停止发生在 `full` 下
+- [ ] Status 先于新鲜度检查决定：尽管版本不同，也不显示 ADR 版本不匹配提示，且除这一次 Grep 外不读取该 ADR
+- [ ] 不派发任何程序员或引擎专家代理，用户故事保持 `Status: Ready`
 
 ---
 
-### Case 3: ADR changed since the story was written
+### Case 3: 用户故事编写后 ADR 发生变更
 
 **Fixture:**
-- `project.yaml`: `engine.name: Godot`, `modes.workflow: full`
-- Story file with `Status: Ready`, Type Logic, `Requirement: TR-combat-002`,
-  `ADR Governing Implementation: ADR-0004`, an `ADR Version` older than ADR-0004's
-  `## Last Verified` date, a `Manifest Version` equal to the manifest header date,
-  Dependencies None
-- `docs/architecture/tr-registry.yaml` has `TR-combat-002`; ADR-0004 exists with
-  `## Status` Accepted and is under 50KB; `docs/architecture/control-manifest.md`
-  exists
-- User picks `[A]` at the prompt
+- `project.yaml`：`engine.name: Godot`、`modes.workflow: full`
+- 用户故事文件 `Status: Ready`、Type Logic、`Requirement: TR-combat-002`、
+  `ADR Governing Implementation: ADR-0004`，`ADR Version` 早于 ADR-0004 的
+  `## Last Verified` 日期，`Manifest Version` 等于清单头部日期，
+  Dependencies 为 None
+- `docs/architecture/tr-registry.yaml` 含 `TR-combat-002`；ADR-0004 存在，
+  `## Status` 为 Accepted 且小于 50KB；`docs/architecture/control-manifest.md`
+  存在
+- 用户在提示处选择 `[A]`
 
 **Input:** `/dev-story production/epics/[epic-slug]/story-[NNN]-[slug].md`
 
 **Expected behavior:**
-1. `Grep "^## (Status|Last Verified|Date)"` on ADR-0004 reads Accepted and a
-   `Last Verified` date different from the story's `ADR Version`
-2. `AskUserQuestion`: "Story was written against ADR v[story-date]. The ADR is now
+1. 对 ADR-0004 执行 `Grep "^## (Status|Last Verified|Date)"`，读到 Accepted 和一个
+   不同于用户故事 `ADR Version` 的 `Last Verified` 日期
+2. `AskUserQuestion`："Story was written against ADR v[story-date]. The ADR is now
    v[current-date]. Its decision may have changed. How do you want to proceed?"
-   with `[A] Re-read the changed ADR sections…` (naming the refresh of this story's
-   ADR summary and ADR Version) / `[B] Implement from the story's summary…` /
+   选项为 `[A] Re-read the changed ADR sections…`（点名刷新本用户故事的
+   ADR 摘要和 ADR Version） / `[B] Implement from the story's summary…` /
    `[C] Stop…`
-3. On [A]: checks the size with `wc -c`; under ~50KB, reads the ADR with one `Read`
-4. Sets the story's `ADR Version` to ADR-0004's `Last Verified` date and replaces
-   its ADR Decision Summary and Implementation Notes with the re-read guidance
-5. Spawns the programmer with that guidance inline
+3. 选择 [A] 时：用 `wc -c` 检查大小；小于约 50KB 时，用一次 `Read` 读取该 ADR
+4. 将用户故事的 `ADR Version` 设为 ADR-0004 的 `Last Verified` 日期，并用重新
+   读取的指导替换其 ADR Decision Summary 和 Implementation Notes
+5. 以内联方式把该指导传给程序员代理并派发
 
 **Assertions:**
-- [ ] The mismatch prompt is shown before any agent is spawned
-- [ ] All three options ([A] re-read / [B] accept drift / [C] stop) are offered, and [A] names the story edit it makes
-- [ ] On [A] the size is checked and a sub-50KB ADR is read in a single `Read`
-- [ ] The story's `ADR Version` becomes ADR-0004's `Last Verified` date — not today's date — before the programmer is spawned
-- [ ] The programmer brief carries the freshly read Decision guidance inline, not the summary the story held before [A]
+- [ ] 不匹配提示在任何代理派发之前显示
+- [ ] 提供全部三个选项（[A] 重读 / [B] 接受偏差 / [C] 停止），且 [A] 点明它将做的用户故事编辑
+- [ ] 选择 [A] 时检查大小，且小于 50KB 的 ADR 用单次 `Read` 读取
+- [ ] 在派发程序员代理之前，用户故事的 `ADR Version` 变为 ADR-0004 的 `Last Verified` 日期 —— 而不是今天的日期
+- [ ] 程序员代理简报携带新读取的 Decision 指导内联内容，而不是 [A] 之前用户故事持有的摘要
 
 **Fixture (Date fallback):**
-- As above, but ADR-0004 has no `## Last Verified` section; its `## Date` equals the
-  story's `ADR Version` (the value `/create-stories` stamped from it)
+- 同上，但 ADR-0004 没有 `## Last Verified` 小节；其 `## Date` 等于用户故事的
+  `ADR Version`（即 `/create-stories` 从中写入的值）
 
 **Expected behavior (Date fallback):**
-1. The same Grep finds no `Last Verified`, so the ADR's current version is its `## Date`
-2. That matches the story's `ADR Version`: the story is trusted, no prompt is shown,
-   and the ADR is not read
+1. 同一次 Grep 未找到 `Last Verified`，因此该 ADR 的当前版本为其 `## Date`
+2. 这与用户故事的 `ADR Version` 匹配：信任该用户故事，不显示提示，
+   也不读取该 ADR
 
 **Assertions (Date fallback):**
-- [ ] No mismatch prompt is shown — an ADR stamped from its `## Date` is not treated as stale for lacking `## Last Verified`
-- [ ] ADR-0004 is not read beyond the one Grep
+- [ ] 不显示不匹配提示 —— 依据 `## Date` 写入的 ADR 不会因缺少 `## Last Verified` 而被视为过期
+- [ ] 除这一次 Grep 外不读取 ADR-0004
 
 ---
 
-### Case 4: Edge Case — No argument; reads from session state
+### Case 4: 边界情况 —— 无参数；从会话状态读取
 
 **Fixture:**
-- No argument is provided
-- `production/session-state/active.md` references an active story file
-- That story file exists with `Status: In Progress`
+- 未提供参数
+- `production/session-state/active.md` 引用一个活跃用户故事文件
+- 该用户故事文件存在，`Status: In Progress`
 
-**Input:** `/dev-story` (no argument)
+**Input:** `/dev-story`（无参数）
 
 **Expected behavior:**
-1. Skill detects no argument is provided
-2. Skill reads `production/session-state/active.md`
-3. Skill finds the active story reference
-4. Skill confirms with user: "Continuing work on [story title] — is that correct?"
-5. After confirmation, skill proceeds with that story
+1. 技能检测到未提供参数
+2. 技能读取 `production/session-state/active.md`
+3. 技能找到活跃用户故事引用
+4. 技能与用户确认："Continuing work on [story title] — is that correct?"
+5. 确认后，技能继续处理该用户故事
 
 **Assertions:**
-- [ ] Skill reads session state when no argument is provided
-- [ ] Skill confirms the active story with the user before proceeding
-- [ ] Skill does NOT silently assume the active story without confirmation
+- [ ] 未提供参数时，技能读取会话状态
+- [ ] 技能在继续之前与用户确认活跃用户故事
+- [ ] 技能不会在未确认的情况下静默假定活跃用户故事
 
 **Fixture (no active story):**
-- No argument is provided
-- `production/session-state/active.md` names no active story
-- `production/epics/` holds two stories with `Status: Ready` and one `In Progress`
+- 未提供参数
+- `production/session-state/active.md` 未指定活跃用户故事
+- `production/epics/` 中有两个 `Status: Ready` 的用户故事和一个 `In Progress`
 
 **Expected behavior (no active story):**
-1. Skill asks "Which story are we implementing?"
-2. It globs `production/epics/**/*.md` and lists the two `Status: Ready` stories
+1. 技能询问 "Which story are we implementing?"
+2. 它 Glob `production/epics/**/*.md` 并列出两个 `Status: Ready` 的用户故事
 
 **Assertions (no active story):**
-- [ ] The question is asked instead of guessing a story
-- [ ] Only the `Status: Ready` stories are listed
+- [ ] 询问该问题，而不是猜测用户故事
+- [ ] 只列出 `Status: Ready` 的用户故事
 
 ---
 
-### Case 5: Minimal tier, Logic story — tests waived
+### Case 5: minimal 层级，Logic 用户故事 —— 测试豁免
 
 **Fixture:**
-- `project.yaml`: `engine.name: Godot`, `modes.workflow: minimal`, `qa.level: minimal`
-- Story Type Logic with `Requirement: Brief MVP feature 1` and ADR fields
+- `project.yaml`：`engine.name: Godot`、`modes.workflow: minimal`、`qa.level: minimal`
+- 用户故事 Type Logic，`Requirement: Brief MVP feature 1`，ADR 字段为
   `N/A (minimal — no ADRs)`
-- No TR registry, no ADRs, no control manifest
-- `docs/engine-reference/godot/VERSION.md` rates the pinned version HIGH risk
+- 无 TR 注册表、无 ADR、无控制清单
+- `docs/engine-reference/godot/VERSION.md` 将固定的版本评为 HIGH 风险
 
 **Input:** `/dev-story production/epics/[slug]/story-001-[slug].md`
 
 **Expected behavior:**
-1. Phase 2 does not stop or set BLOCKED for the absent registry, ADR or manifest
-2. Before spawning, prints a `Briefing omits: …` line naming the TR registry, the
-   ADR guidance and the control manifest
-3. Spawns `gameplay-programmer` plus the engine specialist (VERSION.md risk HIGH)
-4. The brief omits the test requirement and tells the agent: "Do not write a test
+1. Phase 2 不会因缺少注册表、ADR 或清单而停止或置为 BLOCKED
+2. 派发之前打印 `Briefing omits: …` 行，点名 TR 注册表、
+   ADR 指导和控制清单
+3. 派发 `gameplay-programmer` 及引擎专家（VERSION.md 风险 HIGH）
+4. 简报省略测试要求，并告知代理："Do not write a test
    file for this story — test evidence is waived at `qa.level: minimal`."
-5. Phase 5 is skipped; the summary prints "Test evidence: waived at
+5. Phase 5 被跳过；摘要打印 "Test evidence: waived at
    `qa.level: minimal` — no test was required or written for this story."
-6. Run-and-observe still runs and prints one `Run result:` line
-7. Next step is `/story-done [story-path]` directly — no `/code-review`
+6. 运行并观察仍会执行，并打印一行 `Run result:`
+7. 下一步直接为 `/story-done [story-path]` —— 不经过 `/code-review`
 
 **Assertions:**
-- [ ] No STOP or BLOCKED for the absent TR registry, ADR or manifest at `minimal`
-- [ ] The `Briefing omits:` line names all three dropped inputs, the ADR included
-- [ ] The engine specialist is spawned because VERSION.md rates the risk HIGH
-- [ ] The test waiver is stated to the agent and printed in the summary; no tests row or "run your test suite" paragraph appears
-- [ ] A `Run result:` line is printed — run-and-observe is not waived
-- [ ] The handoff is `/story-done` with no `/code-review` step
+- [ ] 在 `minimal` 下不因缺少 TR 注册表、ADR 或清单而 STOP 或 BLOCKED
+- [ ] `Briefing omits:` 行点名全部三个被丢弃的输入，包括 ADR
+- [ ] 因 VERSION.md 将风险评为 HIGH 而派发引擎专家
+- [ ] 向代理说明测试豁免，并在摘要中打印；不出现测试行或 "run your test suite" 段落
+- [ ] 打印 `Run result:` 行 —— 运行并观察不被豁免
+- [ ] 交接为 `/story-done`，无 `/code-review` 步骤
 
 ---
 
-### Case 5b: Minimal tier, UI story — the screenshot is still required
+### Case 5b: minimal 层级，UI 用户故事 —— 仍需要截图
 
 **Fixture:**
-- `project.yaml`: `engine.name: Godot`, `modes.workflow: minimal`, `qa.level: minimal`
-- Story Type UI with `Requirement: Brief MVP feature 2` and ADR fields
+- `project.yaml`：`engine.name: Godot`、`modes.workflow: minimal`、`qa.level: minimal`
+- 用户故事 Type UI，`Requirement: Brief MVP feature 2`，ADR 字段为
   `N/A (minimal — no ADRs)`
-- No TR registry, no ADRs, no control manifest
+- 无 TR 注册表、无 ADR、无控制清单
 
 **Input:** `/dev-story production/epics/[slug]/story-002-[slug].md`
 
 **Expected behavior:**
-1. Spawns `ui-programmer`; the brief has no test item and no "Do not write a test
-   file" sentence — the test requirement only ever covered Logic and Integration
-2. The summary prints "Retained screenshot required under
+1. 派发 `ui-programmer`；简报中没有测试项，也没有 "Do not write a test
+   file" 句子 —— 测试要求始终只覆盖 Logic 和 Integration
+2. 摘要打印 "Retained screenshot required under
    `production/qa/evidence/[story-slug]/` before this story can be closed…"
-3. Run-and-observe retains a screenshot under `production/qa/evidence/[story-slug]/`
-   and prints `Run result: OBSERVED — …` with the path
-4. Next step is `/story-done [story-path]`
+3. 运行并观察在 `production/qa/evidence/[story-slug]/` 下保留截图，
+   并打印 `Run result: OBSERVED — …` 及路径
+4. 下一步为 `/story-done [story-path]`
 
 **Assertions:**
-- [ ] The UI story is not told its evidence is waived — neither in the brief nor as a "Test evidence: waived" line in the summary
-- [ ] The screenshot-required line is printed at `qa.level: minimal`
-- [ ] `Run result: OBSERVED` names a retained screenshot; a `NOT VERIFIED` result would be reported as a blocker, not a note
-- [ ] The handoff is `/story-done` with no `/code-review` step
+- [ ] 不告知 UI 用户故事其证据被豁免 —— 简报和摘要中的 "Test evidence: waived" 行都不出现
+- [ ] 在 `qa.level: minimal` 下打印需要截图的提示行
+- [ ] `Run result: OBSERVED` 点名一张保留的截图；`NOT VERIFIED` 结果会作为阻塞项报告，而不是备注
+- [ ] 交接为 `/story-done`，无 `/code-review` 步骤
 
 ---
 
-### Case 6: Unity — code under `Assets/`, capture script asked for
+### Case 6: Unity —— 代码位于 `Assets/` 下，需请求写入捕获脚本
 
 **Fixture:**
-- `project.yaml`: `engine.name: Unity`, `specialists.code: unity-specialist`,
-  `specialists.ui: unity-ui-specialist`, `commands.smoke` and `commands.run` set,
-  `modes.workflow: minimal`, `qa.level: minimal`
-- Story Type UI (an inventory screen) with `Requirement: Brief MVP feature 3` and
-  ADR fields `N/A (minimal — no ADRs)`
-- The project has `Assets/` and no `src/`; no `ScreenshotOnArg.cs` exists under `Assets/`
-- `docs/engine-reference/unity/VERSION.md` rates the pinned version HIGH risk
+- `project.yaml`：`engine.name: Unity`、`specialists.code: unity-specialist`、
+  `specialists.ui: unity-ui-specialist`、已设置 `commands.smoke` 和 `commands.run`、
+  `modes.workflow: minimal`、`qa.level: minimal`
+- 用户故事 Type UI（一个背包界面），`Requirement: Brief MVP feature 3`，ADR
+  字段为 `N/A (minimal — no ADRs)`
+- 项目有 `Assets/` 且没有 `src/`；`Assets/` 下不存在 `ScreenshotOnArg.cs`
+- `docs/engine-reference/unity/VERSION.md` 将固定的版本评为 HIGH 风险
 
 **Input:** `/dev-story production/epics/[slug]/story-003-[slug].md`
 
 **Expected behavior:**
-1. Spawns `ui-programmer` with `unity-specialist` (`specialists.code`) and
-   `unity-ui-specialist` (`specialists.ui`, for a UI story)
-2. The brief sends the code to `Assets/Scripts/<System>/`, the Unity code root
-3. Verification runs `commands.smoke` and reports its exit code
-4. Before launching, globs `Assets/**/ScreenshotOnArg.cs`, finds none and asks
-   "May I write `Assets/Scripts/ScreenshotOnArg.cs`?"; on yes writes the script
-   verbatim from `.claude/docs/run-and-observe.md`
-5. Launches the built player with `--scene`/`--screenshot` and prints
-   `Run result: OBSERVED — …` with the retained path
+1. 以 `unity-specialist`（`specialists.code`）和 `unity-ui-specialist`
+   （`specialists.ui`，针对 UI 用户故事）派发 `ui-programmer`
+2. 简报将代码写入 `Assets/Scripts/<System>/`，即 Unity 代码根目录
+3. 验证运行 `commands.smoke` 并报告其退出码
+4. 启动之前，Glob `Assets/**/ScreenshotOnArg.cs`，未找到则询问
+   "May I write `Assets/Scripts/ScreenshotOnArg.cs`?"；确认后按
+   `.claude/docs/run-and-observe.md` 原样写入该脚本
+5. 以 `--scene`/`--screenshot` 启动构建后的玩家程序，并打印
+   `Run result: OBSERVED — …` 及保留路径
 
 **Assertions:**
-- [ ] No file is written under `src/` — the Godot row is not a default
-- [ ] Both specialists come from the `specialists` block, not the roster table
-- [ ] `ScreenshotOnArg.cs` is written only after its ask, at `Assets/Scripts/`, exactly as run-and-observe.md gives it
-- [ ] If the user declines that ask, the result is `Run result: NOT VERIFIED — ScreenshotOnArg.cs not written`, not an observation
-- [ ] Verification names `commands.smoke` and its exit code
+- [ ] 不在 `src/` 下写入任何文件 —— Godot 的路径不是默认值
+- [ ] 两个专家都来自 `specialists` 块，而不是名册表
+- [ ] `ScreenshotOnArg.cs` 仅在其询问之后写入，位置为 `Assets/Scripts/`，与 run-and-observe.md 给出的内容完全一致
+- [ ] 若用户拒绝该询问，结果为 `Run result: NOT VERIFIED — ScreenshotOnArg.cs not written`，而不是观察到结果
+- [ ] 验证点名 `commands.smoke` 及其退出码
 
 ---
 
-### Case 7: Engine unset — the code root is unresolved, nothing is written
+### Case 7: 引擎未设置 —— 代码根目录无法解析，不写入任何内容
 
 **Fixture:**
-- `project.yaml` has no `engine` block; `.claude/docs/technical-preferences.md`
-  reads `Engine: [TO BE CONFIGURED]`
-- The project has none of `src/`, `Assets/` or `Source/`
-- `modes.workflow: minimal`; the story is Type Logic
+- `project.yaml` 没有 `engine` 块；`.claude/docs/technical-preferences.md`
+  内容为 `Engine: [TO BE CONFIGURED]`
+- 项目没有 `src/`、`Assets/` 或 `Source/` 中的任何一个
+- `modes.workflow: minimal`；用户故事为 Type Logic
 
 **Input:** `/dev-story production/epics/[slug]/story-001-[slug].md`
 
 **Expected behavior:**
-1. The code root cannot be resolved (`.claude/docs/code-root-resolution.md`: no
-   `engine.name`, no legacy `Engine:` value, no single unambiguous root in the tree)
-2. No source file is written, and the output says the code root is unresolved
+1. 代码根目录无法解析（`.claude/docs/code-root-resolution.md`：没有
+   `engine.name`、没有旧的 `Engine:` 值、目录树中没有唯一明确根目录）
+2. 不写入任何源文件，输出说明代码根目录未解析
 
 **Assertions:**
-- [ ] No file is created under `src/` or any other guessed root
-- [ ] The output names the unresolved code root as the reason nothing was written
-- [ ] "Implementation Complete" is not printed
+- [ ] 不在 `src/` 或任何其他猜测的根目录下创建文件
+- [ ] 输出将未解析的代码根目录列为未写入任何内容的原因
+- [ ] 不打印 "Implementation Complete"
 
 ---
 
-### Case 8: Dependency marked Complete through option [C]
+### Case 8: 通过选项 [C] 将依赖标记为 Complete
 
 **Fixture:**
-- `project.yaml`: `engine.name: Godot`, `modes.workflow: minimal`, `qa.level: minimal`
-- `story-003` lists `story-002` under Dependencies; `story-002` has
+- `project.yaml`：`engine.name: Godot`、`modes.workflow: minimal`、`qa.level: minimal`
+- `story-003` 在 Dependencies 下列出 `story-002`；`story-002` 为
   `Status: In Progress`
-- At the dependency prompt the user picks `[C]`, then approves the update
+- 在依赖提示处用户选择 `[C]`，然后批准更新
 
 **Input:** `/dev-story production/epics/[slug]/story-003-[slug].md`
 
 **Expected behavior:**
-1. Reads story-002's `Status:` and asks: "Story '[story-003 title]' depends on
+1. 读取 story-002 的 `Status:` 并询问："Story '[story-003 title]' depends on
    '[story-002 title]' which is currently In Progress, not Complete. How do you
-   want to proceed?" with `[A] Proceed anyway` / `[B] Stop` / `[C] The dependency
+   want to proceed?"，选项为 `[A] Proceed anyway` / `[B] Stop` / `[C] The dependency
    is done but status wasn't updated — mark it Complete and continue`
-2. On [C] asks "May I update `production/epics/[slug]/story-002-[slug].md` Status
+2. 选择 [C] 时询问 "May I update `production/epics/[slug]/story-002-[slug].md` Status
    to Complete?"
-3. On yes sets story-002's `Status:` to `Complete`, then continues with story-003
+3. 确认后将 story-002 的 `Status:` 设为 `Complete`，然后继续 story-003
 
 **Assertions:**
-- [ ] The dependency prompt comes before any agent is spawned
-- [ ] story-002 is edited only after the "May I update … Status to Complete?" ask, and only its `Status:` changes
-- [ ] story-003 itself is not marked Complete — it is set In Progress, after its own ask
-- [ ] Had the user picked `[B]`, story-003 would be BLOCKED in session state and no agent spawned
+- [ ] 依赖提示在任何代理派发之前出现
+- [ ] story-002 仅在 "May I update … Status to Complete?" 询问之后被编辑，且只改其 `Status:`
+- [ ] story-003 本身不被标记为 Complete —— 它在自身询问之后被置为 In Progress
+- [ ] 若用户选择 `[B]`，story-003 将在会话状态中为 BLOCKED，且不派发任何代理
 
-### Case 9: The agent stops early — INCOMPLETE, and the checkpoint says resume
+### Case 9: 代理提前停止 —— INCOMPLETE，检查点提示继续
 
 **Fixture:**
-- `project.yaml`: `engine.name: Godot`, `modes.workflow: minimal`, `qa.level: minimal`
-- Story Type Logic, `Status: Ready`, ADR fields `N/A (minimal — no ADRs)`
-- The programmer agent reports that it hit its turn limit after adding
-  `src/combat/damage.gd`, which calls a helper it never defined
+- `project.yaml`：`engine.name: Godot`、`modes.workflow: minimal`、`qa.level: minimal`
+- 用户故事 Type Logic、`Status: Ready`、ADR 字段 `N/A (minimal — no ADRs)`
+- 程序员代理报告：在添加 `src/combat/damage.gd` 后达到回合上限，而该文件调用了它
+  从未定义的辅助函数
 
 **Input:** `/dev-story production/epics/[slug]/story-001-[slug].md`
 
 **Expected behavior:**
-1. Phase 6 treats the story as INCOMPLETE: the headline says so, lists what exists,
-   names the undefined helper, and offers to resume the agent
-2. "Implementation Complete" is not printed and the story's `Status:` is not advanced
-3. The checkpoint's **Next step** reads `/dev-story [story-path] — resume: [the
+1. Phase 6 将该用户故事视为 INCOMPLETE：标题如此说明，列出已存在的内容，
+   点名未定义的辅助函数，并提出继续运行代理
+2. 不打印 "Implementation Complete"，用户故事的 `Status:` 不推进
+3. 检查点的 **Next step** 为 `/dev-story [story-path] — resume: [the
    undefined helper]`
 
 **Assertions:**
-- [ ] No "Implementation Complete" and no `Status:` change past `In Progress`
-- [ ] The checkpoint's **Next step** is `/dev-story [story-path]` to resume — never `/story-done`, which `/help` reads as "the work is written"
+- [ ] 不出现 "Implementation Complete"，`Status:` 也不推进到 `In Progress` 之后
+- [ ] 检查点的 **Next step** 为 `/dev-story [story-path]` 以继续 —— 绝不是 `/story-done`，`/help` 会把它读作“工作已完成”
 
 ---
 
-### Case 10: `full` tier, a story with no governing ADR (`ADR: N/A`)
+### Case 10: `full` 层级，用户故事无主导 ADR（`ADR: N/A`）
 
 **Fixture:**
-- `project.yaml`: `engine.name: Godot`, `modes.workflow: full`
-- Story `Status: Ready`, Type Logic, `ADR Governing Implementation: N/A — no
-  architectural pattern required` (what `/create-stories` writes for a
-  requirement `/create-epics` flagged as untraced)
-- `docs/architecture/tr-registry.yaml` has the story's TR-ID; the control manifest exists
+- `project.yaml`：`engine.name: Godot`、`modes.workflow: full`
+- 用户故事 `Status: Ready`、Type Logic、`ADR Governing Implementation: N/A — no
+  architectural pattern required`（即 `/create-stories` 为 `/create-epics`
+  标记为未追溯的需求写入的内容）
+- `docs/architecture/tr-registry.yaml` 含该用户故事的 TR-ID；控制清单存在
 
 **Input:** `/dev-story production/epics/[slug]/story-004-[slug].md`
 
 **Expected behavior:**
-1. Phase 2 reads the ADR field as `N/A`: the story references no ADR, so the `full`
-   column's "ADR file [path] not found" STOP does not fire and no ADR is grepped
-2. The story is not set BLOCKED; implementation proceeds, with the ADR guidance
-   named in the `Briefing omits:` line
+1. Phase 2 将 ADR 字段读为 `N/A`：用户故事不引用任何 ADR，因此 `full`
+   列的 "ADR file [path] not found" STOP 不触发，也不 Grep 任何 ADR
+2. 用户故事不被置为 BLOCKED；实现继续，ADR 指导在 `Briefing omits:` 行中
+   点名
 
 **Assertions:**
-- [ ] No STOP and no BLOCKED for the `N/A` ADR field at `full`
-- [ ] No ADR file is looked up for `N/A`
-- [ ] Variant — the story names `ADR-0006`, whose `## Status` reads `Superseded by ADR-0009`: the story is BLOCKED at every tier, naming ADR-0009 and saying to edit its ADR field (`/create-stories` never rewrites an existing story)
+- [ ] 在 `full` 下，`N/A` 的 ADR 字段不触发 STOP，也不置为 BLOCKED
+- [ ] 不会为 `N/A` 查找任何 ADR 文件
+- [ ] 变体 —— 用户故事点名 `ADR-0006`，其 `## Status` 为 `Superseded by ADR-0009`：该用户故事在所有层级都被 BLOCKED，输出点名 ADR-0009 并说明要编辑其 ADR 字段（`/create-stories` 从不重写已有用户故事）
 
 ---
 
-### Case 11: Two TR-IDs share a prefix — the registry lookup matches the exact id
+### Case 11: 两个 TR-ID 共享前缀 —— 注册表查找匹配精确 id
 
 **Fixture:**
-- `project.yaml`: `engine.name: Godot`, `modes.workflow: full` (pinned: the TR registry
-  is required at `full`, so the lookup always runs)
-- `docs/architecture/tr-registry.yaml` lists `TR-combat-0010` first, then
-  `TR-combat-001`, each as `- id: TR-combat-NNN` followed by its own `requirement:`
-  line. `TR-combat-0010` reads "Enemies drop loot on death"; `TR-combat-001` reads
+- `project.yaml`：`engine.name: Godot`、`modes.workflow: full`（固定：`full` 下
+  需要 TR 注册表，因此查找总会运行）
+- `docs/architecture/tr-registry.yaml` 先列出 `TR-combat-0010`，再列出
+  `TR-combat-001`，各自为 `- id: TR-combat-NNN` 后跟自己的 `requirement:`
+  行。`TR-combat-0010` 内容为 "Enemies drop loot on death"；`TR-combat-001` 内容为
   "Damage is clamped to the target's remaining health"
-- Story A: `Requirement: TR-combat-001`. Story B: `Requirement: TR-combat-0010`.
-  Both `Status: Ready`, Type Logic, ADR governing field `N/A`, Dependencies None
+- 用户故事 A：`Requirement: TR-combat-001`。用户故事 B：`Requirement: TR-combat-0010`。
+  两者 `Status: Ready`、Type Logic、ADR 主导字段为 `N/A`、Dependencies 为 None
 
-**Input:** `/dev-story production/epics/combat/story-A-[slug].md`, then the same for story B
+**Input:** `/dev-story production/epics/combat/story-A-[slug].md`，随后对用户故事 B 相同
 
 **Expected behavior:**
-1. For story A the registry grep is anchored at the end of the line
-   (`id: TR-combat-001\s*$`), so `id: TR-combat-0010` does not match
-2. The matched entry is `TR-combat-001`; its `requirement` text ("Damage is clamped…")
-   is the one held and briefed to the agent
-3. For story B the grep returns only the `TR-combat-0010` entry and its
-   "Enemies drop loot on death" requirement
-4. Neither run reads the whole registry
+1. 对用户故事 A，注册表 grep 锚定行尾
+   （`id: TR-combat-001\s*$`），因此 `id: TR-combat-0010` 不匹配
+2. 匹配到的条目为 `TR-combat-001`；保留并简报给代理的是其 `requirement` 文本
+   （"Damage is clamped…"）
+3. 对用户故事 B，grep 只返回 `TR-combat-0010` 条目及其
+   "Enemies drop loot on death" 需求
+4. 两次运行都不读取整个注册表
 
 **Assertions:**
-- [ ] Story A's brief carries the `TR-combat-001` requirement text, never the `TR-combat-0010` text, although `TR-combat-0010` appears first in the file
-- [ ] Story B's brief carries the `TR-combat-0010` requirement text
-- [ ] The grep pattern ends with `\s*$` (or is otherwise an exact match), so neither lookup returns the other id's entry
-- [ ] The whole registry is not read for either story
+- [ ] 用户故事 A 的简报携带 `TR-combat-001` 需求文本，绝不是 `TR-combat-0010` 的文本，尽管 `TR-combat-0010` 在文件中先出现
+- [ ] 用户故事 B 的简报携带 `TR-combat-0010` 需求文本
+- [ ] grep 模式以 `\s*$` 结尾（或以其他方式精确匹配），因此任何一次查找都不会返回另一个 id 的条目
+- [ ] 两个用户故事都不完整读取整个注册表
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Does NOT write source code directly — delegates to specialist agents
-- [ ] Resolves the workflow tier and verifies required inputs before any agent is spawned
-- [ ] Mismatch and dependency prompts (`AskUserQuestion`) come before implementation
-- [ ] Every file the skill itself writes — story fields, `sprint-status.yaml`, a dependency's `Status`, a Config/Data file, `ScreenshotOnArg.cs` — follows an ask that names it; only the `active.md` checkpoint is written without one
-- [ ] Code is written only under the resolved code root; an unresolved root writes nothing
-- [ ] Skipped phases and dropped briefing items are announced in the output
-- [ ] Never emits "Implementation Complete" for an agent that stopped early (INCOMPLETE)
-- [ ] Overwrites the CHECKPOINT block in `production/session-state/active.md`
-- [ ] Ends with next-step handoff: `/story-done` (`/code-review` first at standard/full)
+- [ ] 不直接编写源代码 —— 委托给专家代理
+- [ ] 在任何代理派发之前解析工作流层级并校验所需输入
+- [ ] 不匹配和依赖提示（`AskUserQuestion`）在实现之前出现
+- [ ] 技能自身写入的每个文件 —— 用户故事字段、`sprint-status.yaml`、依赖项的 `Status`、Config/Data 文件、`ScreenshotOnArg.cs` —— 都遵循点名该文件的询问；只有 `active.md` 检查点无需询问即可写入
+- [ ] 代码只写入解析后的代码根目录；根目录未解析时不写入任何内容
+- [ ] 跳过的阶段和丢弃的简报项在输出中声明
+- [ ] 对提前停止的代理（INCOMPLETE）绝不输出 "Implementation Complete"
+- [ ] 覆盖 `production/session-state/active.md` 中的 CHECKPOINT 块
+- [ ] 以下一步交接结尾：`/story-done`（standard/full 下先 `/code-review`）
 
 ---
 
 ## Coverage Notes
 
-- The code root is covered for Godot (`src/`) and Unity (`Assets/`, Case 6) and for
-  an unresolved engine (Case 7). Unreal (`Source/<Module>/<System>/`, with the
-  editor-target build as the parse check) is not given a fixture.
-- The INCOMPLETE path is Case 9; `parse NOT VERIFIED` when the engine binary is
-  unavailable is not given a fixture.
-- The Manifest Version mismatch prompt (`[A]` update / `[B]` keep old rules, which
-  records a `Manifest-Note` / `[C]` stop) follows Case 3's ask-before-spawn pattern
-  and is not separately tested.
-- Config/Data stories (no agent spawned) and `testing.strict` per-type overrides
-  are not covered.
+- 代码根目录覆盖了 Godot（`src/`）和 Unity（`Assets/`，Case 6），以及
+  引擎未解析的情况（Case 7）。Unreal（`Source/<Module>/<System>/`，以
+  编辑器目标构建作为解析检查）未提供 fixture。
+- INCOMPLETE 路径为 Case 9；引擎二进制不可用时的 `parse NOT VERIFIED`
+  未提供 fixture。
+- Manifest Version 不匹配提示（`[A]` 更新 / `[B]` 保留旧规则，记录
+  `Manifest-Note` / `[C]` 停止）遵循 Case 3 的“派发前询问”模式，
+  未单独测试。
+- Config/Data 用户故事（不派发代理）以及 `testing.strict` 逐类型覆盖
+  未覆盖。

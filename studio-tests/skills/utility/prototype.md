@@ -3,321 +3,320 @@
 ## Skill Summary
 
 `/prototype [concept] [--path html|engine|paper] [--review full|lean|solo]
-[--spike]` runs a throwaway concept prototype before GDDs are written. It first
-confirms intent with `AskUserQuestion` (Prototype this concept / Skip — concept
-already proven / Mid-production spike), forms a falsifiable hypothesis ("If the
-player [does X], they will feel [Y] — we will know this is true if [Z]") and asks
-for the riskiest assumption. It picks an HTML, Engine or Paper path (genre table,
-recommendation pre-stated), presents a 3–5 bullet plan, asks to record it as a
-checkpoint in `production/session-state/active.md`, then asks "May I create the prototype
-directory at `prototypes/[concept-name]-concept/` and begin implementation?".
-Every prototype file starts with a `PROTOTYPE - NOT FOR PRODUCTION` header in
-that file's own comment syntax (`#` in GDScript and Python, `//` in C#, C++ and
-JavaScript, `<!-- -->` in HTML and Markdown), and standards are intentionally
-relaxed.
+[--spike]` 在编写 GDD 之前运行一次一次性的概念原型。它首先通过
+`AskUserQuestion` 确认意图（Prototype this concept / Skip — concept
+already proven / Mid-production spike），形成一个可证伪的假设（"If the
+player [does X], they will feel [Y] — we will know this is true if [Z]"），并
+询问风险最高的假设。它选择 HTML、Engine 或 Paper 路径（按类型表，
+预先给出推荐），呈现一份 3–5 条的要点计划，询问是否将其记录为
+`production/session-state/active.md` 中的检查点，然后询问 "May I create the prototype
+directory at `prototypes/[concept-name]-concept/` and begin implementation?"。
+每个原型文件都以该文件自身注释语法中的 `PROTOTYPE - NOT FOR PRODUCTION` 头开头
+（GDScript 与 Python 中为 `#`，C#、C++ 与
+JavaScript 中为 `//`，HTML 与 Markdown 中为 `<!-- -->`），并且有意放宽
+标准。
 
-After a one-question-at-a-time debrief, it fills
-`.claude/docs/templates/prototype-report.md`, asks to write
-`prototypes/[concept-name]-concept/REPORT.md` and add its row to
-`prototypes/index.md` (one ask naming both). Verdicts are **PROCEED / PIVOT / KILL**. PIVOT writes a
-`PIVOT-NOTE.md`; KILL runs a five-item soundness check and appends to
-`prototypes/GRAVEYARD.md`. In `full` review mode `creative-director` reviews the
-result via **CD-PLAYTEST** and answers APPROVE / CONCERNS / REJECT: APPROVE keeps
-the recommendation; CONCERNS go to the user, who decides (Revise / Accept /
-Discuss); REJECT means a PROCEED cannot stand — the user chooses PIVOT or KILL,
-and REPORT.md records the director's reason. A NOT ASSESSED answer (the director
-lacked an input) is never an approval. `--spike` replaces the
-whole flow with a ~4-hour spike that asks before creating its folder, asks
-before writing `SPIKE-NOTE.md` and clearing the spike from `active.md`, and has
-no CD gate and no PROCEED/PIVOT/KILL.
+在一次只问一个问题的复盘之后，它填写
+`.claude/docs/templates/prototype-report.md`，询问是否写入
+`prototypes/[concept-name]-concept/REPORT.md` 并把其行添加到
+`prototypes/index.md`（一次询问同时指明两者）。结论为 **PROCEED / PIVOT / KILL**。PIVOT 写入
+`PIVOT-NOTE.md`；KILL 运行包含五项内容的健全性检查，并追加到
+`prototypes/GRAVEYARD.md`。在 `full` 评审模式下，`creative-director` 通过
+**CD-PLAYTEST** 评审结果，并回答 APPROVE / CONCERNS / REJECT：APPROVE 保持
+该建议；CONCERNS 交给用户决定（Revise / Accept /
+Discuss）；REJECT 意味着 PROCEED 不能成立——用户选择 PIVOT 或 KILL，
+REPORT.md 记录总监的理由。NOT ASSESSED 的回答（总监
+缺少某项输入）绝不等同于批准。`--spike` 把
+整个流程替换为约 4 小时的 spike：在创建其文件夹之前询问，在写入
+`SPIKE-NOTE.md` 并从 `active.md` 清除该 spike 之前询问，且
+没有 CD 闸门，也没有 PROCEED/PIVOT/KILL。
 
 ---
 
 ## Static Assertions (Structural)
 
-Checked against the SKILL.md by `/skill-test spec` — no fixture needed.
+由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] Has required frontmatter fields: `name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`
-- [ ] Has ≥2 phase headings
-- [ ] Contains verdict keywords: PROCEED, PIVOT, KILL, NOT ASSESSED (a prototype nobody has played)
-- [ ] Contains "May I create" / "May I write" language before creating the prototype directory and the report
-- [ ] Has a next-step handoff per verdict (PROCEED → `/design-review`, `/gate-check`, `/map-systems`, `/design-system`; PIVOT → `/prototype` or `/brainstorm`; KILL → `/brainstorm`)
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 有 ≥2 个 phase 标题
+- [ ] 包含结论关键词：PROCEED、PIVOT、KILL、NOT ASSESSED（没有人玩过的原型）
+- [ ] 在创建原型目录与报告之前包含 "May I create" / "May I write" 措辞
+- [ ] 每种结论都有下一步交接（PROCEED → `/design-review`、`/gate-check`、`/map-systems`、`/design-system`；PIVOT → `/prototype` 或 `/brainstorm`；KILL → `/brainstorm`）
 
 ---
 
 ## Director Gate Checks
 
-- **Full mode**: CD-PLAYTEST — `creative-director` receives the REPORT.md
-  content, the hypothesis and the pillars (from `design/gdd/game-concept.md`, or
-  the pitch and "what they feel" line from `design/game-brief.md`) and returns
-  APPROVE / CONCERNS / REJECT, or NOT ASSESSED when it lacked an input.
-  APPROVE → the recommendation stands; CONCERNS → shown with the recommendation,
-  and the user decides (Revise / Accept / Discuss); REJECT → a PROCEED cannot
-  stand: the user chooses PIVOT or KILL, and REPORT.md records the director's
-  reason; NOT ASSESSED → never an approval: the missing input is named, and the
-  gate is re-run or the review recorded as NOT ASSESSED. If neither document
-  exists: "CD-PLAYTEST skipped — game pillars not yet defined at concept
+- **Full 模式**：CD-PLAYTEST——`creative-director` 接收 REPORT.md
+  内容、假设与游戏支柱（来自 `design/gdd/game-concept.md`，或来自
+  `design/game-brief.md` 的提案与 "what they feel" 一行），并返回
+  APPROVE / CONCERNS / REJECT，或在缺少输入时返回 NOT ASSESSED。
+  APPROVE → 建议成立；CONCERNS → 与建议一同展示，
+  由用户决定（Revise / Accept / Discuss）；REJECT → PROCEED 不能
+  成立：用户选择 PIVOT 或 KILL，REPORT.md 记录总监的
+  理由；NOT ASSESSED → 绝不等于批准：指明缺失的输入，并
+  重新运行闸门，或把评审记录为 NOT ASSESSED。如果两份文档都
+  不存在："CD-PLAYTEST skipped — game pillars not yet defined at concept
   prototype stage."
-- **Lean mode**: skipped — "CD-PLAYTEST skipped — Lean mode."
-- **Solo mode**: skipped — "CD-PLAYTEST skipped — Solo mode."
-- **Spike mode**: no CD gate and no phase gate, in any review mode.
+- **Lean 模式**：跳过——"CD-PLAYTEST skipped — Lean mode."
+- **Solo 模式**：跳过——"CD-PLAYTEST skipped — Solo mode."
+- **Spike 模式**：在任何评审模式下都没有 CD 闸门，也没有阶段闸门。
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非某个用例自己的 Fixture 另有说明，否则每个用例的 `project.yaml` 都设置
+`modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/CLAUDE.md` §
+Fixture defaults。
 
 ---
 
 ## Test Cases
 
-### Case 1: Happy Path — Engine Prototype, PROCEED
+### Case 1: Happy Path — Engine 原型，PROCEED
 
 **Fixture:**
-- `design/gdd/game-concept.md` describes a 2D platformer; `project.yaml` has
-  `engine.name: Godot` and `engine.language: GDScript`
-- `prototypes/` has no `grapple-hook-concept/`
-- Review mode: `solo`; `modes.workflow: standard` (pinned: unset resolves to
-  minimal, which routes PROCEED to `/create-stories` and `/dev-story` instead of
-  the step 7 list — Case 6 covers that route)
-- In the debrief the user reports the hypothesis CONFIRMED and answers PROCEED
+- `design/gdd/game-concept.md` 描述一个 2D 平台游戏；`project.yaml` 含
+  `engine.name: Godot` 与 `engine.language: GDScript`
+- `prototypes/` 中没有 `grapple-hook-concept/`
+- 评审模式：`solo`；`modes.workflow: standard`（已固定：未设置时解析为
+  minimal，会把 PROCEED 路由到 `/create-stories` 与 `/dev-story`，而非
+  步骤 7 的列表——Case 6 覆盖该路由）
+- 在复盘中用户报告假设 CONFIRMED 并回答 PROCEED
 
 **Input:** `/prototype grapple-hook traversal`
 
 **Expected behavior:**
-1. `AskUserQuestion` confirms intent; user picks "Prototype this concept"
-2. Skill states a falsifiable hypothesis in the If / feel / know-if form and asks
-   for the riskiest assumption
-3. Path widget pre-states an Engine recommendation (traversal feel is the
-   hypothesis)
-4. Plan is presented and confirmed, with the ask naming
-   `production/session-state/active.md`; the checkpoint is written there
-5. Skill asks "May I create the prototype directory at
-   `prototypes/grapple-hook-concept/` and begin implementation?"; every GDScript
-   file it writes starts with `# PROTOTYPE - NOT FOR PRODUCTION` (GDScript
-   comments use `#`; a `//` header would not parse)
-6. Debrief questions are asked one at a time; report drafted from
-   `.claude/docs/templates/prototype-report.md`; "May I write this report to
+1. `AskUserQuestion` 确认意图；用户选择 "Prototype this concept"
+2. 技能以 If / feel / know-if 形式陈述一个可证伪的假设，并询问
+   风险最高的假设
+3. 路径控件预先给出 Engine 推荐（移动手感即是
+   假设）
+4. 呈现并确认计划，询问中指明
+   `production/session-state/active.md`；检查点写入该处
+5. 技能询问 "May I create the prototype directory at
+   `prototypes/grapple-hook-concept/` and begin implementation?"；它写入的每个
+   GDScript 文件都以 `# PROTOTYPE - NOT FOR PRODUCTION` 开头（GDScript
+   注释使用 `#`；用 `//` 头将无法解析）
+6. 复盘问题逐个提出；报告依据
+   `.claude/docs/templates/prototype-report.md` 起草；询问 "May I write this report to
    `prototypes/grapple-hook-concept/REPORT.md` and add its row to
-   `prototypes/index.md`?"; a row is appended to `prototypes/index.md`
-7. Note "CD-PLAYTEST skipped — Solo mode."; PROCEED routes to `/design-review`,
-   `/gate-check`, `/art-bible`, `/map-systems`, `/design-system`, `/review-all-gdds`
+   `prototypes/index.md`?"；向 `prototypes/index.md` 追加一行
+7. 记录 "CD-PLAYTEST skipped — Solo mode."；PROCEED 路由到 `/design-review`、
+   `/gate-check`、`/art-bible`、`/map-systems`、`/design-system`、`/review-all-gdds`
 
 **Assertions:**
-- [ ] The hypothesis is falsifiable, with a measurable signal
-- [ ] Engine is recommended in the path prompt before the user chooses
-- [ ] The directory ask names `prototypes/grapple-hook-concept/` and comes before any prototype file is written
-- [ ] Every prototype script carries the `PROTOTYPE - NOT FOR PRODUCTION` header as a `#` comment, never `//`; no file is written under the code root
-- [ ] REPORT.md is written only after its ask, that ask also names `prototypes/index.md`, and the index gains a row with verdict PROCEED
-- [ ] PROCEED next steps include `/map-systems` and `/design-system`
+- [ ] 假设可证伪，并带有可测量的信号
+- [ ] 在用户选择之前，路径提示中已推荐 Engine
+- [ ] 目录询问指明 `prototypes/grapple-hook-concept/`，且位于写入任何原型文件之前
+- [ ] 每个原型脚本都以 `#` 注释携带 `PROTOTYPE - NOT FOR PRODUCTION` 头，绝不使用 `//`；代码根目录下不写入任何文件
+- [ ] REPORT.md 仅在其询问之后写入，该询问也指明 `prototypes/index.md`，且索引新增一行，结论为 PROCEED
+- [ ] PROCEED 的后续步骤包含 `/map-systems` 与 `/design-system`
 
 ---
 
-### Case 2: PIVOT — Carry-Forward Note Written
+### Case 2: PIVOT — 写入结转说明
 
 **Fixture:**
-- A paper prototype of `trade-routes` has just been debriefed
-- User answers PIVOT: the route planning was engaging, the upkeep maths was not
-- Review mode: `solo`
+- `trade-routes` 的纸面原型刚刚完成复盘
+- 用户回答 PIVOT：路线规划很有吸引力，维护计算则不然
+- 评审模式：`solo`
 
 **Input:** `/prototype trade-routes --path paper`
 
 **Expected behavior:**
-1. Paper path writes `prototypes/trade-routes-concept/rules.md` and
-   `play-log.md` after the directory ask
-2. REPORT.md is written after its ask with verdict PIVOT
-3. Skill asks, one at a time: "What specifically worked in this prototype that
-   we should preserve…?" and "What is the single most important thing to change?"
-4. Skill asks "May I write this to `prototypes/trade-routes-concept/PIVOT-NOTE.md`?"
-5. The note holds the original hypothesis, what to keep, what to change and the
-   revised hypothesis; next steps are `/prototype [revised-concept]` or
+1. Paper 路径在目录询问之后写入 `prototypes/trade-routes-concept/rules.md` 与
+   `play-log.md`
+2. REPORT.md 在其询问之后写入，结论为 PIVOT
+3. 技能逐个询问："What specifically worked in this prototype that
+   we should preserve…?" 与 "What is the single most important thing to change?"
+4. 技能询问 "May I write this to `prototypes/trade-routes-concept/PIVOT-NOTE.md`?"
+5. 说明包含原始假设、需要保留的内容、需要修改的内容以及
+   修订后的假设；后续步骤为 `/prototype [revised-concept]` 或
    `/brainstorm [hint]`
 
 **Assertions:**
-- [ ] `--path paper` is honoured and produces `rules.md` and `play-log.md`
-- [ ] The two carry-forward questions are asked separately
-- [ ] "May I write" names `PIVOT-NOTE.md` before it is written
-- [ ] The note contains a revised hypothesis
-- [ ] Next steps offer `/prototype` for the revised concept or `/brainstorm`
+- [ ] 遵循 `--path paper`，产出 `rules.md` 与 `play-log.md`
+- [ ] 两个结转问题分开询问
+- [ ] 在写入 `PIVOT-NOTE.md` 之前询问 "May I write" 并指明它
+- [ ] 说明中包含修订后的假设
+- [ ] 后续步骤提供用于修订后概念的 `/prototype` 或 `/brainstorm`
 
 ---
 
-### Case 3: KILL — Soundness Check and Graveyard Entry
+### Case 3: KILL — 健全性检查与墓地条目
 
 **Fixture:**
-- An HTML prototype of `procedural-dialogue` has been debriefed
-- User answers KILL; the debrief shows testers never understood the core
-  action after 2 playtests, no fun moment was observed, and the concept only
-  worked when the developer explained it
+- `procedural-dialogue` 的 HTML 原型已完成复盘
+- 用户回答 KILL；复盘显示经过 2 次试玩测试，测试者始终没有理解核心
+  操作，没有观察到有趣的时刻，且该概念只有在开发者解释时才
+  成立
 
 **Input:** `/prototype procedural-dialogue --path html`
 
 **Expected behavior:**
-1. REPORT.md is written after its ask with verdict KILL
-2. Skill runs the five-item KILL checklist; 3 items apply, so the verdict is sound
-3. Skill asks "May I append this concept to `prototypes/GRAVEYARD.md`?"
-4. The entry has Kill reason, What worked, What failed and Next time, with a
-   specific kill reason (not "it was boring")
-5. Next step: `/brainstorm open` or `/brainstorm [new-hint]`
+1. REPORT.md 在其询问之后写入，结论为 KILL
+2. 技能运行五项 KILL 清单；有 3 项适用，因此该结论是健全的
+3. 技能询问 "May I append this concept to `prototypes/GRAVEYARD.md`?"
+4. 条目包含 Kill reason、What worked、What failed 与 Next time，
+   并给出具体的淘汰原因（而不是 "it was boring"）
+5. 下一步：`/brainstorm open` 或 `/brainstorm [new-hint]`
 
 **Assertions:**
-- [ ] The KILL checklist is applied, with the 2+ rule deciding soundness
-- [ ] "May I append" names `prototypes/GRAVEYARD.md` before writing
-- [ ] The graveyard entry has all four fields and a specific kill reason
-- [ ] Next steps route to `/brainstorm`
+- [ ] 应用 KILL 清单，并以 2+ 规则判定健全性
+- [ ] 在写入之前，询问 "May I append" 并指明 `prototypes/GRAVEYARD.md`
+- [ ] 墓地条目包含全部四个字段以及具体的淘汰原因
+- [ ] 后续步骤路由到 `/brainstorm`
 
 ---
 
-### Case 4: Spike Mode — No Debrief, No Gate, No PROCEED/PIVOT/KILL
+### Case 4: Spike Mode — 无复盘、无闸门、无 PROCEED/PIVOT/KILL
 
 **Fixture:**
-- Project is in Production
-- Review mode: `full`; `modes.workflow: standard` (pinned: unset resolves to minimal,
-  whose spike note and `active.md` wording Case 7 covers)
-- `production/sprints/sprint-004.md` is the current sprint and `active.md` shows it
+- 项目处于 Production 阶段
+- 评审模式：`full`；`modes.workflow: standard`（已固定：未设置时解析为 minimal，
+  其 spike 说明与 `active.md` 措辞由 Case 7 覆盖）
+- `production/sprints/sprint-004.md` 是当前冲刺，且 `active.md` 显示它
 
 **Input:** `/prototype rope-physics --spike`
 
 **Expected behavior:**
-1. Skill skips Phases 1–9 and runs Spike Mode
-2. Asks for the spike question in plain text: "Can we [do X] using [approach Y]?"
-3. Path widget as in Phase 3; scope limited to 2–3 bullets; ~4-hour cap
-4. Asks "May I create `prototypes/rope-physics-spike-[date]/` and build the
-   spike there?" before writing any spike file
-5. Asks "Did the spike answer the question? YES or NO, and why in one sentence."
-6. Asks once, naming both files, "May I write
+1. 技能跳过 Phase 1–9 并运行 Spike 模式
+2. 以纯文本询问 spike 问题："Can we [do X] using [approach Y]?"
+3. 路径控件同 Phase 3；范围限制为 2–3 条要点；约 4 小时上限
+4. 在写入任何 spike 文件之前询问 "May I create `prototypes/rope-physics-spike-[date]/` and build the
+   spike there?"
+5. 询问 "Did the spike answer the question? YES or NO, and why in one sentence."
+6. 只询问一次，同时指明两个文件："May I write
    `prototypes/rope-physics-spike-[date]/SPIKE-NOTE.md` and clear the spike from
-   `production/session-state/active.md`?"; then writes the note (question, result
-   YES / NO / PARTIAL, what to do next) and updates `active.md`
-7. The note's "what to do next" offers: add to the current sprint / investigate
-   further / abandon the idea. `active.md` is cleared back to the current sprint state
+   `production/session-state/active.md`?"；随后写入说明（问题、结果
+   YES / NO / PARTIAL、下一步该做什么）并更新 `active.md`
+7. 说明中的 "what to do next" 提供：加入当前冲刺 / 进一步调查 /
+   放弃该想法。`active.md` 被清除回当前冲刺状态
 
 **Assertions:**
-- [ ] The intent widget and hypothesis/debrief phases are skipped
-- [ ] The spike folder is created only after its ask
-- [ ] `SPIKE-NOTE.md` and `active.md` are written only after an ask that names both
-- [ ] Output is `SPIKE-NOTE.md` in a `-spike-[date]` folder, not a REPORT.md
-- [ ] No CD-PLAYTEST spawn or skip note, even though review mode is `full`
-- [ ] No PROCEED / PIVOT / KILL verdict is issued
-- [ ] At `standard`, the note's next-step options say "add to current sprint", and `active.md` returns to the current sprint state
+- [ ] 跳过意图控件与假设/复盘阶段
+- [ ] 只有在其询问之后才创建 spike 文件夹
+- [ ] `SPIKE-NOTE.md` 与 `active.md` 只在一次同时指明两者的询问之后写入
+- [ ] 输出是 `-spike-[date]` 文件夹中的 `SPIKE-NOTE.md`，而不是 REPORT.md
+- [ ] 即使评审模式为 `full`，也没有 CD-PLAYTEST 生成或跳过说明
+- [ ] 不发出任何 PROCEED / PIVOT / KILL 结论
+- [ ] 在 `standard` 下，说明的后续步骤选项写为 "add to current sprint"，且 `active.md` 返回当前冲刺状态
 
 ---
 
-### Case 5: Director Gate — CD-PLAYTEST by Review Mode and Pillars
+### Case 5: Director Gate — 按评审模式与游戏支柱决定 CD-PLAYTEST
 
 **Fixture:**
-- A concept prototype has been built and REPORT.md written with a PROCEED
-  recommendation
-- Run A: `--review full`, `design/gdd/game-concept.md` exists with pillars;
-  `creative-director` returns REJECT — the core fantasy is not present; the user,
-  asked PIVOT or KILL, picks PIVOT
-- Run B: `--review full`, neither `game-concept.md` nor `design/game-brief.md` exists
-- Run C: `--review lean`
+- 已构建一个概念原型，且 REPORT.md 已写入，带有 PROCEED
+  建议
+- 运行 A：`--review full`，`design/gdd/game-concept.md` 存在且含游戏支柱；
+  `creative-director` 返回 REJECT——核心幻想不存在；被询问
+  PIVOT 或 KILL 的用户选择 PIVOT
+- 运行 B：`--review full`，`game-concept.md` 与 `design/game-brief.md` 都不存在
+- 运行 C：`--review lean`
 
 **Input:** `/prototype [concept] --review [mode]`
 
 **Expected behavior:**
-1. Run A: `creative-director` is spawned for CD-PLAYTEST with the REPORT.md
-   content, hypothesis and pillars. Its REJECT means the PROCEED recommendation
-   cannot stand: the skill asks the user to choose PIVOT or KILL (it does not pick
-   for them), the user picks PIVOT, and after an ask naming REPORT.md and
-   `prototypes/index.md` the report records the director's verdict and reason and
-   the final PIVOT recommendation; Phase 9 then runs the PIVOT route
-2. Run B: no spawn; note "CD-PLAYTEST skipped — game pillars not yet defined at
+1. 运行 A：为 CD-PLAYTEST 生成 `creative-director`，传入 REPORT.md
+   内容、假设与游戏支柱。其 REJECT 意味着 PROCEED 建议
+   不能成立：技能请用户选择 PIVOT 或 KILL（不替他们
+   选择），用户选择 PIVOT，随后在一次指明 REPORT.md 与
+   `prototypes/index.md` 的询问之后，报告记录总监的结论与理由
+   以及最终的 PIVOT 建议；Phase 9 然后运行 PIVOT 路线
+2. 运行 B：不生成；记录 "CD-PLAYTEST skipped — game pillars not yet defined at
    concept prototype stage."
-3. Run C: no spawn; note "CD-PLAYTEST skipped — Lean mode."
+3. 运行 C：不生成；记录 "CD-PLAYTEST skipped — Lean mode."
 
 **Assertions:**
-- [ ] Run A spawns `creative-director` for CD-PLAYTEST after REPORT.md is written
-- [ ] Run A: the director's verdict is read as one of APPROVE / CONCERNS / REJECT, not as a PROCEED / PIVOT / KILL of its own
-- [ ] Run A: after the REJECT, PROCEED is not kept; the user is asked to choose PIVOT or KILL
-- [ ] Run A's final recommendation is the user's PIVOT, and REPORT.md records it with the director's reason
-- [ ] Run B skips with the "game pillars not yet defined" note instead of spawning without pillars
-- [ ] Run C skips with the Lean-mode note
-- [ ] No other director gate is spawned
+- [ ] 运行 A 在 REPORT.md 写入之后为 CD-PLAYTEST 生成 `creative-director`
+- [ ] 运行 A：总监的结论被读作 APPROVE / CONCERNS / REJECT 之一，而不是它自己的 PROCEED / PIVOT / KILL
+- [ ] 运行 A：REJECT 之后不保留 PROCEED；请用户选择 PIVOT 或 KILL
+- [ ] 运行 A 的最终建议是用户的 PIVOT，且 REPORT.md 连同总监的理由一并记录
+- [ ] 运行 B 以 "game pillars not yet defined" 说明跳过，而不是在没有游戏支柱的情况下生成
+- [ ] 运行 C 以 Lean 模式说明跳过
+- [ ] 不生成任何其他总监闸门
 
 ---
 
-### Case 6: NOT ASSESSED (Unplayed) and the `workflow: minimal` PROCEED Route
+### Case 6: NOT ASSESSED（未游玩）与 `workflow: minimal` 的 PROCEED 路由
 
 **Fixture:**
-- Run A: the prototype was built this session but nobody has played it yet
-- Run B: a PROCEED recommendation, `project.yaml` has `modes.workflow: minimal`
+- 运行 A：原型在本次会话中已构建，但还没有人玩过
+- 运行 B：给出 PROCEED 建议，`project.yaml` 含 `modes.workflow: minimal`
 
 **Input:** `/prototype [concept]`
 
 **Expected behavior:**
-1. Run A: with no fun evidence yet, PROCEED/PIVOT/KILL are all unreachable; the
-   skill reports NOT ASSESSED and stops rather than guessing, naming "play it,
-   then run `/prototype [same concept]` again" as the next step
-2. Run B: Phase 9's PROCEED route offers `/create-stories` (from the brief) then
-   `/dev-story` on the first story, not the GDD/`/map-systems`/`/art-bible` path
+1. 运行 A：由于尚无有趣性证据，PROCEED/PIVOT/KILL 都不可达；
+   技能报告 NOT ASSESSED 并停止，而不是猜测，并把 "play it,
+   then run `/prototype [same concept]` again" 命名为下一步
+2. 运行 B：Phase 9 的 PROCEED 路线提供 `/create-stories`（来自简报），然后
+   在第一个用户故事上提供 `/dev-story`，而不是 GDD/`/map-systems`/`/art-bible` 路径
 
 **Assertions:**
-- [ ] Run A's verdict is NOT ASSESSED, not a guessed PROCEED/PIVOT/KILL
-- [ ] Run A's report and `prototypes/index.md` row both read NOT ASSESSED until a playtest happens
-- [ ] Run B's recommended path is the `workflow: minimal` route (`/create-stories`, `/dev-story`), not the `standard`/`full` GDD pipeline
+- [ ] 运行 A 的结论为 NOT ASSESSED，而不是猜测的 PROCEED/PIVOT/KILL
+- [ ] 在试玩测试发生之前，运行 A 的报告与 `prototypes/index.md` 行都写作 NOT ASSESSED
+- [ ] 运行 B 推荐的路径是 `workflow: minimal` 路线（`/create-stories`、`/dev-story`），而不是 `standard`/`full` 的 GDD 流水线
 
 ---
 
-### Case 7: Spike Mode at `workflow: minimal` — the build order, not a sprint
+### Case 7: Spike Mode at `workflow: minimal` — 构建顺序，而非冲刺
 
 **Fixture:**
-- `project.yaml`: `modes.workflow: minimal` (pinned: this case tests the `minimal`
-  wording, the opposite of Case 4); review mode `full`
-- No `production/sprints/` directory. `design/game-brief.md` lists a build order; the
-  story in progress is `production/epics/core/story-002.md` (`Status: In Progress`),
-  and `production/session-state/active.md` names it as the current task
-- The user answers YES to the spike question
+- `project.yaml`：`modes.workflow: minimal`（已固定：本用例测试 `minimal`
+  措辞，与 Case 4 相反）；评审模式 `full`
+- 没有 `production/sprints/` 目录。`design/game-brief.md` 列出构建顺序；
+  进行中的用户故事是 `production/epics/core/story-002.md`（`Status: In Progress`），
+  且 `production/session-state/active.md` 将其指明为当前任务
+- 用户对 spike 问题回答 YES
 
 **Input:** `/prototype rope-physics --spike`
 
 **Expected behavior:**
-1. The spike runs as in Case 4, with the same asks: the spike folder, then one ask
-   naming `SPIKE-NOTE.md` and `active.md`
-2. `SPIKE-NOTE.md` holds the question tested, the result (YES / NO / PARTIAL) and
-   what to do next: add the mechanic to the brief's build order / investigate
-   further / abandon the idea. It does not offer "add to current sprint"
-3. `active.md` is updated to clear the spike and return to the story in progress
-   (story-002), not to a sprint state
-4. No CD gate and no PROCEED / PIVOT / KILL
+1. spike 按 Case 4 运行，询问相同：先是 spike 文件夹，然后是一次同时
+   指明 `SPIKE-NOTE.md` 与 `active.md` 的询问
+2. `SPIKE-NOTE.md` 包含所测试的问题、结果（YES / NO / PARTIAL）以及
+   下一步该做什么：把该机制加入简报的构建顺序 / 进一步调查 /
+   放弃该想法。它不提供 "add to current sprint"
+3. `active.md` 被更新以清除该 spike 并返回进行中的用户故事
+   （story-002），而不是冲刺状态
+4. 没有 CD 闸门，也没有 PROCEED / PIVOT / KILL
 
 **Assertions:**
-- [ ] The note's next-step options name the brief's build order instead of the current sprint
-- [ ] After the write, `active.md` names story-002 as the current task and no sprint
-- [ ] The spike folder and the note-and-`active.md` write each follow an ask that names the files
-- [ ] No sprint file is created or referenced
-- [ ] No CD-PLAYTEST spawn or skip note and no PROCEED / PIVOT / KILL verdict is issued
+- [ ] 说明的后续步骤选项指明简报的构建顺序，而不是当前冲刺
+- [ ] 写入之后，`active.md` 把 story-002 指明为当前任务，且不提及冲刺
+- [ ] spike 文件夹与说明及 `active.md` 的写入各自都先有一次指明文件的询问
+- [ ] 不创建或引用任何冲刺文件
+- [ ] 没有 CD-PLAYTEST 生成或跳过说明，也不发出任何 PROCEED / PIVOT / KILL 结论
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Confirms intent with `AskUserQuestion` before building (unless `--spike`)
-- [ ] Forms a falsifiable hypothesis and stops if the concept is too vague to form one
-- [ ] Presents the plan and gets confirmation before building
-- [ ] Asks before creating `prototypes/[concept-name]-concept/` and before writing REPORT.md (with its `prototypes/index.md` row), PIVOT-NOTE.md or GRAVEYARD.md
-- [ ] In spike mode, asks before creating the spike folder and before writing `SPIKE-NOTE.md` and `active.md`
-- [ ] Keeps prototype files under `prototypes/`, each with the `PROTOTYPE - NOT FOR PRODUCTION` header in its own comment syntax
-- [ ] Applies the review mode before CD-PLAYTEST and prints the skip note when skipped
-- [ ] Ends with the per-verdict next steps
+- [ ] 在构建之前通过 `AskUserQuestion` 确认意图（除非使用 `--spike`）
+- [ ] 形成可证伪的假设；若概念过于模糊而无法形成假设则停止
+- [ ] 在构建之前呈现计划并获得确认
+- [ ] 在创建 `prototypes/[concept-name]-concept/` 之前，以及在写入 REPORT.md（含其 `prototypes/index.md` 行）、PIVOT-NOTE.md 或 GRAVEYARD.md 之前询问
+- [ ] 在 spike 模式下，在创建 spike 文件夹之前以及在写入 `SPIKE-NOTE.md` 与 `active.md` 之前询问
+- [ ] 把原型文件保留在 `prototypes/` 下，每个都以自身注释语法携带 `PROTOTYPE - NOT FOR PRODUCTION` 头
+- [ ] 在 CD-PLAYTEST 之前应用评审模式，并在跳过时打印跳过说明
+- [ ] 以每种结论对应的后续步骤收尾
 
 ---
 
 ## Coverage Notes
 
-- "Skip — concept already proven" (records the evidence, suggests `/map-systems`
-  or `/design-system`, and stops) is not tested.
-- A concept too vague to form a hypothesis (skill stops and asks the user to
-  narrow it) is covered only by protocol compliance.
-- Reading a prior `PIVOT-NOTE.md` on the next run to seed the revised hypothesis
-  is not tested.
-- The engine-path multi-turn fix loop and the 2-hour sunk-cost rule need a live
-  run to verify.
-- CD-PLAYTEST APPROVE (the recommendation stands), CONCERNS (the user decides:
-  Revise / Accept / Discuss), REJECT on a PIVOT or KILL recommendation (it
-  stands) and NOT ASSESSED (never an approval) are not separately tested.
+- "Skip — concept already proven"（记录证据，建议 `/map-systems`
+  或 `/design-system`，然后停止）未测试。
+- 概念过于模糊而无法形成假设（技能停止并请用户
+  收窄范围）仅由协议合规部分覆盖。
+- 在下一次运行时读取先前的 `PIVOT-NOTE.md` 以播种修订后的假设
+  未测试。
+- Engine 路径的多轮修复循环与 2 小时沉没成本规则需要实际
+  运行才能验证。
+- CD-PLAYTEST 的 APPROVE（建议成立）、CONCERNS（用户决定：
+  Revise / Accept / Discuss）、对 PIVOT 或 KILL 建议的 REJECT（该建议
+  成立）以及 NOT ASSESSED（绝不等同于批准）未单独测试。

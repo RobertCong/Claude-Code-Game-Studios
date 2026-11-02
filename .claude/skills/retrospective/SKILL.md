@@ -1,6 +1,6 @@
 ---
 name: retrospective
-description: "Sprint or milestone retrospective from completed work, velocity, blockers. Actionable insights for the next iteration."
+description: "基于已完成工作、速度和阻塞项生成冲刺或里程碑回顾。为下一个迭代提供可执行的洞察。"
 argument-hint: "[sprint-N|milestone-name]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, AskUserQuestion, Bash(bash "*/.claude/skills/retrospective/../../hooks/yaml-helper.sh" resolve_config *), Bash(git log *)
@@ -9,147 +9,129 @@ model: sonnet
 
 !`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow,qa.level`
 
-# Retrospective
+# 回顾（Retrospective）
 
 
 
-Every `AskUserQuestion` call follows `.claude/docs/automation-modes.md`
-(collaborative asks always · guided major-only · autonomous logs and proceeds;
-`automation_always_ask` categories always prompt).
+每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+（协作模式总是询问 · 引导模式仅大项询问 · 自主模式记录后继续；
+`automation_always_ask` 类别始终提示）。
 
-## Insufficient input — check this before producing any report
+## 输入不足——产出任何报告前先检查
 
-**If the inputs this skill needs do not exist, the answer is "could not run" —
-not a filled-in report.** Check first, and stop if the check fails.
+**如果本技能需要的输入不存在，答案就是"无法运行"——而不是一份填好的报告。** 先检查，检查失败就停止。
 
-1. List the inputs this skill reads (data files, prior reports, profiler output,
-   test results, registries, source code).
-2. For each, record `FOUND` or `ABSENT` — not "assumed present".
-3. If any input required for a section is ABSENT, that section is
-   **`NOT ASSESSED — NO DATA`**. Do not estimate it, do not infer it from an
-   adjacent artifact, and do not leave a mandated cell to be filled by whoever
-   reads the template next.
-4. If **every** required input is ABSENT, stop and report
-   **`NOT ASSESSED — NO DATA`** as the whole verdict, naming what was missing and
-   which skill produces it.
+1. 列出本技能读取的输入（数据文件、既有报告、性能分析输出、
+   测试结果、注册表、源代码）。
+2. 对每项记录 `FOUND` 或 `ABSENT`——而不是"假定存在"。
+3. 若某章节所需的任一输入为 ABSENT，该章节即为
+   **`NOT ASSESSED — NO DATA`**。不要估算它，不要从相邻产出物推断，也不要留下一个强制单元格让模板的下一位读者去填。
+4. 若**所有**必需输入均为 ABSENT，则停止，并将
+   **`NOT ASSESSED — NO DATA`** 作为整体结论输出，说明缺少什么以及由哪个技能产出。
 
-**A verdict of `NOT ASSESSED` is a success.** It is the correct, useful answer to
-"what does the data say?" when there is no data. The failure mode this prevents is
-specific: a report whose verdict enum has no "could not run" state produces
-**false clean passes** — an asset audit returning COMPLIANT on a project with no
-assets and no standards, or a performance profile reporting ">99% headroom against
-a 16.67ms budget" with zero profiler data and no budget ever set.
+**`NOT ASSESSED` 的结论是一种成功。** 当没有数据时，这是对"数据说明了什么？"的正确且有价值的回答。它防止的失败模式很具体：一个结论枚举中没有"无法运行"状态的报告，会产生**虚假的干净通过**——例如对没有资源也没有标准的项目返回 COMPLIANT 的资源审计，或对 16.67ms 预算报告">99% 余量"却零性能分析数据、预算从未设置。
 
-**Absence of evidence is never evidence of absence.** A scan that finds no
-matches because there are no files to scan has not verified anything. Say which of
-the two happened — a reader cannot tell from a green result.
+**证据的缺失从来不是缺失的证据。** 一次扫描因为没有文件可扫而未找到任何匹配，并不代表验证了什么。要说明属于哪种情况——读者无法从一个绿色的结果中分辨。
 
 ---
 
-## Phase 1: Parse Arguments
+## Phase 1: 解析参数
 
-Determine whether this is a sprint retrospective (`sprint-N`) or a milestone retrospective (`milestone-name`).
-
----
-
-## Phase 1b: Check for Existing Retrospective
-
-Before loading any data, glob for an existing retrospective file:
-
-- For sprint retrospectives: `production/retrospectives/retro-[sprint-slug]-*.md`
-  (also check `production/sprints/sprint-[N]-retrospective.md` as an alternate location)
-- For milestone retrospectives: `production/retrospectives/retro-[milestone-name]-*.md`
-
-If a matching file is found, use `AskUserQuestion`:
-- Prompt: "An existing retrospective was found: [filename]. How do you want to proceed?"
-- Options:
-  - `[A] Update existing — load it and add/revise sections with new data`
-  - `[B] Start fresh — generate a new retrospective (archive the old one)`
-
-If [A]: read the existing file and carry its content forward, revising sections with new data.
-If [B]: continue to Phase 2 with a blank slate. Before writing the new file, rename the existing one with a `-archived-[date]` suffix. That rename is a write too: it happens in Phase 5, only once the ask there — which names it — is approved.
+确定这是冲刺回顾（`sprint-N`）还是里程碑回顾（`milestone-name`）。
 
 ---
 
-## Phase 2: Load Sprint or Milestone Data
+## Phase 1b: 检查已有回顾
 
-Read the sprint or milestone plan from the appropriate location:
+在加载任何数据之前，先 glob 查找已有回顾文件：
 
-- Sprint plans: `production/sprints/`
-- Milestone definitions: `production/milestones/`
+- 冲刺回顾：`production/retrospectives/retro-[sprint-slug]-*.md`
+  （同时检查备用位置 `production/sprints/sprint-[N]-retrospective.md`）
+- 里程碑回顾：`production/retrospectives/retro-[milestone-name]-*.md`
 
-**Also check for `production/sprint-status.yaml`**: if it exists, read it alongside the sprint plan. It is the authoritative source for actual story completion status (status: done, completed dates, blockers). Use it as the primary source for completion metrics in Phase 3. Fall back to markdown scanning only if the yaml does not exist. Note discrepancies between the yaml and the sprint plan (e.g., stories in yaml not in plan, or vice versa).
+若找到匹配文件，使用 `AskUserQuestion`：
+- 提示："已找到一份现有回顾：[filename]。你想如何处理？"
+- 选项：
+  - `[A] 更新现有回顾 —— 加载它，并用新数据添加/修订各章节`
+  - `[B] 重新开始 —— 生成一份新回顾（归档旧的那份）`
 
-**If the file does not exist or is empty**, output:
+若选 [A]：读取已有文件并沿用其内容，用新数据修订各章节。
+若选 [B]：以空白状态继续 Phase 2。写入新文件之前，将已有文件重命名为带 `-archived-[date]` 后缀的名字。该重命名同样是一次写入：它在 Phase 5 发生，且只在该处的询问（其中会点名它）获批之后执行。
 
-> "No sprint data found for [sprint/milestone]. Run `/sprint-plan new` to create a
-> sprint (`/sprint-status` only reads one), or provide the sprint details manually."
+---
 
-At `workflow: minimal` (resolved above) there are no sprints: offer to look back over the stories
-closed so far instead (`production/epics/*/story-*.md` with `Status: Complete`).
-At `qa.level: minimal` (resolved above) tests are waived, so a story closed
-without one is not a finding; a Visual/Feel or UI story closed without its
-retained screenshot still is.
+## Phase 2: 加载冲刺或里程碑数据
 
-Then use `AskUserQuestion` to present these options ([C] only at `workflow: minimal`):
+从相应位置读取冲刺或里程碑计划：
 
-- **[A] Provide data manually** — ask the user to paste or describe the sprint
-  tasks, dates, and outcomes; use that as the source of truth for the retrospective.
-- **[B] Stop** — abort the skill. Verdict: **BLOCKED** — no sprint data available.
-- **[C] Look back over the closed stories** — use the stories with
-  `Status: Complete` as the record of what was done.
+- 冲刺计划：`production/sprints/`
+- 里程碑定义：`production/milestones/`
 
-If the user chooses [A], collect the data and continue to Phase 3 using what they provide.
-If the user chooses [B], stop here.
-If the user chooses [C], read those stories and continue to Phase 3. Sections that
-need sprint data (planned vs actual, velocity, carryover, estimation accuracy)
-are `NOT ASSESSED — NO DATA`.
+**同时检查 `production/sprint-status.yaml`**：若存在，与冲刺计划一并读取。它是用户故事实际完成状态（status: done、完成日期、阻塞项）的权威来源。在 Phase 3 中将其作为完成度指标的主要来源。仅在 yaml 不存在时回退到 markdown 扫描。注意 yaml 与冲刺计划之间的差异（例如 yaml 中有而计划中没有的用户故事，或反之）。
 
-Extract: planned tasks, estimated effort, owners, and goals.
+**若文件不存在或为空**，输出：
 
-Run git log for the sprint period to understand what was actually committed and when. Use the Bash tool (which uses Git Bash on Windows — the `2>/dev/null` is bash syntax, not PowerShell):
+> "未找到 [sprint/milestone] 的冲刺数据。运行 `/sprint-plan new` 创建一个
+> 冲刺（`/sprint-status` 只会读取冲刺），或手动提供冲刺详情。"
+
+在 `workflow: minimal`（已在上方解析）下没有冲刺：改为提供回顾迄今已关闭用户故事的选项（`production/epics/*/story-*.md` 且 `Status: Complete`）。
+在 `qa.level: minimal`（已在上方解析）下测试被豁免，因此一个未附测试就关闭的用户故事不算发现项；但一个未附保留截图的视觉/手感或 UI 用户故事仍算。
+
+然后使用 `AskUserQuestion` 呈现这些选项（[C] 仅在 `workflow: minimal` 下）：
+
+- **[A] 手动提供数据** —— 请用户粘贴或描述冲刺
+  任务、日期与结果；将其作为回顾的事实来源。
+- **[B] 停止** —— 中止技能。结论：**BLOCKED** —— 无冲刺数据可用。
+- **[C] 回顾已关闭的用户故事** —— 使用
+  `Status: Complete` 的用户故事作为已完成工作的记录。
+
+若用户选 [A]，收集数据并使用其提供的内容继续 Phase 3。
+若用户选 [B]，在此停止。
+若用户选 [C]，读取这些用户故事并继续 Phase 3。需要冲刺数据的章节（计划 vs 实际、速度、结转、估算准确性）为 `NOT ASSESSED — NO DATA`。
+
+提取：计划任务、估算工作量、负责人与目标。
+
+对冲刺周期运行 git log，以了解实际提交了什么以及何时提交。使用 Bash 工具（Windows 上使用 Git Bash——`2>/dev/null` 是 bash 语法，不是 PowerShell）：
 
 ```
 Bash: git log --oneline --since="4 weeks ago" 2>/dev/null || git log --oneline -20
 ```
 
-Adjust the `--since` date to match the sprint duration if known from the sprint plan.
+若从冲刺计划中已知冲刺时长，相应调整 `--since` 日期。
 
 ---
 
-## Phase 3: Analyze Completion and Trends
+## Phase 3: 分析完成情况与趋势
 
-Scan for completed and incomplete tasks by comparing the plan against actual deliverables. Check for:
+通过对比计划与实际交付物，扫描已完成与未完成的任务。检查：
 
-- Tasks completed as planned
-- Tasks completed but modified from the plan
-- Tasks carried over (not completed)
-- Tasks added mid-sprint (unplanned work)
-- Tasks removed or descoped
+- 按计划完成的任务
+- 完成但偏离计划的任务
+- 结转的任务（未完成）
+- 冲刺中期新增的任务（计划外工作）
+- 被移除或缩减范围的任务
 
-Every story with `status: blocked` in `production/sprint-status.yaml` goes under
-Blockers Encountered, with its `blocker` field as the Blocker, and gets an action
-item in Action Items for Next Iteration.
+`production/sprint-status.yaml` 中每个 `status: blocked` 的用户故事都归入
+Blockers Encountered，以其 `blocker` 字段作为 Blocker，并在 Action Items for Next Iteration 中生成一个行动项。
 
-Scan the codebase for TODO/FIXME trends:
+扫描代码库中的 TODO/FIXME 趋势：
 
-- Count current TODO/FIXME/HACK comments
-- Compare to previous sprint counts if available (check previous retrospectives)
-- Note whether technical debt is growing or shrinking
+- 统计当前 TODO/FIXME/HACK 注释
+- 如可用，与之前冲刺的计数对比（查看既往回顾）
+- 记录技术债是在增长还是缩减
 
-Read previous retrospectives (if any) from `production/retrospectives/` to check:
+读取 `production/retrospectives/` 中的既往回顾（若有）以检查：
 
-- Were previous action items addressed?
-- Are the same problems recurring?
-- How has velocity trended?
+- 之前的行动项是否已处理？
+- 是否反复出现同样的问题？
+- 速度趋势如何？
 
-With no earlier sprint or retrospective, Velocity Trend keeps only the current
-sprint's row and reads `NOT ASSESSED — NO DATA`, and Previous Action Items
-Follow-Up is that one line — no invented earlier rows, no empty table.
+若没有更早的冲刺或回顾，Velocity Trend 只保留当前冲刺那一行并读作
+`NOT ASSESSED — NO DATA`，Previous Action Items Follow-Up 就是那一行——不编造更早的行，不留空表。
 
 ---
 
-## Phase 4: Generate the Retrospective
+## Phase 4: 生成回顾
 
 ```markdown
 ## Retrospective: [Sprint N / Milestone Name]
@@ -245,43 +227,41 @@ the single most important thing to change going forward?]
 
 ---
 
-## Phase 5: Save Retrospective
+## Phase 5: 保存回顾
 
-Present the retrospective and top findings to the user (completion rate, velocity trend, top blocker, most important action item).
+向用户展示回顾与主要发现（完成率、速度趋势、最大阻塞项、最重要的行动项）。
 
-Ask: "May I write this to `production/retrospectives/retro-sprint-[N]-[date].md`?" (or `production/retrospectives/retro-[milestone-name]-[date].md` for milestone retrospectives)
+询问："我可以把它写入 `production/retrospectives/retro-sprint-[N]-[date].md` 吗？"（里程碑回顾则为 `production/retrospectives/retro-[milestone-name]-[date].md`）
 
-After Start fresh in Phase 1b, the same ask also names the rename: "…and rename
-`[old file]` to `[old file name]-archived-[date].md`?" On yes, rename first, then
-write; on no, neither happens.
+在 Phase 1b 选择 Start fresh 之后，同一询问还会点名重命名："……并将
+`[old file]` 重命名为 `[old file name]-archived-[date].md`？" 若选是，先重命名，再写入；若选否，两者都不发生。
 
-If yes, write the file, creating the `production/retrospectives/` directory if needed. Verdict: **COMPLETE** — retrospective saved.
+若选是，写入文件，必要时创建 `production/retrospectives/` 目录。结论：**COMPLETE** —— 回顾已保存。
 
-If no, stop here. Verdict: **BLOCKED** — user declined write.
+若选否，在此停止。结论：**BLOCKED** —— 用户拒绝写入。
 
 ---
 
-## Phase 6: Next Steps
+## Phase 6: 后续步骤
 
-At `workflow: minimal` (resolved above), which has no sprints, skip this question:
-point to the retrospective file and say its action items go into the brief's build
-order.
+在 `workflow: minimal`（已在上方解析）下没有冲刺，跳过此问题：
+指向回顾文件，并说明其行动项进入简报的构建顺序。
 
-Otherwise, use `AskUserQuestion`:
-- Prompt: "Retrospective complete. The action items and velocity data are ready. Would you like to start sprint planning now with this data pre-loaded?"
-- Options:
-  - `[A] Yes — open sprint planning with retro action items and velocity delta pre-populated`
-  - `[B] No — I'll reference the retrospective file manually when I'm ready`
+否则，使用 `AskUserQuestion`：
+- 提示："回顾已完成。行动项与速度数据已就绪。你希望现在带着这些数据开始冲刺规划吗？"
+- 选项：
+  - `[A] 是 —— 打开冲刺规划，预先填入回顾行动项与速度变化`
+  - `[B] 否 —— 我准备好时会手动参考回顾文件`
 
-If the user selects [A]: Proceed to invoke `/sprint-plan new`, passing the retrospective file path and a summary of the action items and velocity change so the sprint planner can reference them.
+若用户选 [A]：继续调用 `/sprint-plan new`，传入回顾文件路径以及行动项与速度变化的摘要，以便冲刺规划器参考。
 
-- If this was a milestone retrospective, run `/gate-check` to formally assess readiness for the next phase.
+- 若这是里程碑回顾，运行 `/gate-check` 以正式评估下一阶段的准备情况。
 
-### Guidelines
+### 指南（Guidelines）
 
-- Be honest and specific. Vague retrospectives ("communication could be better") produce vague improvements. Use data and examples.
-- Focus on systemic issues, not individual blame.
-- Limit action items to 3-5. More than that dilutes focus.
-- Every action item must have an owner and a deadline.
-- Check whether previous action items were completed. Recurring unaddressed items are a process smell.
-- If this is a milestone retrospective, also evaluate whether the milestone goals were achieved and what that means for the overall project timeline.
+- 诚实且具体。含糊的回顾（"沟通可以更好"）会产生含糊的改进。使用数据与示例。
+- 关注系统性问题，而非个人追责。
+- 行动项限制在 3-5 个。再多会分散焦点。
+- 每个行动项必须有负责人与截止日期。
+- 检查之前的行动项是否已完成。反复出现未处理的项是流程异味。
+- 若这是里程碑回顾，还要评估里程碑目标是否达成，以及这对整体项目时间线意味着什么。

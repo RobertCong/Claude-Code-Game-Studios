@@ -1,7 +1,7 @@
 # Sprint [N] — [Start Date] to [End Date]
 
 ## Sprint Goal
-[One sentence describing what this sprint achieves toward the milestone]
+[用一句话描述本冲刺为里程碑达成了什么]
 
 ## Goal Prerequisites
 | Needed to show the goal | Status |
@@ -14,7 +14,7 @@
 
 ## Capacity
 - Total days: [X]
-- Buffer (20%): [Y days reserved for unplanned work]
+- Buffer (20%): [Y 天预留给计划外工作]
 - Available: [Z days]
 
 ## Tasks
@@ -40,15 +40,15 @@
 |------|------------|--------|------------|
 
 ## Dependencies on External Factors
-- [List any external dependencies]
+- [列出任何外部依赖]
 
 ## Definition of Done for this Sprint
-- [ ] All Must Have tasks completed
-- [ ] All tasks pass acceptance criteria
-- [ ] QA plan exists (`production/qa/qa-plan-[sprint-slug]-[date].md`, from `/qa-plan sprint`)
-- [ ] All Logic/Integration stories have passing unit/integration tests
-- [ ] Smoke check passed (`/smoke-check sprint`)
-- [ ] QA sign-off report: APPROVED or APPROVED WITH CONDITIONS (`/team-qa sprint`)
-- [ ] No S1 or S2 bugs in delivered features
-- [ ] Design documents updated for any deviations
-- [ ] Code reviewed and merged
+- [ ] 所有 Must Have 任务已完成
+- [ ] 所有任务通过验收标准
+- [ ] QA 计划已存在（`production/qa/qa-plan-[sprint-slug]-[date].md`，来自 `/qa-plan sprint`）
+- [ ] 所有 Logic/Integration 故事都有通过的单元/集成测试
+- [ ] 冒烟检查已通过（`/smoke-check sprint`）
+- [ ] QA 签署报告：APPROVED 或 APPROVED WITH CONDITIONS（`/team-qa sprint`）
+- [ ] 交付功能中没有 S1 或 S2 缺陷
+- [ ] 设计文档已针对任何偏差更新
+- [ ] 代码已评审并合并

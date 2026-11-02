@@ -2,253 +2,223 @@
 
 ## Skill Summary
 
-`/regression-suite [update | audit | report]` maintains `tests/regression-suite.md`,
-a curated manifest of existing tests that guard critical paths and fixed bugs.
-`audit` maps each GDD acceptance criterion (scoped by workflow tier) to tests in
-`tests/unit/[system]/` and `tests/integration/[system]/` as COVERED / PARTIAL /
-MISSING / EXEMPT, raising MISSING formula or state-machine criteria to HIGH
-PRIORITY. `update` checks bugs in `production/qa/bugs/` with `Status: Closed` or
-`Status: Fixed` for a regression test (HAS / MISSING REGRESSION TEST) and appends
-new manifest entries without removing any. `report` is read-only. All modes
-check for coverage drift.
+`/regression-suite [update | audit | report]` 维护 `tests/regression-suite.md`，这是一份精选清单，登记用于守护关键路径和已修复缺陷的现有测试。`audit` 将每条 GDD 验收标准（按工作流层级限定范围）映射到 `tests/unit/[system]/` 和 `tests/integration/[system]/` 中的测试，标记为 COVERED / PARTIAL / MISSING / EXEMPT，并将缺失的公式或状态机标准提升为 HIGH PRIORITY。`update` 检查 `production/qa/bugs/` 中 `Status: Closed` 或 `Status: Fixed` 的缺陷是否有回归测试（HAS / MISSING REGRESSION TEST），并在不移除任何条目的情况下追加新的清单条目。`report` 为只读。所有模式都会检查覆盖率漂移。
 
-At `qa.level: minimal` the skill stops before any scan with "Regression suite
-not generated at qa.level minimal". With zero critical paths or zero test files
-it reports `Coverage: NOT ASSESSED — [no GDDs found | no test files found]`
-instead of a percentage. Before writing it asks "May I write/update
-`tests/regression-suite.md` with the current regression suite manifest?".
-Verdict, first match: **NOT ASSESSED** at the `qa.level: minimal` stop or when
-coverage was not computed (never COMPLETE over a missing figure, even after a
-write), **BLOCKED** if the user declines the write, **COMPLETE** after the
-write — or, in read-only `report` mode, once the report is shown. `qa.level`
-also sets timing — the suite is due at Polish-stage entry at `standard` and at
-Production-stage entry at `full` — so each fixture pins `project.stage`. No
-director gates apply.
+在 `qa.level: minimal` 下，技能会在任何扫描之前停止，并输出 "Regression suite not generated at qa.level minimal"。当关键路径为零或测试文件为零时，它报告 `Coverage: NOT ASSESSED — [no GDDs found | no test files found]`，而不是给出百分比。写入前它会询问 "May I write/update `tests/regression-suite.md` with the current regression suite manifest?"。结论按首个匹配项：在 `qa.level: minimal` 停止处或覆盖率未计算时为 **NOT ASSESSED**（即使已写入，也绝不基于缺失的数字给出 COMPLETE），用户拒绝写入时为 **BLOCKED**，写入后为 **COMPLETE**——或者在只读 `report` 模式下，报告展示完毕即为 COMPLETE。`qa.level` 还决定时机——在 `standard` 下套件应在进入 Polish 阶段时完成，在 `full` 下应在进入 Production 阶段时完成——因此每个 fixture 都固定了 `project.stage`。不适用任何总监闸门。
 
 ---
 
 ## Static Assertions (Structural)
 
-Checked against the SKILL.md by `/skill-test spec` — no fixture needed.
+由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] Has required frontmatter fields: `name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`
-- [ ] Has ≥2 phase headings
-- [ ] Contains verdict keywords: COMPLETE, BLOCKED, NOT ASSESSED
-- [ ] Contains "May I write" language before writing `tests/regression-suite.md`
-- [ ] Has a next-step handoff (`/test-helpers` for HIGH gaps, `/regression-suite audit` on drift, `/test-flakiness` for quarantined tests)
+- [ ] 具备必需的前置元数据字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 至少有 ≥2 个阶段标题
+- [ ] 包含结论关键词：COMPLETE、BLOCKED、NOT ASSESSED
+- [ ] 在写入 `tests/regression-suite.md` 前包含 "May I write" 用语
+- [ ] 具备下一步交接（HIGH 缺口用 `/test-helpers`，发生漂移时用 `/regression-suite audit`，被隔离的测试用 `/test-flakiness`）
 
 ---
 
 ## Director Gate Checks
 
-None. `/regression-suite` is a QA utility. It spawns no agents (`Agent` is not
-in its allowed tools) and no director gates apply.
+无。`/regression-suite` 是一个 QA 工具。它不生成任何代理（`Agent` 不在其允许工具中），且不适用任何总监闸门。
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非某个用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且不存在 `project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
 
 ---
 
 ## Test Cases
 
-### Case 1: Audit — Criteria Mapped, Formula Gap Raised to HIGH
+### Case 1: 审计 — 标准已映射，公式缺口提升为 HIGH
 
 **Fixture:**
-- `qa.level: standard`; workflow tier `full`; `project.stage: Polish`
-- `design/gdd/systems-index.md` lists `combat`; `design/gdd/combat.md` has 4
-  acceptance criteria: a damage formula, a hit-stun state transition, a
-  knockback rule and a HUD damage-number display
-- `tests/unit/combat/` has tests for hit-stun (all cases) and knockback (happy
-  path only); nothing tests the damage formula
-- `tests/regression-suite.md` exists
+- `qa.level: standard`；工作流层级 `full`；`project.stage: Polish`
+- `design/gdd/systems-index.md` 列出 `combat`；`design/gdd/combat.md` 有 4
+  条验收标准：一条伤害公式、一次受击硬直状态转换、一条击退规则
+  以及 HUD 伤害数字显示
+- `tests/unit/combat/` 有针对受击硬直（所有用例）和击退（仅正常路径）
+  的测试；没有任何测试覆盖伤害公式
+- `tests/regression-suite.md` 存在
 
 **Input:** `/regression-suite audit`
 
 **Expected behavior:**
-1. Skill reads the existing manifest, globs the test inventory and reads the
-   combat GDD's critical paths
-2. Coverage: hit-stun COVERED, knockback PARTIAL, damage formula MISSING, HUD
-   display EXEMPT (UI, not automatable)
-3. The missing damage formula is raised to a HIGH PRIORITY gap with a suggested
-   test file path
-4. The report shows the per-system table and a non-exempt coverage rate
-5. Skill asks "May I write/update `tests/regression-suite.md` with the current
-   regression suite manifest?"; on approval audit rewrites the full manifest
-6. Verdict is COMPLETE; for the HIGH gap it suggests `/test-helpers`
+1. 技能读取现有清单，glob 测试清单，并读取 combat GDD 的关键路径
+2. 覆盖率：受击硬直 COVERED，击退 PARTIAL，伤害公式 MISSING，HUD
+   显示 EXEMPT（UI，无法自动化）
+3. 缺失的伤害公式被提升为 HIGH PRIORITY 缺口，并给出建议的
+   测试文件路径
+4. 报告展示按系统的表格以及非豁免覆盖率
+5. 技能询问 "May I write/update `tests/regression-suite.md` with the current
+   regression suite manifest?"；获批后 audit 重写完整清单
+6. 结论为 COMPLETE；针对 HIGH 缺口建议使用 `/test-helpers`
 
 **Assertions:**
-- [ ] Each criterion gets one of COVERED / PARTIAL / MISSING / EXEMPT, matching the fixture
-- [ ] The HUD criterion is EXEMPT and excluded from the coverage rate
-- [ ] The damage-formula gap is HIGH PRIORITY with a `tests/unit/combat/` path
-- [ ] The manifest is written only after the "May I write/update" ask
-- [ ] Verdict is COMPLETE and `/test-helpers` is suggested
+- [ ] 每条标准都得到 COVERED / PARTIAL / MISSING / EXEMPT 之一，且与 fixture 相符
+- [ ] HUD 标准为 EXEMPT，且不计入覆盖率
+- [ ] 伤害公式缺口为 HIGH PRIORITY，并带有 `tests/unit/combat/` 路径
+- [ ] 只有在 "May I write/update" 询问之后才写入清单
+- [ ] 结论为 COMPLETE，并建议使用 `/test-helpers`
 
 ---
 
-### Case 2: Update — Fixed Bug Without a Regression Test
+### Case 2: 更新 — 已修复缺陷缺少回归测试
 
 **Fixture:**
-- `qa.level: standard`; `modes.workflow: standard` (pinned: unset resolves to minimal, where the next-sprint wording does not apply); `project.stage: Polish`
-- `production/sprints/sprint-007.md` is the current sprint plan; its one
-  `Status: Complete` story is `production/epics/inventory/story-003.md`
-- `production/qa/bugs/BUG-0012.md` has `Status: Closed`, system `inventory`
-- No test under `tests/unit/inventory/` or `tests/integration/inventory/`
-  references BUG-0012 or its failure scenario
-- `tests/regression-suite.md` has 6 registered tests
+- `qa.level: standard`；`modes.workflow: standard`（固定：未设置时会解析为 minimal，此时下一冲刺的措辞不适用）；`project.stage: Polish`
+- `production/sprints/sprint-007.md` 是当前冲刺计划；其中唯一一个
+  `Status: Complete` 的用户故事是 `production/epics/inventory/story-003.md`
+- `production/qa/bugs/BUG-0012.md` 的 `Status: Closed`，系统为 `inventory`
+- `tests/unit/inventory/` 或 `tests/integration/inventory/` 下没有任何测试
+  引用 BUG-0012 或其失败场景
+- `tests/regression-suite.md` 已登记 6 个测试
 
 **Input:** `/regression-suite update`
 
 **Expected behavior:**
-1. Skill reads the sprint plan's completed stories and the closed bugs
-2. BUG-0012 is MISSING REGRESSION TEST, with suggested path
-   `tests/unit/inventory/[bug-slug]_regression_test.[ext]` and the note
+1. 技能读取冲刺计划中已完成的用户故事以及已关闭的缺陷
+2. BUG-0012 为 MISSING REGRESSION TEST，建议路径为
+   `tests/unit/inventory/[bug-slug]_regression_test.[ext]`，并附注
    "Without this test, this bug can silently return in a future sprint."
-3. Report shows the Bug Regression Coverage table with BUG-0012 marked NO
-4. After the "May I write/update" ask, new entries are appended with targeted
-   `Edit` insertions; the 6 existing entries remain
-5. Skill says the next sprint should include a story to write the missing test;
-   verdict COMPLETE
+3. 报告展示 Bug Regression Coverage 表格，BUG-0012 标记为 NO
+4. 在 "May I write/update" 询问之后，通过有针对性的 `Edit` 插入追加新条目；
+   6 条现有条目保持不变
+5. 技能说明下一冲刺应包含一个编写缺失测试的用户故事；
+   结论为 COMPLETE
 
 **Assertions:**
-- [ ] BUG-0012 is reported as MISSING REGRESSION TEST
-- [ ] The suggested path follows `tests/unit/[system]/[bug-slug]_regression_test.[ext]`
-- [ ] No existing manifest entry is removed
-- [ ] The next-sprint story recommendation appears because bug regression gaps > 0
-- [ ] Verdict is COMPLETE after approval
+- [ ] BUG-0012 被报告为 MISSING REGRESSION TEST
+- [ ] 建议路径遵循 `tests/unit/[system]/[bug-slug]_regression_test.[ext]`
+- [ ] 不移除任何现有清单条目
+- [ ] 由于缺陷回归缺口 > 0，出现下一冲刺用户故事的建议
+- [ ] 获批后结论为 COMPLETE
 
 ---
 
-### Case 3: qa.level minimal — Suite Not Generated
+### Case 3: qa.level minimal — 不生成套件
 
 **Fixture:**
 - `qa.level: minimal`
-- GDDs and test files exist
+- 存在 GDD 和测试文件
 
 **Input:** `/regression-suite audit`
 
 **Expected behavior:**
-1. The early `qa.level` guard fires before any scan
-2. Skill reports "Regression suite not generated at qa.level minimal" and stops
-3. It does not fall into the workflow-tier `minimal` branch (smoke-report scope)
-4. Verdict is NOT ASSESSED — the first rule of the verdict list
+1. 早期 `qa.level` 守卫在任何扫描之前触发
+2. 技能报告 "Regression suite not generated at qa.level minimal" 并停止
+3. 它不会落入工作流层级的 `minimal` 分支（冒烟报告范围）
+4. 结论为 NOT ASSESSED——结论列表的第一条规则
 
 **Assertions:**
-- [ ] The "not generated at qa.level minimal" message is shown
-- [ ] No GDD, test or bug scan runs
-- [ ] The smoke-report branch is not entered on account of `qa.level`
-- [ ] Nothing is written and no "May I write" ask appears
-- [ ] Verdict is NOT ASSESSED — not COMPLETE, and not a stop without a verdict
+- [ ] 显示 "not generated at qa.level minimal" 消息
+- [ ] 不运行任何 GDD、测试或缺陷扫描
+- [ ] 不因 `qa.level` 进入冒烟报告分支
+- [ ] 不写入任何内容，也不出现 "May I write" 询问
+- [ ] 结论为 NOT ASSESSED——不是 COMPLETE，也不是没有结论的停止
 
 ---
 
-### Case 4: Edge Case — No Test Files, Coverage NOT ASSESSED
+### Case 4: 边界情况 — 无测试文件，覆盖率为 NOT ASSESSED
 
 **Fixture:**
-- `qa.level: standard`; workflow tier `full`; `project.stage: Polish`
-- `design/gdd/` holds GDDs with acceptance criteria
-- `tests/unit/`, `tests/integration/` and `tests/regression/` contain no files
-- The user approves the manifest write
+- `qa.level: standard`；工作流层级 `full`；`project.stage: Polish`
+- `design/gdd/` 中有带验收标准的 GDD
+- `tests/unit/`、`tests/integration/` 和 `tests/regression/` 中没有任何文件
+- 用户批准写入清单
 
 **Input:** `/regression-suite audit`
 
 **Expected behavior:**
-1. The test globs return zero files
-2. Skill does not emit a coverage percentage
-3. It reports `Coverage: NOT ASSESSED — no test files found`, naming the empty
-   side and `/test-setup` as the skill that produces the test scaffold
-4. The manifest is written only after the "May I write/update" ask
-5. Verdict is NOT ASSESSED — the first match, even though the write happened
+1. 测试 glob 返回零个文件
+2. 技能不给出覆盖率百分比
+3. 它报告 `Coverage: NOT ASSESSED — no test files found`，指明为空的一侧
+   以及负责生成测试脚手架的 `/test-setup`
+4. 只有在 "May I write/update" 询问之后才写入清单
+5. 结论为 NOT ASSESSED——首个匹配项，即使已经写入
 
 **Assertions:**
-- [ ] No `0%` (or any percentage) coverage figure is reported
-- [ ] Coverage reads `NOT ASSESSED — no test files found`
-- [ ] `/test-setup` is named as the producing skill
-- [ ] Any manifest write still requires the "May I write/update" ask
-- [ ] Verdict is NOT ASSESSED — never COMPLETE over a coverage figure that was not computed
+- [ ] 不报告 `0%`（或任何百分比）覆盖率数字
+- [ ] 覆盖率显示为 `NOT ASSESSED — no test files found`
+- [ ] 指明 `/test-setup` 是负责生成的技能
+- [ ] 任何清单写入仍需先进行 "May I write/update" 询问
+- [ ] 结论为 NOT ASSESSED——绝不基于未计算的覆盖率数字给出 COMPLETE
 
 ---
 
-### Case 5: Director Gate Check — None; Report Mode Is Read-Only
+### Case 5: 总监闸门检查 — 无；报告模式为只读
 
 **Fixture:**
-- `qa.level: standard`; `project.stage: Polish`
-- `tests/regression-suite.md`, tests and closed bugs exist
-- Any review mode
+- `qa.level: standard`；`project.stage: Polish`
+- 存在 `tests/regression-suite.md`、测试和已关闭缺陷
+- 任意评审模式
 
 **Input:** `/regression-suite report`
 
 **Expected behavior:**
-1. Skill produces the Regression Suite Status report in conversation
-2. No director or other agent is spawned; no gate IDs appear
-3. `report` mode writes nothing and asks no write question
+1. 技能在对话中生成 Regression Suite Status 报告
+2. 不生成任何总监或其他代理；不出现闸门 ID
+3. `report` 模式不写入任何内容，也不询问是否写入
 
 **Assertions:**
-- [ ] No director gate is invoked and no gate skip message appears
-- [ ] No subagent is spawned
-- [ ] The status report is shown in conversation
-- [ ] No file is written and no "May I write" ask appears
+- [ ] 未调用任何总监闸门，也不出现闸门跳过消息
+- [ ] 不生成任何子代理
+- [ ] 状态报告在对话中展示
+- [ ] 不写入任何文件，也不出现 "May I write" 询问
 
 ---
 
-### Case 6: Workflow Minimal With a Writing QA Level — "Next story" wording, gate requirement only at full
+### Case 6: 工作流 minimal 配合可写 QA 级别 — "Next story" 措辞，仅 full 下要求闸门
 
 **Fixture:**
-- `project.yaml`: `modes.workflow: minimal` (no sprints), `qa.level: standard` (pinned so the suite is generated), `project.stage: Polish`
-- No sprint plan; `design/game-brief.md` exists. `production/epics/inventory/story-003.md` has `Status: Complete`, and `tests/` holds no test for the inventory system
-- `production/qa/bugs/BUG-0012.md` has `Status: Closed`, system `inventory`; no test references it
-- `tests/regression-suite.md` exists with 6 registered tests and an old Last Updated date
+- `project.yaml`：`modes.workflow: minimal`（无冲刺），`qa.level: standard`（固定此项以便生成套件），`project.stage: Polish`
+- 无冲刺计划；存在 `design/game-brief.md`。`production/epics/inventory/story-003.md` 的 `Status: Complete`，且 `tests/` 中没有针对 inventory 系统的测试
+- `production/qa/bugs/BUG-0012.md` 的 `Status: Closed`，系统为 `inventory`；没有测试引用它
+- `tests/regression-suite.md` 存在，已登记 6 个测试，且 Last Updated 日期较旧
 
 **Input:** `/regression-suite update`
 
 **Expected behavior:**
-1. The `qa.level` guard does not fire (`standard`); `update` mode is tier-independent, so it reads the completed stories and closed bugs
-2. BUG-0012 is MISSING REGRESSION TEST; the completed inventory story with no test and the stale manifest are reported as coverage drift
-3. After the "May I write/update" ask and the write, the follow-up lines say "next story" where they would say "next sprint": the missing tests belong in the next story, and the drift line suggests running `/regression-suite audit` at the next story boundary
-4. The gaps are described as advisory; the skill does not say `/gate-check` needs the suite at this `qa.level`
-5. Verdict COMPLETE
+1. `qa.level` 守卫不触发（`standard`）；`update` 模式与层级无关，因此它会读取已完成的用户故事和已关闭缺陷
+2. BUG-0012 为 MISSING REGRESSION TEST；没有测试的已完成 inventory 用户故事和过期清单被报告为覆盖率漂移
+3. 在 "May I write/update" 询问和写入之后，后续行在原本会说 "next sprint" 的地方说 "next story"：缺失的测试应放入下一个用户故事，漂移提示建议在下一个用户故事边界运行 `/regression-suite audit`
+4. 缺口被描述为建议性的；技能不会说 `/gate-check` 在此 `qa.level` 下需要该套件
+5. 结论为 COMPLETE
 
 **Assertions:**
-- [ ] The bug-gap line and the drift line say "next story" (or "story boundary") and the word "sprint" is not used for scheduling them
-- [ ] The HIGH-priority line, when a HIGH gap exists, also says "next story", not "next sprint"
-- [ ] The gaps are presented as advisory; `/gate-check` is not said to require the suite at `qa.level: standard`
-- [ ] No existing manifest entry is removed and the write follows the "May I write/update" ask
-- [ ] Verdict is COMPLETE
+- [ ] 缺陷缺口行和漂移行说 "next story"（或 "story boundary"），且不使用 "sprint" 一词来安排它们
+- [ ] 当存在 HIGH 缺口时，HIGH 优先级行也说 "next story"，而不是 "next sprint"
+- [ ] 缺口以建议性方式呈现；未声称 `/gate-check` 在 `qa.level: standard` 下需要该套件
+- [ ] 不移除任何现有清单条目，且写入遵循 "May I write/update" 询问
+- [ ] 结论为 COMPLETE
 
-**Case 6b — `qa.level: full`:** the same fixture with `qa.level: full` and `project.stage: Production`.
+**Case 6b — `qa.level: full`：** 相同 fixture，但 `qa.level: full` 且 `project.stage: Production`。
 
 **Assertions (6b):**
-- [ ] The wording is still "next story"
-- [ ] The output says phase gates require the regression suite at `qa.level: full`, so the gaps are not just advisory there
+- [ ] 措辞仍为 "next story"
+- [ ] 输出说明在 `qa.level: full` 下阶段闸门需要回归套件，因此那里的缺口不只是建议性的
 
 ---
 
 ## Protocol Compliance
 
-- [ ] At `workflow: minimal` the follow-up lines say "next story" in place of "next sprint"
-- [ ] Stops before scanning at `qa.level: minimal`
-- [ ] Reports `NOT ASSESSED` instead of a percentage when GDDs or tests are absent
-- [ ] Asks "May I write/update `tests/regression-suite.md`" before any write
-- [ ] `update` only appends; existing manifest entries are never removed without approval
-- [ ] `report` writes nothing
-- [ ] Verdict, first match: NOT ASSESSED at the `qa.level: minimal` stop or when coverage was not computed (even after a write); else BLOCKED if the user declines the write; else COMPLETE
+- [ ] 在 `workflow: minimal` 下，后续行用 "next story" 代替 "next sprint"
+- [ ] 在 `qa.level: minimal` 下于扫描前停止
+- [ ] 当 GDD 或测试缺失时，报告 `NOT ASSESSED` 而不是百分比
+- [ ] 在任何写入之前询问 "May I write/update `tests/regression-suite.md`"
+- [ ] `update` 只追加；未经批准绝不移除现有清单条目
+- [ ] `report` 不写入任何内容
+- [ ] 结论按首个匹配项：在 `qa.level: minimal` 停止处或覆盖率未计算时（即使已写入）为 NOT ASSESSED；否则若用户拒绝写入为 BLOCKED；否则为 COMPLETE
 
 ---
 
 ## Coverage Notes
 
-- No-argument behaviour (runs `update` when a sprint is clearly active, else
-  asks A/B/C) is not tested.
-- Case 6 covers the workflow-`minimal` wording in `update` mode; at that tier
-  `audit` maps coverage against the latest
-  `production/qa/smoke-*.md` report instead of GDD criteria, and stops if none
-  exists; not separately tested.
-- Coverage-drift detection is exercised only through Case 6's completed story
-  without tests and stale manifest date; the new-system and revised-GDD
-  indicators have no dedicated case.
-- The skill does not run tests; it maps criteria and bugs to test files by name.
+- 未测试无参数行为（冲刺明显活跃时运行 `update`，否则询问 A/B/C）。
+- Case 6 覆盖了 `update` 模式下工作流 `minimal` 的措辞；在该层级下，`audit` 会对照最新的 `production/qa/smoke-*.md` 报告映射覆盖率，而不是 GDD 标准，并在不存在此类报告时停止；未单独测试。
+- 覆盖率漂移检测仅通过 Case 6 中无测试的已完成用户故事和过期清单日期进行检验；新系统和 GDD 修订指标没有专门用例。
+- 技能不运行测试；它按名称将标准和缺陷映射到测试文件。

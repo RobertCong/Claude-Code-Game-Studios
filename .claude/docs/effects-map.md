@@ -2,80 +2,71 @@
 
 > ## READ ONE SECTION, NEVER THIS WHOLE FILE
 >
-> This document is very large, far more than any one lookup needs. It is
-> organised as one section per setting, headed `## <key>`, so a reader can take
-> only the section it wants.
+> 本文档篇幅很大，远超任何单次查询所需。它按「每个设置一节」组织，每节标题为
+> `## <key>`，因此读者可以只取自己需要的那一节。
 >
-> **So opening it whole costs many times what you need.** To look up a setting:
+> **所以整篇打开的成本是你实际所需的许多倍。** 要查询某个设置，请这样做：
 >
 > ```
 > Grep pattern="^## modes.review_mode" path=".claude/docs/effects-map.md" -A 40
 > ```
 >
-> Read the section for your key and stop. The same rule the skills already apply
-> to their own reference files — `/gate-check` loads only the row for the target
-> phase and says "never load the others" — applies here, and this is the largest
-> file in the framework.
+> 读取你所需键对应的那一节，然后停下。技能们对自己的参考文件早已应用同一条规则——
+> `/gate-check` 只加载目标阶段的那一行，并声明"绝不加载其他行"——这里同样适用，
+> 而且这是整个框架中最大的文件。
 >
-> Cite a section of this document, never the whole file. A pointer such as "see
-> effects-map.md for full schema" invites a full read of a file this size, and
-> the cost of accepting that invitation is silent. Name the `## <key>` section
-> you need instead.
+> 引用本文档的某一节，绝不要引用整篇。诸如"参见 effects-map.md 了解完整 schema"
+> 这类指引会诱使对方完整读取如此体量的文件，而接受这一邀请的代价是无声的。请改为
+> 指名你需要的 `## <key>` 小节。
 
-This document defines what each `project.yaml` setting actually does across
-every skill that reads it. It is the tracked, authoritative reference.
+本文档说明每个 `project.yaml` 设置在读取它的所有技能中实际起什么作用。它是纳入
+版本跟踪的权威参考。
 
-**Purpose:** When a skill reads a setting, this document is the authoritative
-source for what each value means for that skill's behavior. Implementers update
-this file when adding a new setting or changing how a skill responds to one.
+**用途：** 当技能读取某个设置时，本文档是关于每个取值对该技能行为意味着什么的
+权威来源。实现在新增设置或改变技能对某个设置的响应方式时，应更新本文件。
 
-**Format per setting:**
-- Priority chain — which source wins when multiple are present
-- Per-value intent — what the value means in plain terms
-- Skill behavior table — exactly what changes per skill per value
+**每个设置的格式：**
+- 优先级链——多个来源同时存在时哪个来源胜出
+- 各取值意图——用平实语言说明该取值的含义
+- 技能行为表——每个技能在每个取值下究竟会发生什么变化
 
-**Coverage scope:** This document covers the skills most affected by each setting.
-Skills not listed (e.g. `ux-review`, `balance-check`, `test-flakiness`, `test-helpers`,
-`test-setup`, `soak-test`, `perf-profile`, `launch-checklist`, `release-checklist`,
-`skill-test`, `skill-improve`, `vertical-slice`) are not meaningfully affected by
-`project.yaml` settings and do not need entries here. Add a skill only when its
-behavior genuinely branches on a setting value.
+**覆盖范围：** 本文档覆盖受每个设置影响最大的技能。未列出的技能（例如 `ux-review`、
+`balance-check`、`test-flakiness`、`test-helpers`、`test-setup`、`soak-test`、
+`perf-profile`、`launch-checklist`、`release-checklist`、`skill-test`、`skill-improve`、
+`vertical-slice`）不会受到 `project.yaml` 设置的实质影响，因此无需在此登记。只有当
+某个技能的行为确实会依据设置取值分叉时，才应添加该技能。
 
-**Local override pattern:** `project.yaml` is committed to git as the shared team
-config. Per-developer overrides live in `project.local.yaml` (gitignored). Priority
-chain across all settings: `project.local.yaml` → `project.yaml` → legacy mirror →
-`modes.rigor` expansion → hardcoded default. The expansion step applies only to the
-six knobs `rigor` fronts (`modes.workflow`, `docs.density`, `qa.level`,
-`modes.story_granularity`, `modes.review_mode`, `team.size`), which for that reason have **no** hardcoded default —
-see the `modes.rigor` section.
-**Secrets do NOT belong in either file — use environment variables.** See the
-"Local Override Pattern" section below for full design including the whitelist of
-which settings can be locally overridden.
+**本地覆盖模式：** `project.yaml` 作为团队共享配置提交至 git。每位开发者的个人覆盖
+存放在 `project.local.yaml`（已被 gitignore）。所有设置的优先级链为：
+`project.local.yaml` → `project.yaml` → 历史镜像 → `modes.rigor` 展开 → 硬编码默认值。
+展开步骤仅适用于 `rigor` 所前置的六个开关（`modes.workflow`、`docs.density`、`qa.level`、
+`modes.story_granularity`、`modes.review_mode`、`team.size`），正因如此它们**没有**硬编码
+默认值——见 `modes.rigor` 一节。
+**密钥不属于这两个文件中的任何一个——请使用环境变量。** 完整设计（包括哪些设置可被
+本地覆盖的白名单）见下方"Local Override Pattern"一节。
 
 ---
 
 ## Local Override Pattern — `project.local.yaml`
 
-The `project.local.yaml` file lets each developer override specific settings for
-their own use without affecting the team. The file is gitignored and never
-committed.
+`project.local.yaml` 文件让每位开发者可以覆盖特定设置供自己使用，而不影响团队。
+该文件已被 gitignore，永不提交。
 
 ### How it works
 
-Priority chain (every setting): `project.local.yaml` → `project.yaml` → hardcoded default
+优先级链（每个设置）：`project.local.yaml` → `project.yaml` → 硬编码默认值
 
-If a setting is present in `project.local.yaml`, that value wins. If absent, the
-value from `project.yaml` is used. If absent there too, the hardcoded default
-takes over.
+如果某设置出现在 `project.local.yaml` 中，则以该值为准。如果不存在，则使用
+`project.yaml` 中的值。如果那里也不存在，则由硬编码默认值接管。
 
 ---
 
 ### Deep merge semantics
 
-When both files set a nested value, only the explicitly-set key is overridden.
-Sibling keys in the same block are preserved.
+当两个文件都设置了某个嵌套值时，只有被显式设置的键会被覆盖。同一块中的兄弟键
+会保留。
 
-Example:
+示例：
 
 `project.yaml`:
 ```yaml
@@ -86,84 +77,77 @@ testing:
     visual: false
 ```
 
-`project.local.yaml` (sparse override):
+`project.local.yaml`（稀疏覆盖）：
 ```yaml
 testing:
   strict:
     logic: false
 ```
 
-Effective config seen by skills: `logic: false, integration: true, visual: false`.
-Only the explicitly-set `logic` key is overridden; sibling keys come through from
-`project.yaml`.
+技能看到的有效配置为：`logic: false, integration: true, visual: false`。只有被显式设置的
+`logic` 键被覆盖；兄弟键来自 `project.yaml`。
 
 ---
 
 ### Whitelist — which settings can be locally overridden
 
-Only personal-experience settings can be locally overridden. Project-wide facts
-(engine, stage, naming conventions, what's required on disk) are locked to
-`project.yaml` because divergence between developers would break team coordination.
+只有个人体验类设置可以在本地覆盖。项目级事实（引擎、阶段、命名约定、磁盘上的必需
+内容）锁定在 `project.yaml`，因为开发者之间的分歧会破坏团队协作。
 
-The rule for deciding which side a setting belongs on:
+判断某设置应归属哪一侧的规则：
 
-> **If a setting affects what artifacts exist or what they look like on disk,
-> it must be locked to `project.yaml`. If a setting only changes your personal
-> experience (which agents spawn for you, whether you get prompts, your local
-> CI bypass), it can be locally overridden.**
+> **如果某设置会影响存在哪些产出物或其磁盘上的样子，它必须锁定在 `project.yaml`。
+> 如果某设置只改变你的个人体验（为你生成哪些 agent、你是否会收到提示、你的本地
+> CI 绕过），它可以在本地覆盖。**
 
-**Locally overridable** (personal experience only — no effect on artifacts on disk):
+**可本地覆盖**（仅个人体验——不影响磁盘上的产出物）：
 
-| Setting | Why local override makes sense |
+| 设置 | 为什么本地覆盖是合理的 |
 |---------|-------------------------------|
-| `modes.review_mode` | How much AI review you personally want |
-| `modes.automation` | How often the AI prompts you |
-| `modes.automation_always_ask` | Your personal safety categories |
-| `team.size` | Which agents spawn for your reviews (review depth differs, artifacts don't) |
-| `testing.strict.*` (each type) | Whether failures block your local work (CI still enforces project.yaml defaults) |
-| `performance.enforce` | Whether budget violations block your local work (CI enforces project defaults) |
-| `features.session_state` | Your session tracking preference |
-| `features.token_budget_warn_at` | Your personal cost threshold |
-| `features.read_guard` | Whether your whole-file reads of large design docs are refused |
-| `features.read_guard_kb` | The size over which they are |
-| `updates.check` | Whether you see the new-release line; turning it off for you leaves it on for teammates |
+| `modes.review_mode` | 你个人希望多少 AI 评审 |
+| `modes.automation` | AI 向你提问的频率 |
+| `modes.automation_always_ask` | 你的个人安全类别 |
+| `team.size` | 为你的评审生成哪些 agent（评审深度不同，产出物不变） |
+| `testing.strict.*`（每种类型） | 失败是否阻塞你的本地工作（CI 仍执行 `project.yaml` 默认值） |
+| `performance.enforce` | 预算违规是否阻塞你的本地工作（CI 执行项目默认值） |
+| `features.session_state` | 你的会话跟踪偏好 |
+| `features.token_budget_warn_at` | 你的个人成本阈值 |
+| `features.read_guard` | 是否拒绝你对大型设计文档的整文件读取 |
+| `features.read_guard_kb` | 超过多大即被拒绝 |
+| `updates.check` | 你是否看到新版本提示行；对你关闭不影响队友 |
 
-**Locked to `project.yaml`** (project-wide — would create artifact divergence if local):
+**锁定在 `project.yaml`**（项目级——本地化会造成产出物分歧）：
 
-| Setting | Why it must be project-wide |
+| 设置 | 为什么必须是项目级 |
 |---------|----------------------------|
-| `schema_version`, `framework.*` | File metadata, not preferences — **exempt from the report below**, since a `project.local.yaml` carrying `schema_version: 1` is correct as written |
-| `project.name`, `version`, `genre`, `kind`, `stage` | Project identity |
-| `engine.*`, `specialists.*` | Whole team must use same engine |
-| `naming.*` | Code conventions must be consistent across team |
-| `platform.*` | Game facts (what platforms it ships on) |
-| `performance.target_framerate`, `frame_budget_ms`, `draw_call_limit`, `memory_ceiling_mb` | Game budgets, shared targets |
-| `accessibility.target` | Game commitment, project-wide |
-| `cadence.*` | Sprint/milestone length affects team coordination |
-| `modes.rigor` | Fronts the four below — locked for the same reason they are |
-| `modes.workflow` and `workflow_overrides` | Affects which sections are required in authored docs |
-| `modes.story_granularity` | Affects how big stories are in repo — team must be consistent |
-| `docs.density` | Affects how deep authored docs are — team must produce consistent docs |
-| `qa.level` | Affects what test evidence stories must include on disk |
-| `qa.coverage_minimum` | Project quality bar |
-| `strict_gate_checks` | Affects whether `project.stage` advances — a project-wide write |
-| `commands.*` | Build/test commands are project facts |
-| `testing.framework` | Whole project uses one framework |
+| `schema_version`、`framework.*` | 文件元数据而非偏好——**不受下方报告影响**，因为 `project.local.yaml` 中写入 `schema_version: 1` 本身是正确的 |
+| `project.name`、`version`、`genre`、`kind`、`stage` | 项目身份 |
+| `engine.*`、`specialists.*` | 整个团队必须使用同一引擎 |
+| `naming.*` | 代码约定必须在团队内保持一致 |
+| `platform.*` | 游戏事实（发行在哪些平台） |
+| `performance.target_framerate`、`frame_budget_ms`、`draw_call_limit`、`memory_ceiling_mb` | 游戏预算、共享目标 |
+| `accessibility.target` | 游戏承诺，项目级 |
+| `cadence.*` | 冲刺/里程碑长度影响团队协作 |
+| `modes.rigor` | 前置下面四项——锁定原因与它们相同 |
+| `modes.workflow` 和 `workflow_overrides` | 影响撰写文档中哪些章节为必需 |
+| `modes.story_granularity` | 影响仓库中用户故事的粒度——团队必须一致 |
+| `docs.density` | 影响撰写文档的深度——团队必须产出风格一致的文档 |
+| `qa.level` | 影响用户故事在磁盘上必须包含哪些测试证据 |
+| `qa.coverage_minimum` | 项目质量底线 |
+| `strict_gate_checks` | 影响 `project.stage` 是否推进——属于项目级写操作 |
+| `commands.*` | 构建/测试命令是项目事实 |
+| `testing.framework` | 整个项目使用同一框架 |
 
-> **A locked key written into `project.local.yaml` by hand is reported, not
-> swallowed.** `/settings --local` refuses to write one, but the
-> file is meant to be hand-edited and that path had no guard: `modes.rigor: full`
-> there is a real key with a legal value, so enum validation passes it, and then
-> resolution never consults the local file for that path — the setting vanishes
-> and the user sees the default they were trying to override, with no error
-> anywhere. Every check validated the **value**; nothing validated the
-> **location**. `validate_local_scope` in `yaml-helper.sh` now names such keys on
-> `resolve_config`'s `notes:` line. It **warns and never reconciles**: it does not
-> edit the file, does not begin honouring the key, and does not change
-> resolution — a locked setting decides which artifacts exist on disk, so
-> applying one quietly would produce exactly the divergence this table prevents.
-> A clean file stays silent — you are only told when a key is actually in the
-> wrong place.
+> **手工写入 `project.local.yaml` 的锁定键会被报告，而不会被吞掉。**
+> `/settings --local` 会拒绝写入这类键，但该文件本就是供手工编辑的，而这条路径此前
+> 没有防护：其中的 `modes.rigor: full` 是一个真实存在且取值合法的键，因此枚举校验会
+> 放行它，随后解析过程对该路径从不查阅本地文件——设置就此消失，用户看到的仍是他们
+> 试图覆盖的默认值，而任何地方都没有报错。此前每项检查校验的都是**值**，没有任何
+> 检查校验**位置**。现在 `yaml-helper.sh` 中的 `validate_local_scope` 会在
+> `resolve_config` 的 `notes:` 行中列出这类键。它**只警告、从不调和**：不编辑文件、
+> 不开始遵循该键、也不改变解析结果——锁定的设置决定磁盘上存在哪些产出物，因此悄悄
+> 应用它恰恰会产生此表所防范的分歧。干净的文件保持静默——只有键确实放错了位置时你
+> 才会被告知。
 
 ---
 
@@ -174,302 +158,280 @@ The rule for deciding which side a setting belongs on:
 /settings --local automation=autonomous  → writes to project.local.yaml (just you)
 ```
 
-**Behavior rules:**
+**行为规则：**
 
-- Default (no flag): writes to `project.yaml`
-- `--local` flag: writes to `project.local.yaml` (creates it if absent)
-- `--local` on a locked setting → error:
-  > *"`<setting>` cannot be locally overridden — it's a project-wide setting.
-  > Use `/settings <setting>=<value>` (no `--local`) to change it for the whole team."*
-- Writing to `project.yaml` when the same setting is currently locally overridden → warning:
-  > *"This setting is currently locally overridden in `project.local.yaml`.
-  > Writing to `project.yaml` will not affect your effective value."*
+- 默认（无标志）：写入 `project.yaml`
+- `--local` 标志：写入 `project.local.yaml`（若不存在则创建）
+- 对锁定设置使用 `--local` → 报错：
+  > *"`<setting>` 不能在本地覆盖——它是项目级设置。请使用
+  > `/settings <setting>=<value>`（不加 `--local`）为整个团队修改。"*
+- 当同一设置当前已在本地被覆盖时写入 `project.yaml` → 警告：
+  > *"该设置当前在 `project.local.yaml` 中被本地覆盖。
+  > 写入 `project.yaml` 不会影响你的有效值。"*
 
 ---
 
 ### Schema validation on read
 
-When skills or hooks read either file:
+当技能或钩子读取任一文件时：
 
-| Issue | Behavior |
+| 问题 | 行为 |
 |-------|----------|
-| Unknown key (typo or stale setting) | Session-start warning: *"`project.local.yaml` has unknown key `modes.automaton` — typo? Ignored."* Does NOT block (forwards-compat with future settings). |
-| Invalid value not in enum (e.g. `automation: chaotic`) | Hard error: skill exits with explanation of valid values. |
-| Type mismatch (e.g. integer field set to a string) | Hard error: skill exits with type expected. |
+| 未知键（拼写错误或过期设置） | 会话开始时警告：*"`project.local.yaml` 含有未知键 `modes.automaton` ——拼写错误？已忽略。"* 不会阻塞（与未来设置向前兼容）。 |
+| 取值不在枚举范围内（例如 `automation: chaotic`） | 硬错误：技能退出并说明有效取值。 |
+| 类型不匹配（例如整数字段被设为字符串） | 硬错误：技能退出并说明期望类型。 |
 
 ---
 
 ### Creation and error handling
 
-| Scenario | Behavior |
+| 场景 | 行为 |
 |----------|----------|
-| `/start` on fresh project | Creates `project.yaml` only. Does NOT create `project.local.yaml`. |
-| `/settings --local <x>=<y>` when local.yaml doesn't exist | Creates `project.local.yaml` containing just that setting. |
-| `project.local.yaml` exists but `project.yaml` doesn't | Hard error: *"`project.yaml` missing — run `/start` to create one. Local overrides require a base."* |
-| Both files exist | Read `project.yaml` first, deep-merge `project.local.yaml` on top. Normal operation. |
-| Both files set the same key | `project.local.yaml` wins. No prompting. |
+| 在全新项目上运行 `/start` | 仅创建 `project.yaml`。**不**创建 `project.local.yaml`。 |
+| `project.local.yaml` 不存在时执行 `/settings --local <x>=<y>` | 创建仅包含该设置的 `project.local.yaml`。 |
+| `project.local.yaml` 存在但 `project.yaml` 不存在 | 硬错误：*"`project.yaml` 缺失——请运行 `/start` 创建一个。本地覆盖需要一个基础配置。"* |
+| 两个文件都存在 | 先读取 `project.yaml`，再在其上深度合并 `project.local.yaml`。正常运作。 |
+| 两个文件设置了同一个键 | `project.local.yaml` 胜出。不做提示。 |
 
 ---
 
 ### Two-developer clash scenarios — and why the whitelist prevents them
 
-**File-level conflict (`project.yaml`):**
-Standard git merge conflict. Each developer's `project.local.yaml` is gitignored
-and never collides with another developer's. Normal git workflow handles team-wide
-changes.
+**文件级冲突（`project.yaml`）：**
+标准的 git 合并冲突。每位开发者的 `project.local.yaml` 都被 gitignore，永远不会与
+他人的文件冲突。常规 git 工作流即可处理团队级变更。
 
-**Logical inconsistency (prevented by whitelist):**
+**逻辑不一致（由白名单防范）：**
 
-Example of what the whitelist prevents:
+以下是白名单所防范的情形示例：
 
-> Sarah sets `modes.workflow: minimal` locally to skip GDD requirements. She
-> doesn't write GDDs because her local mode doesn't require them. Mike runs
-> `/gate-check` with the team's `project.yaml` value, `standard`; gate-check sees missing
-> GDDs and fails.
+> Sarah 在本地设置 `modes.workflow: minimal` 以跳过 GDD 要求。她因此不写 GDD，
+> 因为她的本地模式不要求这些。Mike 用团队的 `project.yaml` 取值 `standard` 运行
+> `/gate-check`；gate-check 发现 GDD 缺失，于是失败。
 
-This can't happen because `modes.workflow` is locked to `project.yaml`. Same
-for `qa.level`, `docs.density`, `strict_gate_checks`, `naming.*`, and every
-other setting that affects what artifacts exist on disk.
+这不会发生，因为 `modes.workflow` 锁定在 `project.yaml`。`qa.level`、`docs.density`、
+`strict_gate_checks`、`naming.*` 以及所有其他影响磁盘上产出物的设置同样如此。
 
-Personal experience settings (`automation`, `review_mode`, `team.size`,
-`testing.strict.*`, `performance.enforce`) can diverge freely without affecting
-anyone else.
+个人体验类设置（`automation`、`review_mode`、`team.size`、`testing.strict.*`、
+`performance.enforce`）可以自由分歧而不影响他人。
 
 ---
 
 ### Stricter reviewer reviewing a looser reviewer's work
 
-A common worry: "what if my teammate has stricter review settings than me?
-Will their `/gate-check` or `/design-review` flag things in my work?"
+一个常见的担忧："如果我队友的评审设置比我更严格会怎样？他们的 `/gate-check` 或
+`/design-review` 会不会在我的工作里挑出问题？"
 
-The answer depends on which kind of difference you're talking about:
+答案取决于你说的是哪种差异：
 
-**Different review depth, same project requirements (HEALTHY):**
+**评审深度不同，项目要求相同（健康）：**
 
-- Teammate A: local `review_mode: full`, `automation: collaborative`, `testing.strict.logic: true`
-- Teammate B: local `review_mode: solo`, `automation: autonomous`, `testing.strict.logic: false`
-- Both bound by the same project.yaml-locked settings (e.g. `workflow: standard`, `qa.level: standard`)
+- 队友 A：本地 `review_mode: full`、`automation: collaborative`、`testing.strict.logic: true`
+- 队友 B：本地 `review_mode: solo`、`automation: autonomous`、`testing.strict.logic: false`
+- 两人都受相同的 project.yaml 锁定设置约束（例如 `workflow: standard`、`qa.level: standard`）
 
-B writes a GDD that meets `workflow: standard` (all 5 required sections present).
-B's `/design-review` runs with `review_mode: solo` — fast advisory check, no
-specialists spawned. B moves on.
+B 写出的 GDD 满足 `workflow: standard`（5 个必需章节全部齐全）。B 的 `/design-review`
+以 `review_mode: solo` 运行——快速的建议性检查，不生成专家代理。B 继续推进。
 
-Later A reviews the same GDD with `review_mode: full` — spawns 5–15 specialists,
-finds polish opportunities and edge cases B's lighter review missed. A files
-findings as PR comments or follow-up issues. B addresses the ones that matter.
+之后 A 以 `review_mode: full` 评审同一份 GDD——生成 5–15 位专家，发现 B 的轻量评审
+遗漏的打磨机会与边缘情况。A 将发现记录为 PR 评论或后续 issue。B 处理真正重要的那些。
 
-**This is normal team collaboration.** Different reviewers catching different
-things is the value of having multiple reviewers. The artifacts on disk are the
-same; only review depth differs. Nothing about this scenario creates project-state
-divergence.
+**这是正常的团队协作。** 不同的评审者发现不同的问题，正体现了拥有多位评审者的价值。
+磁盘上的产出物是相同的，只是评审深度不同。这一情形不会造成任何项目状态分歧。
 
-**Different requirements (PREVENTED by the whitelist):**
+**要求不同（由白名单防范）：**
 
-If `qa.level` were locally overridable:
+如果 `qa.level` 可以本地覆盖：
 
-- B sets `qa.level: minimal` locally. B's stories don't include test evidence.
-- B's `/story-done` accepts the story without evidence. Story marked Complete on disk.
-- A pulls. A's `qa.level: standard` requires evidence. A's `/story-done` would have rejected it.
-- A's next `/gate-check` fails because evidence is missing across multiple of B's "Complete" stories.
+- B 在本地设置 `qa.level: minimal`。B 的用户故事不包含测试证据。
+- B 的 `/story-done` 在没有证据的情况下接受了该故事。故事在磁盘上被标记为 `Complete`。
+- A 拉取更新。A 的 `qa.level: standard` 要求证据。A 的 `/story-done` 本会拒绝它。
+- A 下一次 `/gate-check` 失败，因为 B 的多个"Complete"故事都缺少证据。
 
-This is the artifact divergence problem. To prevent it, `qa.level` is locked to
-`project.yaml`. The team agrees together on what's required; individuals override
-only their personal experience, never the team's standards.
+这就是产出物分歧问题。为防止它，`qa.level` 锁定在 `project.yaml`。团队共同商定
+要求是什么；个人只覆盖自己的个人体验，绝不覆盖团队标准。
 
-**The pattern to remember:**
+**需要记住的模式：**
 
-| Difference type | Outcome |
+| 差异类型 | 结果 |
 |----------------|---------|
-| Different review depth (review_mode, team.size) | Stricter reviewer surfaces more findings — healthy. Artifacts unchanged. |
-| Different local strictness on failures (testing.strict.*, performance.enforce) | Stricter dev's local /story-done blocks earlier — they fix it locally. CI uses project.yaml defaults so team-wide quality bar stays. |
-| Different artifact requirements (workflow, qa.level, docs.density, etc.) | **Can't happen — these are locked.** Team agrees once in project.yaml. |
+| 评审深度不同（review_mode、team.size） | 更严格的评审者会暴露更多发现——健康。产出物不变。 |
+| 对失败的本地严格程度不同（testing.strict.*、performance.enforce） | 更严格的开发者本地 `/story-done` 会更早阻塞——他们在本地修复。CI 使用 project.yaml 默认值，因此团队级质量底线保持不变。 |
+| 产出物要求不同（workflow、qa.level、docs.density 等） | **不可能发生——这些都已锁定。** 团队在 project.yaml 中一次性达成一致。 |
 
 ---
 
 ### CI behavior
 
-CI environments have no `project.local.yaml` — the file is gitignored and never
-present in a fresh clone. CI therefore always runs against `project.yaml`
-defaults: strict project standards, no developer-specific overrides.
+CI 环境没有 `project.local.yaml`——该文件被 gitignore，在全新克隆中永远不会存在。
+因此 CI 总是依据 `project.yaml` 默认值运行：严格的项目标准，没有任何针对开发者的
+覆盖。
 
-This is intentional and important:
+这是有意为之，而且很重要：
 
-| Setting | Local default for fast iteration | CI default (`project.yaml`) |
+| 设置 | 快速迭代的本地默认值 | CI 默认值（`project.yaml`） |
 |---------|----------------------------------|------------------------------|
-| `modes.review_mode` (locally overridable) | `solo` for one developer | `lean` (a team's usual choice — phase gates always run) |
-| `testing.strict.logic` (locally overridable) | `false` for fast WIP commits | `true` (failing tests block CI) |
-| `modes.automation` (locally overridable) | `autonomous` for solo flow | `collaborative` (the team's collab protocol, but CI doesn't ask questions anyway — this is mostly a no-op on CI) |
+| `modes.review_mode`（可本地覆盖） | 单人开发时用 `solo` | `lean`（团队的常见选择——阶段闸门始终运行） |
+| `testing.strict.logic`（可本地覆盖） | `false`，便于快速提交 WIP | `true`（测试失败会阻塞 CI） |
+| `modes.automation`（可本地覆盖） | 单人流程用 `autonomous` | `collaborative`（团队的协作协议，但 CI 本来也不提问——这在 CI 上基本是空操作） |
 
-A developer can iterate locally with relaxed gates, but CI catches issues using
-the strict project defaults. The team's quality bar is enforced at the CI level
-regardless of any individual developer's local config.
+开发者可以在本地以宽松的闸门迭代，但 CI 会用严格的项目默认值发现问题。无论任何
+单个开发者的本地配置如何，团队的质量底线都在 CI 层面得到执行。
 
 ---
 
 ### Secrets — never in either file
 
-`project.yaml` and `project.local.yaml` are for **preferences and configuration**,
-never for **secrets**. API keys, tokens, and credentials belong in:
+`project.yaml` 和 `project.local.yaml` 用于**偏好与配置**，绝不用于**密钥**。
+API 密钥、令牌和凭证应放在：
 
-- **Environment variables** (preferred for production/CI)
-- **`.env` file** (gitignored, local dev)
-- **OS keychain** (when integrating with services that support it)
+- **环境变量**（生产/CI 的首选）
+- **`.env` 文件**（已被 gitignore，本地开发用）
+- **操作系统钥匙串**（与服务集成且该服务支持时）
 
-When a skill needs an API key (e.g. `/asset-spec` calling Midjourney), it reads
-from the environment, not from `project.yaml`. `project.yaml` only stores **which**
-generator is used (`art.generator: midjourney`), not the API key for it.
+当技能需要 API 密钥时（例如 `/asset-spec` 调用 Midjourney），它从环境读取，而不是
+从 `project.yaml` 读取。`project.yaml` 只存储**使用哪个**生成器
+（`art.generator: midjourney`），不存储其 API 密钥。
 
-CI environments typically have no `project.local.yaml` (gitignored, not in the
-clone) — so CI always runs against `project.yaml` defaults. This is correct
-behavior: strict project defaults for CI, looser developer overrides for local work.
+CI 环境通常没有 `project.local.yaml`（被 gitignore，不在克隆中）——因此 CI 总是
+依据 `project.yaml` 默认值运行。这是正确的行为：CI 用严格的项目默认值，本地工作
+用较宽松的开发者覆盖。
 
 ---
 
 ## modes.review_mode
 
-**Controls:** How many specialist and director agents are spawned during skill execution  
-**Values:** `full` | `lean` | `solo`  
-**Default:** *none* — supplied by `modes.rigor` (`minimal`, the default, yields `solo`; `standard` yields `lean`; `full` yields `full`)  
-**Set by:** `/settings`, or `migrate-v1-config.sh` (which `/adopt` runs) when it carries over a v1.0 `production/review-mode.txt`. `/start` and `/adopt` never write it themselves — unset, it follows `modes.rigor`  
-**Read by:** See skill table below
+**控制：** 技能执行期间生成多少专家代理与总监代理  
+**取值：** `full` | `lean` | `solo`  
+**默认：** *无*——由 `modes.rigor` 提供（`minimal`（默认值）产出 `solo`；`standard` 产出 `lean`；`full` 产出 `full`）  
+**设置方式：** `/settings`，或 `migrate-v1-config.sh`（由 `/adopt` 运行）在迁移 v1.0 的 `production/review-mode.txt` 时设置。`/start` 与 `/adopt` 自身从不写入它——未设置时，它跟随 `modes.rigor`  
+**读取方：** 见下方技能表
 
-**Priority chain (all skills):** inline argument flag → `modes.review_mode` in `project.yaml` → `production/review-mode.txt` (legacy fallback) → `modes.rigor` expansion (no terminal default; `minimal`→`solo`, `standard`→`lean`, `full`→`full`)
+**优先级链（所有技能）：** 行内参数标志 → `project.yaml` 中的 `modes.review_mode` → `production/review-mode.txt`（历史回退） → `modes.rigor` 展开（无终结默认值；`minimal`→`solo`，`standard`→`lean`，`full`→`full`）
 
-> **design-review follows the standard chain.** `modes.review_mode` controls
-> design-review depth, its inline flag is `--review` for consistency with every
-> other review-mode-aware skill, and with nothing set it follows `modes.rigor` like
-> them: `solo` at `minimal` (the default), `lean` at `standard`.
+> **design-review 遵循标准链。** `modes.review_mode` 控制 design-review 的深度，
+> 其行内标志为 `--review`，以便与其他所有感知评审模式的技能保持一致；在未设置任何
+> 值时，它像它们一样跟随 `modes.rigor`：`minimal`（默认）下为 `solo`，`standard`
+> 下为 `lean`。
 
-> **Hotfix / day-one-patch exception:** These skills are emergency or release-critical
-> pipelines. They are never gated by `review_mode` — all agents always run.
+> **热修复 / 首日补丁例外：** 这些技能是应急或发布关键流水线。它们从不被
+> `review_mode` 门控——所有 agent 始终运行。
 
-> **`review_mode` in the nine `team-*` orchestrators.** `review_mode` sets
-> director-gate depth: `full` spawns every director gate a pipeline names, `lean`
-> skips director gates unless they are PHASE-GATE type, and `solo` skips gate
-> spawning entirely. No team pipeline spawns a PHASE-GATE (`/gate-check` is their
-> only spawner), so in the orchestrators
-> `lean` and `solo` behave the same, and `full` adds two things:
-> `/team-release`'s technical-director release sign-off, and, at
-> `team.size: small`, `/team-narrative`'s `localization-lead` and `world-builder`.
+> **九个 `team-*` 编排器中的 `review_mode`。** `review_mode` 设定总监闸门的深度：
+> `full` 生成流水线指定的每个总监闸门，`lean` 跳过总监闸门（除非它们是 PHASE-GATE
+> 类型），`solo` 完全跳过闸门生成。没有任何团队流水线会生成 PHASE-GATE
+> （`/gate-check` 是它们唯一的生成者），因此在这些编排器中 `lean` 与 `solo` 行为
+> 相同，而 `full` 额外增加两项：`/team-release` 的技术总监发布签核，以及在
+> `team.size: small` 时 `/team-narrative` 的 `localization-lead` 与 `world-builder`。
 >
-> Outside the orchestrators, the skills in the *Core skills* table below read
-> `review_mode` as that table documents.
+> 在编排器之外，下方*核心技能*表中的技能按该表所述读取 `review_mode`。
 
 ---
 
 ### Value intent
 
-| Value | Intent |
+| 取值 | 意图 |
 |-------|--------|
-| `full` | All director and specialist gates active. Best for teams, learning, or anyone who wants thorough AI feedback on every decision. |
-| `lean` | Phase gates only — per-skill director sign-offs skipped. The `rigor: standard` value. Balances quality with token cost. |
-| `solo` | No gates, no director spawns (a pipeline's own review, such as `/team-narrative`'s ND-CONSISTENCY, still runs). Fastest. For confident solo iteration. The default, from `rigor: minimal`. |
+| `full` | 所有总监与专家闸门均启用。最适合团队、学习，或希望每个决策都获得全面 AI 反馈的人。 |
+| `lean` | 仅阶段闸门——跳过各技能的总监签核。即 `rigor: standard` 对应的取值。在质量与 token 成本之间取得平衡。 |
+| `solo` | 无闸门、不生成总监（流水线自身的评审，例如 `/team-narrative` 的 ND-CONSISTENCY，仍会运行）。最快。适合有把握的单人迭代。默认值，源自 `rigor: minimal`。 |
 
 ---
 
 ### Core skills (currently review-mode aware)
 
-| Skill | full | lean | solo |
+| 技能 | full | lean | solo |
 |-------|------|------|------|
-| **design-review** | 5–15 specialist agents spawned in Phase 3b | No specialist agents — single-session analysis only | Phases 1–4 only, no delegation, no next-steps prompt |
-| **gate-check** | Director panel runs in parallel — **width set by `modes.workflow`**, not by this axis | Director panel runs in parallel — same width rule; phase gates always run | Artifact existence checks only, no directors spawned |
-| **design-system** | All section specialists + CD-GDD-ALIGN sign-off gate | Specialists for Sections D and H only (+ G when its knobs interact, + Visual/Audio when visual feedback is central); CD-GDD-ALIGN skipped | No section specialists; CD-GDD-ALIGN skipped |
-| **art-bible** | All section specialists + AD-ART-BIBLE sign-off gate | All section specialists, AD-ART-BIBLE skipped | All section specialists, AD-ART-BIBLE skipped |
-| **architecture-decision** | Engine specialist + TD-ADR gate | Engine specialist; TD-ADR skipped | Engine specialist; TD-ADR skipped |
-| **create-architecture** | TD-ARCHITECTURE + LP-FEASIBILITY agents, in parallel | Both skipped | Both skipped |
-| **brainstorm** | CD-PILLARS, AD-CONCEPT-VISUAL, TD-FEASIBILITY, PR-SCOPE | All skipped | All skipped |
-| **map-systems** | TD-SYSTEM-BOUNDARY, PR-SCOPE, CD-SYSTEMS | All skipped | All skipped |
-| **story-done** | QL-TEST-COVERAGE + LP-CODE-REVIEW | Both skipped | Both skipped |
-| **sprint-plan** | PR-SPRINT feasibility check | Skipped | Skipped |
-| **create-epics** | PR-EPIC scope check | Skipped | Skipped |
-| **create-stories** | QL-STORY-READY + test case specs | Skipped | Skipped |
-| **prototype** | CD-PLAYTEST review — APPROVE keeps the recommendation; CONCERNS and REJECT go to the user, who decides | Skipped — the recommendation stands unreviewed | Skipped — the recommendation stands unreviewed |
-| **milestone-review** | PR-MILESTONE feasibility check | Skipped — no producer verdict | Skipped — no producer verdict |
-| **playtest-report** | CD-PLAYTEST creative assessment | Skipped | Skipped |
-| **story-readiness** | QL-STORY-READY acceptance criteria check | Skipped | Skipped |
-| **create-control-manifest** | TD-MANIFEST (technical-director) review | Skipped | Skipped |
-| **propagate-design-change** | TD-CHANGE-IMPACT (technical-director) review | Skipped | Skipped |
+| **design-review** | Phase 3b 中生成 5–15 位专家代理 | 不生成专家代理——仅单会话分析 | 仅执行 Phase 1–4，不委派，不提示后续步骤 |
+| **gate-check** | 总监小组并行运行——**面板宽度由 `modes.workflow` 决定**，与此轴无关 | 总监小组并行运行——宽度规则相同；阶段闸门始终运行 | 仅检查产出物是否存在，不生成总监 |
+| **design-system** | 所有章节专家 + CD-GDD-ALIGN 签核闸门 | 仅 Section D 与 H 的专家（当 G 的开关相互影响时也含 G，当视觉反馈是核心时也含 Visual/Audio）；跳过 CD-GDD-ALIGN | 不生成章节专家；跳过 CD-GDD-ALIGN |
+| **art-bible** | 所有章节专家 + AD-ART-BIBLE 签核闸门 | 所有章节专家，跳过 AD-ART-BIBLE | 所有章节专家，跳过 AD-ART-BIBLE |
+| **architecture-decision** | 引擎专家 + TD-ADR 闸门 | 引擎专家；跳过 TD-ADR | 引擎专家；跳过 TD-ADR |
+| **create-architecture** | TD-ARCHITECTURE + LP-FEASIBILITY 代理并行运行 | 两者均跳过 | 两者均跳过 |
+| **brainstorm** | CD-PILLARS、AD-CONCEPT-VISUAL、TD-FEASIBILITY、PR-SCOPE | 全部跳过 | 全部跳过 |
+| **map-systems** | TD-SYSTEM-BOUNDARY、PR-SCOPE、CD-SYSTEMS | 全部跳过 | 全部跳过 |
+| **story-done** | QL-TEST-COVERAGE + LP-CODE-REVIEW | 两者均跳过 | 两者均跳过 |
+| **sprint-plan** | PR-SPRINT 可行性检查 | 跳过 | 跳过 |
+| **create-epics** | PR-EPIC 范围检查 | 跳过 | 跳过 |
+| **create-stories** | QL-STORY-READY + 测试用例规格 | 跳过 | 跳过 |
+| **prototype** | CD-PLAYTEST 评审——APPROVE 保留建议；CONCERNS 与 REJECT 交由用户决定 | 跳过——建议未经评审直接成立 | 跳过——建议未经评审直接成立 |
+| **milestone-review** | PR-MILESTONE 可行性检查 | 跳过——无制作人结论 | 跳过——无制作人结论 |
+| **playtest-report** | CD-PLAYTEST 创意评估 | 跳过 | 跳过 |
+| **story-readiness** | QL-STORY-READY 验收标准检查 | 跳过 | 跳过 |
+| **create-control-manifest** | TD-MANIFEST（technical-director）评审 | 跳过 | 跳过 |
+| **propagate-design-change** | TD-CHANGE-IMPACT（technical-director）评审 | 跳过 | 跳过 |
 
 ---
 
 ### Skills that do not read `modes.review_mode`
 
-These skills run the same way at `full`, `lean` and `solo`. None of them takes a
-`--review` flag.
+这些技能在 `full`、`lean` 和 `solo` 下运行方式相同。它们都不接受 `--review` 标志。
 
-| Skill | What runs at every level |
+| 技能 | 各档位下都运行的内容 |
 |-------|--------------------------|
-| **review-all-gdds** | Phase 2 consistency pass and Phase 3 design-theory pass, in parallel |
-| **architecture-review** | The primary engine specialist is consulted after the engine audit (recorded as NOT ASSESSED when no engine is configured) |
-| **dev-story** | Core programmer routing, plus the engine specialist's check of every code story |
-| **code-review** | Language, shader and UI specialists when an engine is configured, plus `qa-tester` for Logic and Integration stories |
-| **security-audit** | `security-engineer` is spawned to run the audit |
+| **review-all-gdds** | Phase 2 一致性检查与 Phase 3 设计理论检查，并行执行 |
+| **architecture-review** | 引擎审计之后会咨询主引擎专家（未配置引擎时记为 NOT ASSESSED） |
+| **dev-story** | 核心程序员路由，外加引擎专家对每个代码故事的检查 |
+| **code-review** | 配置引擎后调用语言、着色器与 UI 专家，另为 Logic 与 Integration 故事调用 `qa-tester` |
+| **security-audit** | 生成 `security-engineer` 执行审计 |
 
 ---
 
 ### Team orchestration skills (pipeline behavior — different relationship)
 
-Team skills are execution pipelines, not review gates. In them `review_mode` sets
-only director-gate depth; `team.size` picks the agents (see `## team.size`), and a
-pipeline's own review steps run in every mode.
+团队技能是执行流水线，不是评审闸门。在其中，`review_mode` 只设定总监闸门深度；
+`team.size` 决定选用哪些 agent（见 `## team.size`），而流水线自身的评审步骤在所有
+模式下都会运行。
 
-| Skill | full | lean | solo |
+| 技能 | full | lean | solo |
 |-------|------|------|------|
-| **All nine `team-*`** | Every director gate the pipeline names | PHASE-GATE-type gates only | No director gates |
-| **team-release** | + technical-director release sign-off before the go/no-go call | Sign-off not run — recorded as `not run (review_mode: lean)` | Sign-off not run — recorded as `not run (review_mode: solo)` |
-| **team-narrative** | ND-CONSISTENCY; at `team.size: small`, + `localization-lead` and `world-builder` | ND-CONSISTENCY; at `small`, `narrative-director` + `writer` only | ND-CONSISTENCY still runs when `narrative-director` is active |
+| **全部九个 `team-*`** | 流水线指定的每个总监闸门 | 仅 PHASE-GATE 类型闸门 | 无总监闸门 |
+| **team-release** | + 在 go/no-go 决策前进行技术总监发布签核 | 不运行签核——记为 `not run (review_mode: lean)` | 不运行签核——记为 `not run (review_mode: solo)` |
+| **team-narrative** | ND-CONSISTENCY；在 `team.size: small` 时 + `localization-lead` 与 `world-builder` | ND-CONSISTENCY；在 `small` 时仅 `narrative-director` + `writer` | 当 `narrative-director` 活跃时仍运行 ND-CONSISTENCY |
 
 ---
 
 ### Special cases and notes
 
-- **gate-check** is the only skill where `full` and `lean` behave identically —
-  phase gates always run. Only `solo` skips them. This is intentional: phase
-  gates are the minimum quality bar, not optional extras. **How many directors
-  run is a separate axis** — `modes.workflow` sets panel width (`minimal` → PR
-  only, `standard` → TD + PR, `full` → all four), because directors are
-  Opus-tier and a small project should not pay for the same four-director panel
-  as a large one. Width never softens a verdict: the strictest verdict from
-  whoever ran still wins, and `/gate-check` names the perspectives it skipped.
-- **art-bible** always spawns its section specialists regardless of mode — only
-  the final sign-off gate is controlled by `review_mode`. Specialist delegation is
-  mandatory for the authoring output to be useful, and that has not changed.
-  **design-system** is different: `lean` keeps the specialists for its high-risk
-  sections only (D and H, plus G and Visual/Audio when they matter) and `solo`
-  drafts every section without one, and each skipped spawn is announced by name.
-  What sets `art-bible`'s **spawn count** is therefore not `review_mode`
-  but (a) `modes.workflow`, via how many sections get authored at all — `standard`
-  requires sections 1–4, not all 9, and Phase 1 recommends the tier's set — and
-  (b) batching consecutive sections that call the *same* agent with the *same*
-  input into one delegation (2–4, and 5–6). Unbatched, sections 5 and 6 spawn
-  `art-director` twice with the identical `sections 1–4` brief. Every section is
-  still specialist-authored; per-section approval and write-to-file are unchanged.
-- **dev-story** core programmer routing (gameplay-programmer, ui-programmer, etc.)
-  always runs regardless of mode — only the optional engine-specialist escalation
-  for HIGH risk stories is gated.
-- **hotfix** and **day-one-patch** are exempt — all agents always run.
-- When a gate is skipped, skills emit: `"[GATE-ID] skipped — [mode] mode."` before
-  proceeding. This is consistent across all skills.
+- **gate-check** 是唯一一个 `full` 与 `lean` 行为相同的技能——阶段闸门始终运行。
+  只有 `solo` 会跳过它们。这是有意为之：阶段闸门是最低质量底线，不是可选项。
+  **运行多少位总监是另一条独立的轴**——`modes.workflow` 设定面板宽度（`minimal` →
+  仅 PR，`standard` → TD + PR，`full` → 全部四位），因为总监属于 Opus 档位，小项目
+  不应承担与大型项目相同的四人总监小组成本。宽度绝不会软化结论：参与运行者中
+  最严格的结论仍然胜出，且 `/gate-check` 会列出它跳过了哪些视角。
+- **art-bible** 无论何种模式都始终生成其章节专家——只有最终签核闸门受
+  `review_mode` 控制。专家委派对撰写产出物是否有用是强制要求，这一点没有改变。
+  **design-system** 不同：`lean` 只为高风险章节（D 与 H，以及重要时的 G 与
+  Visual/Audio）保留专家，`solo` 则在没有专家的情况下起草每个章节，且每次跳过的
+  生成都会按名称公布。因此，决定 `art-bible` **生成数量**的并不是 `review_mode`，
+  而是：(a) `modes.workflow`，通过最终撰写多少章节——`standard` 要求章节 1–4 而非
+  全部 9 章，且 Phase 1 会推荐该档位的章节集——以及 (b) 将调用*同一* agent、输入
+  *相同*的连续章节（2–4，以及 5–6）合并为一次委派。若不合并，章节 5 和 6 会用
+  完全相同的 `sections 1–4` 简报两次生成 `art-director`。每个章节仍由专家撰写；
+  逐章节审批与写入文件保持不变。
+- **dev-story** 的核心程序员路由（gameplay-programmer、ui-programmer 等）无论何种
+  模式都始终运行——只有针对 HIGH 风险故事的可选引擎专家升级受闸门控制。
+- **hotfix** 与 **day-one-patch** 豁免——所有 agent 始终运行。
+- 当闸门被跳过时，技能会在继续之前输出：`"[GATE-ID] skipped — [mode] mode."`。
+  这在所有技能中保持一致。
 
 ---
 
 ## modes.rigor
 
-**Controls:** How much process the project carries overall — the single question
-`/start` asks that sets the six knobs below
-**Values:** `minimal` | `standard` | `full`
-**Default:** `minimal` — see the rationale block above `_yaml_helper_defaults`
-in `.claude/hooks/yaml-helper.sh`. Short version: the heavier tier costs more to
-reach working code without producing a better result.
-**Set by:** `/start` (Phase 4: inferred from the user's description, shown, saved on a yes), `/settings`
-**Read by:** nothing directly — it is read *through* the six knobs it supplies
+**控制：** 项目整体承载多少流程——`/start` 提出的那个设置下方六个开关的单一问题
+**取值：** `minimal` | `standard` | `full`
+**默认：** `minimal`——理由见 `.claude/hooks/yaml-helper.sh` 中
+`_yaml_helper_defaults` 上方的说明块。简版：更重的档位要花更多成本才能达到可运行
+代码，却并不会产生更好的结果。
+**设置方式：** `/start`（Phase 4：根据用户描述推断、展示、确认后保存）、`/settings`
+**读取方：** 没有任何技能直接读取——它是*通过*所提供的六个开关被读取的
 
-**Priority chain:** `modes.rigor` in `project.yaml` → hardcoded default `minimal`
-(**locked** — not overridable from `project.local.yaml`, like the four *on-disk*
-knobs it fronts — `modes.workflow`, `docs.density`, `qa.level`,
-`modes.story_granularity` — because those five change what artifacts exist on
-disk. The two personal-experience knobs it also fronts, `modes.review_mode` and
-`team.size`, stay locally overridable.)
+**优先级链：** `project.yaml` 中的 `modes.rigor` → 硬编码默认值 `minimal`
+（**已锁定**——不可从 `project.local.yaml` 覆盖，与它所前置的四个*磁盘*开关
+`modes.workflow`、`docs.density`、`qa.level`、`modes.story_granularity` 一样——
+因为这五个都会改变磁盘上存在哪些产出物。它同样前置的两个个人体验开关
+`modes.review_mode` 与 `team.size` 则仍可在本地覆盖。）
 
 ---
 
@@ -477,164 +439,147 @@ disk. The two personal-experience knobs it also fronts, `modes.review_mode` and
 
 | `modes.rigor` | `modes.workflow` | `docs.density` | `qa.level` | `modes.story_granularity` | `modes.review_mode` | `team.size` |
 |---|---|---|---|---|---|---|
-| `minimal` *(default)* | `minimal` | `terse` | `minimal` | `coarse` | `solo` | `individual` |
+| `minimal` *（默认）* | `minimal` | `terse` | `minimal` | `coarse` | `solo` | `individual` |
 | `standard` | `standard` | `balanced` | `standard` | `balanced` | `lean` | `individual` |
 | `full` | `full` | `thorough` | `full` | `fine` | `full` | `studio` |
 
 ### It fronts, it does not replace
 
-The expansion sits **below every explicit source and above the terminal
-default**:
+展开结果位于**所有显式来源之下、终结默认值之上**：
 
 ```
 project.local.yaml → project.yaml → legacy file → rigor expansion → default
 ```
 
-That ordering is the back-compat guarantee, and it is what makes the migration
-free. Three consequences worth stating plainly:
+这一顺序是向下兼容的保证，也是迁移免费的原因。有三点后果值得明确说明：
 
-- **An existing `project.yaml` behaves identically.** If it already sets
-  `docs.density: terse`, step 2 answers before the expansion is consulted — so
-  the value and its reported source (`project.yaml`) are unchanged whether or not
-  `rigor` is present. No migration, no `schema_version` bump.
-- **Overrides go both ways.** Unlike the `workflow_overrides` **boolean flags** —
-  which are additive and stricter-only — an explicit knob may be *looser* than
-  the rigor level implies.
-  (`workflow_overrides.system_overrides` is also two-directional — it replaces a tier; only the flags are stricter-only.)
-  Inheriting the stricter-only rule would make "comprehensive but compact"
-  inexpressible, which is the one off-diagonal the docs have always cited.
-- **`modes.workflow` keeps `workflow_overrides.system_overrides`.** Per-system
-  tiers still beat the rigor-derived project tier. `workflow` was fronted rather
-  than folded away precisely because it drives ~5 distinct behaviors and owns the
-  only per-system override mechanism.
+- **既有 `project.yaml` 的行为完全不变。** 如果它已经设置
+  `docs.density: terse`，第 2 步会在咨询展开之前给出答案——因此无论 `rigor` 是否
+  存在，其取值和报告的来源（`project.yaml`）都不变。无需迁移，无需升
+  `schema_version`。
+- **覆盖是双向的。** 与 `workflow_overrides` 的**布尔标志**——它们是叠加式且只能
+  更严格——不同，显式设置的开关可以比 rigor 级别所隐含的*更宽松*。
+  （`workflow_overrides.system_overrides` 同样是双向的——它替换档位；只有那些标志
+  是只能更严格。）
+  若继承"只能更严格"的规则，"全面但紧凑"就无法表达，而这正是文档一直以来引用的
+  唯一非对角组合。
+- **`modes.workflow` 保留 `workflow_overrides.system_overrides`。** 按系统的档位
+  仍优先于 rigor 推导出的项目档位。`workflow` 之所以被前置而非折叠掉，正是因为它
+  驱动约 5 种不同行为，并拥有唯一的按系统覆盖机制。
 
-The six fronted knobs therefore have **no entry in `_yaml_helper_defaults`**. A
-terminal default there would answer before the expansion and make `rigor` a no-op
-for anyone who had not also set the sub-knob.
+因此六个被前置的开关在 `_yaml_helper_defaults` 中**没有条目**。若在那里设置终结
+默认值，它会先于展开给出答案，使 `rigor` 对任何没有同时设置子开关的人成为空操作。
 
 ### Provenance
 
-Derived values report their source as `rigor:<level>`, so the vocabulary is
+派生值报告其来源为 `rigor:<level>`，因此词汇表为
 `{project.local.yaml, project.yaml, <legacy path>, rigor:<level>, default,
-unset}`. `/settings` renders this as `(derived from rigor: standard)` and
-force-appends the five to its view-all list — none of them is a leaf of either
-YAML file, so enumerating file leaves alone would hide exactly the settings the
-user just chose.
+unset}`。`/settings` 将其渲染为 `(derived from rigor: standard)`，并强制把这五项
+追加到它的全量查看列表中——它们都不是任一 YAML 文件的叶子，因此仅枚举文件叶子
+恰好会隐藏用户刚刚选择的设置。
 
 ---
 
 ## modes.workflow
 
-**Controls:** How much design documentation is required before code can begin —
-the tradeoff between token/time cost of documentation and speed of reaching
-working code  
-**Values:** `full` | `standard` | `minimal`  
-**Default:** *none* — supplied by `modes.rigor` (`minimal`, the default, yields `minimal`; `standard` yields `standard`; `full` yields `full`)  
-**Set by:** `/start` (via `modes.rigor`), `/settings`  
-**Read by:** See skill tables below
+**控制：** 在代码开始之前要求多少设计文档——文档的 token/时间成本与达到可运行代码
+的速度之间的取舍  
+**取值：** `full` | `standard` | `minimal`  
+**默认：** *无*——由 `modes.rigor` 提供（`minimal`（默认值）产出 `minimal`；`standard` 产出 `standard`；`full` 产出 `full`）  
+**设置方式：** `/start`（通过 `modes.rigor`）、`/settings`  
+**读取方：** 见下方技能表
 
-**Priority chain:** `modes.workflow` in `project.yaml` → `modes.rigor` expansion → *(no hardcoded default)*
+**优先级链：** `project.yaml` 中的 `modes.workflow` → `modes.rigor` 展开 → *（无硬编码默认值）*
 
-> **Why the middle level is `standard`, not `indie`.** A developer-type label
-> would conflate "type of developer" with "level of process". `standard`
-> describes the *amount of process*, not the user, and pairs cleanly with
-> `minimal` and `full`.
+> **为什么中间档位叫 `standard` 而不是 `indie`。** 以开发者类型命名的标签会把
+> "开发者类型"与"流程级别"混为一谈。`standard` 描述的是*流程的量*，而不是用户，
+> 并且能与 `minimal`、`full` 干净地配对。
 
-> **Permissive, not restrictive:** `workflow` controls what is REQUIRED —
-> not what is ALLOWED. Any skill can be run at any workflow level. The
-> setting changes what gate-check enforces and what completeness checks
-> validate, not what the user can invoke.
+> **宽松而非限制：** `workflow` 控制什么是必需的——而不是什么是被允许的。任何技能
+> 都可以在任何 workflow 级别下运行。该设置改变的是 gate-check 强制执行什么、
+> 完整性检查校验什么，而不是用户可以调用什么。
 
-> **`minimal` floor:** Even in minimal mode, engine choice and a filled
-> **`design/game-brief.md`** are required before code starts — the brief's
-> build-order field is the plan, so there is no separate `sprint-plan` step.
-> Both take minutes and prevent real problems downstream. Everything else can
-> be skipped.
+> **`minimal` 底线：** 即使在 minimal 模式下，代码开始前也要求选定引擎并填写
+> **`design/game-brief.md`**——简报中的构建顺序字段就是计划，因此没有单独的
+> `sprint-plan` 步骤。两者都只需几分钟，却能防止下游的真正问题。其余一切都可以跳过。
 
-> **Escape hatches via `workflow_overrides`:** Users who want *almost* the
-> standard set with one extra requirement (e.g. always force Edge Cases) use
-> `workflow_overrides` rather than escalating to `full`. See next section.
+> **通过 `workflow_overrides` 的兜底出口：** 想要*几乎*标准的集合再加一项额外要求
+> （例如始终强制 Edge Cases）的用户，应使用 `workflow_overrides`，而不是升级到
+> `full`。见下一节。
 
 ---
 
 ### Value intent
 
-| Value | Token/time cost | Required before code | Best for |
+| 取值 | Token/时间成本 | 代码前必需 | 最适合 |
 |-------|----------------|---------------------|----------|
-| `full` | High | All 8 GDD sections per system, full architecture, all ADRs, art bible, UX specs per screen | Projects where design correctness matters more than speed — teams, commercial titles, learning the full pipeline |
-| `standard` | Balanced | 5 GDD sections per system, one architecture doc, critical ADRs, game concept, systems index | Projects that have outgrown a brief — several interacting systems, or a design someone else has to implement |
-| `minimal` | Low | One-page `design/game-brief.md` + engine choice (build order in the brief = the plan; no separate sprint plan) | **Default.** Get to code fast — small scope, jam projects, or the design already in your head. Raise it when the project grows |
+| `full` | 高 | 每个系统全部 8 个 GDD 章节、完整架构、所有 ADR、美术圣经、逐屏 UX 规格 | 设计正确性比速度更重要的项目——团队、商业作品、学习完整流水线 |
+| `standard` | 平衡 | 每个系统 5 个 GDD 章节、一份架构文档、关键 ADR、游戏概念、系统索引 | 已超出简报承载能力的项目——多个相互作用的系统，或需要他人实现的设计 |
+| `minimal` | 低 | 一页 `design/game-brief.md` + 引擎选择（简报中的构建顺序即计划；无单独冲刺计划） | **默认。** 快速进入编码——小范围、game jam 项目，或设计已在脑中。项目成长时再提高 |
 
-**standard required GDD sections:** Overview, Detailed Rules, Edge Cases, Dependencies,
-Acceptance Criteria.
-**standard conditional:** Formulas — required when the system **defines numeric
-rules**: rates, curves, thresholds, costs, damage, drop weights, or any value a
-balance pass would tune. Optional only when the system defines no such value.
+**standard 必需的 GDD 章节：** Overview、Detailed Rules、Edge Cases、Dependencies、
+Acceptance Criteria。
+**standard 条件项：** Formulas——当系统**定义了数值规则**时必需：比率、曲线、阈值、
+成本、伤害、掉落权重，或任何平衡性调整会调节的值。仅当系统不定义此类值时才可选。
 
-> **The test is what the system defines, not what it is called.** The `Category`
-> column in `systems-index.md` is a *hint* — `Gameplay`, `Economy` and
-> `Progression` systems almost always qualify — but it is not the test, and a
-> `Core`, `UI` or `Persistence` system that defines a numeric rule qualifies too.
+> **判定标准是系统定义了什么，而不是它叫什么。** `systems-index.md` 中的 `Category`
+> 列只是一个*提示*——`Gameplay`、`Economy` 和 `Progression` 系统几乎总是符合——
+> 但它不是判定标准，一个定义了数值规则的 `Core`、`UI` 或 `Persistence` 系统同样
+> 符合。
 >
-> Do not restate it as "required when system category is combat, economy,
-> progression, or AI". Those four tokens are not the vocabulary `/map-systems`
-> writes: `templates/systems-index.md` defines the categories as `Core ·
-> Gameplay · Progression · Economy · Persistence · UI · Audio · Narrative ·
-> Meta`, and lists **combat and AI as example systems under `Gameplay`**. A
-> combat system categorised exactly as the template instructs therefore matched
-> none of the four, and Formulas was silently dropped for the system most likely
-> to need it. `coding-standards.md` and `rules/design-docs.md` already stated the
-> "has math" test; the skills are reconciled to them rather than the other way
-> round.
+> 不要把它改述为"当系统类别为 combat、economy、progression 或 AI 时必需"。这四个
+> 词并不是 `/map-systems` 写入的词汇：`templates/systems-index.md` 将类别定义为
+> `Core · Gameplay · Progression · Economy · Persistence · UI · Audio · Narrative ·
+> Meta`，并把 **combat 与 AI 列为 `Gameplay` 下的示例系统**。因此，完全按模板指示
+> 归类为 combat 的战斗系统，曾经一个类别都匹配不上，而 Formulas 恰好在最可能需要
+> 它的系统上被悄悄丢弃了。`coding-standards.md` 与 `rules/design-docs.md` 早已声明
+> 了"有数学"的判定标准；各技能现已与之对齐，而非反过来。
 
-> **Edge Cases is required at `standard`.** Skipping it consistently produces
-> "wait, what happens if X is null?" debt during implementation. These 5
-> required sections are the minimum that produces implementable code.
+> **`standard` 下 Edge Cases 是必需的。** 跳过它会在实现期间持续产生"等等，如果 X
+> 为 null 会怎样？"这类技术债。这 5 个必需章节是产出可实现代码的最小集合。
 
-> **Art bible is conditional in `standard`.** It is required only if visual
-> asset stories exist in the project. Code-focused projects can skip it
-> entirely at `standard` level.
+> **美术圣经在 `standard` 下是条件项。** 仅当项目中存在视觉资源故事时才必需。以代码
+> 为主的项目在 `standard` 级别下可以完全跳过它。
 
 ---
 
 ### Authoring skills
 
-| Skill | full | standard | minimal |
+| 技能 | full | standard | minimal |
 |-------|------|----------|---------|
-| **design-system** | All 8 sections required | 5 required sections + conditional Formulas; Player Fantasy, Tuning Knobs skipped | Not required — game brief replaces GDDs. Can still be run voluntarily. |
-| **art-bible** | All 9 sections required | Required only if visual asset stories exist; sections 1–4 minimum when required | Not required. Can still be run voluntarily. |
-| **create-architecture** | Full architecture — all layers, module ownership, data flow, API boundaries, full ADR audit | Simplified — system layer map + critical ADR list only | Not required. Can still be run voluntarily. |
-| **ux-design** | UX spec required per screen | Core screens only (main menu, HUD, primary game loop) | Not required. Can still be run voluntarily. |
-| **map-systems** | Required before design-system | Required before design-system | Not required |
-| **architecture-decision** | All ADRs on required ADR list must be completed | Critical ADRs only — Foundation layer systems | Not required |
+| **design-system** | 全部 8 个章节必需 | 5 个必需章节 + 条件项 Formulas；跳过 Player Fantasy、Tuning Knobs | 不要求——游戏简报取代 GDD。仍可自愿运行。 |
+| **art-bible** | 全部 9 个章节必需 | 仅当存在视觉资源故事时才要求；要求时至少章节 1–4 | 不要求。仍可自愿运行。 |
+| **create-architecture** | 完整架构——所有分层、模块归属、数据流、API 边界、完整 ADR 审计 | 简化——仅系统分层图 + 关键 ADR 列表 | 不要求。仍可自愿运行。 |
+| **ux-design** | 每个屏幕都需要 UX 规格 | 仅核心屏幕（主菜单、HUD、主要玩法循环） | 不要求。仍可自愿运行。 |
+| **map-systems** | design-system 之前必需 | design-system 之前必需 | 不要求 |
+| **architecture-decision** | 必需 ADR 列表上的所有 ADR 都必须完成 | 仅关键 ADR——Foundation 层系统 | 不要求 |
 
 ---
 
 ### Review and validation skills
 
-| Skill | full | standard | minimal |
+| 技能 | full | standard | minimal |
 |-------|------|----------|---------|
-| **design-review** | All 8 sections validated — any missing section blocks approval | 5 required sections validated; missing optional sections warned but do not block | Not applicable — no GDDs to review |
-| **review-all-gdds** | Validates all 8 sections across all GDDs | Validates 5 required sections across all GDDs; optional sections surfaced as advisory only | Not applicable |
-| **architecture-review** | Full traceability matrix — all GDDs, all ADRs | Reduced scope — architecture doc + critical ADRs only | Not applicable |
-| **consistency-check** | Full entity registry cross-check against all GDD sections | Entity registry check against required sections only | Not meaningful — no GDDs to check |
-| **content-audit** | Full content count audit against all GDD specs | Limited audit — only specs in required sections counted | Cannot run — no systems index exists |
+| **design-review** | 全部 8 个章节都校验——缺少任何章节都会阻止批准 | 校验 5 个必需章节；缺少可选章节会警告但不阻止 | 不适用——没有 GDD 可评审 |
+| **review-all-gdds** | 校验所有 GDD 的全部 8 个章节 | 校验所有 GDD 的 5 个必需章节；可选章节仅作提示性展示 | 不适用 |
+| **architecture-review** | 完整可追溯性矩阵——所有 GDD、所有 ADR | 缩减范围——仅架构文档 + 关键 ADR | 不适用 |
+| **consistency-check** | 完整实体注册表与所有 GDD 章节交叉核对 | 实体注册表仅对照必需章节检查 | 无意义——没有 GDD 可检查 |
+| **content-audit** | 完整内容数量审计，对照所有 GDD 规格 | 有限审计——仅统计必需章节中的规格 | 无法运行——不存在系统索引 |
 
 ---
 
 ### Phase gate enforcement (gate-check)
 
-`gate-check` is where workflow has the most visible impact — the artifact
-checklists differ per phase per mode.
+`gate-check` 是 workflow 影响最显著的地方——产出物清单按阶段、按模式各不相同。
 
-| Gate | full | standard | minimal |
+| 闸门 | full | standard | minimal |
 |------|------|----------|---------|
-| Concept → Systems Design | game-concept.md, pillars, Visual Identity Anchor | game-concept.md only | `design/game-brief.md` only (content check, not section check) |
-| Systems Design → Technical Setup | systems-index, all MVP GDDs reviewed (8 sections), cross-GDD review | systems-index, 5-section GDDs reviewed, cross-GDD review optional | Not applicable — no gates between brief and code; the gate PASSes with that note |
-| Technical Setup → Pre-Production | engine, art bible sections 1–4+, 3+ ADRs, architecture, UX specs started | engine, art bible only if visual assets, critical ADRs, architecture | engine configured (required floor) |
-| Pre-Production → Production | sprint plan, complete art bible, epics, UX specs, control manifest; Vertical Slice + its playtest recommended (absent → CONCERNS) | epics, sprint plan; complete art bible, UX specs, control manifest recommended; Vertical Slice recommended | the brief's Build order + stories under `production/epics/`; the Vertical Slice items drop — the core loop is fun and runs end to end, checked on the current build |
-| Production → Polish | core mechanics, tests, smoke check, QA sign-off, 3+ playtests | core mechanics, smoke check, playable end to end, 1+ playtest, no open S1 bugs | smoke check, playable end to end, no open S1 bugs |
-| Polish → Release | all features, content complete, localization (`/localize qa` per locale), QA, smoke, no open S1–S3 bugs, newest `/security-audit` with no open CRITICAL/HIGH | all features, smoke, no open S1 bugs, the security audit | smoke, no open S1 bugs |
+| Concept → Systems Design | game-concept.md、游戏支柱、Visual Identity Anchor | 仅 game-concept.md | 仅 `design/game-brief.md`（内容检查，非章节检查） |
+| Systems Design → Technical Setup | systems-index、所有 MVP GDD 已评审（8 个章节）、跨 GDD 评审 | systems-index、5 章节 GDD 已评审、跨 GDD 评审可选 | 不适用——简报与代码之间无闸门；该闸门以该说明判定为 PASS |
+| Technical Setup → Pre-Production | 引擎、美术圣经章节 1–4+、3+ 个 ADR、架构、UX 规格已启动 | 引擎、仅在存在视觉资源时要求美术圣经、关键 ADR、架构 | 引擎已配置（必需底线） |
+| Pre-Production → Production | 冲刺计划、完整美术圣经、史诗、UX 规格、控制清单；建议完成垂直切片及其试玩测试（缺失 → CONCERNS） | 史诗、冲刺计划；建议完成美术圣经、UX 规格、控制清单；建议垂直切片 | 简报的 Build order + `production/epics/` 下的用户故事；垂直切片相关项取消——核心循环有趣且端到端可运行，在当前构建上检查 |
+| Production → Polish | 核心机制、测试、冒烟检查、QA 签核、3+ 次试玩测试 | 核心机制、冒烟检查、端到端可玩、1+ 次试玩测试、无未解决的 S1 bug | 冒烟检查、端到端可玩、无未解决的 S1 bug |
+| Polish → Release | 所有功能、内容完成、本地化（每个语言执行 `/localize qa`）、QA、冒烟、无未解决的 S1–S3 bug、最新的 `/security-audit` 无未解决的 CRITICAL/HIGH | 所有功能、冒烟、无未解决的 S1 bug、安全审计 | 冒烟、无未解决的 S1 bug |
 
 <!-- gate-check reconciliation: at `full` and `standard` the Vertical Slice
      keeps its long-standing "recommended, not blocking → CONCERNS if absent;
@@ -645,93 +590,85 @@ checklists differ per phase per mode.
      sprint-plan step — the brief's Build order plus stories is the floor at
      `minimal`. -->
 
-**Director panel width** (`/gate-check` Section 4b) is workflow's second effect
-here. Directors are Opus-tier, so the panel is sized to the project rather than
-fixed at four:
+**总监小组宽度**（`/gate-check` 的 Section 4b）是 workflow 在此处的第二项影响。
+总监属于 Opus 档位，因此小组规模按项目大小设定，而非固定为四位：
 
-| `workflow` | Panel | Directors |
+| `workflow` | 小组人数 | 总监 |
 |---|---|---|
-| `full` | 4 | `creative-director`, `technical-director`, `producer`, `art-director` |
-| `standard` | 2 | `technical-director`, `producer` |
+| `full` | 4 | `creative-director`、`technical-director`、`producer`、`art-director` |
+| `standard` | 2 | `technical-director`、`producer` |
 | `minimal` | 1 | `producer` |
 
-`review_mode` remains the axis that decides *whether* the panel runs at all
-(`solo` skips it entirely); workflow decides only how wide it is. Narrowing
-never softens a verdict — the strictest verdict from whoever ran still wins, and
-`/gate-check` names the perspectives that did not run.
+`review_mode` 仍是决定小组*是否*运行的轴（`solo` 完全跳过它）；workflow 只决定它
+有多宽。收窄绝不软化结论——参与运行者中最严格的结论仍然胜出，且 `/gate-check` 会
+列出未参与的视角。
 
 ---
 
 ### Planning and implementation skills
 
-| Skill | full | standard | minimal |
+| 技能 | full | standard | minimal |
 |-------|------|----------|---------|
-| **create-epics** | Requires all GDDs approved (8 sections) | Requires 5-section GDDs approved | **Skipped** (Option A) — no separate epic doc. `/create-stories` reads `design/game-brief.md` directly and synthesizes the implicit epic container itself. |
-| **create-stories** | Requires all ADRs on required list present | Requires critical ADRs present | No ADR requirement |
-| **dev-story** | Requires TR registry + governing ADR — blocks without them, and on a `Proposed`, `Deprecated` or `Superseded` ADR; a missing control manifest warns | TR registry optional; blocks only on a referenced ADR that is missing, `Proposed`, `Deprecated` or `Superseded` | No TR registry or ADR required — implements against `design/game-brief.md`; a referenced ADR that is missing, `Proposed`, `Deprecated` or `Superseded` still blocks |
-| **story-readiness** | Full TR registry + ADR + control manifest validation; any referenced ADR that is missing, `Proposed`, `Deprecated` or `Superseded` BLOCKS | TR registry optional; critical ADR check, and any referenced ADR that is missing, `Proposed`, `Deprecated` or `Superseded` BLOCKS | Acceptance-criteria check (the brief stands in for the GDD); any referenced ADR that is missing, `Proposed`, `Deprecated` or `Superseded` still BLOCKS |
-| **story-done** | Full GDD traceability + ADR consistency check | 5-section GDD traceability check | Acceptance criteria check only |
-| **qa-plan** | Full test plan derived from all 8 GDD sections | Test plan from 5 required sections | Test plan from acceptance criteria only |
-| **regression-suite** | Critical paths mapped from all sections including Edge Cases | Critical paths from required sections (including Edge Cases) | Smoke test coverage only |
-| **release-checklist** | Open S1, S2 or S3 bug in `production/qa/bugs/` fails its Quality Gates item | Open S1 fails; open S2/S3 listed as risks | Open S1 fails; open S2/S3 listed as risks |
-| **launch-checklist** | Zero open S1–S3 bugs, no exceptions | Zero open S1; S2 or a documented exception | Zero open S1; S2 or a documented exception |
-| **team-release** | qa-lead verifies no open S1–S3 bugs | qa-lead verifies no open S1 bugs | qa-lead verifies no open S1 bugs |
+| **create-epics** | 要求所有 GDD 已获批（8 个章节） | 要求 5 章节 GDD 已获批 | **跳过**（Option A）——没有单独的史诗文档。`/create-stories` 直接读取 `design/game-brief.md`，并自行合成隐式的史诗容器。 |
+| **create-stories** | 要求必需列表上的所有 ADR 均已存在 | 要求关键 ADR 已存在 | 无 ADR 要求 |
+| **dev-story** | 要求 TR 注册表 + 治理 ADR——缺失则阻塞，且遇到状态为 `Proposed`、`Deprecated` 或 `Superseded` 的 ADR 也阻塞；缺少控制清单会警告 | TR 注册表可选；仅当被引用的 ADR 缺失或状态为 `Proposed`、`Deprecated`、`Superseded` 时阻塞 | 不要求 TR 注册表或 ADR——依据 `design/game-brief.md` 实现；被引用的 ADR 若缺失或状态为 `Proposed`、`Deprecated`、`Superseded` 仍然阻塞 |
+| **story-readiness** | 完整校验 TR 注册表 + ADR + 控制清单；任何被引用的 ADR 缺失或状态为 `Proposed`、`Deprecated`、`Superseded` 都**阻塞** | TR 注册表可选；检查关键 ADR，任何被引用的 ADR 缺失或状态为 `Proposed`、`Deprecated`、`Superseded` 都**阻塞** | 验收标准检查（简报代替 GDD）；任何被引用的 ADR 缺失或状态为 `Proposed`、`Deprecated`、`Superseded` 仍**阻塞** |
+| **story-done** | 完整 GDD 可追溯性 + ADR 一致性检查 | 5 章节 GDD 可追溯性检查 | 仅验收标准检查 |
+| **qa-plan** | 从全部 8 个 GDD 章节推导完整测试计划 | 从 5 个必需章节推导测试计划 | 仅从验收标准推导测试计划 |
+| **regression-suite** | 从所有章节（含 Edge Cases）映射关键路径 | 从必需章节（含 Edge Cases）映射关键路径 | 仅冒烟测试覆盖 |
+| **release-checklist** | `production/qa/bugs/` 中存在未解决的 S1、S2 或 S3 bug 会使 Quality Gates 项失败 | 未解决的 S1 失败；未解决的 S2/S3 列为风险 | 未解决的 S1 失败；未解决的 S2/S3 列为风险 |
+| **launch-checklist** | 零未解决的 S1–S3 bug，无例外 | 零未解决的 S1；S2 或记录在案的例外 | 零未解决的 S1；S2 或记录在案的例外 |
+| **team-release** | qa-lead 核实无未解决的 S1–S3 bug | qa-lead 核实无未解决的 S1 bug | qa-lead 核实无未解决的 S1 bug |
 
 ---
 
 ### Support skills
 
-| Skill | full | standard | minimal |
+| 技能 | full | standard | minimal |
 |-------|------|----------|---------|
-| **project-stage-detect** | Checks for all doc types; missing art bible or UX specs flagged as gaps | Adjusts expectations — art bible only flagged if visual-asset stories exist; non-core UX specs not flagged | `design/game-brief.md` + engine present = normal state; no gaps flagged for absent GDDs |
-| **adopt** | Full format compliance audit across all doc types | Audit scope reduced to required docs only | `design/game-brief.md` format check only |
-| **reverse-document** | Generates full 8-section GDD from code | Generates 5-section GDD from code | Generates `design/game-brief.md` from code |
-| **propagate-design-change** | Full cascading impact analysis across all ADRs | Checks critical ADRs for references only | Not applicable |
-| **help** | Full artifact detection — surfaces all missing docs as next steps | Adjusts "what's missing" to required docs only — optional docs not surfaced as gaps | `design/game-brief.md` + engine present = next step is code |
+| **project-stage-detect** | 检查所有文档类型；缺失美术圣经或 UX 规格会被标为缺口 | 调整预期——仅在存在视觉资源故事时才标记美术圣经缺失；非核心 UX 规格不标记 | 有 `design/game-brief.md` + 引擎即为正常状态；GDD 缺失不标记为缺口 |
+| **adopt** | 对所有文档类型执行完整格式合规审计 | 审计范围缩减至必需文档 | 仅检查 `design/game-brief.md` 格式 |
+| **reverse-document** | 从代码生成完整 8 章节 GDD | 从代码生成 5 章节 GDD | 从代码生成 `design/game-brief.md` |
+| **propagate-design-change** | 对所有 ADR 执行完整级联影响分析 | 仅检查关键 ADR 中的引用 | 不适用 |
+| **help** | 完整产出物检测——将所有缺失文档作为后续步骤呈现 | 将"缺少什么"调整为仅必需文档——可选文档不作为缺口呈现 | 有 `design/game-brief.md` + 引擎即为正常状态，下一步就是写代码 |
 
 ---
 
 ### Workflow change mid-project
 
-When `workflow` changes via `/settings`, the skill emits an informational note:
+当通过 `/settings` 更改 `workflow` 时，该技能会输出一条提示信息：
 
-> "Workflow changed from [old] to [new]. Run `/content-audit` to see what's now
-> required or extra. No automatic migration — existing files stay in place."
+> "Workflow 已从 [old] 变为 [new]。运行 `/content-audit` 查看现在哪些是必需项或
+> 额外项。不会自动迁移——既有文件保持原样。"
 
-No documents are auto-deleted, auto-generated, or blocked. The setting only affects
-*new* enforcement going forward.
+不会自动删除、自动生成或阻塞任何文档。该设置仅影响此后*新*的强制执行。
 
 ---
 
 ## workflow_overrides
 
-**Controls:** Opt-in granular requirements that override the chosen workflow level
-**Location:** **top level of `project.yaml`** — a sibling of `modes:`, *not* a child of it
-**Values:** object with sub-flags (see below)
-**Default:** all false / empty
-**Set by:** `/settings`
-**Read by:** `/design-system`, `/design-review`, `/art-bible`, `/gate-check`, `/review-all-gdds`, `/qa-plan`
+**控制：** 可选的细粒度要求，用于覆盖所选 workflow 级别
+**位置：** **`project.yaml` 的顶层**——是 `modes:` 的兄弟节点，*而非*其子节点
+**取值：** 含子标志的对象（见下）
+**默认：** 全部为 false / 空
+**设置方式：** `/settings`
+**读取方：** `/design-system`、`/design-review`、`/art-bible`、`/gate-check`、`/review-all-gdds`、`/qa-plan`
 
-> **Why the location is called out.** `resolve_config` reads
-> `workflow_overrides.system_overrides.*` from the document root
-> (`yaml-helper.sh`), and all 14 consuming skill files grep the same top-level
-> path. Nested under `modes:` it is still valid YAML, so nothing errors — the
-> setting is simply never read. If you copied a `workflow_overrides` block from
-> anywhere, check its indentation: it belongs at the document root, never under
-> `modes:`.
+> **为什么特意指出位置。** `resolve_config` 从文档根读取
+> `workflow_overrides.system_overrides.*`（`yaml-helper.sh`），而全部 14 个消费方
+> 技能文件也都用 grep 匹配同一顶层路径。嵌套在 `modes:` 之下仍是合法 YAML，因此
+> 不会报错——只是该设置永远不会被读取。如果你从某处复制了 `workflow_overrides`
+> 块，请检查缩进：它属于文档根，绝不在 `modes:` 之下。
 
-**Priority chain:** the three `workflow_overrides` **boolean flags**
-(`edge_cases`, `tuning_knobs`, `art_bible_strict`) are *additive* on top of the
-chosen `workflow` level — they make things stricter, never looser. None of them
-has a value that opts out of a requirement the workflow level imposes.
+**优先级链：** 三个 `workflow_overrides` **布尔标志**（`edge_cases`、`tuning_knobs`、
+`art_bible_strict`）是在所选 `workflow` 级别之上的*叠加*——它们只会让要求更严格，
+绝不更宽松。它们都没有能退出 workflow 级别所施加要求的取值。
 
-> **`workflow_overrides.system_overrides` is not a flag and is not additive — it replaces a tier in both directions.**
-> This rule does not extend to it. On a
-> `full` project, `system_overrides.inventory: minimal` really does drop that
-> system's required sections to zero. Intended — see
-> `.claude/docs/workflow-modes.md § workflow_overrides`. Stating the additive
-> rule over the whole key is wrong: the guarantee never held for
-> `system_overrides`, so do not rely on it as a safety net.
+> **`workflow_overrides.system_overrides` 不是标志，也不是叠加式——它会双向替换档位。**
+> 该规则不适用于它。在 `full` 项目中，`system_overrides.inventory: minimal` 确实会把
+> 该系统的必需章节降为零。这是有意的——见
+> `.claude/docs/workflow-modes.md § workflow_overrides`。把叠加规则套在整个键上是
+> 错误的：该保证从未适用于 `system_overrides`，因此不要依赖它作为安全网。
 
 ---
 
@@ -755,53 +692,53 @@ workflow_overrides:
     inventory: minimal        # inventory needs no GDD — the game brief covers it (minimal = no required sections)
 ```
 
-`system_overrides` is a map of `system_name: workflow_level`. The named system uses the override; all other systems use the project-level `workflow`.
+`system_overrides` 是 `system_name: workflow_level` 的映射。被命名的系统使用覆盖值；
+所有其他系统使用项目级的 `workflow`。
 
 ---
 
 ### Affected skills
 
-| Skill | How workflow_overrides changes behavior |
+| 技能 | workflow_overrides 如何改变行为 |
 |-------|----------------------------------------|
-| **design-system** | Reads `system_overrides[system_name]` first; falls back to project `workflow`. Applies override-specific section requirements. |
-| **design-review** | Same lookup — validates against the override tier, not the project default, for the named system. |
-| **art-bible** | If `art_bible_strict: true`, requires all 9 sections regardless of `workflow` level. |
-| **gate-check** | Considers `system_overrides` when validating that all required GDDs are complete. A system at `system_overrides.combat: full` blocks the gate until all 8 sections exist for combat. |
-| **review-all-gdds** | Validates each GDD against its effective tier (project workflow + any system override). |
+| **design-system** | 优先读取 `system_overrides[system_name]`；否则回退到项目 `workflow`。应用覆盖值对应的章节要求。 |
+| **design-review** | 同样的查找——对被命名的系统按覆盖档位而非项目默认值校验。 |
+| **art-bible** | 若 `art_bible_strict: true`，无论 `workflow` 级别如何都要求全部 9 个章节。 |
+| **gate-check** | 校验所有必需 GDD 是否完整时会考虑 `system_overrides`。`system_overrides.combat: full` 的系统会阻塞闸门，直到 combat 的全部 8 个章节存在。 |
+| **review-all-gdds** | 按每个 GDD 的有效档位（项目 workflow + 任何系统覆盖）进行校验。 |
 
 ---
 
 ## modes.automation
 
-**Controls:** Whether skills ask for decisions and approval before acting, or
-recommend and proceed — the tradeoff between user control and speed  
-**Values:** `collaborative` | `guided` | `autonomous`  
-**Default:** `collaborative`  
-**Set by:** `/start`, `/settings`  
-**Read by:** All 68 skills that use `AskUserQuestion` or write files
+**控制：** 技能在行动前是否会先征求决策与批准，还是给出建议后直接推进——用户控制力
+与速度之间的取舍  
+**取值：** `collaborative` | `guided` | `autonomous`  
+**默认：** `collaborative`  
+**设置方式：** `/start`、`/settings`  
+**读取方：** 使用 `AskUserQuestion` 或写入文件的所有 68 个技能
 
-**Priority chain:** `modes.automation` in `project.yaml` → hardcoded default
+**优先级链：** `project.yaml` 中的 `modes.automation` → 硬编码默认值
 
-> **Unlike review_mode and workflow, this setting is not a per-skill table.**
-> It defines universal interaction rules that apply across all skills. A
-> per-skill breakdown would repeat the same answer 68 times.
+> **与 review_mode、workflow 不同，该设置不是逐技能表格。**
+> 它定义适用于所有技能的通用交互规则。若逐技能拆解，只会把同一答案重复 68 次。
 
-> **Overrides COLLABORATIVE-DESIGN-PRINCIPLE.md:** `guided` and `autonomous`
-> modes intentionally relax the Q→O→D→Draft→Approval protocol defined in that
-> document. This is opt-in. `collaborative` preserves the protocol exactly.
+> **覆盖 COLLABORATIVE-DESIGN-PRINCIPLE.md：** `guided` 与 `autonomous`
+> 模式会有意放宽该文档所定义的 Q→O→D→Draft→Approval 协议。这是用户主动选择的。
+> `collaborative` 则完全保留该协议。
 
-> **Safety net — `automation_always_ask`:** Even in `autonomous` mode, certain
-> categories of decision can be configured to always prompt. See next section.
+> **安全网——`automation_always_ask`：** 即使在 `autonomous` 模式下，也可以配置
+> 某些类别的决策始终弹出询问。见下一节。
 
 ---
 
 ### Value intent
 
-| Value | Speed | Control | What changes |
+| 取值 | 速度 | 控制力 | 变化 |
 |-------|-------|---------|--------------|
-| `collaborative` | Slowest | Full — every decision is the user's | Current behavior. Q→O→D→Draft→Approval strictly followed. |
-| `guided` | Balanced | High — major decisions are the user's, minor ones proceed automatically | AI states recommendation and proceeds for minor decisions. AskUserQuestion reserved for major/irreversible decisions. |
-| `autonomous` | Fastest | Low — AI decides, logs, and proceeds | No AskUserQuestion (except categories in `automation_always_ask`). No draft review. No write approval. All decisions logged to decision log. |
+| `collaborative` | 最慢 | 完全——每个决策都由用户做出 | 当前行为。严格遵循 Q→O→D→Draft→Approval。 |
+| `guided` | 平衡 | 高——重大决策由用户做，次要决策自动推进 | AI 说明建议并对次要决策直接推进。AskUserQuestion 仅保留给重大/不可逆决策。 |
+| `autonomous` | 最快 | 低——AI 自行决策、记录并推进 | 不调用 AskUserQuestion（`automation_always_ask` 中的类别除外）。无草稿评审。无写入批准。所有决策记入决策日志。 |
 
 ---
 
@@ -809,132 +746,120 @@ recommend and proceed — the tradeoff between user control and speed
 
 #### collaborative (current behavior — no change)
 
-- `AskUserQuestion` called for every multi-option decision
-- 2–4 options presented with pros/cons for every design choice
-- Full draft shown and approved before every file write
-- "May I write this to [filepath]?" asked before every write
-- "May I create [filepath] with skeleton?" asked before skeleton creation
-- Section-by-section approval in multi-section authoring skills
-- Multi-file changes require explicit approval of the full changeset
+- 每个多选项决策都调用 `AskUserQuestion`
+- 每个设计选择都给出 2–4 个选项及其利弊
+- 每次写文件前展示完整草稿并获批准
+- 每次写入前询问"我可以把它写入 [filepath] 吗？"
+- 创建骨架前询问"我可以用骨架创建 [filepath] 吗？"
+- 多章节撰写技能中逐章节批准
+- 多文件变更需要用户对完整变更集的显式批准
 
 #### guided
 
-- `AskUserQuestion` called for **major decisions only** (see classification below)
-- Minor decisions: AI states recommendation inline and proceeds — e.g.
-  *"Going with a static utility pattern here — it fits the existing architecture.
-  Continuing unless you want to change direction."*
-- Updates to existing files: draft shown briefly before writing — proceeds after a
-  short summary, does not wait for explicit "yes"
-- "May I write?" asked for **new files only**, and a new file waits for the answer
-  — updates to existing files proceed directly
-- Still presents options for major decisions but caps at 2 choices with a clear
-  recommendation
-- Multi-section authoring: writes each approved section immediately, no per-section
-  confirmation prompt
+- `AskUserQuestion` 仅用于**重大决策**（见下方分类）
+- 次要决策：AI 在行内说明建议并推进——例如
+  *"这里采用静态工具类模式——它符合现有架构。除非你想调整方向，否则继续。"*
+- 更新既有文件：写入前简要展示草稿——给出简短摘要后即推进，不等待明确的"是"
+- "我可以写入吗？"仅对**新文件**询问，且新文件会等待回答——对既有文件的更新直接进行
+- 重大决策仍会给出选项，但最多 2 个选择，并附明确建议
+- 多章节撰写：每个已批准章节立即写入，无逐章节确认提示
 
 #### autonomous
 
-- No `AskUserQuestion` calls **except** for categories listed in `automation_always_ask`
-- No draft review
-- No "May I write?" prompts — writes directly
-- Picks the recommended option for every decision without presenting alternatives
-- All decisions logged immediately to `production/session-logs/decision-log.md`
-  with: timestamp, skill, decision point, option chosen, reasoning
-- User reviews decision log post-session to audit choices made
+- 不调用 `AskUserQuestion`，**除非**是 `automation_always_ask` 中列出的类别
+- 无草稿评审
+- 无"我可以写入吗？"提示——直接写入
+- 每个决策都直接选择推荐项，不展示备选方案
+- 所有决策立即记录到 `production/session-logs/decision-log.md`，包含：时间戳、技能、
+  决策点、所选选项、理由
+- 用户在会话后查看决策日志，以审计所做的选择
 
 #### every mode — a question with no answer
 
-- A question that comes back skipped, dismissed or empty is **not an answer**, in
-  every mode and on every tool (a closed question, a headless run that returns
-  every question as skipped, a reply that picks nothing)
-- Nothing is written, no mode or setting changes and no option is picked on its
-  behalf; the question is asked again in plain text, naming what waits on it
-- `autonomous`: a question the mode did not require is decided and logged as
-  usual; an `automation_always_ask` category or an exempt skill asks again
-- Where nobody can answer (CI, headless), the skill stops and reports what is
-  waiting rather than choosing
+- 被跳过、被关闭或返回空内容的问题**不是回答**，在任何模式、任何工具下都是如此
+  （已关闭的问题、把每个问题都返回为跳过的无头运行、什么都没选的回复）
+- 不写入任何内容，不改动模式或设置，也不代其选择任何选项；该问题会以纯文本
+  重新询问，并点名它在等待什么
+- `autonomous`：该模式本不需要的问题按常规决定并记录；属于 `automation_always_ask`
+  类别或由被豁免技能提出的问题会再次询问
+- 在无人能回答的场景（CI、无头运行）中，技能会停止并报告正在等待什么，而不是代替选择
 
 ---
 
 ### Major vs minor decision classification (guided mode)
 
-**Major — always use AskUserQuestion in guided mode:**
+**重大——guided 模式下始终使用 AskUserQuestion：**
 
-| Decision type | Example |
+| 决策类型 | 示例 |
 |---------------|---------|
-| Choosing a system name or document path | "What should we call this system?" |
-| Mutually exclusive design directions | "Real-time or turn-based?" |
-| Any choice that gates downstream work | Engine choice, architecture approach |
-| Scope changes | "Cut this feature or slip the deadline?" |
-| Any decision that can't be changed without significant rework | Core loop mechanic |
+| 选择系统名称或文档路径 | "这个系统该叫什么？" |
+| 互斥的设计方向 | "实时还是回合制？" |
+| 任何会门控下游工作的选择 | 引擎选择、架构方案 |
+| 范围变更 | "砍掉这个功能还是延期？" |
+| 任何需要大量返工才能更改的决策 | 核心循环机制 |
 
-**Minor — AI recommends and proceeds in guided mode:**
+**次要——guided 模式下由 AI 建议并推进：**
 
-| Decision type | Example |
+| 决策类型 | 示例 |
 |---------------|---------|
-| Which section to work on next | "Moving to Edge Cases next" |
-| Optional section inclusion | "Adding a Visual Notes section — fits the system" |
-| Formatting and structure choices | Heading levels, table vs prose |
-| Adding detail to an already-decided direction | Sub-options within an approved approach |
-| Next-step routing after a phase completes | "Running design-review now" |
+| 下一步做哪个章节 | "接下来处理 Edge Cases" |
+| 可选章节的纳入 | "加一节 Visual Notes——它符合该系统" |
+| 格式与结构选择 | 标题层级、表格还是散文 |
+| 为已确定的方向补充细节 | 已批准方案内的子选项 |
+| 阶段完成后的下一步路由 | "现在运行 design-review" |
 
 ---
 
 ### Affected skills by category
 
-**Authoring skills — highest impact.** Each pauses 10–15 times per document in
-`collaborative`. Drops to 2–3 in `guided`, zero in `autonomous`.
+**撰写类技能——影响最大。** 在 `collaborative` 下，每份文档会暂停 10–15 次。
+在 `guided` 下降至 2–3 次，`autonomous` 下为 0 次。
 
-`brainstorm`, `design-system`, `art-bible`, `create-architecture`, `ux-design`,
-`map-systems`, `architecture-decision`, `create-epics`, `create-stories`,
-`sprint-plan`, `prototype`
+`brainstorm`、`design-system`、`art-bible`、`create-architecture`、`ux-design`、
+`map-systems`、`architecture-decision`、`create-epics`、`create-stories`、
+`sprint-plan`、`prototype`
 
-**Review skills — medium impact.** Pause after presenting findings to ask what
-to do next. In `guided` routing decisions proceed automatically. In `autonomous`
-the recommended path is taken and logged.
+**评审类技能——中等影响。** 呈现发现后暂停，询问下一步做什么。在 `guided` 下
+路由决策自动推进。在 `autonomous` 下采用推荐路径并记录。
 
-`design-review`, `architecture-review`, `gate-check`, `review-all-gdds`,
-`story-readiness`, `story-done`, `milestone-review`, `playtest-report`
+`design-review`、`architecture-review`、`gate-check`、`review-all-gdds`、
+`story-readiness`、`story-done`、`milestone-review`、`playtest-report`
 
-**Team orchestration skills — medium impact.** Pause between phases for
-check-in. In `guided` the pipeline advances automatically unless BLOCKED. In
-`autonomous` the full pipeline runs end to end.
+**团队编排技能——中等影响。** 阶段之间暂停进行确认。在 `guided` 下流水线自动推进，
+除非状态为 BLOCKED。在 `autonomous` 下完整流水线端到端运行。
 
-`team-combat`, `team-ui`, `team-audio`, `team-qa`, `team-release`,
-`team-narrative`, `team-polish`, `team-level`, `team-live-ops`
+`team-combat`、`team-ui`、`team-audio`、`team-qa`、`team-release`、
+`team-narrative`、`team-polish`、`team-level`、`team-live-ops`
 
-**Implementation skills — lower impact.** Pause for architectural questions
-before writing code. In `guided` only genuinely ambiguous decisions stop. In
-`autonomous` the conventional approach is picked and logged.
+**实现类技能——影响较低。** 写代码前就架构问题暂停。在 `guided` 下只有真正含糊的
+决策才会停下。在 `autonomous` 下选择常规做法并记录。
 
-`dev-story`, `code-review`
+`dev-story`、`code-review`
 
-**Setup and utility skills — lowest impact.** Pause for initial configuration
-or routing questions. In `guided` defaults are applied automatically. In
-`autonomous` recommended defaults are taken without prompting.
+**设置与工具类技能——影响最低。** 为初始配置或路由问题暂停。在 `guided` 下自动应用
+默认值。在 `autonomous` 下直接采用推荐默认值而不提示。
 
-`start`, `adopt`, `setup-engine`, `retrospective`, `localize`, `propagate-design-change`,
-`asset-spec`, `smoke-check`, `qa-plan`, `story-readiness`
+`start`、`adopt`、`setup-engine`、`retrospective`、`localize`、`propagate-design-change`、
+`asset-spec`、`smoke-check`、`qa-plan`、`story-readiness`
 
 ---
 
 ### Exemptions — skills that ignore the automation setting
 
-These skills always behave as `collaborative` regardless of the setting.
-The reasons are noted.
+这些技能无论该设置如何，都始终以 `collaborative` 方式运行。原因如下。
 
-| Skill | Why always collaborative |
+| 技能 | 为什么始终协作 |
 |-------|--------------------------|
-| **hotfix** | Emergency decisions — user must approve scope and risk before any action |
-| **gate-check** | Results must be reviewed — a gate verdict without user acknowledgement defeats the purpose |
-| **day-one-patch** | Release-critical — every action needs explicit sign-off |
-| **setup-engine** | One-time irreversible choice that affects the entire project |
+| **hotfix** | 紧急决策——用户必须在任何行动前批准范围与风险 |
+| **gate-check** | 结果必须经审阅——没有用户确认的闸门结论毫无意义 |
+| **day-one-patch** | 发布关键——每个操作都需要显式签核 |
+| **setup-engine** | 影响整个项目的一次性不可逆选择 |
 
 ---
 
 ### Decision log format (autonomous mode)
 
-Written to `production/session-logs/decision-log.md` — append-only.
+写入 `production/session-logs/decision-log.md`——仅追加。
 
 ```markdown
 ## [timestamp] — [skill-name]
@@ -946,112 +871,111 @@ Written to `production/session-logs/decision-log.md` — append-only.
 **Category:** [scope_changes | file_deletions | schema_changes | etc., or "minor"]
 ```
 
-If the file does not exist, it is created. It is never truncated — each session
-appends to the existing log.
+若文件不存在则创建。它绝不会被截断——每次会话都追加到既有日志。
 
 ---
 
 ## modes.automation_always_ask
 
-**Controls:** Decision categories that ALWAYS trigger AskUserQuestion regardless of automation mode
-**Values:** list of category names
-**Default:** `[scope_changes, file_deletions, schema_changes]`
-**Set by:** `/settings`
-**Read by:** All skills that respect `modes.automation`
+**控制：** 无论自动化模式如何都始终触发 AskUserQuestion 的决策类别
+**取值：** 类别名称列表
+**默认：** `[scope_changes, file_deletions, schema_changes]`
+**设置方式：** `/settings`
+**读取方：** 所有遵循 `modes.automation` 的技能
 
-> **Makes `autonomous` safe.** Without this, `autonomous` is "AI does literally
-> everything, no questions asked." With it, AI does most things but stops on
-> destructive or irreversible decisions you specifically named.
+> **让 `autonomous` 变得安全。** 没有它，`autonomous` 就是"AI 字面意义上做所有事，
+> 什么都不问"。有了它，AI 会完成大部分工作，但会在你明确指定的破坏性或不可逆
+> 决策上停下来。
 
 ---
 
 ### Recognized categories
 
-| Category | Examples of decisions in this category |
+| 类别 | 该类别下的决策示例 |
 |----------|----------------------------------------|
-| `scope_changes` | Cutting a feature, slipping a deadline, splitting/merging an epic, removing acceptance criteria |
-| `file_deletions` | Removing a story, deleting a GDD, removing a system, removing a test file |
-| `schema_changes` | Changes to project.yaml, story template, control manifest, ADR template, GDD template |
-| `architecture_decisions` | New ADR creation, ADR replacement, system boundary changes |
-| `version_bumps` | Engine version change, framework version bump, dependency major version change |
-| `external_calls` | Invoking external APIs (asset gen, AI services) when in autonomous mode |
+| `scope_changes` | 砍掉功能、推迟截止日期、拆分/合并史诗、移除验收标准 |
+| `file_deletions` | 移除用户故事、删除 GDD、移除系统、移除测试文件 |
+| `schema_changes` | 修改 project.yaml、用户故事模板、控制清单、ADR 模板、GDD 模板 |
+| `architecture_decisions` | 新建 ADR、替换 ADR、变更系统边界 |
+| `version_bumps` | 引擎版本变更、框架版本升级、依赖的主版本变更 |
+| `external_calls` | 在 autonomous 模式下调用外部 API（资源生成、AI 服务） |
 
-The list is a YAML list of these strings. Skills check whether the current decision falls into one of the configured categories and prompt regardless of `automation` value.
+该列表是这些字符串构成的 YAML 列表。技能会判断当前决策是否属于已配置的某一类别，
+若是则无论 `automation` 取值如何都会提示。
 
 ---
 
 ### Affected skills
 
-| Skill | Categories typically triggered |
+| 技能 | 通常触发的类别 |
 |-------|--------------------------------|
 | **scope-check** | `scope_changes` |
-| **propagate-design-change** | `schema_changes`, `architecture_decisions` |
+| **propagate-design-change** | `schema_changes`、`architecture_decisions` |
 | **architecture-decision** | `architecture_decisions` |
-| **setup-engine** | `version_bumps`, `schema_changes` |
-| **story-done** | `file_deletions` (when removing/replacing test files) |
-| **asset-spec** | `external_calls` (when calling external generators) |
+| **setup-engine** | `version_bumps`、`schema_changes` |
+| **story-done** | `file_deletions`（移除/替换测试文件时） |
+| **asset-spec** | `external_calls`（调用外部生成器时） |
 
 ---
 
 ## modes.story_granularity
 
-**Controls:** How big each story is and how many stories per epic/sprint
-**Values:** `coarse` | `balanced` | `fine`
-**Default:** *none* — supplied by `modes.rigor` (`minimal`, the default, yields `coarse`; `standard` yields `balanced`; `full` yields `fine`)
-**Set by:** `/start` (via `modes.rigor`), `/settings`
-**Read by:** `/create-stories`, `/sprint-plan`, `/sprint-status`, `/story-readiness`
+**控制：** 每个用户故事的规模，以及每个史诗/冲刺包含多少用户故事
+**取值：** `coarse` | `balanced` | `fine`
+**默认：** *无*——由 `modes.rigor` 提供（`minimal`（默认值）产出 `coarse`；`standard` 产出 `balanced`；`full` 产出 `fine`）
+**设置方式：** `/start`（通过 `modes.rigor`）、`/settings`
+**读取方：** `/create-stories`、`/sprint-plan`、`/sprint-status`、`/story-readiness`
 
-**Priority chain:** `modes.story_granularity` in `project.yaml` → `modes.rigor` expansion → *(no hardcoded default)*
+**优先级链：** `project.yaml` 中的 `modes.story_granularity` → `modes.rigor` 展开 → *（无硬编码默认值）*
 
 ---
 
 ### Value intent
 
-| Value | Story shape | Stories per sprint | Best for |
+| 取值 | 用户故事形态 | 每冲刺故事数 | 最适合 |
 |-------|-------------|-------------------|----------|
-| `coarse` | 1 story = 1 feature. 3–5 days work each. 5–10 ACs per story. The default, from `rigor: minimal`. | 2–4 | Solo devs, prototyping, "I know what I'm building" |
-| `balanced` | 1 story = 1 task. 1–2 days work each. 2–4 ACs per story. The `rigor: standard` value. | 6–10 | Most projects |
-| `fine` | 1 story = 1 AC. Hours of work each. Easy code review. Frequent /story-done. | 15–25 | Teams, learning, anything needing fine handoffs |
+| `coarse` | 1 个故事 = 1 个功能。每个 3–5 天工作量。每个故事 5–10 条验收标准。默认值，源自 `rigor: minimal`。 | 2–4 | 单人开发者、做原型、"我很清楚要做什么"的人 |
+| `balanced` | 1 个故事 = 1 个任务。每个 1–2 天工作量。每个故事 2–4 条验收标准。即 `rigor: standard` 对应的取值。 | 6–10 | 大多数项目 |
+| `fine` | 1 个故事 = 1 条验收标准。每个只需数小时。便于代码评审。频繁执行 /story-done。 | 15–25 | 团队、学习、任何需要细致交接的场景 |
 
 ---
 
 ### Affected skills
 
-| Skill | coarse | balanced | fine |
+| 技能 | coarse | balanced | fine |
 |-------|--------|----------|------|
-| **create-stories** | Each story carries 5–10 ACs covering an entire feature | Each story carries 2–4 ACs covering one task | Each story carries 1 AC; story name = AC restatement |
-| **sprint-plan** | Allocates 2–4 stories per sprint based on velocity. | Allocates 6–10 stories per sprint. | Allocates 15–25 stories per sprint. |
-| **sprint-status** | Burn-down reads in feature-sized chunks. | Burn-down reads in task-sized chunks. | Burn-down reads in AC-sized chunks. |
+| **create-stories** | 每个故事承载 5–10 条验收标准，覆盖整个功能 | 每个故事承载 2–4 条验收标准，覆盖一个任务 | 每个故事承载 1 条验收标准；故事名称 = 验收标准的复述 |
+| **sprint-plan** | 依据速率每冲刺分配 2–4 个故事。 | 每冲刺分配 6–10 个故事。 | 每冲刺分配 15–25 个故事。 |
+| **sprint-status** | 燃尽图按功能规模读取。 | 燃尽图按任务规模读取。 | 燃尽图按验收标准规模读取。 |
 
 ---
 
 ## docs.density
 
-**Controls:** How deep each section in authored docs goes — independent of which sections are required
-**Values:** `terse` | `balanced` | `thorough`
-**Default:** *none* — supplied by `modes.rigor` (`minimal`, the default, yields `terse`; `standard` yields `balanced`; `full` yields `thorough`)
-**Set by:** `/start` (via `modes.rigor`), `/settings`
-**Read by:** `/design-system`, `/art-bible`, `/create-architecture`, `/ux-design`, `/map-systems`, `/brainstorm`
+**控制：** 撰写文档中每个章节的深入程度——与哪些章节为必需无关
+**取值：** `terse` | `balanced` | `thorough`
+**默认：** *无*——由 `modes.rigor` 提供（`minimal`（默认值）产出 `terse`；`standard` 产出 `balanced`；`full` 产出 `thorough`）
+**设置方式：** `/start`（通过 `modes.rigor`）、`/settings`
+**读取方：** `/design-system`、`/art-bible`、`/create-architecture`、`/ux-design`、`/map-systems`、`/brainstorm`
 
-**Priority chain:** `docs.density` in `project.yaml` → `modes.rigor` expansion → *(no hardcoded default)*
+**优先级链：** `project.yaml` 中的 `docs.density` → `modes.rigor` 展开 → *（无硬编码默认值）*
 
-> **Distinct from `workflow`, but not independent by default.** `workflow`
-> controls which sections exist; `density` controls how deep each section goes.
-> `modes.rigor` sets both together, so the diagonal (`rigor: full` → 8
-> sections *and* thorough prose) is what you get without asking. The off-diagonal
-> is still reachable and is the reason `rigor` overrides both ways: `rigor: full`
-> + an explicit `docs.density: terse` gives "all sections but each is compact" —
-> the "comprehensive but tight" mode, which neither knob expresses alone.
+> **与 `workflow` 不同，但默认并不独立。** `workflow` 控制存在哪些章节；`density`
+> 控制每个章节的深入程度。`modes.rigor` 同时设定两者，因此不作额外指定时你得到的
+> 就是那条对角线（`rigor: full` → 8 个章节*且*详尽散文）。非对角组合仍然可达，
+> 这也正是 `rigor` 允许双向覆盖的原因：`rigor: full` + 显式的 `docs.density: terse`
+> 得到"所有章节都存在，但每个都很紧凑"——即"全面但紧凑"模式，这是任何单个旋钮
+> 都无法单独表达的。
 
 ---
 
 ### Value intent
 
-| Value | Per-section output style |
+| 取值 | 每章节的输出风格 |
 |-------|--------------------------|
-| `terse` | Bullet points. 2–5 lines per section. Skip rationale and narrative framing. Skip preambles like "In this game..." Just facts needed to implement. The default, from `rigor: minimal`. |
-| `balanced` | Paragraphs with light rationale. Examples where helpful. The `rigor: standard` value. |
-| `thorough` | Full prose. Rationale for every decision. Examples, alternatives considered, design history. |
+| `terse` | 项目符号列表。每节 2–5 行。跳过理由说明与叙事性铺陈。跳过"在这款游戏中……"之类的开场白。只写实现所需的事实。默认值，源自 `rigor: minimal`。 |
+| `balanced` | 带简要理由说明的段落。在有用处给出示例。即 `rigor: standard` 对应的取值。 |
+| `thorough` | 完整散文。每个决策都给出理由。包含示例、考虑过的备选方案、设计历史。 |
 
 ---
 
@@ -1059,185 +983,182 @@ The list is a YAML list of these strings. Skills check whether the current decis
 
 |  | docs.density: terse | balanced | thorough |
 |---|---|---|---|
-| **workflow: minimal** | Game brief in bullets *(default)* | Game brief in prose | Game brief + rationale |
-| **workflow: standard** | 5 sections, bullets | 5 sections, paragraphs | 5 sections + examples |
-| **workflow: full** | 8 sections, bullets *(comprehensive but compact)* | 8 sections, paragraphs *(current full)* | 8 sections + rationale + examples |
+| **workflow: minimal** | 项目符号形式的游戏简报 *（默认）* | 散文形式的游戏简报 | 游戏简报 + 理由说明 |
+| **workflow: standard** | 5 个章节，项目符号 | 5 个章节，段落 | 5 个章节 + 示例 |
+| **workflow: full** | 8 个章节，项目符号 *（全面但紧凑）* | 8 个章节，段落 *（当前 full）* | 8 个章节 + 理由说明 + 示例 |
 
 ---
 
 ### Affected skills
 
-| Skill | terse | balanced | thorough |
+| 技能 | terse | balanced | thorough |
 |-------|-------|----------|----------|
-| **design-system** | Each GDD section is 2–5 bullets. Skip Player Fantasy preambles. | Paragraphs with key decisions explained. | Full prose, decision history, alternatives considered. |
-| **art-bible** | Each art bible section is a bulleted list of constraints + references. | Paragraphs explaining each visual choice. | Full prose including style explorations, references, rationale per choice. |
-| **create-architecture** | Layer diagrams + decision bullets. No essays. | Diagrams + paragraph explanations of layer choices. | Full prose with rationale, trade-offs, alternatives considered per layer. |
-| **ux-design** | Wireframe descriptions + interaction bullets. | Wireframes + paragraph descriptions of flows. | Full prose including user research summaries, alternative flow considerations. |
-| **map-systems** | One-line system descriptions. | Brief paragraph per system + dependency notes. | Full system-by-system rationale + relationship analysis. |
-| **brainstorm** | Pillar bullets + concept bullets. | Pillars + concept with brief rationale. | Pillars + concept + extensive rationale + alternatives. |
+| **design-system** | 每个 GDD 章节 2–5 条项目符号。跳过 Player Fantasy 类开场白。 | 用段落解释关键决策。 | 完整散文，含决策历史与考虑过的备选方案。 |
+| **art-bible** | 每个美术圣经章节是约束与参考资料的符号列表。 | 用段落解释每项视觉选择。 | 完整散文，含风格探索、参考资料、每项选择的理由。 |
+| **create-architecture** | 分层图 + 决策要点。不写长篇论述。 | 图 + 用段落解释分层选择。 | 完整散文，含每层的理由、取舍与考虑过的备选方案。 |
+| **ux-design** | 线框描述 + 交互要点。 | 线框图 + 用段落描述流程。 | 完整散文，含用户研究摘要与备选流程考量。 |
+| **map-systems** | 一行式系统描述。 | 每个系统一段简述 + 依赖说明。 | 逐系统的完整理由说明 + 关系分析。 |
+| **brainstorm** | 支柱要点 + 概念要点。 | 支柱 + 概念，附简要理由。 | 支柱 + 概念 + 详尽理由 + 备选方案。 |
 
 ---
 
 ## testing.framework
 
-**Controls:** Which test framework the project uses — drives test-runner commands and per-engine assumptions in CI
-**Values:** engine-specific (see table)
-**Default:** auto-populated by `/setup-engine` based on engine choice
-**Set by:** `/setup-engine`, `/settings`
-**Read by:** `/test-helpers` — the only skill that references it. `/qa-plan`, `/dev-story`, `/regression-suite`, `/test-setup` and `/smoke-check` do **not** name the key, despite being plausible readers.
-  *(Derived by grep. A helper-based read such as `session_state_enabled()` would not show up, so treat this list as the verified floor, not a ceiling.)*
+**控制：** 项目使用哪个测试框架——决定 CI 中的测试运行器命令与各引擎假设
+**取值：** 因引擎而异（见表格）
+**默认：** 由 `/setup-engine` 依据引擎选择自动填充
+**设置方式：** `/setup-engine`、`/settings`
+**读取方：** `/test-helpers`——唯一引用它的技能。`/qa-plan`、`/dev-story`、`/regression-suite`、`/test-setup` 与 `/smoke-check` **不**提及该键，尽管它们看似是合理的读取方。
+  *（通过 grep 推导。像 `session_state_enabled()` 这样的辅助函数式读取不会显现，因此请将此列表视为已验证的下限，而非上限。）*
 
-**Priority chain:** `testing.framework` in `project.yaml` → engine default
+**优先级链：** `project.yaml` 中的 `testing.framework` → 引擎默认值
 
-> **Migrated from `technical-preferences.md`.**
+> **迁移自 `technical-preferences.md`。**
 
 ---
 
 ### Engine defaults
 
-| Engine | Default test framework | Alternatives |
+| 引擎 | 默认测试框架 | 备选方案 |
 |--------|------------------------|--------------|
-| Godot | `gdunit4` | `godot-test`, `WAT` |
-| Unity | `unity-test-framework` | `nunit`, custom |
-| Unreal | `unreal-automation` | Google Test, custom |
+| Godot | `gdunit4` | `godot-test`、`WAT` |
+| Unity | `unity-test-framework` | `nunit`、自研 |
+| Unreal | `unreal-automation` | Google Test、自研 |
 
 ---
 
 ### Affected skills
 
-| Skill | How `testing.framework` is used |
+| 技能 | `testing.framework` 如何使用 |
 |-------|--------------------------------|
-| **qa-plan** | Test plan tailored to framework's idioms (assertion style, fixture pattern, parameterized tests) |
-| **dev-story** | Test framework name passed to programmer subagent in implementation brief |
-| **regression-suite** | Test file naming and discovery patterns match framework conventions |
-| **test-setup** | Scaffolds the right test layout for the engine (gdUnit4 under `addons/gdUnit4/` + `tests/` for Godot; `Assets/Tests/` asmdefs for Unity; `Source/<Module>/Private/Tests/` for Unreal) |
-| **smoke-check** | Invokes framework-appropriate test runner |
+| **qa-plan** | 测试计划贴合该框架的惯用法（断言风格、测试夹具模式、参数化测试） |
+| **dev-story** | 在实现简报中把测试框架名称传给程序员子代理 |
+| **regression-suite** | 测试文件命名与发现模式匹配框架约定 |
+| **test-setup** | 为引擎搭建正确的测试布局（Godot 的 gdUnit4 位于 `addons/gdUnit4/` + `tests/`；Unity 的 `Assets/Tests/` asmdef；Unreal 的 `Source/<Module>/Private/Tests/`） |
+| **smoke-check** | 调用与该框架相配的测试运行器 |
 
 ---
 
 ## testing.strict
 
-**Controls:** Whether failing or missing test evidence blocks a story from
-closing, or produces a warning and lets work continue — per test type
-**Values:** map of `{logic, integration, visual, ui, config}` → `true | false`
-**Default:** `{logic: true, integration: true, visual: true, ui: true, config: false}`
-**Set by:** `/settings`
-**Read by:** `story-done`, `story-readiness`, `gate-check`, `smoke-check`, `dev-story`, `test-evidence-review`
+**控制：** 测试失败或缺失测试证据时是阻止用户故事关闭，还是仅警告并允许继续——按测试类型分别设定
+**取值：** `{logic, integration, visual, ui, config}` → `true | false` 的映射
+**默认：** `{logic: true, integration: true, visual: true, ui: true, config: false}`
+**设置方式：** `/settings`
+**读取方：** `story-done`、`story-readiness`、`gate-check`、`smoke-check`、`dev-story`、`test-evidence-review`
 
-> **Per-type, not a single bool.** A global `testing.strict: true|false` forces
-> all-or-nothing: either all test failures block or none do. Per-type matches how
-> most teams actually work — strict logic and visual gates, an advisory smoke check.
+> **按类型而非单一布尔值。** 全局的 `testing.strict: true|false` 会强制全有或全无：
+> 要么所有测试失败都阻塞，要么都不阻塞。按类型设定符合多数团队的实际工作方式——
+> 逻辑与视觉采用严格闸门，冒烟检查仅作建议。
 
-> **Composes with `qa.level`:** `qa.level` controls whether evidence is REQUIRED.
-> `testing.strict` controls whether failures BLOCK when evidence exists. If
-> `qa.level: minimal`, the strict map is effectively ignored (no evidence required
-> means nothing to be strict about).
+> **与 `qa.level` 组合：** `qa.level` 控制证据是否**必需**。`testing.strict` 控制
+> 在证据存在时失败是否**阻塞**。若 `qa.level: minimal`，严格映射实际上会被忽略
+> （不要求证据，也就没有什么需要严格对待）。
 
 ---
 
 ### Value intent per type
 
-| Type | `true` | `false` |
+| 类型 | `true` | `false` |
 |------|--------|---------|
-| `logic` (formulas, AI, state machines) | Unit test failures BLOCK — story cannot close | Failures WARN — story can close with warning |
-| `integration` (multi-system) | Integration test failures BLOCK | Failures WARN |
-| `visual` (animation, VFX, feel) | Missing/failing screenshot evidence BLOCKS (default) | Advisory only — story can close |
-| `ui` (menus, HUD, screens) | Missing screenshot of the screen BLOCKS (default) | Advisory only — story can close |
-| `config` (balance tuning) | Failing smoke check BLOCKS | Advisory only — story can close (default) |
+| `logic`（公式、AI、状态机） | 单元测试失败**阻塞**——故事无法关闭 | 失败仅**警告**——故事可在有警告的情况下关闭 |
+| `integration`（多系统） | 集成测试失败**阻塞** | 失败仅**警告** |
+| `visual`（动画、VFX、手感） | 截图证据缺失/失败**阻塞**（默认） | 仅作建议——故事可关闭 |
+| `ui`（菜单、HUD、界面） | 缺少界面截图**阻塞**（默认） | 仅作建议——故事可关闭 |
+| `config`（平衡性调整） | 冒烟检查失败**阻塞** | 仅作建议——故事可关闭（默认） |
 
 ---
 
 ### Affected skills
 
-| Skill | strict.[type]: true | strict.[type]: false |
+| 技能 | strict.[type]: true | strict.[type]: false |
 |-------|---------------------|----------------------|
-| **story-done** | Story of that type cannot close on test/evidence failure | Story can close; warning logged in story file |
-| **story-readiness** | Validates test requirements exist before implementation — blocks if absent | Validates but does not block — surfaces as warnings |
-| **gate-check** | CI failures of that type block phase transition | CI failures of that type surfaced as concerns, not blockers |
-| **smoke-check** | Failing smoke (config strict) blocks QA handoff | Failing smoke flagged but handoff proceeds |
-| **dev-story** | References test requirements — flags story as unverifiable if absent | References test requirements — advisory only |
-| **test-evidence-review** | A gap in that type's evidence is a BLOCKING item (the run ends CONCERNS) | The gap is ADVISORY |
+| **story-done** | 该类型的故事因测试/证据失败而无法关闭 | 故事可关闭；警告记入故事文件 |
+| **story-readiness** | 在实现前校验测试需求存在——缺失则阻塞 | 校验但不阻塞——以警告形式呈现 |
+| **gate-check** | 该类型的 CI 失败会阻塞阶段推进 | 该类型的 CI 失败以关注项呈现，而非阻塞项 |
+| **smoke-check** | 冒烟失败（config 严格）会阻塞 QA 交接 | 冒烟失败会被标记，但交接继续 |
+| **dev-story** | 引用测试需求——若缺失则将该故事标为不可验证 | 引用测试需求——仅作建议 |
+| **test-evidence-review** | 该类型证据的缺口是**阻塞**项（本次运行以 CONCERNS 结束） | 该缺口为**建议**性质 |
 
-> **Unset-key resolution.** Each skill reads `testing.strict.<type>`; if absent
-> it reads `testing.strict` as a plain boolean (legacy form); if still absent it
-> falls back to a hardcoded default. For `story-done`, `story-readiness`,
-> `gate-check`, and `dev-story` the hardcoded default is the per-type default map
-> above (logic/integration/visual/ui strict, config advisory). **`smoke-check` is
-> the exception**: it is a build-health gate, so an unset `testing.strict.config`
-> defaults to *strict* (a FAIL blocks QA hand-off) — preserving its v1.0 behavior.
-> Only an explicit `testing.strict.config: false` makes a failing smoke advisory.
+> **未设置键时的解析。** 每个技能读取 `testing.strict.<type>`；若不存在，则把
+> `testing.strict` 当作普通布尔值读取（旧式写法）；若仍不存在，则回退到硬编码
+> 默认值。对 `story-done`、`story-readiness`、`gate-check` 与 `dev-story` 而言，
+> 硬编码默认值就是上方的按类型默认映射（logic/integration/visual/ui 严格，config
+> 建议）。**`smoke-check` 是例外**：它是构建健康闸门，因此未设置的
+> `testing.strict.config` 默认为*严格*（FAIL 会阻塞 QA 交接）——以保留其 v1.0 行为。
+> 只有显式设置 `testing.strict.config: false` 才会让冒烟失败仅作建议。
 
 ---
 
 ## qa.level
 
-**Controls:** What test evidence is required to mark stories Done
-**Values:** `minimal` | `standard` | `full`
-**Default:** *none* — supplied by `modes.rigor` (`minimal`, the default, yields `minimal`; `standard` yields `standard`; `full` yields `full`)
-**Set by:** `/start` (via `modes.rigor`), `/settings`
-**Read by:** `/story-done`, `/story-readiness`, `/dev-story`, `/smoke-check`, `/gate-check`, `/qa-plan`, `/regression-suite`, `/team-qa`, `/test-evidence-review`, `/create-stories`, `/retrospective`, `/test-setup`
+**控制：** 把用户故事标记为 Done 需要哪些测试证据
+**取值：** `minimal` | `standard` | `full`
+**默认：** *无*——由 `modes.rigor` 提供（`minimal`（默认值）产出 `minimal`；`standard` 产出 `standard`；`full` 产出 `full`）
+**设置方式：** `/start`（通过 `modes.rigor`）、`/settings`
+**读取方：** `/story-done`、`/story-readiness`、`/dev-story`、`/smoke-check`、`/gate-check`、`/qa-plan`、`/regression-suite`、`/team-qa`、`/test-evidence-review`、`/create-stories`、`/retrospective`、`/test-setup`
 
-**Priority chain:** `qa.level` in `project.yaml` → `modes.rigor` expansion → *(no hardcoded default)*
+**优先级链：** `project.yaml` 中的 `qa.level` → `modes.rigor` 展开 → *（无硬编码默认值）*
 
-> **Different axis from `testing.strict`.** `qa.level` = what evidence is required.
-> `testing.strict` = do failures block. A user wanting "minimal QA" sets
-> `qa.level: minimal` and the strict map becomes effectively a no-op.
+> **与 `testing.strict` 是不同的轴。** `qa.level` = 需要什么证据。`testing.strict`
+> = 失败是否阻塞。想要"最小 QA"的用户设置 `qa.level: minimal`，严格映射便会
+> 实际失效。
 
 ---
 
 ### Value intent
 
-| Aspect | minimal | standard | full |
+| 方面 | minimal | standard | full |
 |--------|---------|----------|------|
-| Logic stories | No test required, no gap flagged | Unit test required (strict.logic controls block) | Unit test, and every acceptance criterion covered |
-| Integration stories | No test required | Integration test or playtest doc required | Same + regression coverage |
-| Visual stories | Screenshot + lead sign-off required — the look is never waived (strict.visual controls block) | Same | Same |
-| UI stories | Screenshot of each screen touched required — never waived (strict.ui controls block) | Same | Same |
-| Config/Data stories | No evidence required | Smoke check advisory | Smoke check required (blocking unless `testing.strict.config: false`) |
-| /story-done test gate | Acceptance criteria only, except the UI and Visual/Feel screenshot, which is never waived | Enforced per story type | Enforced for every story type |
-| /gate-check phase enforcement | No test gates | Logic + integration must pass | Full coverage + regression suite |
-| /dev-story routing prompt | No "Test required: ..." line | Per-type test requirement included | Per-type, and every criterion must be covered |
-| Regression suite required by | Never | Polish stage | Production stage |
-| Best for | Jam games, throwaway prototypes, fast iteration | Most projects | Commercial, console cert, learning, paranoid teams |
+| 逻辑类故事 | 无需测试，不标记缺口 | 需要单元测试（strict.logic 控制阻塞） | 单元测试，且每条验收标准都被覆盖 |
+| 集成类故事 | 无需测试 | 需要集成测试或试玩测试文档 | 同上 + 回归覆盖 |
+| 视觉类故事 | 需要截图 + 主管签核——观感从不豁免（strict.visual 控制阻塞） | 同上 | 同上 |
+| UI 类故事 | 需要每个涉及界面的截图——从不豁免（strict.ui 控制阻塞） | 同上 | 同上 |
+| 配置/数据类故事 | 无需证据 | 冒烟检查仅作建议 | 需要冒烟检查（除非 `testing.strict.config: false`，否则阻塞） |
+| /story-done 测试闸门 | 仅验收标准，但 UI 与 Visual/Feel 截图永不豁免 | 按故事类型强制执行 | 对每种故事类型都强制执行 |
+| /gate-check 阶段强制执行 | 无测试闸门 | 逻辑 + 集成必须通过 | 完整覆盖 + 回归套件 |
+| /dev-story 路由提示 | 无"Test required: ..."行 | 包含按类型的测试需求 | 按类型，且每条标准都必须被覆盖 |
+| 回归套件要求的阶段 | 从不 | Polish 阶段 | Production 阶段 |
+| 最适合 | Game jam 作品、一次性原型、快速迭代 | 大多数项目 | 商业项目、主机认证、学习、要求严格的团队 |
 
 ---
 
 ### Affected skills
 
-| Skill | minimal | standard | full |
+| 技能 | minimal | standard | full |
 |-------|---------|----------|------|
-| **story-done** | Acceptance criteria check only — no test evidence required, except the UI and Visual/Feel screenshot, which is never waived | Per-type evidence required; strictness from `testing.strict`; more than half the criteria untested blocks | Per-type evidence required; a Config/Data smoke report blocks by default; any untested criterion blocks |
-| **story-readiness** | No test requirement validated, except the UI and Visual/Feel screenshot requirement | Test requirement per story type validated | Test requirement + coverage target validated |
-| **dev-story** | Routing prompt has no "Test required" line | Per-type test requirement passed to programmer agent | Per-type requirement, and every criterion must be covered by a test |
-| **smoke-check** | Optional; with no game tests (WAIVED), `commands.smoke` (else `commands.build`) when set and the launch and critical-path checks carry the verdict; a build nobody launched is NOT ASSESSED | Required before phase transition | Required before every commit |
-| **gate-check** | No test enforcement at phase transitions | Logic + integration tests must pass | Full coverage check + regression suite |
-| **qa-plan** | Skipped entirely or minimal smoke plan | Full plan per story type | Full plan + coverage targets per system |
-| **regression-suite** | Not generated | Generated at Polish stage entry | Generated at Production stage entry |
-| **team-qa** | A Logic, Integration or Config/Data story without a test is WAIVED; its acceptance-criteria walk in manual QA is its evidence | The automated test is the evidence for those types | Same |
-| **test-evidence-review** | A story with no test evidence is WAIVED, not MISSING; gaps in existing tests are ADVISORY; screenshots never waived | Per-type evidence reviewed; BLOCKING/ADVISORY from `testing.strict` | Same |
+| **story-done** | 仅检查验收标准——不要求测试证据，但 UI 与 Visual/Feel 截图永不豁免 | 需要按类型的证据；严格程度由 `testing.strict` 决定；超过一半标准未测试则阻塞 | 需要按类型的证据；Config/Data 冒烟报告默认阻塞；任何未测试的标准都阻塞 |
+| **story-readiness** | 不校验测试需求，但 UI 与 Visual/Feel 截图要求除外 | 校验每种故事类型的测试需求 | 校验测试需求 + 覆盖率目标 |
+| **dev-story** | 路由提示中没有"Test required"行 | 把按类型的测试需求传给程序员代理 | 按类型的需求，且每条标准都必须被测试覆盖 |
+| **smoke-check** | 可选；无游戏测试（WAIVED）时，若已设置则运行 `commands.smoke`（否则 `commands.build`），由启动与关键路径检查承担结论；构建存在但无人启动则为 NOT ASSESSED | 阶段推进前必需 | 每次提交前必需 |
+| **gate-check** | 阶段推进时不强制执行测试 | 逻辑 + 集成测试必须通过 | 完整覆盖检查 + 回归套件 |
+| **qa-plan** | 完全跳过或仅最小冒烟计划 | 按故事类型的完整计划 | 完整计划 + 按系统的覆盖率目标 |
+| **regression-suite** | 不生成 | 进入 Polish 阶段时生成 | 进入 Production 阶段时生成 |
+| **team-qa** | 没有测试的逻辑、集成或配置/数据类故事为 WAIVED；其在人工 QA 中走查验收标准即为证据 | 对这些类型而言自动化测试就是证据 | 同上 |
+| **test-evidence-review** | 无测试证据的故事为 WAIVED 而非 MISSING；既有测试中的缺口为 ADVISORY；截图永不豁免 | 按类型审查证据；阻塞/建议由 `testing.strict` 决定 | 同上 |
 
 ---
 
 ## qa.coverage_minimum
 
-**Controls:** Minimum code coverage percentage enforced at `qa.level: full`
-**Values:** integer 0–100, or `null` for unset
-**Default:** `null`
-**Set by:** `/settings`
-**Read by:** `/gate-check` only. `/story-done` does not reference the key, and no CI runner reads it.
-  *(Derived by grep. A helper-based read such as `session_state_enabled()` would not show up, so treat this list as the verified floor, not a ceiling.)*
+**控制：** 在 `qa.level: full` 下强制的最低代码覆盖率百分比
+**取值：** 0–100 的整数，或 `null` 表示未设置
+**默认：** `null`
+**设置方式：** `/settings`
+**读取方：** 仅 `/gate-check`。`/story-done` 不引用该键，也没有 CI 运行器读取它。
+  *（通过 grep 推导。像 `session_state_enabled()` 这样的辅助函数式读取不会显现，因此请将此列表视为已验证的下限，而非上限。）*
 
-**Priority chain:** `qa.coverage_minimum` in `project.yaml` → no enforcement if `null`
+**优先级链：** `project.yaml` 中的 `qa.coverage_minimum` → 若为 `null` 则不强制
 
-> **Only meaningful at `qa.level: full`.** Ignored at minimal and standard. A
-> non-null value at standard or minimal level emits a warning at session-start:
-> *"coverage_minimum is set but qa.level is not full — value will not be enforced."*
+> **仅在 `qa.level: full` 下有意义。** 在 minimal 与 standard 下被忽略。在 standard
+> 或 minimal 级别设置非空值会在会话启动时发出警告：
+> *"coverage_minimum 已设置，但 qa.level 不是 full——该值不会被强制执行。"*
 
-> **Implementation is engine-specific.** Coverage measurement is different per engine:
-> - Godot: gdunit4 coverage report (markdown export)
-> - Unity: Unity Test Framework coverage (xml export)
-> - Unreal: gcov-style coverage from clang flags
-> CCGS does not unify these — gate-check reads the engine-appropriate report.
+> **实现因引擎而异。** 各引擎的覆盖率测量方式不同：
+> - Godot：gdunit4 覆盖率报告（markdown 导出）
+> - Unity：Unity Test Framework 覆盖率（xml 导出）
+> - Unreal：基于 clang 标志的 gcov 风格覆盖率
+> CCGS 不对这些做统一——gate-check 读取与该引擎相配的报告。
 
 ---
 
@@ -1245,179 +1166,172 @@ closing, or produces a warning and lets work continue — per test type
 
 > ### RESERVED - NOT IMPLEMENTED
 >
-> **No skill or hook reads this setting. Setting it has no effect.** Everything
-> below describes the intended design, not current behaviour.
+> **没有任何技能或钩子读取该设置。设置它没有任何效果。** 下文描述的是预期设计，
+> 而非当前行为。
 >
-> The value is not checked when you set it, and nothing reads it.
+> 你在设置时不会校验该值，也没有任何东西读取它。
 
-**Controls:** Whether phase gate failures block stage transition or just warn
-**Values:** `true` | `false`
-**Default:** `true`
-**Set by:** `/settings`
-**Read by:** nothing yet (intended reader: `/gate-check`)
+**控制：** 阶段闸门失败是阻止阶段推进，还是仅发出警告
+**取值：** `true` | `false`
+**默认：** `true`
+**设置方式：** `/settings`
+**读取方：** 暂时没有（预期读取方：`/gate-check`）
 
-**Priority chain:** `strict_gate_checks` in `project.yaml` → hardcoded default of `true`
+**优先级链：** `project.yaml` 中的 `strict_gate_checks` → 硬编码默认值 `true`
 
-> **Different from `review_mode: solo`.** `review_mode: solo` skips the gate
-> *entirely* — directors don't even run. `strict_gate_checks: false` runs the
-> gate normally but treats the verdict as advisory.
+> **与 `review_mode: solo` 不同。** `review_mode: solo` 会*完全*跳过闸门——总监甚至
+> 不会运行。`strict_gate_checks: false` 会正常运行闸门，但把结论视为建议性质。
 
 ---
 
 ### Value intent
 
-| Value | Behavior |
+| 取值 | 行为 |
 |-------|----------|
-| `true` | Default. FAIL or BLOCKING-CONCERNS verdict stops the stage transition. `project.stage` is not advanced. User must address findings and re-run gate. |
-| `false` | All gate verdicts are advisory. `/gate-check` still runs and reports findings. `project.stage` advances on user confirmation regardless of verdict. |
+| `true` | 默认。FAIL 或 BLOCKING-CONCERNS 结论会阻止阶段推进。`project.stage` 不会前进。用户必须处理发现项并重新运行闸门。 |
+| `false` | 所有闸门结论都是建议性质。`/gate-check` 仍会运行并报告发现项。无论结论如何，`project.stage` 都会在用户确认后前进。 |
 
 ---
 
 ### Affected skills
 
-| Skill | true | false |
+| 技能 | true | false |
 |-------|------|-------|
-| **gate-check** | FAIL verdict stops execution before writing new stage; CONCERNS verdict prompts user but defaults to "stay at current stage." | All verdicts surfaced as informational; user is asked "advance anyway?" with default Yes. |
+| **gate-check** | FAIL 结论会在写入新阶段前停止执行；CONCERNS 结论会提示用户，但默认"停留在当前阶段"。 | 所有结论都作为信息呈现；用户会被询问"仍然前进吗？"，默认为是。 |
 
 ---
 
 ## team.size
 
-**Controls:** Which agents are active by default — solo devs shouldn't get studio-grade gating on every change
-**Values:** `individual` | `small` | `studio`
-**Default:** *none* — supplied by `modes.rigor` (`minimal`/`standard` yield `individual`, `full` yields `studio`)
-**Set by:** `/start` (via `modes.rigor`), `/settings`
-**Read by:** All `team-*` skills, `/gate-check`, all skills that spawn agents via `Agent`
+**控制：** 默认哪些 agent 处于活跃状态——单人开发者不应在每次变更时都受到工作室级闸门审查
+**取值：** `individual` | `small` | `studio`
+**默认：** *无*——由 `modes.rigor` 提供（`minimal`/`standard` 产出 `individual`，`full` 产出 `studio`）
+**设置方式：** `/start`（通过 `modes.rigor`）、`/settings`
+**读取方：** 所有 `team-*` 技能、`/gate-check`、所有通过 `Agent` 生成 agent 的技能
 
-**Priority chain:** `team.size` in `project.local.yaml` → `project.yaml` → the `modes.rigor` expansion (`full` → `studio`, else `individual`) → no terminal default. Locally overridable — it is a personal-experience knob, not an on-disk artifact.
+**优先级链：** `project.local.yaml` 中的 `team.size` → `project.yaml` → `modes.rigor` 展开（`full` → `studio`，否则 `individual`） → 无终结默认值。可本地覆盖——它是个人体验旋钮，而非磁盘产出物。
 
-> **`individual` at `minimal`/`standard`, `studio` at `full`.** CCGS's audience is
-> overwhelmingly solo indie developers, so the two lighter rigor tiers resolve
-> `team.size` to `individual` — a `minimal` (default) or `standard` project gets one active agent
-> per role, not 15 (directors and leads included). Only `rigor: full` opts into the
-> full `studio` roster; a smaller team on a big project sets `team.size: small`
-> explicitly, which wins over the rigor-derived value.
+> **`minimal`/`standard` 下为 `individual`，`full` 下为 `studio`。** CCGS 的用户绝大多数
+> 是单人独立开发者，因此两个较轻的 rigor 档位会把 `team.size` 解析为 `individual`——
+> 一个 `minimal`（默认）或 `standard` 项目每个角色只获得一个活跃 agent，而不是 15 个
+> （含总监与主管）。只有 `rigor: full` 才会选择完整的 `studio` 名册；大型项目上的
+> 小团队应显式设置 `team.size: small`，它会优先于 rigor 推导出的值。
 
-> **Different axis from `workflow`.** `workflow` controls *what docs are required.*
-> `team.size` controls *which agents exist to make them.* A solo dev on
-> `workflow: full` still doesn't need all 49 agents — they need the same coverage
-> from a smaller active set.
+> **与 `workflow` 是不同的轴。** `workflow` 控制*要求哪些文档*。`team.size` 控制
+> *有哪些 agent 来撰写它们*。一个处于 `workflow: full` 的单人开发者仍然不需要全部
+> 49 个 agent——他们需要的是用更小的活跃集获得同样的覆盖。
 
 ---
 
 ### Active agent set per value
 
-| Value | Active set | Notes |
+| 取值 | 活跃集 | 备注 |
 |-------|-----------|-------|
-| `individual` | Core 8: `producer`, `game-designer`, `gameplay-programmer`, engine-specialist (engine-driven), `technical-artist`, `sound-designer`, `qa-tester`, `writer`. **Default.** | Directors and lead-* run only on explicit invocation (e.g. via `/architecture-decision`). Specialists outside the core 8 routed through their nearest core agent. Each `team-*` skill names its own set per value, which can sit outside the core 8 (`team-release` runs `release-manager`); each skill's own `team.size` list is authoritative, and the Affected skills table below mirrors it. |
-| `small` | Core 15: directors (CD, TD, PR) + leads (LP, AD, QL, ND) + game-designer + systems-designer + engine-specialist + technical-artist + sound-designer + qa-tester + ux-designer + writer | `team-*` skills add their `small` set (below); most reach their full pipeline only at `studio`. |
-| `studio` | All 49 agents available. Engine sub-specialists (e.g. `unity-dots-specialist` separate from `unity-specialist`) routed when relevant. The adversarial review pass in `team-combat`, `team-ui` and `team-polish`. | Commercial titles, learning the full org chart, large teams with parallel work. |
+| `individual` | 核心 8 个：`producer`、`game-designer`、`gameplay-programmer`、引擎专家（由引擎驱动）、`technical-artist`、`sound-designer`、`qa-tester`、`writer`。**默认。** | 总监与 lead-* 仅在显式调用时运行（例如通过 `/architecture-decision`）。核心 8 之外的专家通过其最近的核心 agent 路由。每个 `team-*` 技能会为每个取值指定自己的集合，该集合可能位于核心 8 之外（`team-release` 运行 `release-manager`）；各技能自己的 `team.size` 列表具有权威性，下方"Affected skills"表与之对应。 |
+| `small` | 核心 15 个：总监（CD、TD、PR）+ 主管（LP、AD、QL、ND）+ game-designer + systems-designer + 引擎专家 + technical-artist + sound-designer + qa-tester + ux-designer + writer | `team-*` 技能会加入其 `small` 集合（见下）；多数技能只在 `studio` 下才达到完整流水线。 |
+| `studio` | 全部 49 个 agent 可用。相关时路由引擎子专家（例如独立于 `unity-specialist` 的 `unity-dots-specialist`）。`team-combat`、`team-ui` 与 `team-polish` 中的对抗式评审环节。 | 商业作品、学习完整组织架构、并行工作的大型团队。 |
 
 ---
 
 ### Affected skills
 
-| Skill | individual | small | studio |
+| 技能 | individual | small | studio |
 |-------|------|-------|--------|
-| **team-combat** | Single agent (gameplay-programmer) runs the pipeline; ai-programmer escalated only if AI work flagged | Default pipeline as documented | Default + the primary engine specialist may use its sub-specialists + adversarial review pass (Phase 5's qa-tester looks for how it breaks) |
-| **team-narrative** | writer only; narrative-director invoked only on explicit pillar conflict | narrative-director + writer, + localization-lead and world-builder at `review_mode: full` | All six narrative agents, whatever the review mode |
-| **team-ui** | ui-programmer + ux-designer | + accessibility-specialist + art-director | + engine UI specialist + adversarial review pass (Phase 4's reviewers look for where it fails its spec) |
-| **team-audio** | sound-designer only | + audio-director + technical-artist + gameplay-programmer | + accessibility-specialist + the primary engine specialist |
-| **team-level** | level-designer only | + systems-designer + art-director + qa-tester | + narrative-director + world-builder + accessibility-specialist |
-| **team-qa** | qa-tester only; qa-lead invoked at phase gates only | qa-lead + qa-tester pipeline | qa-lead + per-story qa-tester spawn + sign-off |
-| **team-release** | release-manager only | + producer + devops-engineer + qa-lead + community-manager | + security-engineer + analytics-engineer + localization-lead + performance-analyst, and network-programmer when the game is multiplayer |
-| **team-polish** | performance-analyst + technical-artist; no programmer is active, so Phase 2's optimisation list is handed to `/dev-story` | + sound-designer + qa-tester + engine-programmer (implements Phase 2's optimisation list), and tools-programmer when Phase 1 traces a cause to a content authoring tool | engine-programmer, as at small, + adversarial review pass (Phase 5's qa-tester looks for how it breaks) |
+| **team-combat** | 单个 agent（gameplay-programmer）运行流水线；仅当标记了 AI 工作时才升级至 ai-programmer | 按文档所述的默认流水线 | 默认 + 主引擎专家可使用其子专家 + 对抗式评审环节（Phase 5 的 qa-tester 寻找它如何被破坏） |
+| **team-narrative** | 仅 writer；narrative-director 仅在明确的支柱冲突时调用 | narrative-director + writer，且在 `review_mode: full` 时加 localization-lead 与 world-builder | 全部六个叙事 agent，无论评审模式如何 |
+| **team-ui** | ui-programmer + ux-designer | + accessibility-specialist + art-director | + 引擎 UI 专家 + 对抗式评审环节（Phase 4 的评审者寻找它在何处不符合规格） |
+| **team-audio** | 仅 sound-designer | + audio-director + technical-artist + gameplay-programmer | + accessibility-specialist + 主引擎专家 |
+| **team-level** | 仅 level-designer | + systems-designer + art-director + qa-tester | + narrative-director + world-builder + accessibility-specialist |
+| **team-qa** | 仅 qa-tester；qa-lead 仅在阶段闸门处调用 | qa-lead + qa-tester 流水线 | qa-lead + 按故事生成 qa-tester + 签核 |
+| **team-release** | 仅 release-manager | + producer + devops-engineer + qa-lead + community-manager | + security-engineer + analytics-engineer + localization-lead + performance-analyst，且游戏为多人时加 network-programmer |
+| **team-polish** | performance-analyst + technical-artist；没有启用的程序员，因此 Phase 2 的优化清单交给 `/dev-story` | + sound-designer + qa-tester + engine-programmer（实现 Phase 2 的优化清单），且当 Phase 1 把某个成因追溯到内容创作工具时加 tools-programmer | 与 small 相同的 engine-programmer，另加对抗式评审环节（Phase 5 的 qa-tester 寻找它如何被破坏） |
 | **team-live-ops** | live-ops-designer + economy-designer | + analytics-engineer + community-manager | + writer + narrative-director |
-| **gate-check** | Panel width is `modes.workflow`'s axis, not this one (gates always run) — `team.size` affects only specialist depth within each director's review | Same as individual for directors; specialists within directors' reviews use small set | Same plus engine sub-specialists |
-| **architecture-decision** | TD-ADR (in `full` review mode) + the primary engine specialist | Same | Same — no sub-specialist or adversarial reviewer at any size |
+| **gate-check** | 面板宽度属于 `modes.workflow` 的轴，与此轴无关（闸门始终运行）——`team.size` 只影响每位总监评审内的专家深度 | 对总监而言与 individual 相同；总监评审内的专家使用 small 集合 | 同上，另加引擎子专家 |
+| **architecture-decision** | TD-ADR（在 `full` 评审模式下）+ 主引擎专家 | 同上 | 同上——任何规模下都没有子专家或对抗式评审者 |
 
 ---
 
 ### Special cases
 
-- `team.size` does not decide whether directors run: `/gate-check`'s panel follows `review_mode` and `modes.workflow`, and no `team-*` pipeline spawns a director phase gate. In a team skill, a "phase gate" is one of the decision points its own pipeline lists, whatever the `automation` mode.
-- `individual` does not disable agents — it just changes which are active by default. Any agent can still be invoked by name.
-- When `team.size: individual` and a non-core agent is needed (e.g. `network-programmer` for a multiplayer story), the skill emits an informational note and routes through the nearest active core agent.
+- `team.size` 不决定总监是否运行：`/gate-check` 的面板遵循 `review_mode` 与 `modes.workflow`，且没有任何 `team-*` 流水线会生成总监阶段闸门。在团队技能中，"阶段闸门"是其自身流水线列出的决策点之一，与 `automation` 模式无关。
+- `individual` 不会禁用 agent——它只改变默认哪些处于活跃状态。任何 agent 仍可按名称调用。
+- 当 `team.size: individual` 且需要非核心 agent 时（例如多人故事需要 `network-programmer`），技能会发出信息性提示，并通过最近的活跃核心 agent 路由。
 
 ---
 
 ## platform.multiplayer
 
-**Controls:** Whether the project includes real-time online multiplayer — determines
-which specialists are routed and which architecture sections are required  
-**Values:** `true` | `false`  
-**Default:** none — unset is not `false`  
-**Set by:** `/settings`  
-**Read by:** `security-audit`, `team-release` (and the `security-engineer` agent)
+**控制：** 项目是否包含实时在线多人——决定路由哪些专家、要求哪些架构章节  
+**取值：** `true` | `false`  
+**默认：** 无——未设置不等于 `false`  
+**设置方式：** `/settings`  
+**读取方：** `security-audit`、`team-release`（以及 `security-engineer` agent）
 
-**Priority chain:** `platform.multiplayer` in `project.yaml` → unset (`platform.*` is locked to `project.yaml`, so `project.local.yaml` cannot set it). Nothing writes it except `/settings`, so on most projects it is unset: `/security-audit` and `/team-release` ask whether the game is multiplayer rather than reading unset as `false`.
+**优先级链：** `project.yaml` 中的 `platform.multiplayer` → 未设置（`platform.*` 锁定在 `project.yaml`，因此 `project.local.yaml` 无法设置它）。除 `/settings` 外没有任何东西写入它，因此在多数项目上它处于未设置状态：`/security-audit` 与 `/team-release` 会询问游戏是否为多人，而不是把未设置当作 `false`。
 
-> **Distinct from `platform.online`.** `multiplayer` is *real-time multiplayer
-> specifically* (network specialist, netcode review, replication architecture).
-> `platform.online` covers everything else online (cloud saves, leaderboards,
-> telemetry). See next section.
+> **与 `platform.online` 不同。** `multiplayer` 特指*实时多人*（网络专家、netcode
+> 评审、复制架构）。`platform.online` 涵盖其他所有在线功能（云存档、排行榜、
+> 遥测）。见下一节。
 
-> **This is a project attribute, not a mode.** It describes what the game is,
-> not how the pipeline operates. It lives in `platform` alongside `targets`,
-> `primary_input`, and `gamepad_support` — not in `modes`.
+> **这是项目属性，不是模式。** 它描述游戏是什么，而不是流水线如何运作。它位于
+> `platform` 下，与 `targets`、`primary_input`、`gamepad_support` 并列——不在 `modes` 中。
 
 ---
 
 ### Value intent
 
-| Value | Meaning |
+| 取值 | 含义 |
 |-------|---------|
-| `true` | Game has real-time online multiplayer. `/security-audit` runs its netcode category and rates a HIGH finding as release-blocking; `/team-release` adds `network-programmer`'s sign-off. |
-| `false` | No real-time multiplayer. `/security-audit` skips the netcode category and says so; `/team-release` does not spawn `network-programmer`. |
+| `true` | 游戏具有实时在线多人。`/security-audit` 会运行其 netcode 类别，并将 HIGH 级别的发现评为发布阻塞；`/team-release` 会加入 `network-programmer` 的签核。 |
+| `false` | 无实时多人。`/security-audit` 跳过 netcode 类别并说明这一点；`/team-release` 不生成 `network-programmer`。 |
 
 ---
 
 ### Affected skills
 
-| Skill | multiplayer: true | multiplayer: false |
+| 技能 | multiplayer: true | multiplayer: false |
 |-------|------------------|-------------------|
-| **security-audit** | Includes netcode review — authentication, replication, cheat vectors | Netcode review skipped, and the report says so |
-| **team-release** | `network-programmer` included in release sign-off pipeline | `network-programmer` excluded |
+| **security-audit** | 包含 netcode 评审——认证、复制、作弊向量 | 跳过 netcode 评审，并在报告中说明 |
+| **team-release** | `network-programmer` 纳入发布签核流水线 | `network-programmer` 排除在外 |
 
-No other skill reads this key: `/dev-story`, `/create-architecture` and `/gate-check`
-decide networking scope from the story, GDD or architecture in front of them.
+没有其他技能读取该键：`/dev-story`、`/create-architecture` 与 `/gate-check` 依据
+摆在面前的用户故事、GDD 或架构来决定联网范围。
 
 ---
 
 ## platform.online
 
-**Controls:** Whether the project has any online features (leaderboards, cloud saves, telemetry, IAP)
-**Values:** `true` | `false`
-**Default:** none — unset is not `false`
-**Set by:** `/settings`
-**Read by:** `security-audit`, `team-release` (and the `security-engineer` agent)
+**控制：** 项目是否具有任何在线功能（排行榜、云存档、遥测、IAP）
+**取值：** `true` | `false`
+**默认：** 无——未设置不等于 `false`
+**设置方式：** `/settings`
+**读取方：** `security-audit`、`team-release`（以及 `security-engineer` agent）
 
-**Priority chain:** `platform.online` in `project.yaml` → unset (`platform.*` is locked to `project.yaml`, so `project.local.yaml` cannot set it). Nothing writes it except `/settings`: `/security-audit` and `/team-release` ask rather than reading unset as `false`.
+**优先级链：** `project.yaml` 中的 `platform.online` → 未设置（`platform.*` 锁定在 `project.yaml`，因此 `project.local.yaml` 无法设置它）。除 `/settings` 外没有任何东西写入它：`/security-audit` 与 `/team-release` 会询问，而不是把未设置当作 `false`。
 
-> **Independent of `platform.multiplayer`.** A single-player game with Steam
-> Cloud and leaderboards is `online: true, multiplayer: false`. The two settings
-> have different specialist routing implications.
+> **与 `platform.multiplayer` 相互独立。** 带 Steam Cloud 与排行榜的单人游戏是
+> `online: true, multiplayer: false`。这两个设置对专家路由的影响不同。
 
 ---
 
 ### Value intent
 
-| Value | Meaning |
+| 取值 | 含义 |
 |-------|---------|
-| `true` | Project includes online services (cloud saves, leaderboards, achievements, telemetry, IAP, anything calling external APIs at runtime). `/security-audit` runs Category 2 (network and multiplayer — including a plaintext-token check) when this or `platform.multiplayer` is true or unset; `/team-release` adds a `security-engineer` sign-off. |
-| `false` | Project is fully offline. `/security-audit` skips Category 2 only when `platform.multiplayer` is also false. |
+| `true` | 项目包含在线服务（云存档、排行榜、成就、遥测、IAP、任何运行时调用外部 API 的功能）。当此项或 `platform.multiplayer` 为 true 或未设置时，`/security-audit` 会运行 Category 2（网络与多人——含明文令牌检查）；`/team-release` 会加入 `security-engineer` 签核。 |
+| `false` | 项目完全离线。仅当 `platform.multiplayer` 也为 false 时，`/security-audit` 才跳过 Category 2。 |
 
 ---
 
 ### Affected skills
 
-| Skill | online: true | online: false |
+| 技能 | online: true | online: false |
 |-------|--------------|---------------|
-| **security-audit** | Category 2 (network) runs — server authority, packet validation, rate limits, plaintext tokens | Category 2 skipped only when `platform.multiplayer` is also false |
-| **team-release** | `security-engineer` sign-off when the game is online or stores player data | No online-driven security sign-off |
+| **security-audit** | 运行 Category 2（网络）——服务器权威、数据包校验、速率限制、明文令牌 | 仅当 `platform.multiplayer` 也为 false 时才跳过 Category 2 |
+| **team-release** | 游戏在线或存储玩家数据时进行 `security-engineer` 签核 | 没有由在线功能驱动的安全签核 |
 
-No other skill reads this key: `/create-architecture`, `/dev-story`, `/team-live-ops`
-and `/gate-check` decide online scope from the documents in front of them.
+没有其他技能读取该键：`/create-architecture`、`/dev-story`、`/team-live-ops`
+与 `/gate-check` 依据摆在面前的文档来决定在线范围。
 
 ---
 
@@ -1425,40 +1339,38 @@ and `/gate-check` decide online scope from the documents in front of them.
 
 > ### WIRED — this setting is live
 >
-> `/launch-checklist` and `/release-checklist` both resolve it and branch on its
-> four values — `none` emits no certification section, `itch` and `steam` their
-> storefront's requirements, `console` full platform certification — and ask which
-> platforms are in scope when it is unset.
+> `/launch-checklist` 与 `/release-checklist` 都会解析它并按其四个取值分支——
+> `none` 不输出认证章节，`itch` 与 `steam` 输出各自商店页面的要求，`console`
+> 输出完整平台认证——当它未设置时会询问哪些平台在范围内。
 
-**Controls:** Certification target — scopes what `/launch-checklist` asks for
-**Values:** `none` | `itch` | `steam` | `console`
-**Default:** *none* — unset stays unset, so the skills ask
-**Set by:** `/settings` — nothing else writes it, so it stays unset (and the skills ask) until you set it
-**Read by:** `/launch-checklist`, `/release-checklist`
+**控制：** 认证目标——界定 `/launch-checklist` 的需求范围
+**取值：** `none` | `itch` | `steam` | `console`
+**默认：** *无*——未设置就保持未设置，因此技能会主动询问
+**设置方式：** `/settings`——没有其他东西写入它，因此在你设置之前它一直保持未设置（技能会询问）
+**读取方：** `/launch-checklist`、`/release-checklist`
 
-**Priority chain:** `platform.cert_tier` in `project.yaml` → unset (no default is
-substituted: unset is a missing decision, `none` is a made one, and the skills
-must tell them apart)
+**优先级链：** `project.yaml` 中的 `platform.cert_tier` → 未设置（不替换任何默认值：
+未设置是缺失的决策，`none` 是已做出的决策，技能必须能区分二者）
 
 ---
 
 ### Value intent
 
-| Value | Required compliance | Best for |
+| 取值 | 所需合规项 | 最适合 |
 |-------|---------------------|----------|
-| `none` | No certification | Internal releases, alphas, jam games (an explicit choice — unset is not `none`) |
-| `itch` | itch.io upload requirements (build size, page setup, age tags) | Indie web/desktop releases |
-| `steam` | Steamworks integration, store page, achievements, depot build, system requirements, common content rules | Commercial PC releases |
-| `console` | Platform certification (PlayStation/Xbox/Switch) — heavy compliance: TRC/XR/Lotcheck, save data rules, controller mapping rules, age rating boards | Console releases |
+| `none` | 无认证 | 内部发布、alpha、game jam 作品（这是显式选择——未设置不等于 `none`） |
+| `itch` | itch.io 上传要求（构建体积、页面设置、年龄标签） | 独立 Web/桌面发布 |
+| `steam` | Steamworks 集成、商店页面、成就、depot 构建、系统需求、通用内容规则 | 商业 PC 发布 |
+| `console` | 平台认证（PlayStation/Xbox/Switch）——繁重合规：TRC/XR/Lotcheck、存档数据规则、手柄映射规则、年龄评级机构 | 主机发布 |
 
 ---
 
 ### Affected skills
 
-| Skill | none | itch | steam | console |
+| 技能 | none | itch | steam | console |
 |-------|------|------|-------|---------|
-| **launch-checklist** | Internal launch only — no external requirements | + itch.io page setup, butler upload, build size | + Steamworks integration, store page, achievements depot, common content checks | + Platform-specific TRC, certification submission, console save format compliance |
-| **release-checklist** | Smoke pass + version bump only | + itch.io page live, build uploaded to butler | + Steam store page live, depot pushed, achievements live | + Platform submission accepted, age rating boards cleared |
+| **launch-checklist** | 仅内部发布——无外部要求 | + itch.io 页面设置、butler 上传、构建体积 | + Steamworks 集成、商店页面、成就 depot、通用内容检查 | + 平台特定 TRC、认证提交、主机存档格式合规 |
+| **release-checklist** | 仅冒烟通过 + 版本号提升 | + itch.io 页面已上线、构建已上传至 butler | + Steam 商店页面已上线、depot 已推送、成就已上线 | + 平台提交已获接受、年龄评级机构已通过 |
 
 ---
 
@@ -1466,48 +1378,45 @@ must tell them apart)
 
 > ### RESERVED - NOT IMPLEMENTED
 >
-> **No skill or hook reads this setting. Setting it has no effect.** Everything
-> below describes the intended design, not current behaviour.
+> **没有任何技能或钩子读取该设置。设置它没有任何效果。** 下文描述的是预期设计，
+> 而非当前行为。
 >
-> The value is checked for valid spelling when you set it, and then ignored.
-> The accessibility-specialist routing and the Polish-stage audit described
-> below **do not happen at any level** — `/team-ui`, `/team-level`,
-> `/team-polish` and `/gate-check` do not read this setting, and `/start`
-> does not ask for it.
+> 你在设置时会校验其拼写是否合法，然后便将其忽略。下文所述的无障碍专家路由与
+> Polish 阶段审计**在任何级别下都不会发生**——`/team-ui`、`/team-level`、
+> `/team-polish` 与 `/gate-check` 都不读取该设置，`/start` 也不会询问它。
 
-**Controls:** Accessibility commitment level — routes accessibility specialist and gates audit requirements
-**Values:** `none` | `standard` | `aaa`
-**Default:** `none`
-**Set by:** `/settings`
-**Read by:** nothing yet (intended readers: `/team-ui`, `/team-level`, `/team-polish`, `/gate-check`)
+**控制：** 无障碍承诺级别——决定是否路由无障碍专家，并对审计要求设门
+**取值：** `none` | `standard` | `aaa`
+**默认：** `none`
+**设置方式：** `/settings`
+**读取方：** 暂时没有（预期读取方：`/team-ui`、`/team-level`、`/team-polish`、`/gate-check`）
 
-**Priority chain:** `accessibility.target` in `project.yaml` → hardcoded default of `none`
+**优先级链：** `project.yaml` 中的 `accessibility.target` → 硬编码默认值 `none`
 
-> **Default is `none`, not `standard`.** Most CCGS users are solo devs and jam-game
-> makers — defaulting to `standard` would auto-spawn the accessibility specialist
-> for projects where it's overhead. `/start` does not ask about it; you set it with
-> `/settings`.
+> **默认是 `none` 而非 `standard`。** CCGS 的多数用户是单人开发者与 game jam
+> 创作者——若默认 `standard`，会对那些无障碍专家纯属额外负担的项目自动生成该专家。
+> `/start` 不会询问它；你通过 `/settings` 自行设置。
 
 ---
 
 ### Value intent
 
-| Value | Required features | Specialist routing |
+| 取值 | 必需功能 | 专家路由 |
 |-------|-------------------|--------------------|
-| `none` | None enforced | `accessibility-specialist` not spawned |
-| `standard` | Colorblind-safe palette, subtitles for any voice content, key remapping | `accessibility-specialist` runs in team-ui, team-level |
-| `aaa` | Full Game Accessibility Guidelines: motor, vision, hearing, cognitive categories | `accessibility-specialist` runs in all team-* skills; mandatory audit at Polish stage |
+| `none` | 无强制要求 | 不生成 `accessibility-specialist` |
+| `standard` | 色盲安全配色、任何语音内容的字幕、按键重映射 | `accessibility-specialist` 在 team-ui、team-level 中运行 |
+| `aaa` | 完整 Game Accessibility Guidelines：运动、视觉、听觉、认知类别 | `accessibility-specialist` 在所有 team-* 技能中运行；Polish 阶段强制审计 |
 
 ---
 
 ### Affected skills
 
-| Skill | none | standard | aaa |
+| 技能 | none | standard | aaa |
 |-------|------|----------|-----|
-| **team-ui** | accessibility-specialist not spawned | accessibility-specialist included for HUD/menu reviews | accessibility-specialist included for every screen + accessibility audit pass |
-| **team-level** | accessibility-specialist not spawned | accessibility-specialist reviews level for colorblind safety and signposting | accessibility-specialist reviews for full mobility/audio/cognitive considerations |
-| **team-polish** | No accessibility pass | Final accessibility pass added | Full accessibility audit required before completion |
-| **gate-check** | No accessibility check at any stage | Polish gate checks for the standard required features | Polish gate requires full Game Accessibility Guidelines compliance audit |
+| **team-ui** | 不生成 accessibility-specialist | HUD/菜单评审纳入 accessibility-specialist | 每个界面都纳入 accessibility-specialist + 无障碍审计环节 |
+| **team-level** | 不生成 accessibility-specialist | accessibility-specialist 评审关卡的色盲安全性与指引标识 | accessibility-specialist 评审完整的移动性/音频/认知考量 |
+| **team-polish** | 无无障碍环节 | 加入最终无障碍环节 | 完成前需要完整无障碍审计 |
+| **gate-check** | 任何阶段都无无障碍检查 | Polish 闸门检查 standard 要求的必需功能 | Polish 闸门要求完整的 Game Accessibility Guidelines 合规审计 |
 
 ---
 
@@ -1515,151 +1424,144 @@ must tell them apart)
 
 > ### RESERVED - NOT IMPLEMENTED
 >
-> **No skill or hook reads this setting. Setting it has no effect.** Everything
-> below describes the intended design, not current behaviour.
+> **没有任何技能或钩子读取该设置。设置它没有任何效果。** 下文描述的是预期设计，
+> 而非当前行为。
 >
-> No reference anywhere outside this file.
+> 本文件之外没有任何引用。
 
-**Controls:** Default sprint and milestone durations for planning
-**Values:**
-- `sprint_length`: `1w` | `2w` | `3w` | `4w` | `none`
-- `milestone_length`: `4w` | `6w` | `8w` | `12w`
-**Defaults:** `sprint_length: 2w`, `milestone_length: 8w`
-**Set by:** `/settings`
-**Read by:** nothing yet (intended readers: `/sprint-plan`, `/milestone-review`, `/sprint-status`, future velocity tracking)
+**控制：** 规划时使用的默认冲刺与里程碑时长
+**取值：**
+- `sprint_length`：`1w` | `2w` | `3w` | `4w` | `none`
+- `milestone_length`：`4w` | `6w` | `8w` | `12w`
+**默认：** `sprint_length: 2w`、`milestone_length: 8w`
+**设置方式：** `/settings`
+**读取方：** 暂时没有（预期读取方：`/sprint-plan`、`/milestone-review`、`/sprint-status`、未来的速率跟踪）
 
-**Priority chain:** `cadence.*` in `project.yaml` → hardcoded defaults
+**优先级链：** `project.yaml` 中的 `cadence.*` → 硬编码默认值
 
-> **`none` for `sprint_length`** means continuous-flow / kanban-style — no sprint boundaries.
-> `/sprint-plan` is then invoked manually as needed. Velocity tracking
-> is per-week rather than per-sprint.
+> **`sprint_length` 取 `none`** 表示持续流 / 看板式——没有冲刺边界。之后按需手动
+> 调用 `/sprint-plan`。速率跟踪按周而非按冲刺进行。
 
 ---
 
 ### Affected skills
 
-| Skill | What changes |
+| 技能 | 变化内容 |
 |-------|--------------|
-| **sprint-plan** | Capacity calculated as `sprint_length × team.size velocity baseline`. `none` makes the skill emit a continuous-flow plan instead. |
-| **milestone-review** | Milestone window for retrospective scope = `milestone_length`. |
-| **sprint-status** | Burn-down chart x-axis spans `sprint_length`. |
-| **retrospective** | Sprint retro fires at `sprint_length` cadence (or weekly when sprint_length is `none`). |
+| **sprint-plan** | 产能按 `sprint_length × team.size velocity baseline` 计算。取 `none` 时该技能改为输出持续流计划。 |
+| **milestone-review** | 回顾范围对应的里程碑窗口 = `milestone_length`。 |
+| **sprint-status** | 燃尽图 x 轴跨度 = `sprint_length`。 |
+| **retrospective** | 冲刺回顾按 `sprint_length` 节奏触发（当 sprint_length 为 `none` 时按周触发）。 |
 
 ---
 
 ## performance.target_framerate and performance.frame_budget_ms
 
-**Controls:** The frame-rate target and its per-frame millisecond budget
-**Values:** integers (e.g. `60`, `16.67`)
-**Default:** none — unset means no budget was ever committed to
-**Set by:** the user, by hand or via `/settings`
-**Read by:** `/perf-profile`, `/gate-check`, `/team-polish`
+**控制：** 帧率目标及其每帧毫秒预算
+**取值：** 整数（例如 `60`、`16.67`）
+**默认：** 无——未设置表示从未承诺过任何预算
+**设置方式：** 用户手动设置，或通过 `/settings`
+**读取方：** `/perf-profile`、`/gate-check`、`/team-polish`
 
 ## performance.draw_call_limit and performance.memory_ceiling_mb
 
-**Controls:** Per-frame draw-call ceiling and total memory ceiling
-**Values:** integers
-**Default:** none — unset means no budget was ever committed to
-**Set by:** the user, by hand or via `/settings`
-**Read by:** `/perf-profile`, `/gate-check`, `/team-polish`
+**控制：** 每帧绘制调用上限与总内存上限
+**取值：** 整数
+**默认：** 无——未设置表示从未承诺过任何预算
+**设置方式：** 用户手动设置，或通过 `/settings`
+**读取方：** `/perf-profile`、`/gate-check`、`/team-polish`
 
-> **Every setting needs its own `## ` heading in this file, not just a table
-> row.** The dead-settings audit derives what it checks from those headings, so
-> a setting mentioned only inside a table is invisible to it — it can neither be
-> reported DEAD if it loses its reader, nor caught if it gains one. A setting
-> outside the audit's field of view is exactly how a documented-but-dead entry,
-> or a working-but-listed-as-dead one, survives unnoticed.
+> **每个设置都需要在本文件中有自己的 `## ` 标题，而不只是表格中的一行。**
+> 死设置审计从这些标题推导它要检查的内容，因此仅在表格中被提及的设置对它不可见
+> ——它既无法在失去读取方时被报告为 DEAD，也无法在获得读取方时被捕获。
+> 落在审计视野之外的设置，正是"有文档但已死"或"能工作却被列为已死"的条目
+> 悄然存续的方式。
 >
-> **Unset is not zero and not a default.** A budget nobody set is not a budget
-> that was met — `/perf-profile` must report `NOT ASSESSED` for a metric with no
-> committed target rather than measuring against a placeholder. A headroom figure
-> computed against an invented budget, with no profiler data behind it, reads as
-> a pass and is not one; see obligations 1 and 2 in `.claude/rules/skill-authoring.md`.
+> **未设置不是零，也不是默认值。** 没人设置过的预算不等于已经达成的预算——
+> 对于没有承诺目标的指标，`/perf-profile` 必须报告 `NOT ASSESSED`，而不是拿占位值
+> 去测量。基于臆造预算、背后没有任何剖析数据算出的余量数值，读起来像是通过，
+> 实际并非通过；见 `.claude/rules/skill-authoring.md` 中的义务 1 与义务 2。
 
 ## performance.enforce
 
-**Controls:** Whether performance budget violations warn or block
-**Values:** `warn` | `block` | `off`
-**Default:** `warn`
-**Set by:** `/settings`
-**Read by:** `/perf-profile`, `/gate-check`, CI runner
+**控制：** 性能预算违规是发出警告还是阻塞
+**取值：** `warn` | `block` | `off`
+**默认：** `warn`
+**设置方式：** `/settings`
+**读取方：** `/perf-profile`、`/gate-check`、CI 运行器
 
-**Priority chain:** `performance.enforce` in `project.local.yaml` → `project.yaml` → hardcoded default of `warn`, resolved by `resolve_config --keys performance.enforce`
+**优先级链：** `project.local.yaml` 中的 `performance.enforce` → `project.yaml` → 硬编码默认值 `warn`，由 `resolve_config --keys performance.enforce` 解析
 
-> **Read it from the resolved block, never from `project.yaml` directly.** The key is on the `/settings --local` whitelist. `/perf-profile` Phase 0 and `/gate-check` Section 3 are the two readers the table above promises — a key that is enum-validated, accepted and displayed while nothing reads it is exactly the failure this warning guards against.
+> **从解析后的配置块读取，绝不直接读 `project.yaml`。** 该键在 `/settings --local` 的白名单上。`/perf-profile` 的 Phase 0 与 `/gate-check` 的 Section 3 就是上表承诺的两个读取方——一个键通过枚举校验、被接受、被展示，却无人读取，正是这条警告所防范的失败。
 
-> **Mirrors the `testing.strict` pattern.** Defines what happens when a budget
-> defined in `performance.target_framerate`, `frame_budget_ms`, `draw_call_limit`,
-> or `memory_ceiling_mb` is exceeded.
+> **与 `testing.strict` 模式一致。** 定义当 `performance.target_framerate`、
+> `frame_budget_ms`、`draw_call_limit` 或 `memory_ceiling_mb` 中定义的预算被超出时
+> 会发生什么。
 
 ---
 
 ### Value intent
 
-| Value | Behavior |
+| 取值 | 行为 |
 |-------|----------|
-| `warn` | Default. Profile runs flag violations as findings. CI logs them but doesn't fail. `/gate-check` surfaces them as concerns, not blockers. |
-| `block` | Profile failures block CI. `/gate-check` treats violations as FAIL verdict (Polish stage onward). |
-| `off` | Performance budgets are informational only — no profile runs gated, no findings surfaced. |
+| `warn` | 默认。性能剖析会把违规记录为发现项。CI 会记录但不失败。`/gate-check` 将其作为关注项呈现，而非阻塞项。 |
+| `block` | 剖析失败会阻塞 CI。`/gate-check` 将违规视为 FAIL 结论（自 Polish 阶段起）。 |
+| `off` | 性能预算仅供参考——不对剖析运行设门，也不呈现发现项。 |
 
 ---
 
 ## project.stage
 
-**Controls:** The current development phase — determines which gate-check
-validates and what artifacts are expected to exist  
-**Values:** `Concept` | `Systems Design` | `Technical Setup` | `Pre-Production` | `Production` | `Polish` | `Release`  
-**Default:** `Concept`  
-**Set by:** `/gate-check` on a PASS, or on a CONCERNS the user explicitly accepts (the accepted risks are recorded); a FAIL never advances it — never set manually  
-**Read by:** `gate-check`, `project-stage-detect`, `help`, `day-one-patch`, `team-release`, `launch-checklist`, `release-checklist`, `map-systems`, `team-qa`, `adopt`
+**控制：** 当前开发阶段——决定 gate-check 校验哪些内容，以及预期存在哪些产出物  
+**取值：** `Concept` | `Systems Design` | `Technical Setup` | `Pre-Production` | `Production` | `Polish` | `Release`  
+**默认：** `Concept`  
+**设置方式：** 由 `/gate-check` 在 PASS 时设置，或在用户显式接受 CONCERNS 时设置（被接受的风险会被记录）；FAIL 绝不会推进它——绝不要手动设置  
+**读取方：** `gate-check`、`project-stage-detect`、`help`、`day-one-patch`、`team-release`、`launch-checklist`、`release-checklist`、`map-systems`、`team-qa`、`adopt`
 
-> **Stage count:** This document uses the
-> 7-stage reality implemented by gate-check:
+> **阶段数量：** 本文档采用 gate-check 所实现的 7 阶段现实：
 > `Concept | Systems Design | Technical Setup | Pre-Production | Production | Polish | Release`
 
-> **This is a project attribute, not a mode.** It records where the project is
-> in its lifecycle. Only `/start` (at onboarding) and `/gate-check` write it —
-> `/gate-check` on a PASS verdict with user confirmation, or on a CONCERNS
-> verdict whose risks the user explicitly accepts (they are recorded); a FAIL never advances it.
-> Never write it manually mid-session except to correct an incorrect auto-detect.
+> **这是项目属性，不是模式。** 它记录项目在其生命周期中所处的位置。只有 `/start`
+> （在上手引导时）与 `/gate-check` 会写入它——`/gate-check` 在 PASS 结论且用户确认时写入，
+> 或在 CONCERNS 结论且用户显式接受其风险时写入（风险会被记录）；FAIL 绝不会推进它。
+> 会话中途绝不要手动写入，除非是为了纠正错误的自动检测。
 
-> **Legacy fallback + dual-write.** Stage is read from `project.stage` in
-> `project.yaml` first, then legacy `production/stage.txt`, then artifact
-> auto-detection. When `/gate-check` advances the stage it dual-writes BOTH
-> `project.yaml` and `production/stage.txt`, so hooks that have not migrated
-> still resolve correctly. `/start` also dual-writes the initial stage. The
-> legacy `.txt` file is retired at `.claude/scripts/migrate-v1-config.sh --finalize`.
+> **历史回退 + 双写。** 阶段先读 `project.yaml` 中的 `project.stage`，再读历史文件
+> `production/stage.txt`，最后是产出物自动检测。当 `/gate-check` 推进阶段时，它会同时
+> 双写 `project.yaml` 与 `production/stage.txt`，因此尚未迁移的钩子仍能正确解析。
+> `/start` 也会双写初始阶段。历史 `.txt` 文件在
+> `.claude/scripts/migrate-v1-config.sh --finalize` 时退役。
 
 ---
 
 ### Stage progression and gate requirements
 
-Each row is the gate that must be passed to advance FROM that stage.
+每一行是离开该阶段时必须通过的闸门。
 
-| From stage | Key artifacts required to pass | gate-check writes |
+| 离开阶段 | 通过所需的关键产出物 | gate-check 写入 |
 |------------|-------------------------------|-------------------|
-| **Concept** | `game-concept.md`, design pillars, Visual Identity Anchor | `Systems Design` |
-| **Systems Design** | `systems-index.md`, all MVP GDDs reviewed, cross-GDD consistency check | `Technical Setup` |
-| **Technical Setup** | Engine configured, art bible sections 1–4 (at `standard`, only if visual stories exist), 3+ ADRs, architecture doc, traceability index, test framework, accessibility and interaction-pattern docs | `Pre-Production` |
-| **Pre-Production** | Epics defined, first sprint plan, UX specs, control manifest (a Vertical Slice is recommended, not required) | `Production` |
-| **Production** | Core mechanics implemented, main path playable, smoke check passes, QA sign-off | `Polish` |
-| **Polish** | All features complete, content complete, localization, security audit, no open S1–S3 bugs | `Release` |
+| **Concept** | `game-concept.md`、设计支柱、Visual Identity Anchor | `Systems Design` |
+| **Systems Design** | `systems-index.md`、所有 MVP GDD 已评审、跨 GDD 一致性检查 | `Technical Setup` |
+| **Technical Setup** | 引擎已配置、美术圣经章节 1–4（在 `standard` 下仅当存在视觉故事时）、3+ 个 ADR、架构文档、可追溯性索引、测试框架、无障碍与交互模式文档 | `Pre-Production` |
+| **Pre-Production** | 史诗已定义、首次冲刺计划、UX 规格、控制清单（垂直切片是建议项，非必需） | `Production` |
+| **Production** | 核心机制已实现、主路径可玩、冒烟检查通过、QA 签核 | `Polish` |
+| **Polish** | 所有功能完成、内容完成、本地化、安全审计、无未解决的 S1–S3 bug | `Release` |
 
-Gates adjust per `modes.workflow` — see `modes.workflow` section for what is
-required at `standard` and `minimal` levels.
+闸门会随 `modes.workflow` 调整——`standard` 与 `minimal` 级别下的要求见
+`modes.workflow` 一节。
 
 ---
 
 ### Affected skills
 
-| Skill | How it uses stage |
+| 技能 | 如何使用阶段 |
 |-------|------------------|
-| **gate-check** | Reads current stage to determine which gate to validate. Writes next stage on PASS, or on a CONCERNS the user explicitly accepts. |
-| **project-stage-detect** | Reads `project.stage` first — if set, uses it as authoritative. Falls back to heuristic detection only if absent. |
-| **help** | Uses stage to determine "where are you in the pipeline" and surfaces the correct next steps. |
-| **sprint-status** | Displays current stage in status summary. |
-| **day-one-patch** | Proceeds only when the stage is `Release` or `Polish`; otherwise says it is not appropriate yet. |
-| **team-release** | Stops before Phase 1 unless the stage is `Release` ("run `/gate-check release` first"); proceeding takes an explicit override, recorded in the go/no-go record and the report. Never writes the stage. |
+| **gate-check** | 读取当前阶段以确定要校验哪个闸门。在 PASS 时或在用户显式接受 CONCERNS 时写入下一阶段。 |
+| **project-stage-detect** | 先读取 `project.stage`——若已设置，则以它为权威。仅在缺失时才回退到启发式检测。 |
+| **help** | 用阶段判断"你在流水线的哪一步"，并给出正确的后续步骤。 |
+| **sprint-status** | 在状态摘要中显示当前阶段。 |
+| **day-one-patch** | 仅当阶段为 `Release` 或 `Polish` 时继续；否则说明当前尚不合适。 |
+| **team-release** | 除非阶段为 `Release`，否则在 Phase 1 前停止（"请先运行 `/gate-check release`"）；继续需要显式覆盖，并记录在 go/no-go 记录与报告中。它绝不写入阶段。 |
 
 ---
 
@@ -1667,118 +1569,114 @@ required at `standard` and `minimal` levels.
 
 > ### RESERVED - NOT IMPLEMENTED
 >
-> **No skill or hook reads this setting. Setting it has no effect.** Everything
-> below describes the intended design, not current behaviour.
+> **没有任何技能或钩子读取该设置。设置它没有任何效果。** 下文描述的是预期设计，
+> 而非当前行为。
 >
-> No reference anywhere outside this file.
+> 本文件之外没有任何引用。
 
-**Controls:** What type of project this is — routes skill subsets
-**Values:** `game` | `tool` | `engine` | `mod` | `library`
-**Default:** `game`
-**Set by:** `/start`, `/setup-engine`
-**Read by:** Many skills (advisory routing — see below)
+**控制：** 项目属于哪种类型——据此路由技能子集
+**取值：** `game` | `tool` | `engine` | `mod` | `library`
+**默认：** `game`
+**设置方式：** `/start`、`/setup-engine`
+**读取方：** 许多技能（建议性路由——见下）
 
-**Priority chain:** `project.kind` in `project.yaml` → hardcoded default of `game`
+**优先级链：** `project.yaml` 中的 `project.kind` → 硬编码默认值 `game`
 
 ---
 
 ### Value intent
 
-| Value | Meaning | What's deactivated |
+| 取值 | 含义 | 停用内容 |
 |-------|---------|-------------------|
-| `game` | Default. Full CCGS framework applies. | Nothing |
-| `tool` | Developer tool, not a game | Skip art bible, narrative, level design, playtesting |
-| `engine` | Custom engine or library underneath games | Skip game-specific concerns entirely (narrative, art, playtest) |
-| `mod` | Mod for an existing game | Skip engine setup; assume parent engine; reduce architecture scope |
-| `library` | Reusable library | Emphasize tests + API design; design docs lighter; no asset pipeline |
+| `game` | 默认。适用完整的 CCGS 框架。 | 无 |
+| `tool` | 开发者工具，而非游戏 | 跳过美术圣经、叙事、关卡设计、试玩测试 |
+| `engine` | 游戏底层的自研引擎或库 | 完全跳过游戏专属关注项（叙事、美术、试玩测试） |
+| `mod` | 面向既有游戏的模组 | 跳过引擎设置；假定沿用父引擎；缩小架构范围 |
+| `library` | 可复用库 | 强调测试 + API 设计；设计文档更轻量；无资源流水线 |
 
 ---
 
 ### Affected skills
 
-| Skill | game | tool | engine | mod | library |
+| 技能 | game | tool | engine | mod | library |
 |-------|------|------|--------|-----|---------|
-| **brainstorm** | Full game-concept output | Tool concept output (user, problem, solution) | Engine concept (target use cases, scope) | Mod concept (what changes) | Library concept (API surface, target consumers) |
-| **art-bible** | Required at appropriate workflow level | Skipped | Skipped | Optional (depends on visual scope) | Skipped |
-| **map-systems** | Full game systems decomposition | Tool subsystems | Engine subsystems | Modified-system map | Library module map |
-| **playtest-report** | Required at appropriate stages | Skipped or replaced with user testing | Skipped | Required (compatibility testing) | Skipped or replaced with API usage testing |
-| **setup-engine** | Game engine setup | Skipped or replaced with build tool setup | Self-referential — engine IS the project | Parent engine assumed | Skipped or replaced with library scaffolding |
+| **brainstorm** | 完整的游戏概念产出 | 工具概念产出（用户、问题、方案） | 引擎概念（目标用例、范围） | 模组概念（改变了什么） | 库概念（API 接口面、目标使用者） |
+| **art-bible** | 在相应 workflow 级别下必需 | 跳过 | 跳过 | 可选（取决于视觉范围） | 跳过 |
+| **map-systems** | 完整的游戏系统分解 | 工具子系统 | 引擎子系统 | 被修改系统的映射 | 库模块映射 |
+| **playtest-report** | 在相应阶段必需 | 跳过，或以用户测试替代 | 跳过 | 必需（兼容性测试） | 跳过，或以 API 使用测试替代 |
+| **setup-engine** | 游戏引擎设置 | 跳过，或以构建工具设置替代 | 自指——引擎*就是*项目本身 | 假定沿用父引擎 | 跳过，或以库脚手架替代 |
 
 ---
 
 ## engine.name and specialists
 
-**Controls:** Which engine-specific specialist agents are routed to for code
-implementation, review, and architecture validation  
-**Values:** `Godot` | `Unity` | `Unreal`  
-**Default:** `[UNSET]` — must be configured via `/setup-engine`  
-**Set by:** `/setup-engine`  
-**Read by:** `dev-story`, `code-review`, `architecture-decision`, `create-architecture`, `team-combat`, `team-ui`, `team-audio`
+**控制：** 在代码实现、评审与架构验证时路由到哪些引擎专属专家代理  
+**取值：** `Godot` | `Unity` | `Unreal`  
+**默认：** `[UNSET]`——必须通过 `/setup-engine` 配置  
+**设置方式：** `/setup-engine`  
+**读取方：** `dev-story`、`code-review`、`architecture-decision`、`create-architecture`、`team-combat`、`team-ui`、`team-audio`
 
-> **Currently stored in `technical-preferences.md`**, not `project.yaml`. After
-> YAML expansion, `engine.name` and the specialist routing table move to
-> `project.yaml specialists` block. Skill behavior is unchanged — only the
-> source file changes.
+> **目前存放在 `technical-preferences.md` 中**，而非 `project.yaml`。完成
+> YAML 扩展后，`engine.name` 与专家路由表会迁移到 `project.yaml` 的
+> `specialists` 块。技能行为不变——改变的只是来源文件。
 
-> **This is a project attribute, not a mode.** Engine choice drives specialist
-> routing the same way `platform.multiplayer` drives network routing — skills
-> respond to a fact about the project, not a process preference.
+> **这是项目属性，不是模式。** 引擎选择驱动专家路由的方式，与
+> `platform.multiplayer` 驱动网络路由相同——技能响应的是关于项目的事实，
+> 而不是流程偏好。
 
 ---
 
 ### Specialist routing by engine
 
-| Engine | Language/code specialist | Shader specialist | UI specialist | Additional specialists |
+| 引擎 | 语言/代码专家 | 着色器专家 | UI 专家 | 其他专家 |
 |--------|--------------------------|-------------------|---------------|----------------------|
-| **Godot** | `godot-gdscript-specialist` (GDScript) or `godot-csharp-specialist` (C#) — driven by `engine.language` | `godot-shader-specialist` | `godot-specialist` | `godot-gdextension-specialist` |
-| **Unity** | `unity-specialist` | `unity-shader-specialist` | `unity-ui-specialist` | `unity-addressables-specialist`, `unity-dots-specialist` |
-| **Unreal** | `unreal-specialist` | `unreal-specialist` | `ue-umg-specialist` | `ue-gas-specialist`, `ue-blueprint-specialist`, `ue-replication-specialist` |
-| **[UNSET]** | No specialist spawned — warning emitted | No specialist spawned | No specialist spawned | None |
+| **Godot** | `godot-gdscript-specialist`（GDScript）或 `godot-csharp-specialist`（C#）——由 `engine.language` 决定 | `godot-shader-specialist` | `godot-specialist` | `godot-gdextension-specialist` |
+| **Unity** | `unity-specialist` | `unity-shader-specialist` | `unity-ui-specialist` | `unity-addressables-specialist`、`unity-dots-specialist` |
+| **Unreal** | `unreal-specialist` | `unreal-specialist` | `ue-umg-specialist` | `ue-gas-specialist`、`ue-blueprint-specialist`、`ue-replication-specialist` |
+| **[UNSET]** | 不生成专家——发出警告 | 不生成专家 | 不生成专家 | 无 |
 
 ---
 
 ### Affected skills
 
-| Skill | How engine.name is used |
+| 技能 | `engine.name` 如何使用 |
 |-------|------------------------|
-| **dev-story** | Routes code stories to a programmer agent, then hands the changed files to the language specialist (the generic engine specialist when none is set) for an engine-API check. |
-| **code-review** | Routes review to language, shader, or UI specialist based on file type being reviewed. |
-| **architecture-decision** | Loads `docs/engine-reference/[engine]/VERSION.md` before authoring. Spawns engine specialist to validate ADR for API correctness and post-cutoff compatibility. |
-| **create-architecture** | Includes engine-specific constraints and patterns in architecture doc based on engine choice. |
-| **team-combat / team-ui / team-audio** | Spawn the engine specialist their pipeline names: team-combat the primary engine specialist (from `team.size: small`), team-ui the engine UI specialist (`specialists.ui`, at `studio`), team-audio the primary engine specialist (at `studio`). The other six `team-*` skills spawn none. |
+| **dev-story** | 把代码类用户故事路由给程序员代理，随后把改动文件交给语言专家（未配置时为通用引擎专家）做引擎 API 检查。 |
+| **code-review** | 根据被评审文件的类型，把评审路由给语言、着色器或 UI 专家。 |
+| **architecture-decision** | 撰写前加载 `docs/engine-reference/[engine]/VERSION.md`。生成引擎专家以验证 ADR 的 API 正确性与版本截止后的兼容性。 |
+| **create-architecture** | 依据引擎选择，把引擎专属约束与模式写入架构文档。 |
+| **team-combat / team-ui / team-audio** | 生成各自流水线指定的引擎专家：team-combat 生成主引擎专家（来自 `team.size: small`），team-ui 生成引擎 UI 专家（`specialists.ui`，在 `studio` 下），team-audio 生成主引擎专家（在 `studio` 下）。其余六个 `team-*` 技能不生成任何专家。 |
 
 ---
 
 ## commands
 
-> **Live since the run-and-observe step.** This block was RESERVED — written by
-> `/setup-engine`, read by nothing — through most of v1.1. `test`, `smoke` and
-> `build` gained readers as the parse-check and smoke gates landed; `run` gained
-> its reader last, when `/dev-story` Phase 6 step 4 started launching the game to
-> look at it. The per-skill table at the bottom is now current behaviour, not
-> intent. `validate-push.sh` was once named as a reader and never was.
+> **自「运行并观察」步骤起已启用。** 该块在 v1.1 的大部分时间里都是 RESERVED——
+> 由 `/setup-engine` 写入，却无人读取。随着解析检查与冒烟闸门的落地，`test`、`smoke`
+> 与 `build` 先后获得了读取方；`run` 最后才获得读取方，即 `/dev-story` Phase 6
+> 步骤 4 开始启动游戏以便观察之时。底部的逐技能表现在描述的是当前行为，而非意图。
+> `validate-push.sh` 曾被列为读取方，但从未真正读取过。
 
-**Controls:** Explicit shell commands to build, test, run, and smoke-test the project
-**Values:** strings — shell-executable commands
-**Default:** `[UNSET]` — populated by `/setup-engine` with engine-typical defaults
-**Set by:** `/setup-engine`, `/settings`
-**Written by:** `/setup-engine`, `/settings`. **Read by:** `test` — `/smoke-check`, `/hotfix` (narrowed to the affected suite), `/bug-report` (verify mode, narrowed to the affected suite), `/day-one-patch` (targeted fix and, when set, the broader regression — NOT ASSESSED if unset), `/dev-story` (Godot parse-check executable resolution), `/test-setup` (the `<Project>.` filter root on Unreal), `project-coherence.sh`; `smoke` — `/dev-story` (Unity parse check), `/smoke-check` (build check when tests are WAIVED); `build` — `/smoke-check` (build check when tests are WAIVED and `smoke` is unset), `project-coherence.sh`; `run` — `/dev-story` (Phase 6 step 4, the run-and-observe step). `/launch-checklist` and `/regression-suite` name these commands but do not run them.
-  *(Derived by grep. A helper-based read would not show up, so treat this list as the verified floor, not a ceiling.)*
+**控制：** 用于构建、测试、运行与冒烟测试项目的显式 shell 命令
+**取值：** 字符串——可被 shell 执行的命令
+**默认：** `[UNSET]`——由 `/setup-engine` 填入引擎典型默认值
+**设置方式：** `/setup-engine`、`/settings`
+**写入方：** `/setup-engine`、`/settings`。**读取方：** `test`——`/smoke-check`、`/hotfix`（缩小到受影响的测试套件）、`/bug-report`（verify 模式，缩小到受影响的测试套件）、`/day-one-patch`（针对性修复，以及已设置时的更广泛回归——未设置则记为 NOT ASSESSED）、`/dev-story`（Godot 解析检查的可执行文件解析）、`/test-setup`（Unreal 上 `<Project>.` 过滤根）、`project-coherence.sh`；`smoke`——`/dev-story`（Unity 解析检查）、`/smoke-check`（测试被 WAIVED 时的构建检查）；`build`——`/smoke-check`（测试被 WAIVED 且 `smoke` 未设置时的构建检查）、`project-coherence.sh`；`run`——`/dev-story`（Phase 6 步骤 4，即运行并观察步骤）。`/launch-checklist` 与 `/regression-suite` 会提及这些命令，但不会执行它们。
+  *（通过 grep 推导。辅助函数式读取不会显现，因此请将此列表视为已验证的下限，而非上限。）*
 
-**Priority chain:** `commands.*` in `project.yaml` → engine-typical default → no command available
+**优先级链：** `project.yaml` 中的 `commands.*` → 引擎典型默认值 → 无可用命令
 
-> **Why explicit:** Without this block, CCGS has to guess engine-typical conventions
-> for invoking the project. Better to be explicit per-project — covers cases where
-> projects customize their build (e.g., a Godot project using gdunit4 for tests but
-> a custom export script for builds).
+> **为什么要求显式：** 没有这个块，CCGS 就不得不猜测调用项目的引擎典型约定。
+> 逐项目显式声明更好——可覆盖项目自定义构建的情况（例如某个 Godot 项目用 gdunit4
+> 跑测试，却用自定义导出脚本做构建）。
 
 ---
 
 ### Fields
 
-Each command can be a simple string (used on all OSes) or an OS-aware map:
+每条命令可以是简单字符串（在所有操作系统上使用），也可以是感知操作系统的映射：
 
-**Simple form** (one command, used on every OS):
+**简单形式**（一条命令，在每个操作系统上使用）：
 ```yaml
 commands:
   build: "godot --headless --export-debug '<PRESET>'"   # ask; see the note below
@@ -1787,11 +1685,10 @@ commands:
   smoke: "godot --headless --quit-after 5"
 ```
 
-Note that `build` is the one row the simple form suits least: an export preset
-names a *platform*, so a single build string is portable only for a project that
-builds one platform. The other three rows are genuinely OS-independent.
+注意 `build` 是简单形式最不适合的那一行：导出预设命名的是一个*平台*，因此单条构建
+字符串只有在项目只构建一个平台时才可移植。其余三行确实与操作系统无关。
 
-**OS-aware form** (different commands per OS):
+**感知操作系统的形式**（不同操作系统使用不同命令）：
 ```yaml
 commands:
   build:
@@ -1806,108 +1703,101 @@ commands:
     default: "godot --headless --quit-after 5"
 ```
 
-**Resolution rule:** if the value is a string, use it as-is on any OS. If the
-value is a map, skills/hooks read the current OS and pick the matching key
-(`linux`, `windows`, `macos`). Fall back to `default` if no OS-specific key
-matches.
+**解析规则：** 若取值为字符串，则在任何操作系统上原样使用。若取值为映射，
+技能/钩子会读取当前操作系统并选取匹配的键（`linux`、`windows`、`macos`）。若无
+操作系统专属键匹配，则回退到 `default`。
 
-This solves the Windows/Linux/macOS path-and-binary-name differences without
-breaking the whitelist (commands stays locked to project.yaml — the OS-specific
-keys are inside the locked file, not a local override).
+这解决了 Windows/Linux/macOS 之间路径与可执行文件名称的差异，同时不破坏白名单
+（`commands` 仍锁定在 project.yaml——操作系统专属键位于被锁定的文件内部，而非
+本地覆盖）。
 
-| Field | Purpose |
+| 字段 | 用途 |
 |-------|---------|
-| `build` | Full project build for CI or release. `/smoke-check` runs it only as the WAIVED-path build check when `commands.smoke` is unset; `project-coherence.sh` (which `/smoke-check` runs first) checks the export preset it names, and `/launch-checklist` only asks whether the build produces a valid artifact. |
-| `test` | Run the full test suite. Run by `/smoke-check` and, narrowed to the affected suite, by `/hotfix`, `/bug-report` (verify mode) and `/day-one-patch`; `project-coherence.sh` checks the runner it names. `/regression-suite` does **not** run it. |
-| `run` | Launch the **game** windowed at a fixed resolution — not the editor. Used by `/dev-story` Phase 6 step 4 to observe the feature and retain a screenshot; see `.claude/docs/run-and-observe.md` for the per-engine capture flags that are appended to it. |
-| `smoke` | Minimal "does it boot?" check. Run by `/dev-story` as the Unity parse check (Phase 6 step 2), and by `/smoke-check` as the build check when `qa.level: minimal` waives tests. |
+| `build` | 供 CI 或发布使用的完整项目构建。`/smoke-check` 仅在 `commands.smoke` 未设置时把它作为 WAIVED 路径的构建检查来运行；`project-coherence.sh`（`/smoke-check` 首先运行它）会检查它命名的导出预设，而 `/launch-checklist` 只询问构建是否产出有效产物。 |
+| `test` | 运行完整测试套件。由 `/smoke-check` 运行，并由 `/hotfix`、`/bug-report`（verify 模式）与 `/day-one-patch` 缩小到受影响的测试套件后运行；`project-coherence.sh` 会检查它命名的测试运行器。`/regression-suite` **不**运行它。 |
+| `run` | 以固定分辨率窗口化启动**游戏**——而非编辑器。由 `/dev-story` Phase 6 步骤 4 用来观察功能并留存截图；逐引擎追加的捕获标志见 `.claude/docs/run-and-observe.md`。 |
+| `smoke` | 最小化的「能否启动？」检查。由 `/dev-story` 作为 Unity 解析检查（Phase 6 步骤 2）运行，也由 `/smoke-check` 在 `qa.level: minimal` 豁免测试时作为构建检查运行。 |
 
 ---
 
 ### Engine defaults
 
-When `/setup-engine` runs, it populates `commands` based on engine choice — except
-the **build** row, which it must **ask** for. The build artifact is named by a
-project-defined string (a Godot export preset, a Unity build target), and no
-engine reference in this repo can source it. See `/setup-engine` §"The Godot
-`build` row must not hardcode `'Linux/X11'`".
+当 `/setup-engine` 运行时，它会依据引擎选择填充 `commands`——但 **build** 行除外，
+那一行必须**询问**用户。构建产物由项目自定义的字符串命名（Godot 导出预设、Unity
+构建目标），本仓库中没有任何引擎参考资料能提供它。见 `/setup-engine` 的
+§"The Godot `build` row must not hardcode `'Linux/X11'`"。
 
-| Engine | build | test | run | smoke |
+| 引擎 | build | test | run | smoke |
 |--------|-------|------|-----|-------|
 | Godot | `godot --headless --export-debug '<PRESET>'` | `godot --headless -s -d --remote-debug tcp://127.0.0.1:0 res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a res://tests --ignoreHeadlessMode` | `godot --path . --windowed --resolution 1280x720` | `godot --headless --quit-after 5` |
 | Unity | `"<Unity editor>" -batchmode -quit -projectPath . -buildTarget <TARGET> -build<PLATFORM>Player Builds/<Target>/<Game>.exe` | `"<Unity editor>" -batchmode -runTests -projectPath . -testPlatform EditMode -testResults test-results/editmode.xml` | `Builds/<Target>/<Game>.exe -screen-width 1280 -screen-height 720 -screen-fullscreen 0` | `"<Unity editor>" -batchmode -quit -projectPath . -logFile -` |
-| Unreal | `"<UE root>/Engine/Binaries/DotNET/AutomationTool/AutomationTool.exe" BuildCookRun -project="$(pwd -W 2>/dev/null || pwd)/<project>.uproject" -platform=Win64 -build -cook` (confirm per project) | `"<UE root>/Engine/Binaries/Win64/UnrealEditor-Cmd.exe" "$(pwd -W 2>/dev/null || pwd)/<project>.uproject" -ExecCmds="Automation RunTests <project>.; Quit" -unattended -nullrhi -stdout -FullStdOutLogOutput` | `"<UE root>/Engine/Binaries/Win64/UnrealEditor.exe" "$(pwd -W 2>/dev/null || pwd)/<project>.uproject" -game -windowed -ResX=1280 -ResY=720` | `"<UE root>/Engine/Binaries/Win64/UnrealEditor-Cmd.exe" "$(pwd -W 2>/dev/null || pwd)/<project>.uproject" -game -nullrhi -unattended -stdout -ExecCmds="Quit"` |
+| Unreal | `"<UE root>/Engine/Binaries/DotNET/AutomationTool/AutomationTool.exe" BuildCookRun -project="$(pwd -W 2>/dev/null || pwd)/<project>.uproject" -platform=Win64 -build -cook`（逐项目确认） | `"<UE root>/Engine/Binaries/Win64/UnrealEditor-Cmd.exe" "$(pwd -W 2>/dev/null || pwd)/<project>.uproject" -ExecCmds="Automation RunTests <project>.; Quit" -unattended -nullrhi -stdout -FullStdOutLogOutput` | `"<UE root>/Engine/Binaries/Win64/UnrealEditor.exe" "$(pwd -W 2>/dev/null || pwd)/<project>.uproject" -game -windowed -ResX=1280 -ResY=720` | `"<UE root>/Engine/Binaries/Win64/UnrealEditor-Cmd.exe" "$(pwd -W 2>/dev/null || pwd)/<project>.uproject" -game -nullrhi -unattended -stdout -ExecCmds="Quit"` |
 
-The Unreal row is Windows'. `/setup-engine` writes the Linux block (`Engine/Build/BatchFiles/RunUAT.sh`,
-`Engine/Binaries/Linux/UnrealEditor`) on Linux, and on macOS only `build`, leaving `test`, `run` and
-`smoke` unset, with a comment in `project.yaml` asking you to set them via `/settings` — see
-`docs/engine-reference/unreal/current-best-practices.md`, "Command Line".
+表中 Unreal 一行是 Windows 的写法。`/setup-engine` 在 Linux 上写入 Linux 块
+（`Engine/Build/BatchFiles/RunUAT.sh`、`Engine/Binaries/Linux/UnrealEditor`），在
+macOS 上只写入 `build`，把 `test`、`run` 与 `smoke` 留为未设置，并在 `project.yaml`
+中加一条注释，请你通过 `/settings` 设置它们——见
+`docs/engine-reference/unreal/current-best-practices.md` 的 "Command Line"。
 
-> **`<PRESET>` and `<TARGET>` are placeholders, not values to copy.** A Godot
-> export preset is whatever string the operator typed into `export_presets.cfg`;
-> the shipped defaults are per-platform (`Windows Desktop`, `macOS`, `Web`,
-> `Linux/X11`). Copying a preset name you do not have gives you a build command
-> that fails with `Unknown export preset`; copying one you *do* have, but did not
-> mean, gives you a command that succeeds and builds the wrong platform. The
-> second is the dangerous one. If no presets exist yet — common, since
-> `/setup-engine` usually runs before the project has any — write
-> `[TO BE CONFIGURED]` rather than guessing a name.
+> **`<PRESET>` 与 `<TARGET>` 是占位符，不是可供复制的取值。** Godot 导出预设就是
+> 操作者输入到 `export_presets.cfg` 中的字符串；随附默认值按平台而定
+> （`Windows Desktop`、`macOS`、`Web`、`Linux/X11`）。复制一个你并不拥有的预设名，
+> 会得到一条以 `Unknown export preset` 失败的构建命令；复制一个你*确实*拥有、
+> 但并非本意的预设名，会得到一条成功却构建了错误平台的命令。后者才是危险的那个。
+> 如果尚无任何预设——这很常见，因为 `/setup-engine` 通常在项目还没有任何预设时
+> 运行——请写入 `[TO BE CONFIGURED]`，而不是猜测一个名称。
 
-Users override per-project as needed via `/settings commands.<field>=<value>` or by editing `project.yaml` directly.
+用户可按需通过 `/settings commands.<field>=<value>` 或直接编辑 `project.yaml` 逐项目覆盖。
 
 ---
 
 ### Affected skills
 
-| Skill | How `commands` is used |
+| 技能 | `commands` 如何使用 |
 |-------|------------------------|
-| **smoke-check** | Runs `commands.test`, or the engine's default when it is unset; on Unreal it builds the editor target first. Critical path for QA hand-off. |
-| **launch-checklist** | Emits a checklist **item** asking whether the build produces a valid artifact. It does **not** run `commands.build`; the verification is a human step. |
-| **validate-push.sh** | Does **not** read `commands.*`. It warns on pushes to protected branches (`main`/`master`/`release/*`) and runs no build or smoke command — the block path in it is commented out, so it never fails a push. |
-| **dev-story** | Phase 6 step 2 is the parse check: `.claude/scripts/godot-parse-check.gd` on Godot, `commands.smoke` on Unity, the editor-target build on Unreal. Phase 6 step 4 runs `commands.run` — the windowed game launch — to observe the feature and retain a screenshot (`.claude/docs/run-and-observe.md`). |
-| **regression-suite** | Maps coverage by **globbing test filenames**. It does **not** invoke `commands.test`, so coverage here means "a test file exists", never "a test passed". |
+| **smoke-check** | 运行 `commands.test`，未设置时使用引擎默认值；在 Unreal 上会先构建编辑器目标。这是 QA 交接的关键路径。 |
+| **launch-checklist** | 输出一个清单**项**，询问构建是否产出有效产物。它**不**运行 `commands.build`；验证是一个人工步骤。 |
+| **validate-push.sh** | **不**读取 `commands.*`。它会对推送到受保护分支（`main`/`master`/`release/*`）发出警告，且不运行任何构建或冒烟命令——其中的阻塞路径已被注释掉，因此它永远不会让推送失败。 |
+| **dev-story** | Phase 6 步骤 2 是解析检查：Godot 上运行 `.claude/scripts/godot-parse-check.gd`，Unity 上运行 `commands.smoke`，Unreal 上构建编辑器目标。Phase 6 步骤 4 运行 `commands.run`——窗口化启动游戏——以观察功能并留存截图（`.claude/docs/run-and-observe.md`）。 |
+| **regression-suite** | 通过 **glob 匹配测试文件名**来映射覆盖率。它**不**调用 `commands.test`，因此这里的覆盖率意味着「存在测试文件」，而绝不是「测试通过」。 |
 
 ---
 
 ## naming
 
-**Controls:** Code naming conventions for the project
-**Values:** see field list below
-**Default:** engine-specific (auto-populated by `/setup-engine`)
-**Set by:** `/setup-engine`, `/settings`
-**Read by:** `/adopt`, `/architecture-review`, `/asset-spec`,
-`/create-architecture`, `/create-control-manifest`, `/dev-story`,
-`/vertical-slice` — each reads `naming.*` from `project.yaml` and feeds the
-conventions into a brief, manifest or spec. **NOT by `/code-review` and NOT by
-`validate-commit.sh`**.
-  *(Reader list derived by grep, so treat it as the verified floor rather than
-  a ceiling — a skill reading the value through a helper would not show up.)*
+**控制：** 项目的代码命名约定
+**取值：** 见下方字段列表
+**默认：** 因引擎而异（由 `/setup-engine` 自动填充）
+**设置方式：** `/setup-engine`、`/settings`
+**读取方：** `/adopt`、`/architecture-review`、`/asset-spec`、
+`/create-architecture`、`/create-control-manifest`、`/dev-story`、
+`/vertical-slice`——各自从 `project.yaml` 读取 `naming.*`，并把这些约定
+传入简报、清单或规格。**`/code-review` 不读取，`validate-commit.sh` 也不读取**。
+  *（读取方列表通过 grep 推导，因此请将其视为已验证的下限，而非上限——
+  通过辅助函数读取取值的技能不会显现。）*
 
-> **These conventions are guidance, not a gate.** They reach your project by
-> being passed into briefs, manifests and specs for whoever writes the code.
-> Nothing checks the result: `/code-review` does not validate files against them
-> and `validate-commit.sh` does not warn on violations — neither contains any
-> naming logic. If you need enforcement, it has to be added.
+> **这些约定是指导，不是闸门。** 它们通过被传入简报、清单与规格，到达实际写代码
+> 的人手中。没有任何东西检查结果：`/code-review` 不会依据它们校验文件，
+> `validate-commit.sh` 也不会对违规发出警告——两者都不含任何命名逻辑。如果你需要
+> 强制执行，必须自行添加。
 >
-> **Asset filenames.** `validate-assets.sh` warns when a file under Godot's
-> `assets/` has an uppercase letter, a space or a hyphen in its name (it expects
-> lowercase with underscores), and it takes no config input. `/asset-spec`
-> specifies asset names from `naming.*`. Unity's `Assets/` and Unreal's `Content/`
-> are not naming-checked: those engines name assets in PascalCase. On Godot-C#,
-> where `/setup-engine` sets `naming.files: PascalCase`, the hook warns on assets
-> named exactly as `/asset-spec` specified them. `naming.files` describes
-> **source** files by its own examples (`PlayerController.cs`), and no key governs
-> asset filenames, so treat the hook's naming warning as advisory there.
+> **资源文件名。** 当 Godot 的 `assets/` 下某个文件的名称包含大写字母、空格或连字符
+> 时，`validate-assets.sh` 会发出警告（它期望小写加下划线），且它不接受任何配置输入。
+> `/asset-spec` 依据 `naming.*` 指定资源名称。Unity 的 `Assets/` 与 Unreal 的
+> `Content/` 不做命名检查：这些引擎以 PascalCase 命名资源。在 Godot-C# 上，
+> `/setup-engine` 会设置 `naming.files: PascalCase`，此时该钩子会对完全按
+> `/asset-spec` 所指定方式命名的资源发出警告。`naming.files` 按其自身示例
+> （`PlayerController.cs`）描述的是**源文件**，且没有键管理资源文件名，因此在那种
+> 情况下请把该钩子的命名警告视为建议性质。
 
-> **Moved from `technical-preferences.md`**, which is being deleted. Naming
-> conventions are project-level facts shared by everyone on the project, so they
-> belong in `project.yaml` alongside the rest of your structured config.
+> **从 `technical-preferences.md` 迁移而来**，该文件正在被删除。命名约定是项目级
+> 事实，由项目上的每个人共享，因此它们应与其他结构化配置一起位于 `project.yaml`。
 
 ---
 
 ### Fields
 
-| Field | Values | Godot default | Unity default | Unreal default |
+| 字段 | 取值 | Godot 默认值 | Unity 默认值 | Unreal 默认值 |
 |-------|--------|---------------|---------------|----------------|
 | `classes` | `PascalCase` \| `snake_case` \| `camelCase` | PascalCase | PascalCase | PascalCase |
 | `variables` | `snake_case` \| `camelCase` | snake_case | camelCase | camelCase |
@@ -1916,111 +1806,103 @@ conventions into a brief, manifest or spec. **NOT by `/code-review` and NOT by
 | `files` | `snake_case` \| `PascalCase` \| `kebab-case` | snake_case | PascalCase | PascalCase |
 | `scenes` / `prefabs` | `snake_case` \| `PascalCase` | snake_case | PascalCase | PascalCase |
 
-> **`signals` vs `events`:** Godot uses signals natively; Unity uses C# events
-> or UnityEvents; Unreal uses delegates and dynamic multicast. The field stays
-> named `signals` in project.yaml for consistency across engines — interpret as
-> "event-like callbacks" regardless of engine.
+> **`signals` 与 `events`：** Godot 原生使用 signals；Unity 使用 C# events 或
+> UnityEvents；Unreal 使用 delegates 与 dynamic multicast。为在各引擎间保持一致，
+> 该字段在 project.yaml 中仍名为 `signals`——无论何种引擎，都把它理解为
+> 「类事件的回调」。
 
 ---
 
 ### Affected skills
 
-| Skill | How naming is used |
+| 技能 | 命名约定如何使用 |
 |-------|--------------------|
-| **dev-story** | Passes the naming conventions to the programmer subagent as part of the implementation context |
-| **create-control-manifest** | Emits the conventions as manifest rows (classes, variables, signals/events, files, constants) |
-| **asset-spec** | Specifies asset naming per the configured convention |
-| **create-architecture** / **architecture-review** | Read as project config alongside `performance.*` |
-| **vertical-slice** / **adopt** | Read as project config; `/adopt` audits conformance at MEDIUM severity |
+| **dev-story** | 把命名约定作为实现上下文的一部分传给程序员子代理 |
+| **create-control-manifest** | 把约定输出为清单行（classes、variables、signals/events、files、constants） |
+| **asset-spec** | 按已配置的约定指定资源命名 |
+| **create-architecture** / **architecture-review** | 与 `performance.*` 一同作为项目配置读取 |
+| **vertical-slice** / **adopt** | 作为项目配置读取；`/adopt` 以 MEDIUM 严重度审计合规性 |
 
-No skill or hook validates code *against* these conventions — see the note above.
+没有任何技能或钩子*依据*这些约定校验代码——见上方说明。
 
 ---
 
 ## features.session_state
 
-**Controls:** Whether the harness runs a full session tracking pipeline (hooks,
-log files, `active.md` checkpoint) or relies on
-skeleton-first output files for recovery  
-**Values:** `off` | `on`  
-**Default:** `on`  
-**Set by:** `/settings`  
-**Read by:** Five hooks — `session-start.sh` (its recovery preview only),
-`pre-compact.sh`, `session-stop.sh`, `log-agent.sh` and `log-agent-stop.sh`. No skill reads it, and neither does `statusline.sh`.
+**控制：** 执行框架是运行完整的会话跟踪流水线（钩子、日志文件、`active.md`
+检查点），还是依赖骨架优先的产出文件来恢复  
+**取值：** `off` | `on`  
+**默认：** `on`  
+**设置方式：** `/settings`  
+**读取方：** 五个钩子——`session-start.sh`（仅其恢复预览）、
+`pre-compact.sh`、`session-stop.sh`、`log-agent.sh` 与 `log-agent-stop.sh`。没有技能读取它，`statusline.sh` 也不读取。
 
-> **`on` is the recommended setting.** Long-form skills write self-describing
-> skeleton files upfront, which covers much of mid-task recovery on its own; the
-> session pipeline adds the checkpoint preview at session start, the session
-> archive and the subagent tally. Turn it `off` only to save that preview's
-> tokens.
+> **`on` 是推荐设置。** 长篇幅技能会预先写出自描述的骨架文件，这本身就能覆盖
+> 大部分任务中途的恢复；会话流水线还会增加会话开始时的检查点预览、会话归档与
+> 子代理计数。只有在你想省下那段预览的 token 时才应把它设为 `off`。
 
-> **Priority chain:** `features.session_state` in `project.local.yaml` →
-> `project.yaml` → hardcoded default of **`on`**. Hooks read it via
-> `session_state_enabled()` in `yaml-helper.sh` and exit early when `off`.
-> Skills do not read it: `/dev-story` and `/story-done` update the checkpoint in
-> `active.md` whatever its value.
+> **优先级链：** `project.local.yaml` 中的 `features.session_state` →
+> `project.yaml` → 硬编码默认值 **`on`**。钩子通过 `yaml-helper.sh` 中的
+> `session_state_enabled()` 读取它，并在为 `off` 时提前退出。
+> 技能不读取它：无论其取值如何，`/dev-story` 与 `/story-done` 都会更新
+> `active.md` 中的检查点。
 
-> **The default is `on`, deliberately.** `.claude/docs/context-management.md`
-> tells you to rely on `production/session-state/active.md` as your
-> crash-recovery checkpoint, so defaulting this off would quietly take away
-> recovery, the session archive and the subagent tally. What `off` saves — the
-> checkpoint preview, at most ~750 tokens per session start — is an explicit
-> opt-out (`/settings features.session_state=off`), never a silent default.
+> **默认值刻意设为 `on`。** `.claude/docs/context-management.md` 让你把
+> `production/session-state/active.md` 当作崩溃恢复检查点来依赖，因此把此项默认
+> 关闭会悄悄夺走恢复能力、会话归档与子代理计数。`off` 所节省的——检查点预览，
+> 每次会话开始最多约 750 个 token——属于显式退出
+> （`/settings features.session_state=off`），绝非静默默认。
 
-> **`session-start.sh` is gated per-block, not at the top.** Its sprint,
-> milestone and git context is not part of the session-state pipeline; only the
-> `active.md` recovery preview is gated. Its check also fails OPEN — that hook
-> sources `yaml-helper.sh` conditionally, and an undefined function is falsey,
-> which would suppress the recovery checkpoint invisibly.
+> **`session-start.sh` 是按块门控，而非在顶部门控。** 它的冲刺、里程碑与 git
+> 上下文不属于会话状态流水线；只有 `active.md` 恢复预览受门控。它的检查同样采用
+> 失败即放行（fail OPEN）——该钩子会有条件地 source `yaml-helper.sh`，而未定义的
+> 函数为假值，这会无形地抑制恢复检查点。
 
 ---
 
 ### Value intent
 
-| Value | Intent |
+| 取值 | 意图 |
 |-------|--------|
-| `off` | Recovery via skeleton-first output files. Long-form skills write a complete skeleton (all section headers, empty bodies) before starting. If context clears or compacts, the agent reads the skeleton + relevant docs and resumes. The five session-state hooks do nothing, so no logs; skills still update the checkpoint in `active.md`, but session start does not show it. Saves at most ~750 tokens per session start. |
-| `on` | Full session tracking. Session-stop archival, compaction log and agent audit log all active. Adds the checkpoint preview to each session start, capped at 25 lines or 3,000 characters (at most ~750 tokens). Compaction hooks log to disk and add nothing to Claude's context. |
+| `off` | 通过骨架优先的产出文件恢复。长篇幅技能在开始前写出完整骨架（所有章节标题、空正文）。若上下文被清除或压缩，代理会读取骨架 + 相关文档并继续。五个会话状态钩子什么都不做，因此没有日志；技能仍会更新 `active.md` 中的检查点，但会话开始不会显示它。每次会话开始最多节省约 750 个 token。 |
+| `on` | 完整的会话跟踪。会话结束归档、压缩日志与代理审计日志全部启用。在每次会话开始时增加检查点预览，上限为 25 行或 3,000 个字符（最多约 750 个 token）。压缩钩子写入磁盘日志，不向 Claude 的上下文添加任何内容。 |
 
 ---
 
 ### Hook behavior
 
-> **Implementation note:** The feature flag check lives inside each hook script,
-> not at the harness level. Every session-state-aware hook calls
-> `session_state_enabled()` from `yaml-helper.sh` at its top (an awk read of
-> `project.local.yaml`, then `project.yaml`) and exits silently with no output if
-> the value is `off` — except `session-start.sh`, which skips only its recovery
-> preview. This ensures
-> the harness always fires the hook — the hook decides whether to act.
+> **实现说明：** 功能开关检查位于每个钩子脚本内部，而不是在执行框架层面。每个
+> 感知会话状态的钩子都会在顶部调用 `yaml-helper.sh` 中的
+> `session_state_enabled()`（先 awk 读取 `project.local.yaml`，再读取 `project.yaml`），
+> 若取值为 `off` 则静默退出、不产生任何输出——但 `session-start.sh` 例外，它只跳过
+> 自己的恢复预览。这确保了执行框架始终触发钩子——由钩子决定是否采取行动。
 
-| Hook | session_state: off | session_state: on |
+| 钩子 | session_state: off | session_state: on |
 |------|--------------------|-------------------|
-| **session-start.sh** | Runs normally (git/sprint context) — skips the `active.md` checkpoint preview | Runs fully, including the `active.md` checkpoint preview |
-| **detect-gaps.sh** | Runs unchanged — gap detection is independent of session state | Runs unchanged |
-| **pre-compact.sh** | No-op — exits silently (no compaction-log append) | Appends one line to `compaction-log.txt` and prints nothing (PreCompact output never reaches Claude; `session-start.sh` restores context) |
-| **session-stop.sh** | No-op — exits silently | Archives `active.md` to `session-log.md` when it has changed, appends commits and uncommitted file names, writes the spawn tally to `session-cost.md`; prints nothing |
-| **log-agent.sh** | No-op — exits silently | Appends to agent-audit.log |
-| **log-agent-stop.sh** | No-op — exits silently | Appends to agent-audit.log |
+| **session-start.sh** | 正常运行（git/冲刺上下文）——跳过 `active.md` 检查点预览 | 完整运行，包括 `active.md` 检查点预览 |
+| **detect-gaps.sh** | 照常运行——缺口检测独立于会话状态 | 照常运行 |
+| **pre-compact.sh** | 空操作——静默退出（不追加压缩日志） | 向 `compaction-log.txt` 追加一行且不打印任何内容（PreCompact 输出永远不会到达 Claude；由 `session-start.sh` 恢复上下文） |
+| **session-stop.sh** | 空操作——静默退出 | 当 `active.md` 有变化时把它归档到 `session-log.md`，追加提交与未提交文件名，把生成计数写入 `session-cost.md`；不打印任何内容 |
+| **log-agent.sh** | 空操作——静默退出 | 追加到 agent-audit.log |
+| **log-agent-stop.sh** | 空操作——静默退出 | 追加到 agent-audit.log |
 
 ---
 
 ### File existence by mode
 
-| File | session_state: off | session_state: on |
+| 文件 | session_state: off | session_state: on |
 |------|--------------------|-------------------|
-| `production/session-state/active.md` | Still written by skills; session start does not show it | Written by skills; session start shows its checkpoint |
-| `production/session-logs/session-log.md` | Not written | Append-only archive of each session's `active.md` |
-| `production/session-logs/compaction-log.txt` | Not written | Append-only timestamp log of compaction events |
-| `production/session-logs/agent-audit.log` | Not written | Append-only log of agent spawn/complete events |
+| `production/session-state/active.md` | 仍由技能写入；会话开始不显示它 | 由技能写入；会话开始显示其检查点 |
+| `production/session-logs/session-log.md` | 不写入 | 每次会话 `active.md` 的仅追加归档 |
+| `production/session-logs/compaction-log.txt` | 不写入 | 压缩事件的仅追加时间戳日志 |
+| `production/session-logs/agent-audit.log` | 不写入 | 代理生成/完成事件的仅追加日志 |
 
 ---
 
 ### Skeleton-first pattern (session_state: off recovery mechanism)
 
-Long-form skills must write a skeleton file as their first action — before any
-section discussion begins. The skeleton contains all section headers with empty
-bodies and a `<!-- STATUS: incomplete -->` marker per section.
+长篇幅技能必须把写出骨架文件作为第一个动作——在任何章节讨论开始之前。骨架包含
+所有章节标题，正文为空，并在每个章节处带一个 `<!-- STATUS: incomplete -->` 标记。
 
 ```markdown
 # Combat System — GDD
@@ -2036,99 +1918,94 @@ bodies and a `<!-- STATUS: incomplete -->` marker per section.
 ...
 ```
 
-As each section is approved and written, the marker changes to `<!-- STATUS: done -->`.
-On recovery (after /clear or compaction), the agent reads the skeleton, identifies
-which sections are `done` vs `incomplete`, reads relevant ADRs and the systems index,
-and resumes at the first `incomplete` section. No `active.md` needed.
+当每个章节被批准并写入后，标记会变为 `<!-- STATUS: done -->`。
+恢复时（`/clear` 或压缩之后），代理会读取骨架，识别哪些章节为 `done`、哪些为
+`incomplete`，读取相关 ADR 与系统索引，并从第一个 `incomplete` 章节继续。无需
+`active.md`。
 
-**Skills required to implement skeleton-first:**
+**要求实现骨架优先的技能：**
 
-| Skill | Output file | Skeleton written when |
+| 技能 | 输出文件 | 骨架写入时机 |
 |-------|-------------|----------------------|
-| **design-system** | `design/gdd/[system].md` | Before Phase 1 (section discussion) |
-| **art-bible** | `design/art/art-bible.md` | From `.claude/docs/templates/art-bible.md`, after asking, when section 1 is approved |
-| **create-architecture** | `docs/architecture/architecture.md` | Not skeleton-first: written once at Phase 7 after its ask (an existing document is updated in place) |
-| **ux-design** | `design/ux/[screen].md` | Before screen discussion |
-| **create-stories** | `production/epics/[epic-slug]/story-NNN-[slug].md` | Not skeleton-first: written in Step 6, after the ask names every file |
-| **create-epics** | `production/epics/[epic-slug]/EPIC.md` | Not skeleton-first: written after its per-epic "May I write `production/epics/[epic-slug]/EPIC.md` and add its row to `production/epics/index.md`" ask |
-| **map-systems** | `design/gdd/systems-index.md` | Before system enumeration |
-| **brainstorm** | `design/gdd/game-concept.md` (`standard`/`full`) · `design/game-brief.md` (`minimal`) | Before concept discussion |
+| **design-system** | `design/gdd/[system].md` | Phase 1（章节讨论）之前 |
+| **art-bible** | `design/art/art-bible.md` | 从 `.claude/docs/templates/art-bible.md` 生成，在询问之后、章节 1 获批时写入 |
+| **create-architecture** | `docs/architecture/architecture.md` | 非骨架优先：在 Phase 7 完成询问后一次性写入（对既有文档就地更新） |
+| **ux-design** | `design/ux/[screen].md` | 屏幕讨论之前 |
+| **create-stories** | `production/epics/[epic-slug]/story-NNN-[slug].md` | 非骨架优先：在步骤 6 写入，此时询问已列出每个文件 |
+| **create-epics** | `production/epics/[epic-slug]/EPIC.md` | 非骨架优先：在其逐史诗询问「May I write `production/epics/[epic-slug]/EPIC.md` and add its row to `production/epics/index.md`」之后写入 |
+| **map-systems** | `design/gdd/systems-index.md` | 系统枚举之前 |
+| **brainstorm** | `design/gdd/game-concept.md`（`standard`/`full`）· `design/game-brief.md`（`minimal`） | 概念讨论之前 |
 
-> **Note on agents:** `world-builder` and `narrative-director` are agents, not
-> invocable skills — they do not have SKILL.md files. Long-form output from these
-> agents is produced via the skills above (design-system, art-bible, etc.) which
-> are responsible for skeleton-first enforcement.
+> **关于代理：** `world-builder` 与 `narrative-director` 是代理，不是可调用的技能
+> ——它们没有 SKILL.md 文件。这些代理的长篇产出通过上方技能（design-system、
+> art-bible 等）生成，这些技能负责强制执行骨架优先。
 
 ---
 
 ### Status line behavior
 
-> **Stage detection is always independent of session state.** `statusline.sh`
-> auto-detects stage from `project.yaml` `project.stage` or artifact heuristics regardless
-> of `session_state` value, and so is the breadcrumb: `statusline.sh` never reads
-> `session_state`. (At `workflow: minimal` the status line shows the story count
-> instead of the stage.)
+> **阶段检测始终独立于会话状态。** 无论 `session_state` 取何值，`statusline.sh`
+> 都会从 `project.yaml` 的 `project.stage` 或产出物启发式规则自动检测阶段；面包屑
+> 同样如此：`statusline.sh` 从不读取 `session_state`。（在 `workflow: minimal` 下，
+> 状态栏显示用户故事数量而非阶段。）
 
-| Feature | session_state: off | session_state: on |
+| 功能 | session_state: off | session_state: on |
 |---------|--------------------|-------------------|
-| Context % display | Always shown | Always shown |
-| Model display | Always shown | Always shown |
-| Stage display | From project.yaml or heuristics — except at `workflow: minimal`, where `Minimal · <done>/<total> stories` (or `Minimal · brief` before any story exists) replaces it | Same |
-| Epic/Feature/Task breadcrumb | Parsed from the `<!-- STATUS -->` block in `active.md` (not gated) | Parsed from the `<!-- STATUS -->` block in `active.md` |
+| 上下文百分比显示 | 始终显示 | 始终显示 |
+| 模型显示 | 始终显示 | 始终显示 |
+| 阶段显示 | 来自 project.yaml 或启发式规则——但在 `workflow: minimal` 下由 `Minimal · <done>/<total> stories`（尚无故事时为 `Minimal · brief`）取代 | 相同 |
+| 史诗/功能/任务面包屑 | 从 `active.md` 中的 `<!-- STATUS -->` 块解析（不受门控） | 从 `active.md` 中的 `<!-- STATUS -->` 块解析 |
 
 ---
 
 ### Affected skills
 
-Skills interact with session state in two ways: **inference** (reading `active.md`
-to resolve a missing argument) and **extraction** (appending a SESSION EXTRACT
-block after completing work). Neither is gated: no skill reads `session_state`,
-so both happen whatever its value.
+技能以两种方式与会话状态交互：**推断**（读取 `active.md` 以补全缺失的参数）与
+**提取**（在完成工作后追加一个 SESSION EXTRACT 块）。两者都不受门控：没有技能读取
+`session_state`，因此无论其取值如何，两者都会发生。
 
 #### Inference — skills that read `active.md` to fill in missing arguments
 
-When `active.md` holds nothing to infer from, these skills must receive the
-argument explicitly. If called without an argument, they should prompt the user
-rather than fail silently.
+当 `active.md` 中没有任何可供推断的内容时，这些技能必须显式接收参数。若调用时
+未提供参数，它们应提示用户，而不是静默失败。
 
-| Skill | What it infers from `active.md` | Fallback when nothing is found |
+| 技能 | 从 `active.md` 推断什么 | 未找到任何内容时的回退 |
 |-------|----------------------------------|---------------------|
-| **dev-story** | Active story path (when no arg given) | Prompt user for story path |
-| **story-done** | In-progress story path (when no arg given) | Prompt user for story path |
-| **team-release** | Target version (when no arg given) | Prompt user for version |
-| **team-qa** | Active sprint (when no arg given) | Prompt user for sprint file |
-| **help** | Current task and STATUS block for context-aware suggestions | Responds without session context — surfaces next steps from sprint/epics only |
+| **dev-story** | 活跃用户故事的路径（未提供参数时） | 提示用户输入故事路径 |
+| **story-done** | 进行中用户故事的路径（未提供参数时） | 提示用户输入故事路径 |
+| **team-release** | 目标版本（未提供参数时） | 提示用户输入版本 |
+| **team-qa** | 活跃冲刺（未提供参数时） | 提示用户输入冲刺文件 |
+| **help** | 当前任务与 STATUS 块，用于生成感知上下文的建议 | 在没有会话上下文的情况下响应——仅从冲刺/史诗中给出后续步骤 |
 
 #### Extraction — skills that write session state to active.md
 
-These skills write a structured block after completing work, whatever
-`session_state` is. `/dev-story` and `/story-done` overwrite
-the `<!-- CHECKPOINT -->` block; the others append a SESSION EXTRACT.
+这些技能在完成工作后写入一个结构化块，无论 `session_state` 是什么。
+`/dev-story` 与 `/story-done` 会覆盖 `<!-- CHECKPOINT -->` 块；其余技能追加一个
+SESSION EXTRACT。
 
-| Skill | What it writes to active.md |
+| 技能 | 写入 active.md 的内容 |
 |-------|-----------------------------|
-| **dev-story** | Checkpoint: story path, next step, blockers, files changed, run result |
-| **story-done** | Checkpoint: verdict, story path, next story, tech debt count |
-| **architecture-review** | Verdict, TR coverage counts, new TR-IDs, GDD flags, ADR gaps, report path |
-| **prototype** | Prototype scope, current phase, key decisions |
-| **vertical-slice** | Slice concept, current phase, blocked items |
-| **team-qa** | QA phase comment, blocking issues |
-| **map-systems** | Task record: systems enumerated, current phase |
+| **dev-story** | 检查点：故事路径、下一步、阻塞项、改动文件、运行结果 |
+| **story-done** | 检查点：结论、故事路径、下一个故事、技术债数量 |
+| **architecture-review** | 结论、TR 覆盖率计数、新增 TR-ID、GDD 标记、ADR 缺口、报告路径 |
+| **prototype** | 原型范围、当前阶段、关键决策 |
+| **vertical-slice** | 切片概念、当前阶段、阻塞项 |
+| **team-qa** | QA 阶段备注、阻塞问题 |
+| **map-systems** | 任务记录：已枚举的系统、当前阶段 |
 
 ---
 
 ### Token cost summary
 
-| Scenario | session_state: off | session_state: on |
+| 场景 | session_state: off | session_state: on |
 |----------|--------------------|-------------------|
-| Per session start | ~500 tokens (git/sprint context only) | ~500–1,250 tokens (+ checkpoint preview, at most ~750) |
-| Per compaction event | 0 (compaction hook output never reaches Claude) | 0 (logged to disk only) |
-| Per session end | 0 | File I/O only (no conversation tokens) |
-| Recovery after /clear | Read skeleton + 2–3 docs (~1,000–3,000 tokens) | Read `active.md` (~200–500 tokens) |
+| 每次会话开始 | 约 500 个 token（仅 git/冲刺上下文） | 约 500–1,250 个 token（+ 检查点预览，最多约 750） |
+| 每次压缩事件 | 0（压缩钩子输出永远不会到达 Claude） | 0（仅写入磁盘日志） |
+| 每次会话结束 | 0 | 仅文件 I/O（无对话 token） |
+| `/clear` 之后的恢复 | 读取骨架 + 2–3 份文档（约 1,000–3,000 个 token） | 读取 `active.md`（约 200–500 个 token） |
 
-> **Note:** The `off` recovery cost (reading skeleton + docs) is paid only when
-> recovery is actually needed. The `on` session-start cost is paid every session
-> whether recovery is needed or not.
+> **说明：** `off` 的恢复成本（读取骨架 + 文档）只在确实需要恢复时才付出。`on` 的
+> 会话开始成本则在每次会话都要付出，无论是否需要恢复。
 
 ---
 
@@ -2136,151 +2013,142 @@ the `<!-- CHECKPOINT -->` block; the others append a SESSION EXTRACT.
 
 > ### RESERVED - NOT IMPLEMENTED
 >
-> **No skill or hook reads this setting. Setting it has no effect.** Everything
-> below describes the intended design, not current behaviour.
+> **没有任何技能或钩子读取该设置。设置它没有任何效果。** 下文描述的是预期设计，
+> 而非当前行为。
 >
-> The value is not checked when you set it, and nothing reads it.
-> Nothing warns at any threshold.
+> 你在设置时不会校验该值，也没有任何东西读取它。
+> 任何阈值都不会触发警告。
 
-**Controls:** Context usage threshold at which session warnings fire
-**Values:** float between 0.0 and 1.0
-**Default:** `0.7` (warn at 70%)
-**Set by:** `/settings`
-**Read by:** nothing yet (intended readers: `session-start.sh`, `statusline.sh`)
+**控制：** 触发会话警告的上下文使用率阈值
+**取值：** 0.0 到 1.0 之间的浮点数
+**默认：** `0.7`（使用率达 70% 时警告）
+**设置方式：** `/settings`
+**读取方：** 暂时没有（预期读取方：`session-start.sh`、`statusline.sh`）
 
-**Priority chain:** `features.token_budget_warn_at` in `project.yaml` → hardcoded default of `0.7`
+**优先级链：** `project.yaml` 中的 `features.token_budget_warn_at` → 硬编码默认值 `0.7`
 
-> Surfaces a warning when session context usage exceeds the threshold. Helps
-> cost-conscious users hit `/clear` before runaway sessions. Set to `1.0` to
-> disable.
+> 当会话上下文使用率超过该阈值时给出警告。帮助注重成本的用户在会话失控前执行
+> `/clear`。设为 `1.0` 可禁用。
 
 ---
 
 ### Behavior
 
-| Threshold | What fires |
+| 阈值 | 触发内容 |
 |-----------|-----------|
-| Below `warn_at` | No warning |
-| At or above `warn_at` | `statusline.sh` shows context usage in yellow; next session-start hook emits a one-line note: *"Last session reached [X]% context — consider /clear if continuing work."* |
-| At 90%+ | Yellow becomes red regardless of `warn_at` value |
+| 低于 `warn_at` | 无警告 |
+| 达到或高于 `warn_at` | `statusline.sh` 以黄色显示上下文使用率；下一次会话开始钩子输出一行提示：*“Last session reached [X]% context — consider /clear if continuing work.”* |
+| 达到 90%+ | 无论 `warn_at` 取何值，黄色都变为红色 |
 
 ---
 
 ## features.read_guard
 
-**Controls:** Whether a whole-file Read of a large design doc is refused  
-**Values:** `on` | `off`; `true` and `false` also work  
-**Default:** `on`  
-**Set by:** `/settings`  
-**Read by:** `validate-read.sh` (PreToolUse Read), through `.claude/scripts/read-guard.sh check`
+**控制：** 是否拒绝整文件读取大型设计文档  
+**取值：** `on` | `off`；`true` 与 `false` 同样有效  
+**默认：** `on`  
+**设置方式：** `/settings`  
+**读取方：** `validate-read.sh`（PreToolUse Read），经由 `.claude/scripts/read-guard.sh check`
 
-> **Priority chain:** `features.read_guard` in `project.local.yaml` →
-> `project.yaml` → default **`on`**.
+> **优先级链：** `project.local.yaml` 中的 `features.read_guard` →
+> `project.yaml` → 默认 **`on`**。
 
-A Read with no offset and no limit of a file under `design/`, `docs/architecture/`
-or `production/session-state/` that is over `features.read_guard_kb` is refused.
-The refusal lists the doc's headings with their line numbers, so the next call
-reads one section with offset and limit. A ranged read always passes, so no skill
-can get stuck behind the guard; images and PDFs are never checked. It blocks
-rather than warns because a warning would let the whole read happen, and the
-read is the cost.
+对 `design/`、`docs/architecture/` 或 `production/session-state/` 下超过
+`features.read_guard_kb` 的文件，若 Read 未指定 offset 与 limit，则会被拒绝。
+拒绝信息会列出该文档的各级标题及行号，以便下一次调用带 offset 与 limit 读取
+其中一个章节。范围读取始终放行，因此没有技能会被该防护卡住；图片与 PDF 从不检查。
+它选择阻塞而非警告，因为警告仍会让整次读取发生，而读取本身就是成本。
 
 ---
 
 ## features.read_guard_kb
 
-**Controls:** The size over which `features.read_guard` refuses a whole-file read  
-**Values:** a whole number of KB (1 KB = 1,024 bytes)  
-**Default:** `40`  
-**Set by:** `/settings`  
-**Read by:** `validate-read.sh`, through `.claude/scripts/read-guard.sh check`
+**控制：** 超过多大即由 `features.read_guard` 拒绝整文件读取  
+**取值：** 整数 KB（1 KB = 1,024 字节）  
+**默认：** `40`  
+**设置方式：** `/settings`  
+**读取方：** `validate-read.sh`，经由 `.claude/scripts/read-guard.sh check`
 
-> **Priority chain:** `features.read_guard_kb` in `project.local.yaml` →
-> `project.yaml` → default **`40`**. A value that is not a whole number is
-> ignored, and `read-guard.sh check` names it on its `threshold` row.
+> **优先级链：** `project.local.yaml` 中的 `features.read_guard_kb` →
+> `project.yaml` → 默认 **`40`**。不是整数的取值会被忽略，`read-guard.sh check`
+> 会在其 `threshold` 行中指明该值。
 
-By file size, not lines: token cost follows bytes, and one table row can be 2 KB.
-40 KB is about 10,000 tokens and sits above every shipped template (the largest is
-33 KB).
+按文件大小而非行数：token 成本随字节数增长，而一个表格行就可能有 2 KB。
+40 KB 约合 10,000 个 token，高于所有随附模板（最大为 33 KB）。
 
 ---
 
 ## updates.check
 
-**Controls:** Whether session start tells you that a newer Claude Code Game
-Studios release is out  
-**Values:** `true` | `false`  
-**Default:** `true`  
-**Set by:** `/settings` (`/settings --local updates.check=false` turns it off
-for you only)  
-**Read by:** `session-start.sh`, through `update-check.sh`
+**控制：** 会话开始时是否告知你有更新的 Claude Code Game
+Studios 版本发布  
+**取值：** `true` | `false`  
+**默认：** `true`  
+**设置方式：** `/settings`（`/settings --local updates.check=false` 仅为你自己关闭）  
+**读取方：** `session-start.sh`，经由 `update-check.sh`
 
-> When a newer release is out, session start shows one line: *"Update: Claude
+> 当有更新版本发布时，会话开始会显示一行：*“Update: Claude
 > Code Game Studios 1.3.0 is out (this project has 1.2.0). What changed and how
 > to upgrade: <release page> — to stop this notice: /settings --local
-> updates.check=false"*. Nothing is downloaded or changed; upgrading stays your
-> call (`UPGRADING.md`).
+> updates.check=false”*。不会下载或更改任何内容；是否升级仍由你决定
+> （`UPGRADING.md`）。
 
-> **Priority chain:** `updates.check` in `project.local.yaml` → `project.yaml` →
-> default **`true`**. A value other than `true` or `false` is skipped and named
-> in the session-start schema errors. The check is also off whenever the `CI`
-> environment variable is set: nobody reads session start there.
+> **优先级链：** `project.local.yaml` 中的 `updates.check` → `project.yaml` →
+> 默认 **`true`**。除 `true` 或 `false` 之外的取值会被跳过，并在会话开始的
+> schema 错误中指明。只要设置了 `CI` 环境变量，该检查也会关闭：那里没有人会
+> 读取会话开始输出。
 
 ---
 
 ### How it checks
 
-- At most once a day, a background job asks GitHub for the latest release
-  (`api.github.com/repos/Donchitos/Claude-Code-Game-Studios/releases/latest`)
-  and stores the answer in `~/.cache/claude-code-game-studios/latest-release`
-  (under `$XDG_CACHE_HOME` when that is set). The file is per user and outside
-  every project, so `git status` stays clean and one check covers every project
-  on the machine.
-- Session start only reads that file. It makes no network call and never waits;
-  a new answer shows from the next session on.
-- Offline, or with neither `curl` nor `wget`, it stays silent. The cache keeps
-  the last answer, plus an `error=` line saying why the last check failed.
-- Pre-releases are never offered.
-- The version compared is the one the framework's own hook files carry, not
-  `framework.version`: an upgrade that keeps your `project.yaml` leaves that
-  number behind, and the line would announce the release you already have.
-- With `false`, nothing is read and nothing is requested.
+- 每天最多一次，后台任务向 GitHub 请求最新发布
+  （`api.github.com/repos/Donchitos/Claude-Code-Game-Studios/releases/latest`），
+  并把结果存入 `~/.cache/claude-code-game-studios/latest-release`
+  （当设置了 `$XDG_CACHE_HOME` 时位于其下）。该文件按用户区分且位于所有项目之外，
+  因此 `git status` 保持干净，一次检查即可覆盖本机上的每个项目。
+- 会话开始只读取该文件。它不发起网络调用，也从不等待；新结果从下一次会话起显示。
+- 离线，或既无 `curl` 也无 `wget` 时，它保持静默。缓存会保留上一次的结果，外加一行
+  `error=` 说明上次检查失败的原因。
+- 绝不提供预发布版本。
+- 比较的版本是框架自身钩子文件所携带的版本，而不是 `framework.version`：保留你
+  `project.yaml` 的升级会让该数字停留在旧值，提示行就会宣告你已拥有的那个版本。
+- 取值为 `false` 时，不读取任何内容，也不发起任何请求。
 
 ---
 
 ## schema_version
 
-**Controls:** Which version of the project.yaml schema this file conforms to
-**Values:** integer
-**Default:** `1` (for v1.1 of CCGS)
-**Set by:** `/start`, `/adopt`
-**Read by:** All skills and hooks that parse project.yaml (for migration safety)
+**控制：** 该文件遵循 project.yaml schema 的哪个版本
+**取值：** 整数
+**默认：** `1`（对应 CCGS 的 v1.1）
+**设置方式：** `/start`、`/adopt`
+**读取方：** 所有解析 project.yaml 的技能与钩子（用于迁移安全）
 
-> Lets future CCGS versions detect and migrate old project.yaml files. The
-> migration logic compares `schema_version` in the file against the current
-> CCGS's expected version. If newer, warn. If older, run migrations.
+> 让未来的 CCGS 版本能够检测并迁移旧的 project.yaml 文件。迁移逻辑会把文件中的
+> `schema_version` 与当前 CCGS 期望的版本比较。若更新，则警告。若更旧，则执行迁移。
 
 ---
 
 ### Migration behavior
 
-| project.yaml schema_version | Current CCGS expects | Behavior |
+| project.yaml schema_version | 当前 CCGS 期望 | 行为 |
 |----------------------------|---------------------|----------|
-| Matches expected | — | Normal operation |
-| Lower than expected | — | `/adopt` warns and offers migration; skills run with deprecation warnings |
-| Higher than expected | — | All skills warn: "This project.yaml was created by a newer CCGS version. Some settings may be ignored." |
-| Missing | — | Treated as legacy (pre-v1.1); migration prompted on next `/start` or `/adopt` |
+| 与期望一致 | — | 正常运作 |
+| 低于期望 | — | `/adopt` 警告并提供迁移；技能运行时带弃用警告 |
+| 高于期望 | — | 所有技能警告："This project.yaml was created by a newer CCGS version. Some settings may be ignored." |
+| 缺失 | — | 视为旧式（v1.1 之前）；在下一次 `/start` 或 `/adopt` 时提示迁移 |
 
 ---
 
 ## framework
 
-**Controls:** Tracks which CCGS version created or last touched this project
-**Values:** `framework.version` (semver string) + `framework.last_upgraded` (ISO date)
-**Default:** stamped in the template's `project.yaml` at each release
-**Set by:** the template; `/start` (through `set-stage.sh`), `/setup-engine` and `/gate-check` write the block into a `project.yaml` they create, and `migrate-v1-config.sh` (which `/adopt` runs) writes `framework.version` into the one it builds
-**Read by:** no skill branches on it — it is file metadata, not a behavioural setting. It appears in `/start`, `/gate-check`, `/settings` and `/setup-engine` as part of the `project.yaml` block they **write or display**, and in `yaml-helper.sh`.
-  *(The four skills above were verified to name it; whether each reads it or merely emits it was NOT separated, so this says 'appears in', not 'read by'.)*
+**控制：** 记录哪个 CCGS 版本创建或最后修改了本项目
+**取值：** `framework.version`（semver 字符串）+ `framework.last_upgraded`（ISO 日期）
+**默认：** 每次发布时盖入模板的 `project.yaml`
+**设置方式：** 模板；`/start`（经由 `set-stage.sh`）、`/setup-engine` 与 `/gate-check` 会把该块写入它们创建的 `project.yaml`，而 `migrate-v1-config.sh`（由 `/adopt` 运行）会把 `framework.version` 写入它构建的那份文件
+**读取方：** 没有任何技能据此分支——它是文件元数据，而非行为设置。它出现在 `/start`、`/gate-check`、`/settings` 与 `/setup-engine` 中，作为它们**写入或展示**的 `project.yaml` 块的一部分，也出现在 `yaml-helper.sh` 中。
+  *（已核实上述四个技能会提及它；但每个技能是读取它还是仅仅输出它，未做区分，因此此处说的是「出现在」，而非「被读取」。）*
 
 ---
 
@@ -2292,104 +2160,98 @@ framework:
   last_upgraded: "2026-10-18"
 ```
 
-| Field | Purpose |
+| 字段 | 用途 |
 |-------|---------|
-| `version` | The CCGS version that created the project (or was last updated to — see `UPGRADING.md`). |
-| `last_upgraded` | ISO date of the most recent template update. |
+| `version` | 创建该项目的 CCGS 版本（或最后更新到的版本——见 `UPGRADING.md`）。 |
+| `last_upgraded` | 最近一次模板更新的 ISO 日期。 |
 
 ---
 
 ### Affected skills
 
-None. No skill or hook reads `framework.version` or `last_upgraded` — `/adopt`
-does not consult them and no hook checks their age. They record which template
-version the project came from; `UPGRADING.md` is the upgrade path.
+无。没有任何技能或钩子读取 `framework.version` 或 `last_upgraded`——`/adopt`
+不查阅它们，也没有钩子检查它们的时效。它们记录项目来自哪个模板版本；
+`UPGRADING.md` 是升级路径。
 
 ---
 
 ## Migration from v1.0 → v1.1
 
-When a v1.0 CCGS project upgrades to v1.1, migration tooling (run via `/adopt`)
-converts legacy files to `project.yaml`. This section specifies the intended
-behavior.
+当 v1.0 的 CCGS 项目升级到 v1.1 时，迁移工具（通过 `/adopt` 运行）会把旧式文件
+转换为 `project.yaml`。本节说明预期的行为。
 
 ### Detection
 
-A project is detected as needing migration when:
-- `project.yaml` does **NOT** exist at the repo root, AND
-- One or more legacy files exists:
+当满足以下条件时，项目被检测为需要迁移：
+- 仓库根目录**不**存在 `project.yaml`，且
+- 存在一个或多个旧式文件：
   - `production/stage.txt`
   - `production/review-mode.txt`
   - `.claude/docs/technical-preferences.md`
 
 ### Preservation
 
-| Legacy source | Migrates to |
+| 旧式来源 | 迁移至 |
 |---------------|-------------|
-| `production/stage.txt` (single line) | `project.stage` |
-| `production/review-mode.txt` (single line) | `modes.review_mode` |
-| `.claude/docs/technical-preferences.md` → "Engine & Language" section | `engine.name`, `engine.version`, `engine.language`, `engine.rendering`, `engine.physics` |
-| `technical-preferences.md` → "Input & Platform" section | `platform.targets`, `platform.primary_input`, `platform.gamepad_support`, `platform.touch_support` |
-| `technical-preferences.md` → "Naming Conventions" section | `naming.classes`, `naming.variables`, `naming.constants`, `naming.signals`, `naming.files`, `naming.scenes` |
-| `technical-preferences.md` → "Performance Budgets" section | `performance.target_framerate`, `performance.frame_budget_ms`, `performance.draw_call_limit`, `performance.memory_ceiling_mb` |
-| `technical-preferences.md` → "Testing" section | `testing.framework`, `qa.coverage_minimum` (bare number only — prose is reported for manual entry) |
-| `technical-preferences.md` → "Engine Specialists" section | `specialists.code`, `specialists.shader`, `specialists.ui`, `specialists.additional` |
+| `production/stage.txt`（单行） | `project.stage` |
+| `production/review-mode.txt`（单行） | `modes.review_mode` |
+| `.claude/docs/technical-preferences.md` → "Engine & Language" 章节 | `engine.name`、`engine.version`、`engine.language`、`engine.rendering`、`engine.physics` |
+| `technical-preferences.md` → "Input & Platform" 章节 | `platform.targets`、`platform.primary_input`、`platform.gamepad_support`、`platform.touch_support` |
+| `technical-preferences.md` → "Naming Conventions" 章节 | `naming.classes`、`naming.variables`、`naming.constants`、`naming.signals`、`naming.files`、`naming.scenes` |
+| `technical-preferences.md` → "Performance Budgets" 章节 | `performance.target_framerate`、`performance.frame_budget_ms`、`performance.draw_call_limit`、`performance.memory_ceiling_mb` |
+| `technical-preferences.md` → "Testing" 章节 | `testing.framework`、`qa.coverage_minimum`（仅接受裸数字——散文内容会被报告以手工录入） |
+| `technical-preferences.md` → "Engine Specialists" 章节 | `specialists.code`、`specialists.shader`、`specialists.ui`、`specialists.additional` |
 
-**Value rename — `review_mode: none` → `solo`.** v1.0 used `none` for the "no
-director reviews" tier; v1.1 renamed that tier to `solo` (the enum is
-`full | lean | solo`). Migration **coerces** a legacy `none` to `solo` and reports
-the rename in the migration report's Warnings. This is the one documented value
-rename, so it is mapped-and-flagged rather than preserved raw: writing `none`
-verbatim would produce an enum-invalid `project.yaml` that `resolve_config` rejects
-and falls back to the `modes.rigor` value — at `standard` that is `lean`, reviews *on* —
-inverting the user's intent. The
-`--finalize` preservation check applies the same mapping so it does not falsely
-refuse. Every *other* non-v1.1 stage/review value is a fork, not a rename:
-preserved raw and flagged for manual resolution, never coerced.
+**取值重命名——`review_mode: none` → `solo`。** v1.0 用 `none` 表示「无总监评审」
+档；v1.1 把该档重命名为 `solo`（枚举为 `full | lean | solo`）。迁移会**强制**
+把旧式 `none` 转换为 `solo`，并在迁移报告的 Warnings 中报告该重命名。这是唯一
+有文档记录的取值重命名，因此它被映射并标记，而非原样保留：原样写入 `none` 会产生
+一个枚举非法的 `project.yaml`，`resolve_config` 会拒绝它并回退到 `modes.rigor`
+的取值——在 `standard` 下即 `lean`，评审*开启*——从而反转了用户的本意。
+`--finalize` 保留性检查会应用同样的映射，因此不会误判为拒绝。每一个*其他*非 v1.1
+的 stage/review 取值都是分叉，而非重命名：原样保留并标记为需人工处理，绝不强制
+转换。
 
-Settings absent from the legacy files (new v1.1 settings like `qa.level`,
-`docs.density`, `team.size`, etc.) get hardcoded defaults from the v1.1 schema.
+旧式文件中不存在的设置（如 `qa.level`、`docs.density`、`team.size` 等 v1.1 新增
+设置）会从 v1.1 schema 获得硬编码默认值。
 
 ### Cleanup (optional, non-destructive)
 
-Migration is **non-destructive in v1.1**: legacy files are NOT auto-deleted.
-Migration produces `project.yaml` and leaves the legacy files in place. Hooks
-and skills read `project.yaml` first; they fall back to the legacy file if a
-specific key is missing.
+迁移在 v1.1 中是**非破坏性的**：旧式文件**不会**被自动删除。迁移会生成
+`project.yaml` 并保留旧式文件。钩子与技能优先读取 `project.yaml`；若某个特定键
+缺失，则回退到旧式文件。
 
-Legacy files are deleted only when the user runs
-`.claude/scripts/migrate-v1-config.sh --finalize` (driven by `/adopt`, which
-detects a v1.0 project automatically at Phase 2g). The cleanup step verifies
-that every legacy file's content has been preserved in `project.yaml` before
-deleting.
+只有当用户运行 `.claude/scripts/migrate-v1-config.sh --finalize`（由 `/adopt`
+驱动，后者在 Phase 2g 自动检测 v1.0 项目）时，旧式文件才会被删除。清理步骤会在
+删除前验证每个旧式文件的内容都已保留在 `project.yaml` 中。
 
 ### Failure modes
 
-| Problem | Behavior |
+| 问题 | 行为 |
 |---------|----------|
-| Legacy file is malformed (can't parse) | Migration emits warning per file, leaves it untouched, continues with the others. `project.yaml` gets the parseable values + defaults for the rest. |
-| Parsed value doesn't match v1.1 enum (e.g. `stage: Alpha` from a fork) | Migration writes the raw value with a `_migration_warning` comment in `project.yaml`. User resolves manually. |
-| Both `project.yaml` AND a legacy file exist (split-brain) | Migration tooling refuses to run. Error: "Both project.yaml and legacy files exist — resolve which is authoritative before migrating." |
-| Custom sections in forked `technical-preferences.md` | Custom content logged to `production/migration-report.md` as "not migrated — please integrate manually." |
+| 旧式文件格式错误（无法解析） | 迁移会按文件发出警告，保持该文件不变，继续处理其他文件。`project.yaml` 得到可解析的值 + 其余项的默认值。 |
+| 解析出的取值与 v1.1 枚举不符（例如分叉中的 `stage: Alpha`） | 迁移会在 `project.yaml` 中写入原始取值并附一条 `_migration_warning` 注释。由用户手工处理。 |
+| `project.yaml` 与旧式文件同时存在（脑裂） | 迁移工具拒绝运行。错误："Both project.yaml and legacy files exist — resolve which is authoritative before migrating." |
+| 分叉的 `technical-preferences.md` 中有自定义章节 | 自定义内容会被记录到 `production/migration-report.md`，标注为 "not migrated — please integrate manually." |
 
 ### Migration report
 
-Every migration run writes `production/migration-report.md`:
+每次迁移运行都会写入 `production/migration-report.md`：
 
-- Source files detected
-- Values preserved (per file → per setting)
-- Defaults applied (for v1.1-new settings)
-- Warnings encountered (malformed, mismatched enums, etc.)
-- Manual review items
+- 检测到的来源文件
+- 已保留的取值（逐文件 → 逐设置）
+- 应用的默认值（针对 v1.1 新增设置）
+- 遇到的警告（格式错误、枚举不符等）
+- 需人工审阅的条目
 
-User reads the report before running `--finalize`.
+用户在运行 `--finalize` 之前阅读该报告。
 
 ---
 
 ## Complete example `project.yaml`
 
-A full project.yaml with every setting, showing sensible defaults for a solo
-Godot project. Use this as the reference shape when authoring or migrating.
+一份包含所有设置的完整 project.yaml，展示了单人 Godot 项目的合理默认值。
+在撰写或迁移时，可将此作为参考形态。
 
 ```yaml
 schema_version: 1
@@ -2506,7 +2368,7 @@ updates:
   check: true                # false: no new-release line at session start
 ```
 
-And a minimal sparse `project.local.yaml` example — a single developer who wants autonomous mode locally:
+还有一个极简的稀疏 `project.local.yaml` 示例——一位希望在本地使用 autonomous 模式的开发者：
 
 ```yaml
 modes:
@@ -2515,5 +2377,5 @@ features:
   session_state: on
 ```
 
-Only the overridden keys are present; everything else cascades from `project.yaml`.
-See "Local Override Pattern" section for full whitelist of what can/cannot be overridden locally.
+只包含被覆盖的键；其余一切都从 `project.yaml` 级联继承。
+哪些设置可/不可在本地覆盖的完整白名单，见 "Local Override Pattern" 一节。

@@ -2,204 +2,182 @@
 
 ## Skill Summary
 
-`/ux-review` validates UX documents before they enter the implementation
-pipeline. It takes a file path, `hud` (`design/ux/hud.md`), `patterns`
-(`design/ux/interaction-patterns.md`), `all` (every file in `design/ux/`, with a
-summary table first), or no argument (it asks which spec).
+`/ux-review` 在 UX 文档进入实现流水线之前对其进行验证。它接受文件路径、`hud`（`design/ux/hud.md`）、`patterns`（`design/ux/interaction-patterns.md`）、`all`（`design/ux/` 中的每个文件，先给出摘要表），或无参数（它会询问要检查哪份规格）。
 
-Phase 2 loads cross-reference context: input methods from the `project.yaml`
-`platform` block (the authority for input coverage checks), the accessibility
-tier committed in `design/accessibility-requirements.md`, the pattern library,
-the UI Requirements of GDDs named in the spec header, and the player journey.
-It then runs the checklist for the document type — Phase 3A for a UX spec
-(15 completeness items plus quality checks), 3B for a HUD design, 3C for the
-pattern library — and outputs a structured report. The type comes from the
-file's `> **Template**:` header line (which `/ux-design` writes); a file without
-one is classified by name (`hud.md` → 3B, `interaction-patterns.md` → 3C, else
-3A), and the report says which checklist was assumed.
+Phase 2 加载交叉引用上下文：来自 `project.yaml` `platform` 块的输入方式（输入覆盖检查的权威来源）、`design/accessibility-requirements.md` 中承诺的无障碍层级、模式库、规格头部指明的 GDD 的 UI Requirements，以及玩家旅程。随后它按文档类型运行检查清单——UX 规格使用 Phase 3A（15 个完整性项加质量检查），HUD 设计使用 3B，模式库使用 3C——并输出结构化报告。类型来自文件的 `> **Template**:` 头部行（由 `/ux-design` 写入）；没有该行的文件按名称分类（`hud.md` → 3B，`interaction-patterns.md` → 3C，其他 → 3A），报告会说明假定了哪套检查清单。
 
-Verdicts: **APPROVED**, **NOT ASSESSED** (the spec could not be read, or a
-dimension had no criterion — e.g., no committed accessibility tier), **NEEDS
-REVISION**, **MAJOR REVISION NEEDED**. The skill is read-only
-(`allowed-tools: Read, Glob, Grep`, plus the one `resolve_config` call that
-resolves `workflow` for the Pattern Library rule), spawns no agents, and its
-verdict is advisory. Handoffs: APPROVED → `/team-ui` Phase 2; NEEDS REVISION → fix and
-re-run `/ux-review`; MAJOR REVISION NEEDED → back to `/ux-design`.
+结论：**APPROVED**、**NOT ASSESSED**（无法读取规格，或某维度没有判断标准——例如未承诺无障碍层级）、**NEEDS REVISION**、**MAJOR REVISION NEEDED**。该技能为只读（`allowed-tools: Read, Glob, Grep`，外加唯一一次为 Pattern Library 规则解析 `workflow` 的 `resolve_config` 调用），不启动任何代理，其结论仅供参考。交接：APPROVED → `/team-ui` Phase 2；NEEDS REVISION → 修复后重新运行 `/ux-review`；MAJOR REVISION NEEDED → 返回 `/ux-design`。
 
 ---
 
 ## Static Assertions (Structural)
 
-Checked against the SKILL.md by `/skill-test spec` — no fixture needed.
+由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] Has required frontmatter fields: `name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`
-- [ ] Has ≥2 phase headings
-- [ ] Contains verdict keywords: `APPROVED`, `NOT ASSESSED`, `NEEDS REVISION`, `MAJOR REVISION NEEDED`
-- [ ] Does NOT contain "May I write" language, and `allowed-tools` has no Write or Edit (skill is read-only)
-- [ ] Has a verdict-specific next-step handoff (`/team-ui`, the missing input for NOT ASSESSED, re-run `/ux-review`, `/ux-design`)
+- [ ] 具有必填的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 至少包含 2 个阶段标题
+- [ ] 包含结论关键词：`APPROVED`、`NOT ASSESSED`、`NEEDS REVISION`、`MAJOR REVISION NEEDED`
+- [ ] 不包含 “May I write” 用语，且 `allowed-tools` 中没有 Write 或 Edit（技能为只读）
+- [ ] 包含按结论区分的下一步交接（`/team-ui`、NOT ASSESSED 时缺失的输入、重新运行 `/ux-review`、`/ux-design`）
 
 ---
 
 ## Director Gate Checks
 
-None. `/ux-review` is itself the review step for UX specs; it has no `Agent`
-tool and invokes no director gate.
+无。`/ux-review` 本身就是 UX 规格的评审步骤；它没有 `Agent` 工具，也不调用任何总监闸门。
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非某个案例自身的 Fixture 另有说明，每个案例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见 `studio-tests/CLAUDE.md` § Fixture defaults。
 
 ---
 
 ## Test Cases
 
-### Case 1: Happy Path — Complete UX spec, APPROVED
+### Case 1: 正常路径 — 完整的 UX 规格，APPROVED
 
 **Fixture:**
-- `design/ux/inventory.md` follows `.claude/docs/templates/ux-spec.md`: header with Status, Author, Platform Target (PC, Console), Related GDDs (`design/gdd/inventory.md`), Accessibility Tier and `> **Template**: UX Spec`; every section populated, including States & Variants (loading, empty, populated, error), keyboard and d-pad navigation with focus order, an Input Method Completeness Checklist block for keyboard/mouse and for gamepad with every item ticked, and at least 5 testable acceptance criteria
-- `design/accessibility-requirements.md` commits the Standard tier
-- `design/ux/interaction-patterns.md` exists, and every interactive component in the spec names a pattern from it
-- `project.yaml` `platform` block: `targets: [PC, Console]`, `gamepad_support: Full`
-- `design/gdd/inventory.md` UI Requirements are all addressed by the spec
+- `design/ux/inventory.md` 遵循 `.claude/docs/templates/ux-spec.md`：头部包含 Status、Author、Platform Target（PC、Console）、Related GDDs（`design/gdd/inventory.md`）、Accessibility Tier 和 `> **Template**: UX Spec`；每个小节都已填充，包括 States & Variants（loading、empty、populated、error）、带焦点顺序的键盘与方向键导航、分别针对键盘/鼠标和手柄且每项都勾选的 Input Method Completeness Checklist 块，以及至少 5 条可测试的验收标准
+- `design/accessibility-requirements.md` 承诺 Standard 层级
+- `design/ux/interaction-patterns.md` 存在，且规格中的每个交互组件都指明其中的一个模式
+- `project.yaml` 的 `platform` 块：`targets: [PC, Console]`、`gamepad_support: Full`
+- `design/gdd/inventory.md` 的 UI Requirements 全部被规格覆盖
 
 **Input:** `/ux-review design/ux/inventory.md`
 
 **Expected behavior:**
-1. Phase 2 derives input methods (keyboard/mouse, gamepad) from the `platform` block, reads the committed tier, the pattern library if present, and the UI Requirements of `design/gdd/inventory.md`
-2. Phase 3A runs the completeness items and quality checks
-3. The report names Phase 3A as the checklist (from the Template line) and shows "Completeness: [X/Y sections present]", Quality Issues, "GDD Alignment: ALIGNED", "Accessibility: COMPLIANT" against the Standard tier, and "Pattern Library: CONSISTENT"
-4. Verdict: APPROVED — "This spec is ready for handoff to `/team-ui` Phase 2 (Visual Design)."
-5. Phase 5 suggests running `/team-ui`
+1. Phase 2 从 `platform` 块推导输入方式（键盘/鼠标、手柄），读取已承诺的层级、模式库（若存在），以及 `design/gdd/inventory.md` 的 UI Requirements
+2. Phase 3A 运行完整性项和质量检查
+3. 报告指明 Phase 3A 为所用检查清单（依据 Template 行），并显示 “Completeness: [X/Y sections present]”、Quality Issues、相对于 Standard 层级的 “GDD Alignment: ALIGNED”、“Accessibility: COMPLIANT”，以及 “Pattern Library: CONSISTENT”
+4. 结论：APPROVED——“This spec is ready for handoff to `/team-ui` Phase 2 (Visual Design).”
+5. Phase 5 建议运行 `/team-ui`
 
 **Assertions:**
-- [ ] Input method coverage is checked against the `project.yaml` platform block, not only the spec header
-- [ ] The UX spec checklist (Phase 3A) is used, including States & Variants, Interaction Map coverage and the Input Method Completeness Checklist item
-- [ ] Every review dimension has something to check against — the committed tier, the pattern library, the referenced GDD — so none is NOT ASSESSED
-- [ ] Accessibility is checked against the tier committed in `design/accessibility-requirements.md`
-- [ ] Verdict is APPROVED with the `/team-ui` handoff
-- [ ] No files are written
+- [ ] 输入方式覆盖情况对照 `project.yaml` 的 platform 块检查，而不仅是规格头部
+- [ ] 使用 UX 规格检查清单（Phase 3A），包括 States & Variants、Interaction Map 覆盖和 Input Method Completeness Checklist 项
+- [ ] 每个评审维度都有可对照的内容——已承诺的层级、模式库、引用的 GDD——因此没有维度是 NOT ASSESSED
+- [ ] 无障碍情况对照 `design/accessibility-requirements.md` 中承诺的层级检查
+- [ ] 结论为 APPROVED，并交接至 `/team-ui`
+- [ ] 不写入任何文件
 
 ---
 
-### Case 2: Empty Accessibility Section — NEEDS REVISION
+### Case 2: 无障碍小节为空 — NEEDS REVISION
 
 **Fixture:**
-- Same as Case 1, but the spec's Accessibility section is empty
-- `design/accessibility-requirements.md` commits the Standard tier
+- 与 Case 1 相同，但规格的 Accessibility 小节为空
+- `design/accessibility-requirements.md` 承诺 Standard 层级
 
 **Input:** `/ux-review design/ux/inventory.md`
 
 **Expected behavior:**
-1. The Accessibility Requirements completeness item fails, and the Standard-tier text-contrast check cannot be met; the focus-order check still passes, because the spec still defines keyboard and d-pad focus order (Case 1's fixture)
-2. Each finding is listed as a numbered quality issue with BLOCKING/ADVISORY, "What's wrong", "Where" and "Fix"
-3. Verdict: NEEDS REVISION — "Address the [N] blocking issues above, then re-run `/ux-review`."
-4. The skill offers to help draft the missing content but does not edit the file; it waits for the user
+1. Accessibility Requirements 完整性项失败，Standard 层级的文本对比度检查无法满足；焦点顺序检查仍然通过，因为规格仍定义了键盘和方向键焦点顺序（Case 1 的 fixture）
+2. 每个发现都列为编号质量问题，包含 BLOCKING/ADVISORY、“What's wrong”、“Where” 和 “Fix”
+3. 结论：NEEDS REVISION——“Address the [N] blocking issues above, then re-run `/ux-review`.”
+4. 技能提出可以协助起草缺失内容，但不编辑文件；它会等待用户
 
 **Assertions:**
-- [ ] NEEDS REVISION is returned (not APPROVED or MAJOR REVISION NEEDED)
-- [ ] Findings name the section and give a specific fix
-- [ ] The handoff is to fix the issues and re-run `/ux-review`
-- [ ] The skill offers help but does not auto-fix, and no files are written
+- [ ] 返回 NEEDS REVISION（不是 APPROVED 或 MAJOR REVISION NEEDED）
+- [ ] 发现项指出小节并给出具体修复
+- [ ] 交接为修复问题并重新运行 `/ux-review`
+- [ ] 技能提供帮助但不自动修复，且不写入任何文件
 
 ---
 
-### Case 3: Incomplete States — NEEDS REVISION outranks NOT ASSESSED
+### Case 3: 状态不完整 — NEEDS REVISION 优先于 NOT ASSESSED
 
 **Fixture:**
-- `design/ux/settings-menu.md` follows the UX spec template, carries `> **Template**: UX Spec`, and is otherwise complete
-- Its States & Variants section documents only the populated state — no loading, empty or error state; the screen fetches its data asynchronously
-- `design/ux/interaction-patterns.md` exists and the spec's components name patterns from it
-- No `design/accessibility-requirements.md`, so there is no committed tier
+- `design/ux/settings-menu.md` 遵循 UX 规格模板，带有 `> **Template**: UX Spec`，其余部分完整
+- 其 States & Variants 小节只记录 populated 状态——没有 loading、empty 或 error 状态；该屏幕异步获取数据
+- `design/ux/interaction-patterns.md` 存在，且规格的组件指明了其中的模式
+- 没有 `design/accessibility-requirements.md`，因此没有已承诺的层级
 
 **Input:** `/ux-review design/ux/settings-menu.md`
 
 **Expected behavior:**
-1. The States & Variants completeness item fails ("at minimum: loading, empty/populated, and error states")
-2. The Completeness list marks it, e.g. "States & Variants — MISSING: error state not documented", and names each missing state (loading, empty, error)
-3. The report shows "Accessibility: NOT ASSESSED — no committed tier (design/accessibility-requirements.md absent)" and lists it under "Dimensions not assessed"
-4. The verdict is NEEDS REVISION: a gap that was found outranks a dimension that could not be checked. It is not NOT ASSESSED, and not MAJOR REVISION NEEDED for this fixable gap
-5. The handoff is to fix the gaps and re-run `/ux-review`
+1. States & Variants 完整性项失败（“at minimum: loading, empty/populated, and error states”）
+2. Completeness 列表标记它，例如 “States & Variants — MISSING: error state not documented”，并点名每个缺失状态（loading、empty、error）
+3. 报告显示 “Accessibility: NOT ASSESSED — no committed tier (design/accessibility-requirements.md absent)”，并将其列在 “Dimensions not assessed” 下
+4. 结论为 NEEDS REVISION：已发现的缺口优先于无法检查的维度。它不是 NOT ASSESSED，也不会因为这个可修复的缺口而判为 MAJOR REVISION NEEDED
+5. 交接为修复缺口并重新运行 `/ux-review`
 
 **Assertions:**
-- [ ] NEEDS REVISION is returned, not NOT ASSESSED — NOT ASSESSED ranks below the revision verdicts
-- [ ] The not-assessed Accessibility dimension is still named in the report
-- [ ] The missing loading, empty and error states are each named in the output
-- [ ] MAJOR REVISION NEEDED is not returned for this fixable gap
-- [ ] The handoff is to re-run `/ux-review` after the fix
+- [ ] 返回 NEEDS REVISION，而不是 NOT ASSESSED——NOT ASSESSED 的优先级低于修订类结论
+- [ ] 报告中仍点名未评估的 Accessibility 维度
+- [ ] 缺失的 loading、empty 和 error 状态都在输出中点名
+- [ ] 对于这个可修复的缺口，不返回 MAJOR REVISION NEEDED
+- [ ] 交接为修复后重新运行 `/ux-review`
 
 ---
 
-### Case 4: Nothing to Assess Against — NOT ASSESSED
+### Case 4: 无可对照内容 — NOT ASSESSED
 
 **Fixture:**
-- Scenario (a): `design/ux/inventory-screen.md` does not exist
-- Scenario (b): `design/ux/inventory.md` is complete (as in Case 1), but `design/accessibility-requirements.md` does not exist; the spec header states "Accessibility Tier: Standard"
+- Scenario (a)：`design/ux/inventory-screen.md` 不存在
+- Scenario (b)：`design/ux/inventory.md` 完整（如 Case 1），但 `design/accessibility-requirements.md` 不存在；规格头部声明 “Accessibility Tier: Standard”
 
 **Input:** (a) `/ux-review design/ux/inventory-screen.md` (b) `/ux-review design/ux/inventory.md`
 
 **Expected behavior:**
-1. (a) The spec cannot be read: the verdict is NOT ASSESSED, the missing path is named, and no checklist is produced
-2. (b) The report shows "Accessibility: NOT ASSESSED — no committed tier (design/accessibility-requirements.md absent)" — never COMPLIANT
-3. (b) The header's Standard tier is carried forward and stated as an assumption, not a commitment
-4. (b) `/ux-design accessibility` is recommended to establish the tier
-5. The verdict is NOT ASSESSED, the dimensions not assessed are named with what would make them checkable, and handoff to `/team-ui` is not recommended
+1. (a) 无法读取规格：结论为 NOT ASSESSED，点名缺失的路径，且不生成任何检查清单
+2. (b) 报告显示 “Accessibility: NOT ASSESSED — no committed tier (design/accessibility-requirements.md absent)”——绝不是 COMPLIANT
+3. (b) 头部的 Standard 层级会被沿用，并说明为假设，而不是承诺
+4. (b) 建议运行 `/ux-design accessibility` 来建立层级
+5. 结论为 NOT ASSESSED，点名未评估的维度以及使其可检查所需的输入，并且不建议交接至 `/team-ui`
 
 **Assertions:**
-- [ ] (a) A missing spec yields NOT ASSESSED naming the path, with no checklist output
-- [ ] (b) Accessibility is reported NOT ASSESSED, not COMPLIANT, when no tier is committed
-- [ ] (b) `/ux-design accessibility` is recommended
-- [ ] The report does not recommend handing off to `/team-ui` on a NOT ASSESSED result
-- [ ] No files are written
+- [ ] (a) 规格缺失时产生 NOT ASSESSED 并点名路径，不输出检查清单
+- [ ] (b) 未承诺层级时，Accessibility 报告为 NOT ASSESSED，而不是 COMPLIANT
+- [ ] (b) 建议运行 `/ux-design accessibility`
+- [ ] 在 NOT ASSESSED 结果下，报告不建议交接至 `/team-ui`
+- [ ] 不写入任何文件
 
 ---
 
-### Case 5: `all` Argument and No Director Gate
+### Case 5: `all` 参数与无总监闸门
 
 **Fixture:**
-- `design/ux/` contains `hud.md` (written by `/ux-design hud`, header line `> **Template**: HUD Design`), `inventory.md` (written by `/ux-design inventory`, `> **Template**: UX Spec`) and `pause-menu.md` (hand-written from `.claude/docs/templates/ux-spec.md`, with no Template line)
-- `project.yaml` has `modes.review_mode: full`
+- `design/ux/` 包含 `hud.md`（由 `/ux-design hud` 写入，头部行为 `> **Template**: HUD Design`）、`inventory.md`（由 `/ux-design inventory` 写入，`> **Template**: UX Spec`）和 `pause-menu.md`（依据 `.claude/docs/templates/ux-spec.md` 手写，没有 Template 行）
+- `project.yaml` 中 `modes.review_mode: full`
 
 **Input:** `/ux-review all`
 
 **Expected behavior:**
-1. The skill finds every file in `design/ux/` and outputs a summary table first (file | verdict | primary issue), then the full report for each
-2. `hud.md` is checked with the HUD checklist (Phase 3B) and `inventory.md` with the UX spec checklist (Phase 3A), each from its Template line
-3. `pause-menu.md` has no Template line and is not `hud.md` or `interaction-patterns.md`, so it gets Phase 3A, and its report says the checklist was assumed from the file name
-4. No agent is spawned and no gate ID or gate skip message appears; the review mode has no effect
-5. Each verdict is one of APPROVED / NOT ASSESSED / NEEDS REVISION / MAJOR REVISION NEEDED
+1. 技能找到 `design/ux/` 中的每个文件，先输出摘要表（file | verdict | primary issue），然后输出每个文件的完整报告
+2. `hud.md` 使用 HUD 检查清单（Phase 3B），`inventory.md` 使用 UX 规格检查清单（Phase 3A），各自依据其 Template 行
+3. `pause-menu.md` 没有 Template 行，也不是 `hud.md` 或 `interaction-patterns.md`，因此使用 Phase 3A，其报告说明检查清单是根据文件名假定的
+4. 不启动任何代理，也不出现闸门 ID 或闸门跳过消息；评审模式没有影响
+5. 每个结论都是 APPROVED / NOT ASSESSED / NEEDS REVISION / MAJOR REVISION NEEDED 之一
 
 **Assertions:**
-- [ ] A summary table (file | verdict | primary issue) comes before the per-file detail
-- [ ] Each document's checklist comes from its Template line (HUD vs UX spec)
-- [ ] A file without a Template line is classified by name, and the report says which checklist was assumed
-- [ ] No director gate is invoked and no gate skip messages appear
-- [ ] Every verdict comes from the skill's four-verdict set
+- [ ] 摘要表（file | verdict | primary issue）出现在逐文件详情之前
+- [ ] 每个文档的检查清单来自其 Template 行（HUD 或 UX 规格）
+- [ ] 没有 Template 行的文件按名称分类，且报告说明假定了哪套检查清单
+- [ ] 不调用任何总监闸门，也不出现闸门跳过消息
+- [ ] 每个结论都来自技能的四种结论集合
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Loads cross-reference context (platform config, accessibility tier, pattern library, referenced GDDs, player journey) before validating
-- [ ] Uses the checklist that matches the document type (UX spec, HUD, pattern library) — from the Template line, or by file name with the assumption stated
-- [ ] Checks accessibility against the committed tier, and reports NOT ASSESSED — never COMPLIANT — when no tier is committed
-- [ ] Ranks NOT ASSESSED above APPROVED and below NEEDS REVISION and MAJOR REVISION NEEDED
-- [ ] Does not write or edit any files
-- [ ] Gives specific findings (What's wrong / Where / Fix, BLOCKING or ADVISORY) for NEEDS REVISION and MAJOR REVISION NEEDED; for NOT ASSESSED, names each dimension not assessed and the input that would make it checkable
-- [ ] Ends with the verdict-specific handoff: `/team-ui` (APPROVED), the missing input per dimension and no `/team-ui` handoff (NOT ASSESSED), re-run `/ux-review` (NEEDS REVISION), `/ux-design` (MAJOR REVISION NEEDED)
+- [ ] 在验证之前加载交叉引用上下文（平台配置、无障碍层级、模式库、引用的 GDD、玩家旅程）
+- [ ] 使用与文档类型匹配的检查清单（UX 规格、HUD、模式库）——来自 Template 行，或按文件名并说明假设
+- [ ] 对照已承诺的层级检查无障碍情况，未承诺层级时报告 NOT ASSESSED——绝不报告 COMPLIANT
+- [ ] 将 NOT ASSESSED 排在 APPROVED 之上，并排在 NEEDS REVISION 和 MAJOR REVISION NEEDED 之下
+- [ ] 不写入或编辑任何文件
+- [ ] 对 NEEDS REVISION 和 MAJOR REVISION NEEDED 给出具体发现（What's wrong / Where / Fix，BLOCKING 或 ADVISORY）；对 NOT ASSESSED，点名每个未评估的维度以及使其可检查所需的输入
+- [ ] 以按结论区分的交接结尾：`/team-ui`（APPROVED）、各维度缺失的输入且不交接 `/team-ui`（NOT ASSESSED）、重新运行 `/ux-review`（NEEDS REVISION）、`/ux-design`（MAJOR REVISION NEEDED）
 
 ---
 
 ## Coverage Notes
 
-- MAJOR REVISION NEEDED (fundamental issues with scope, player need or
-  completeness) is not tested with a dedicated fixture.
-- The pattern library checklist (Phase 3C, `patterns` argument) is not
-  fixture-tested.
-- The no-argument prompt ("which spec to validate") is not tested.
-- The fallback to `.claude/docs/technical-preferences.md`, and then to the spec
-  header, when `project.yaml` has no `platform` block is not tested.
+- MAJOR REVISION NEEDED（在范围、玩家需求或完整性方面存在根本性问题）
+  未用专门的 fixture 测试。
+- 模式库检查清单（Phase 3C，`patterns` 参数）未做
+  fixture 测试。
+- 无参数提示（“要验证哪份规格”）未测试。
+- 当 `project.yaml` 没有 `platform` 块时回退到
+  `.claude/docs/technical-preferences.md`，再回退到规格头部的行为未测试。

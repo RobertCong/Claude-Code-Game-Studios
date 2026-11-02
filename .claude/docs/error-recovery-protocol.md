@@ -1,63 +1,31 @@
-# Error Recovery Protocol
+# 错误恢复协议
 
-Shared procedure for any skill that spawns agents via the `Agent` tool, used by
-the `## Error Recovery Protocol` section of each orchestration and review skill.
-Two imperatives apply to all of them: **surface a blocked agent immediately, and
-produce a partial report.** Each skill's own **Common blockers** list is
-skill-specific and is not repeated here.
+任何通过 `Agent` 工具创建 agent 的技能都共用此流程，各编排与评审技能的 `## Error Recovery Protocol` 章节都会引用它。对所有这类技能都适用两条硬性要求：**立即上报被阻塞的 agent，并产出部分报告。** 每个技能自己的 **Common blockers** 列表是技能专用的，此处不再重复。
 
-## Trigger 0 — verify the artifact before reading the response
+## Trigger 0 —— 在阅读响应之前先核实产出物
 
-**Before applying anything below, and before treating a phase as complete: if
-the return contract named a path, check that the path exists.** A named
-artifact that is not on disk is a FAILED PHASE, no matter how the agent's
-response reads.
+**在应用下面任何内容之前，以及在任何阶段被视为完成之前：如果返回契约指定了路径，就检查该路径是否存在。** 名为产出物但不在磁盘上，就是失败的阶段（FAILED PHASE），无论 agent 的响应读起来如何。
 
-This trigger exists because the three below are not sufficient. They fire on
-BLOCKED, on an error, and on "cannot complete" — and an agent can fail in a way
-that is none of those. A parallel agent can do a lot of work and then return a
-single fluent preamble — "I'll verify the build infrastructure…" — with no
-path, no summary, no BLOCKED item, and **no file written**. Nothing in
-steps 1–4 matches that shape. An orchestrator reading the transcript sees a
-plausible response and advances, and half a parallel phase disappears with no
-signal at all.
+这个触发条件之所以存在，是因为下面三个条件并不充分。它们分别在 BLOCKED、出错和「无法完成」时触发 —— 而 agent 可能以不属于上述任何一种的方式失败。一个并行 agent 可以做大量工作，然后返回一段流畅的开场白 —— 「我来验证构建基础设施……」—— 没有路径、没有摘要、没有 BLOCKED 项，而且**没有写入任何文件**。步骤 1–4 都无法匹配这种形态。读取转录的编排者看到一个看似合理的响应便继续推进，于是一半的并行阶段就这样消失，没有任何信号。
 
-The work is usually not lost. Resume the agent with an explicit "you did not
-honour the return contract" message. Its investigation is still in context, so
-it only has to do the write-and-return step it skipped. So the recovery is
-cheap; the detection is the hard part, and the detection cannot come from
-reading the response.
+工作通常并没有丢失。以明确的「你没有遵守返回契约」消息恢复该 agent。它的调查仍在上下文中，因此只需完成它跳过的写入并返回这一步。所以恢复是廉价的；困难的是检测，而检测无法来自阅读响应。
 
-**A fluent response is not evidence that a phase ran.** The artifact is —
-observe the artifact, not the transcript. The rule applies to sub-agents
-exactly as it does to skills.
+**流畅的响应不是阶段运行过的证据。** 产出物才是 —— 要观察产出物，而不是转录。该规则对子 agent 的适用方式与对技能完全一致。
 
-When the path is missing:
-1. Do **not** advance the pipeline or summarise the phase as done.
-2. Resume the agent, naming the unmet contract explicitly and telling it that
-   "I could not write" is a valid answer but silence is not. Prefer resuming
-   over re-spawning — the context is usually still there, and a re-spawn pays
-   for the whole investigation again.
-3. If the second attempt also produces nothing, treat it as BLOCKED and apply
-   steps 1–5 below.
+当路径缺失时：
+1. **不要**推进流水线，也不要把该阶段总结为已完成。
+2. 恢复该 agent，明确指出未满足的契约，并告诉它「我无法写入」是一个可接受的答案，但沉默不是。优先恢复而非重新创建 —— 上下文通常仍在，重新创建则要为整个调查再付一次代价。
+3. 如果第二次尝试仍然没有产出，按 BLOCKED 处理，并应用下面的步骤 1–5。
 
 ---
 
-If any spawned agent returns BLOCKED, errors, or cannot complete:
+如果任何被创建的 agent 返回 BLOCKED、出错或无法完成：
 
-1. **Surface immediately** — report "[AgentName]: BLOCKED — [reason]" to the user
-   before continuing to dependent phases. The reason names what is missing and
-   where it was expected (the path or the input), so the user can supply it.
-2. **Assess dependencies** — check whether the blocked agent's output is required
-   by subsequent phases. If yes, do not proceed past that dependency point without
-   user input.
-3. **Offer options** via `AskUserQuestion`:
-   - Skip this agent and note the gap in the final report — never fill the skipped agent's section with content of your own
-   - Retry with narrower scope
-   - Stop here and resolve the blocker first
-4. **Always produce a partial report** — output whatever was completed. Never
-   discard work because one agent blocked.
-5. **A skip does not clear the block.** In a `/team-*` pipeline, choosing "skip
-   this agent and note the gap" lets the remaining phases run, but the skipped
-   agent's work is missing from what the pipeline delivers: the final verdict is
-   BLOCKED, naming the skipped agent and its gap — never COMPLETE.
+1. **立即上报** —— 在继续进入有依赖的阶段之前，向用户报告「[AgentName]: BLOCKED — [reason]」。原因要指明缺少什么、预期在何处（路径或输入），以便用户补充。
+2. **评估依赖** —— 检查后续阶段是否需要该被阻塞 agent 的输出。如果需要，在没有用户输入的情况下，不得越过该依赖点。
+3. **通过 `AskUserQuestion` 提供选项**：
+   - 跳过此 agent 并在最终报告中记录缺口 —— 绝不要用你自己的内容填充被跳过 agent 的章节
+   - 以更窄的范围重试
+   - 在此停止，先解决阻塞项
+4. **始终产出部分报告** —— 输出所有已完成的内容。绝不因为一个 agent 阻塞就丢弃工作。
+5. **跳过并不能清除阻塞。** 在 `/team-*` 流水线中，选择「跳过此 agent 并记录缺口」可以让其余阶段继续运行，但被跳过 agent 的工作会从流水线交付的内容中缺失：最终结论（verdict）为 BLOCKED，并指明被跳过的 agent 及其缺口 —— 绝不是 COMPLETE。

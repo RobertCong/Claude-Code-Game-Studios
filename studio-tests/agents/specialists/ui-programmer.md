@@ -1,79 +1,79 @@
 # Agent Test Spec: ui-programmer
 
 ## Agent Summary
-Domain: Menu screens, HUDs, inventory screens, dialogue boxes, UI framework code, and data binding.
-Does NOT own: UX flow and interaction design, including UI animation timing (ux-designer), visual style direction (art-director).
-No gate IDs assigned.
+领域：菜单界面、平视显示（HUD）、物品栏界面、对话框、UI 框架代码与数据绑定。
+不负责：UX 流程与交互设计（包括 UI 动画时机）（ux-designer）、视觉风格方向（art-director）。
+未分配质量闸门（gate）ID。
 
 ---
 
 ## Static Assertions (Structural)
 
-- [ ] `description:` field is present and domain-specific (references menus / HUDs / UI framework / data binding)
-- [ ] `tools:` list includes Read, Write, Edit, Bash, Glob, Grep
-- [ ] Model tier is `inherit` — frontmatter `model:` reads exactly `inherit` (tiers: `.claude/docs/model-tiers.md`)
-- [ ] Agent definition does not claim authority over UX flow design or visual art direction
+- [ ] `description:` 字段存在且与领域特定（提及菜单 / HUD / UI 框架 / 数据绑定）
+- [ ] `tools:` 列表包含 Read、Write、Edit、Bash、Glob、Grep
+- [ ] 模型档位为 `inherit` — frontmatter `model:` 的值恰为 `inherit`（档位说明：`.claude/docs/model-tiers.md`）
+- [ ] 代理定义未声称对 UX 流程设计或视觉美术方向拥有权限
 
 ---
 
 ## Test Cases
 
-### Case 1: In-domain request — appropriate output
-**Input:** The UX spec at `design/ux/inventory-flow.md` defines five slot states: default, hover, selected, empty-slot, locked-slot. Request: "Implement the inventory screen from the UX spec in `design/ux/inventory-flow.md`."
+### Case 1: 域内请求 — 合适的输出
+**Input:** `design/ux/inventory-flow.md` 的 UX 规格定义了五种槽位状态：default、hover、selected、empty-slot、locked-slot。请求：“依据 `design/ux/inventory-flow.md` 的 UX 规格实现物品栏界面。”
 **Expected behavior:**
-- Reads the UX spec before producing any code
-- Produces implementation using the project's configured UI framework (UI Toolkit, UGUI, UMG, or Godot Control nodes)
-- Implements every state the spec defines (default, hover, selected, empty-slot, locked-slot) — none dropped, none invented
-- Binds inventory data to UI elements via the project's data model, not hardcoded values
-- Includes doc comments on public UI API per coding standards
+- 在产出任何代码前读取 UX 规格
+- 使用项目配置的 UI 框架实现（UI Toolkit、UGUI、UMG 或 Godot Control 节点）
+- 实现规格定义的每个状态（default、hover、selected、empty-slot、locked-slot）——不遗漏，不虚构
+- 通过项目的数据模型将物品栏数据绑定到 UI 元素，而非硬编码值
+- 按编码规范包含公开 UI API 的文档注释
 
-### Case 2: Out-of-domain request — redirects correctly
-**Input:** "Design the inventory interaction flow — what happens when the player equips, drops, or combines items."
+### Case 2: 域外请求 — 正确重定向
+**Input:** “设计物品栏交互流程——当玩家装备、丢弃或组合物品时会发生什么。”
 **Expected behavior:**
-- Does NOT produce interaction flow design or user flow diagrams
-- Explicitly states that UX flow design belongs to `ux-designer`
-- Redirects the request to `ux-designer`
-- Notes that once the flow spec is ready, it can implement it
+- 不产出交互流程设计或用户流程图
+- 明确说明 UX 流程设计属于 `ux-designer`
+- 将请求重定向给 `ux-designer`
+- 指出一旦流程规格就绪，它可以实现
 
-### Case 3: Custom animation coordination
-**Input:** "The item selection in the inventory needs a custom bounce animation when selected."
+### Case 3: 自定义动画协作
+**Input:** “物品栏中的物品选中时需要一个自定义弹跳动画。”
 **Expected behavior:**
-- Recognizes that the bounce's feel (duration, easing curve, overshoot) is UI interaction and visual design, which it implements but does not design
-- Checks the UX spec it is implementing for those values first; does NOT invent them if they are absent
-- Asks the spec owner — `ux-designer` for interaction timing, `art-director` for visual style — for the missing values
-- Once the values are provided, binds the animation to the selection state, skippable and respecting the player's motion preference
+- 认识到弹跳的手感（时长、缓动曲线、过冲）属于 UI 交互与视觉设计，它负责实现但不负责设计
+- 先检查其正在实现的 UX 规格中是否有这些数值；若缺失则不虚构
+- 向规格所有者——交互时机问 `ux-designer`，视觉风格问 `art-director`——询问缺失值
+- 数值提供后，将动画绑定到选中状态，可跳过并尊重玩家的动态偏好（motion preference）
 
-### Case 4: Ambiguous UX spec — flags back
-**Input:** The UX spec states "show item details on selection" but does not define what happens when an empty slot is selected.
+### Case 4: UX 规格含糊 — 反馈回去
+**Input:** UX 规格写明“选中时显示物品详情”，但未定义选中空槽位时会发生什么。
 **Expected behavior:**
-- Identifies the ambiguity in the spec (empty slot selection state is undefined)
-- Does NOT make an arbitrary implementation decision for the undefined state
-- Flags the ambiguity back to `ux-designer` with the specific question: "What should the detail panel show when an empty inventory slot is selected?"
-- Any options it offers (e.g., hide the panel / show a placeholder) go to ux-designer as part of the question — none is implemented before the answer
+- 识别规格中的歧义（空槽选中状态未定义）
+- 不为未定义状态做任意实现决策
+- 将歧义反馈给 `ux-designer`，附具体问题：“当选中空的物品栏槽位时，详情面板应显示什么？”
+- 其提供的任何选项（例如隐藏面板 / 显示占位符）都作为问题的一部分交给 ux-designer——在得到答复前不实现任何一项
 
-### Case 5: Context pass — engine UI toolkit
-**Input:** Engine context provided: project uses Godot 4.6 with Control node UI. Request: "Implement a scrollable item list for the inventory."
+### Case 5: 上下文传递 — 引擎 UI 工具包
+**Input:** 上下文中提供引擎信息：项目使用 Godot 4.6 与 Control 节点 UI。请求：“为物品栏实现一个可滚动的物品列表。”
 **Expected behavior:**
-- Uses Godot's `ScrollContainer` + `VBoxContainer` + `ItemList` (or equivalent) pattern, not Canvas or UGUI
-- Does NOT produce Unity UGUI or Unreal UMG code for a Godot project
-- Checks the engine version reference (4.6) for any Control node API changes from 4.4/4.5 before using specific APIs
-- Produces GDScript or C# code consistent with the project's configured language
+- 使用 Godot 的 `ScrollContainer` + `VBoxContainer` + `ItemList`（或等价）模式，而非 Canvas 或 UGUI
+- 不为 Godot 项目产出 Unity UGUI 或 Unreal UMG 代码
+- 在使用具体 API 前检查引擎版本参考（4.6）中 4.4/4.5 起 Control 节点 API 的任何变更
+- 产出与项目配置语言一致的 GDScript 或 C# 代码
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Stays within declared domain (menus, HUDs, UI framework, data binding)
-- [ ] Redirects UX flow design to ux-designer
-- [ ] Takes animation timing and easing from ux-designer / art-director specs rather than inventing them, and makes every animation skippable and motion-preference aware
-- [ ] Flags ambiguous UX specs back to ux-designer rather than making arbitrary implementation decisions
-- [ ] Returns structured output (implementation code, data binding patterns, state machine for UI states)
-- [ ] Uses the correct engine UI toolkit for the project — never cross-engine code
-- [ ] Asks "May I write this to [filepath]?" naming the file before writing
+- [ ] 保持在声明的领域内（菜单、HUD、UI 框架、数据绑定）
+- [ ] 将 UX 流程设计重定向给 ux-designer
+- [ ] 从 ux-designer / art-director 的规格中获取动画时机与缓动，而不是自行发明，并使每个动画可跳过且感知动态偏好
+- [ ] 将含糊的 UX 规格反馈给 ux-designer，而不是做任意实现决策
+- [ ] 返回结构化输出（实现代码、数据绑定模式、UI 状态的状态机）
+- [ ] 为项目使用正确的引擎 UI 工具包——绝不使用跨引擎代码
+- [ ] 写入前询问“May I write this to [filepath]?”并指明文件
 
 ---
 
 ## Coverage Notes
-- Inventory implementation (Case 1) should have a retained screenshot of each screen touched in `production/qa/evidence/`
-- Animation coordination (Case 3) confirms the agent does not invent feel parameters without a spec
-- Ambiguous spec (Case 4) verifies the agent routes spec gaps back to the authoring agent rather than guessing
+- 物品栏实现（Case 1）应在 `production/qa/evidence/` 中保留每个涉及界面的截图
+- 动画协作（Case 3）确认代理不会在没有规格的情况下虚构手感参数
+- 含糊规格（Case 4）验证代理将规格缺口路由回编写代理，而不是猜测

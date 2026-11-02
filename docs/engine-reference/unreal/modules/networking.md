@@ -1,38 +1,39 @@
-# Unreal Engine 5.8 — Networking Module Reference
+# Unreal Engine 5.8 — 网络模块参考
 
-**Last verified:** 2026-10-18 (Iris status: release notes and plugin flag); 2026-10-17 (UE 5.8 changes block); 2026-02-13 (rest of file, written against 5.7)
-**Knowledge Gap:** UE 5.7-5.8 networking improvements (Iris production-ready in 5.8)
+**Last verified:** 2026-10-18（Iris 状态：发布说明与插件标记）；2026-10-17（UE 5.8 变更区块）；2026-02-13（文件其余部分，针对 5.7 编写）
+**Knowledge Gap:** UE 5.7-5.8 网络改进（Iris 在 5.8 中可用于生产）
 
-> **UE 5.8 changes:** Iris "is now production-ready for licensees in UE
-> 5.8" (the `Iris.uplugin` in a 5.8.1 install still carries a Beta flag), with
-> clearer protocol-mismatch errors and RPC DoS detection re-enabled. Thread-safety
-> primitives were added for parallel `NetConnection::Tick`; a target that does
-> not need them can drop them with `ExcludeParallelIrisSupport` in
-> `TargetRules.cs`. Network Prediction gained optional Iris support. Source: UE
-> 5.8 release notes, https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-5-8-release-notes?application_version=5.8
+> **UE 5.8 变更：** Iris "is now production-ready for licensees in UE
+> 5.8"（5.8.1 安装中的 `Iris.uplugin` 仍带有 Beta 标记），同时
+> 带来了更清晰的协议不匹配错误，并重新启用了 RPC DoS 检测。为并行
+> `NetConnection::Tick` 新增了线程安全原语；不需要它们的目标
+> 可以通过 `TargetRules.cs` 中的 `ExcludeParallelIrisSupport` 将其移除。
+> Network Prediction 获得了可选的 Iris 支持。来源：UE
+> 5.8 发布说明，https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-5-8-release-notes?application_version=5.8
 >
-> **The notes and the plugin flag disagree.** Treat Iris as production-ready,
-> as the release notes say ("Iris is now production-ready for licensees in UE
-> 5.8", Framework > "Iris: Production-Ready Replication System"), and expect
-> the editor's plugin list to show it as Beta: `Engine/Plugins/Experimental/Iris/Iris.uplugin`
-> in a 5.8.1 install (CL 56057345) has `"IsBetaVersion": true`. Both read
-> 2026-10-18.
+> **发布说明与插件标记不一致。** 应将 Iris 视为可用于生产，
+> 正如发布说明所述（"Iris is now production-ready for licensees in UE
+> 5.8"，Framework > "Iris: Production-Ready Replication System"），并预期
+> 编辑器的插件列表仍将其显示为 Beta：5.8.1 安装（CL 56057345）中的
+> `Engine/Plugins/Experimental/Iris/Iris.uplugin`
+> 带有 `"IsBetaVersion": true`。两者的读取时间均为
+> 2026-10-18。
 
 ---
 
-## Overview
+## 概述
 
-UE 5.8 networking:
-- **Client-Server Architecture**: Server-authoritative (RECOMMENDED)
-- **Replication**: Automatic state synchronization
-- **RPCs (Remote Procedure Calls)**: Call functions across network
-- **Relevancy**: Optimize bandwidth by only replicating relevant actors
+UE 5.8 网络：
+- **Client-Server Architecture**：服务器权威（推荐）
+- **Replication**：自动状态同步
+- **RPCs (Remote Procedure Calls)**：跨网络调用函数
+- **Relevancy**：仅复制相关 actor 以优化带宽
 
 ---
 
-## Basic Multiplayer Setup
+## 基础多玩家设置
 
-### Enable Replication on Actor
+### 在 Actor 上启用复制
 
 ```cpp
 UCLASS()
@@ -48,7 +49,7 @@ public:
 };
 ```
 
-### Network Role Checks
+### 网络角色检查
 
 ```cpp
 // Check role
@@ -67,9 +68,9 @@ if (GetRemoteRole() == ROLE_SimulatedProxy) {
 
 ---
 
-## Replicated Variables
+## 复制变量
 
-### Basic Replication
+### 基础复制
 
 ```cpp
 UPROPERTY(Replicated)
@@ -87,7 +88,7 @@ void AMyActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 }
 ```
 
-### Conditional Replication
+### 条件复制
 
 ```cpp
 // Only replicate to owner
@@ -100,7 +101,7 @@ DOREPLIFETIME_CONDITION(AMyCharacter, TeamID, COND_SkipOwner);
 DOREPLIFETIME_CONDITION(AMyCharacter, Score, COND_InitialOnly);
 ```
 
-### RepNotify (Callback on Replication)
+### RepNotify（复制时的回调）
 
 ```cpp
 UPROPERTY(ReplicatedUsing=OnRep_Health)
@@ -117,9 +118,9 @@ void OnRep_Health() {
 
 ---
 
-## RPCs (Remote Procedure Calls)
+## RPC（远程过程调用）
 
-### Server RPC (Client → Server)
+### Server RPC（Client → Server）
 
 ```cpp
 // Client calls, server executes. WithValidation declares Server_TakeDamage_Validate.
@@ -141,7 +142,7 @@ bool AMyCharacter::Server_TakeDamage_Validate(int32 Damage) {
 }
 ```
 
-### Client RPC (Server → Client)
+### Client RPC（Server → Client）
 
 ```cpp
 // Server calls, client executes
@@ -154,7 +155,7 @@ void AMyCharacter::Client_ShowDeathScreen_Implementation() {
 }
 ```
 
-### Multicast RPC (Server → All Clients)
+### Multicast RPC（Server → All Clients）
 
 ```cpp
 // Server calls, all clients execute
@@ -167,7 +168,7 @@ void AMyActor::Multicast_PlayExplosion_Implementation(FVector Location) {
 }
 ```
 
-### RPC Reliability
+### RPC 可靠性
 
 ```cpp
 // Reliable: Guaranteed delivery (important events)
@@ -181,9 +182,9 @@ void Server_UpdateAim(FRotator AimRotation);
 
 ---
 
-## Server-Authoritative Pattern (RECOMMENDED)
+## 服务器权威模式（推荐）
 
-### Movement Example
+### 移动示例
 
 ```cpp
 class AMyCharacter : public ACharacter {
@@ -224,9 +225,9 @@ class AMyCharacter : public ACharacter {
 
 ---
 
-## Network Relevancy (Bandwidth Optimization)
+## 网络相关性（带宽优化）
 
-### Custom Relevancy
+### 自定义相关性
 
 ```cpp
 bool AMyActor::IsNetRelevantFor(const AActor* RealViewer, const AActor* ViewTarget, const FVector& SrcLocation) const {
@@ -236,7 +237,7 @@ bool AMyActor::IsNetRelevantFor(const AActor* RealViewer, const AActor* ViewTarg
 }
 ```
 
-### Always Relevant Actors
+### 始终相关的 Actor
 
 ```cpp
 AMyActor() {
@@ -247,16 +248,16 @@ AMyActor() {
 
 ---
 
-## Ownership
+## 所有权（Ownership）
 
-### Set Owner
+### 设置所有者
 
 ```cpp
 // Assign owner (important for RPCs and relevancy)
 MyActor->SetOwner(OwningPlayerController);
 ```
 
-### Check Owner
+### 检查所有者
 
 ```cpp
 if (GetOwner() == PlayerController) {
@@ -266,9 +267,9 @@ if (GetOwner() == PlayerController) {
 
 ---
 
-## Game Mode & Game State
+## Game Mode 与 Game State
 
-### Game Mode (Server Only)
+### Game Mode（仅服务器）
 
 ```cpp
 UCLASS()
@@ -281,7 +282,7 @@ public:
 };
 ```
 
-### Game State (Replicated to All Clients)
+### Game State（复制到所有客户端）
 
 ```cpp
 UCLASS()
@@ -306,9 +307,9 @@ public:
 
 ---
 
-## Player Controller & Player State
+## Player Controller 与 Player State
 
-### Player Controller (One per Player)
+### Player Controller（每位玩家一个）
 
 ```cpp
 UCLASS()
@@ -321,7 +322,7 @@ public:
 };
 ```
 
-### Player State (Replicated Player Info)
+### Player State（复制的玩家信息）
 
 ```cpp
 UCLASS()
@@ -345,9 +346,9 @@ public:
 
 ---
 
-## Sessions & Matchmaking
+## 会话与匹配
 
-### Create Session
+### 创建会话
 
 ```cpp
 #include "OnlineSubsystem.h"
@@ -366,7 +367,7 @@ void CreateSession() {
 }
 ```
 
-### Find Sessions
+### 查找会话
 
 ```cpp
 void FindSessions() {
@@ -383,9 +384,9 @@ void FindSessions() {
 
 ---
 
-## Performance Tips
+## 性能技巧
 
-### Reduce Bandwidth
+### 减少带宽
 
 ```cpp
 // Use unreliable RPCs for frequent updates
@@ -401,9 +402,9 @@ SetReplicationFrequency(10.0f); // Update 10 times per second (default 100)
 
 ---
 
-## Debugging
+## 调试
 
-### Network Debugging
+### 网络调试
 
 ```cpp
 // Console commands:
@@ -418,7 +419,7 @@ UE_LOG(LogNet, Warning, TEXT("Replicating Health: %d"), Health);
 
 ---
 
-## Sources
+## 来源
 - https://docs.unrealengine.com/5.7/en-US/networking-and-multiplayer-in-unreal-engine/
 - https://docs.unrealengine.com/5.7/en-US/actor-replication-in-unreal-engine/
 - https://docs.unrealengine.com/5.7/en-US/rpcs-in-unreal-engine/

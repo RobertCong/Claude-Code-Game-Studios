@@ -1,79 +1,79 @@
 # Agent Test Spec: engine-programmer
 
 ## Agent Summary
-Domain: Rendering pipeline, physics integration, memory management, resource loading, and core engine framework.
-Does NOT own: gameplay mechanics (gameplay-programmer), build infrastructure (devops-engineer), editor/debug tool UI (tools-programmer).
-No gate IDs assigned.
+领域：渲染管线、物理集成、内存管理、资源加载与核心引擎框架。
+不负责：玩法机制（gameplay-programmer）、构建基础设施（devops-engineer）、编辑器/调试工具 UI（tools-programmer）。
+未分配质量闸门（gate）ID。
 
 ---
 
 ## Static Assertions (Structural)
 
-- [ ] `description:` field is present and domain-specific (references rendering / memory / engine core)
-- [ ] `tools:` list includes Read, Write, Edit, Bash, Glob, Grep
-- [ ] Model tier is `inherit` — frontmatter `model:` reads exactly `inherit` (tiers: `.claude/docs/model-tiers.md`)
-- [ ] Agent definition does not claim authority over gameplay mechanics or tool UI
+- [ ] `description:` 字段存在且与领域特定（提及渲染 / 内存 / 引擎核心）
+- [ ] `tools:` 列表包含 Read、Write、Edit、Bash、Glob、Grep
+- [ ] 模型档位为 `inherit` — frontmatter `model:` 的值恰为 `inherit`（档位说明：`.claude/docs/model-tiers.md`）
+- [ ] 代理定义未声称对玩法机制或工具 UI 拥有权限
 
 ---
 
 ## Test Cases
 
-### Case 1: In-domain request — appropriate output
-**Input:** "Implement a custom object pool for projectiles to avoid per-frame allocation."
+### Case 1: 域内请求 — 合适的输出
+**Input:** “为投射物实现自定义对象池，以避免逐帧分配。”
 **Expected behavior:**
-- Produces an engine-level object pool implementation with acquire/release interface
-- Pool is typed to the projectile object type, uses pre-allocated fixed-size storage
-- Provides thread-safety notes (or clearly marks as single-threaded-only with rationale)
-- Includes doc comments on the public API per coding standards
-- Output is compatible with the project's configured engine and language
+- 产出引擎级对象池实现，带有 acquire/release 接口
+- 池按投射物对象类型定型，使用预分配的固定大小存储
+- 提供线程安全说明（或明确标注为仅单线程并给出理由）
+- 按编码规范包含针对公开 API 的文档注释
+- 输出与项目配置的引擎和语言兼容
 
-### Case 2: Out-of-domain request — redirects correctly
-**Input:** "Add a wall-jump ability to the player controller."
+### Case 2: 域外请求 — 正确重定向
+**Input:** “给玩家控制器添加蹬墙跳能力。”
 **Expected behavior:**
-- Does NOT produce the wall-jump gameplay code
-- Explicitly states that gameplay features belong to `gameplay-programmer`
-- Redirects the request to `gameplay-programmer`
-- If it offers an engine-level query the ability can call (e.g., wall contact and surface normal), that API does not depend on gameplay code (strict dependency direction)
+- 不产出蹬墙跳玩法代码
+- 明确说明玩法功能属于 `gameplay-programmer`
+- 将请求重定向给 `gameplay-programmer`
+- 如果它提供该能力可调用的引擎级查询（例如墙壁接触与表面法线），该 API 不依赖玩法代码（严格依赖方向）
 
-### Case 3: Memory leak diagnosis
-**Input:** "Memory usage grows by ~50MB per level load and never releases. We suspect the resource loading system."
+### Case 3: 内存泄漏诊断
+**Input:** “每次关卡加载内存占用增加约 50MB 且从不释放。我们怀疑是资源加载系统。”
 **Expected behavior:**
-- Diagnoses by measurement before changing code: memory baseline, repeated load/unload cycles, numbers documented (profile before and after)
-- Audits the resource loading/caching and object lifecycle code it owns for references that are never released, naming likely causes (orphaned resource handles, circular references, a cache that never evicts)
-- Produces a concrete fix for the identified leak pattern
-- Provides a test to verify the fix (memory baseline before load, measure after unload, confirm return to baseline)
+- 在改动代码前通过测量诊断：内存基线、重复加载/卸载循环、记录数据（改动前后进行性能剖析）
+- 审计其负责的资源加载/缓存与对象生命周期代码，查找从未释放的引用，指出可能原因（孤立的资源句柄、循环引用、从不驱逐的缓存）
+- 针对已识别的泄漏模式产出具体修复
+- 提供验证修复的测试（加载前内存基线，卸载后测量，确认回到基线）
 
-### Case 4: Cross-domain coordination — shared system optimization
-**Input:** "I need to optimize the physics broadphase, but the gameplay system is tightly coupled to the physics query API."
+### Case 4: 跨域协作 — 共享系统优化
+**Input:** “我需要优化物理 broadphase，但玩法系统与物理查询 API 紧密耦合。”
 **Expected behavior:**
-- Does NOT unilaterally change the physics query API surface (would break gameplay-programmer's code)
-- Coordinates with `lead-programmer` to plan the change safely
-- Proposes a migration path: new optimized API alongside old API, with a deprecation period
-- Documents the coordination requirement before proceeding
+- 不擅自更改物理查询 API 表面（会破坏 gameplay-programmer 的代码）
+- 与 `lead-programmer` 协作安全规划变更
+- 提出迁移路径：新优化 API 与旧 API 并存，并设弃用期
+- 在继续前记录协作要求
 
-### Case 5: Context pass — checks engine version reference
-**Input:** Engine version reference (Godot 4.6) provided in context. Request: "Set up the default physics engine for the project."
+### Case 5: 上下文传递 — 检查引擎版本参考
+**Input:** 上下文中提供引擎版本参考（Godot 4.6）。请求：“为项目设置默认物理引擎。”
 **Expected behavior:**
-- Reads the engine version reference and notes Godot 4.6 change: Jolt physics is now the default
-- Produces configuration guidance that accounts for the Jolt-as-default change (4.6 migration note)
-- Flags the GodotPhysics3D→Jolt differences `docs/engine-reference/godot/modules/physics.md` documents — HingeJoint3D `damp` is unsupported under Jolt, collision margins may behave differently, Jolt warns at runtime about unsupported properties — and that existing projects keep their current engine setting; says the reference lists no other API differences rather than inventing any
-- Does NOT suggest deprecated or pre-4.6 physics setup steps without noting they apply to older versions
+- 读取引擎版本参考并注意 Godot 4.6 变更：Jolt 物理现为默认
+- 产出考虑 Jolt 成为默认这一变更的配置指导（4.6 迁移说明）
+- 标记 `docs/engine-reference/godot/modules/physics.md` 记录的 GodotPhysics3D→Jolt 差异——HingeJoint3D 的 `damp` 在 Jolt 下不受支持、碰撞边距行为可能不同、Jolt 会在运行时对不支持的属性发出警告——并说明现有项目保留其当前引擎设置；说明参考资料未列出其他 API 差异，而不是自行虚构
+- 不建议已弃用或 4.6 之前的物理设置步骤，除非注明其适用于旧版本
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Stays within declared domain (rendering, physics, memory, resource loading, core framework)
-- [ ] Redirects gameplay feature requests to gameplay-programmer and build infrastructure changes to devops-engineer
-- [ ] Returns structured findings (implementation code, diagnosis steps, migration plans)
-- [ ] Coordinates with lead-programmer before changing shared API surfaces
-- [ ] Checks engine version reference before suggesting engine-specific APIs
-- [ ] Provides test evidence for fixes (memory before/after, performance measurements)
-- [ ] Asks "May I write this to [filepath]?" naming the file before writing
+- [ ] 保持在声明的领域内（渲染、物理、内存、资源加载、核心框架）
+- [ ] 将玩法功能请求重定向给 gameplay-programmer，将构建基础设施变更重定向给 devops-engineer
+- [ ] 返回结构化发现（实现代码、诊断步骤、迁移计划）
+- [ ] 在更改共享 API 表面之前与 lead-programmer 协作
+- [ ] 在建议引擎特定 API 之前检查引擎版本参考
+- [ ] 为修复提供测试证据（内存前后、性能测量）
+- [ ] 写入前询问“May I write this to [filepath]?”并指明文件
 
 ---
 
 ## Coverage Notes
-- Object pool (Case 1) must include a unit test in `tests/unit/engine/`
-- Memory leak diagnosis (Case 3) should produce evidence artifacts in `production/qa/evidence/`
-- Engine version check (Case 5) confirms the agent treats VERSION.md as authoritative, not LLM training data
+- 对象池（Case 1）必须在 `tests/unit/engine/` 中包含单元测试
+- 内存泄漏诊断（Case 3）应在 `production/qa/evidence/` 中产出证据文件
+- 引擎版本检查（Case 5）确认代理将 VERSION.md 视为权威，而非 LLM 训练数据

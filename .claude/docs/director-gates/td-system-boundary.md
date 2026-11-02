@@ -1,31 +1,26 @@
-> Gate definition. The spawning skill passes this file's path to the director agent; the AGENT reads it — the parent session should not.
+> 质量闸门定义。发起调用的技能会把本文件路径传给总监代理；由该 AGENT 读取——父会话不应读取。
 
-# TD-SYSTEM-BOUNDARY — System Boundary Architecture Review
+# TD-SYSTEM-BOUNDARY — 系统边界架构评审
 
-Agent: `technical-director` | Model tier: Opus | Domain: Architecture, engine risk, performance
+Agent：`technical-director` | 模型层级：session（继承） | 领域：架构、引擎风险、性能
 
-**Trigger**: After `/map-systems` Phase 3 dependency mapping is agreed but before
-GDD authoring begins — validates that the system structure is architecturally
-sound before teams invest in writing GDDs against it
+**触发时机**：`/map-systems` Phase 3 依赖映射已达成一致后、GDD 编写开始之前
+——在团队投入依据其撰写 GDD 之前，校验系统结构在架构上是否健全
 
-**Context to pass**:
-- Systems index path (or the dependency map summary if index not yet written)
-- Layer assignments (Foundation / Core / Feature / Presentation / Polish)
-- The full dependency graph (what each system depends on)
-- Any bottleneck systems flagged (many dependents)
-- Any circular dependencies found and their proposed resolutions
+**需传入的上下文**：
+- 系统索引路径（若索引尚未写入，则传依赖图摘要）
+- 层级划分（Foundation / Core / Feature / Presentation / Polish）
+- 完整依赖图（各系统依赖什么）
+- 被标出的任何瓶颈系统（依赖方众多）
+- 发现的任何循环依赖及其拟定解决方案
 
-**Prompt**:
-> "Review this systems decomposition from an architectural perspective before GDD
-> authoring begins. Are the system boundaries clean — does each system own a
-> distinct concern with minimal overlap? Are there God Object risks (systems doing
-> too much)? Does the dependency ordering create implementation-sequencing problems?
-> Are there implicit shared-state problems in the proposed boundaries that will
-> cause tight coupling when implemented? Are any Foundation-layer systems actually
-> dependent on Feature-layer systems (inverted dependency)? Return APPROVE
-> (boundaries are architecturally sound — proceed to GDD authoring), CONCERNS
-> [specific boundary issues to address in the GDDs themselves], or REJECT
-> [fundamental boundary problems — the system structure will cause architectural
-> issues and must be restructured before any GDD is written]."
+**提示词**：
+> "在 GDD 编写开始之前，从架构角度审查这套系统拆解。系统边界是否清晰——每个系统
+> 是否拥有互不重叠的独立关注点？是否存在上帝对象（God Object）风险（系统承担过多
+> 职责）？依赖排序是否会造成实现顺序问题？拟定边界中是否存在隐式共享状态问题，
+> 会在实现时导致紧耦合？是否有 Foundation 层系统实际依赖 Feature 层系统（依赖
+> 倒置）？返回 APPROVE（边界在架构上健全——继续编写 GDD）、CONCERNS [应在 GDD
+> 本身中处理的具体边界问题]，或 REJECT [根本性边界问题——该结构会导致架构问题，
+> 必须在编写任何 GDD 前重构]。"
 
-**Verdicts**: APPROVE / CONCERNS / REJECT
+**结论**：APPROVE / CONCERNS / REJECT

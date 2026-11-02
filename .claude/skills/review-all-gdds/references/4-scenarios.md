@@ -1,55 +1,43 @@
-# /review-all-gdds — Phase 4: Cross-System Scenario Walkthrough
+# /review-all-gdds — Phase 4: 跨系统场景走查
 
-> Part of `/review-all-gdds`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> 属于 `/review-all-gdds`。`SKILL.md` 指明何时读取本文件；它解析出的设置以及其后各标题下的规则在此同样适用。
 
-## Phase 4: Cross-System Scenario Walkthrough
+## Phase 4: 跨系统场景走查
 
-Walk through the game from the player's perspective to find problems that only
-appear at the interaction boundary between multiple systems — things static
-analysis of individual GDDs cannot surface.
+从玩家视角走查游戏，找出只在多个系统交互边界上才会出现的问题 — 这些问题是对单个 GDD 做静态分析无法浮现的。
 
-### 4a: Identify Key Multi-System Moments
+### 4a：识别关键的多系统时刻
 
-Scan all GDDs and identify the 3–5 most important player-facing moments where
-multiple systems activate simultaneously. Look specifically for:
+扫描所有 GDD，识别 3–5 个最重要的、面向玩家的、多个系统同时激活的时刻。特别关注：
 
-- **Combat + Economy overlap**: killing enemies that drop resources, spending
-  resources during combat, death/respawn interacting with economy state
-- **Progression + Difficulty overlap**: level-up triggering mid-fight, ability
-  unlocks changing combat viability, difficulty scaling at progression milestones
-- **Narrative + Gameplay overlap**: dialogue choices locking/unlocking mechanics,
-  story beats interrupting resource loops, quest completion triggering system
-  state changes
-- **3+ system chains**: any player action that triggers System A, which feeds
-  into System B, which triggers System C (these are highest-risk interaction paths)
+- **战斗 + 经济重叠**：击杀掉落资源的敌人、战斗中花费资源、死亡/重生与经济状态交互
+- **成长 + 难度重叠**：战斗中途触发升级、能力解锁改变战斗可行性、成长里程碑处的难度缩放
+- **叙事 + 玩法重叠**：对话选择锁定/解锁机制、故事节点打断资源循环、任务完成触发系统状态变化
+- **3+ 系统链**：任何玩家动作触发系统 A，A 又输入系统 B，B 又触发系统 C（这些是风险最高的交互路径）
 
-List each identified scenario with a one-line description before proceeding.
+在继续之前，用一行描述列出每个识别出的场景。
 
-### 4b: Walk Through Each Scenario
+### 4b：走查每个场景
 
-For each scenario, step through the sequence explicitly:
+对每个场景，显式地步进整个序列：
 
-1. **Trigger** — what player action or game event starts this?
-2. **Activation order** — which systems activate, in what sequence?
-3. **Data flow** — what does each system output, and is that output a valid
-   input for the next system in the chain?
-4. **Player experience** — what does the player see, hear, or feel at each step?
-5. **Failure modes** — are there any of the following?
-   - **Race conditions**: two systems trying to modify the same state simultaneously
-   - **Feedback loops**: System A amplifies System B which re-amplifies System A
-     with no cap or dampener
-   - **Broken state transitions**: a system assumes a state that a previous
-     system may have changed (e.g., "player is alive" assumption after a combat
-     step that could have caused death)
-   - **Contradictory messaging**: player receives conflicting feedback from two
-     systems reacting to the same event (e.g., "success" sound + "failure" UI)
-   - **Compounding difficulty spikes**: two systems both scaling up at the same
-     progression point, multiplying the intended difficulty increase
-   - **Reward conflicts**: two systems both reacting to the same trigger with
-     rewards that together exceed the intended value (double-dipping)
-   - **Undefined behavior**: the GDDs don't specify what happens in this combined
-     state (neither system's rules cover it)
+1. **触发** — 是什么玩家动作或游戏事件启动了它？
+2. **激活顺序** — 哪些系统激活，按什么顺序？
+3. **数据流** — 每个系统输出什么，该输出是否是链条中下一个系统的有效输入？
+4. **玩家体验** — 每一步玩家看到、听到或感受到什么？
+5. **失败模式** — 是否存在以下任何情况？
+   - **竞态条件**：两个系统同时试图修改同一状态
+   - **反馈循环**：系统 A 放大系统 B，系统 B 又反过来放大系统 A，
+     且没有上限或阻尼
+   - **状态转换断裂**：某个系统假定了前一个系统可能已经改变的状态
+     （例如，在可能导致死亡的战斗步骤之后仍假定"玩家还活着"）
+   - **相互矛盾的信息**：玩家从两个对同一事件做出反应的系统收到冲突的反馈
+     （例如，"成功"音效 + "失败"UI）
+   - **复合难度尖峰**：两个系统在同一成长点同时向上缩放，
+     成倍放大了预期的难度提升
+   - **奖励冲突**：两个系统对同一触发都给予奖励，合起来超过了预期值（重复领取）
+   - **未定义行为**：GDD 未规定在此组合状态下会发生什么
+     （两个系统的规则都未覆盖）
 
 ```
 Example walkthrough:
@@ -69,19 +57,18 @@ Trigger: Player lands killing blow on elite enemy
   pre-update stat baseline?
 ```
 
-### 4c: Flag Scenario Issues
+### 4c：标记场景问题
 
-For each problem found during the walkthrough, categorize severity:
+对走查中发现的每个问题，按严重程度分类：
 
-- **BLOCKER**: undefined behavior, broken state transition, or contradictory
-  player messaging — the experience is broken or incoherent in this scenario
-- **WARNING**: compounding spikes, feedback loops without caps, reward conflicts —
-  the experience works but produces unintended outcomes
-- **INFO**: minor ordering ambiguity or messaging overlap — worth noting but
-  unlikely to cause player-visible problems
+- **BLOCKER**：未定义行为、状态转换断裂，或相互矛盾的玩家信息 —
+  该场景中的体验是断裂或不连贯的
+- **WARNING**：复合尖峰、无上限的反馈循环、奖励冲突 —
+  体验可以运行但产生了非预期的结果
+- **INFO**：轻微的时序歧义或信息重叠 — 值得注意，
+  但不太可能造成玩家可见的问题
 
-Add all findings to the output report under **"Cross-System Scenario Issues"**.
-Each finding must cite: the scenario name, the specific systems involved, the
-step where the issue occurs, and the nature of the failure mode.
+将所有发现添加到输出报告中的**"Cross-System Scenario Issues"**之下。
+每个发现必须引用：场景名称、涉及的具体系统、问题发生的步骤，以及失败模式的性质。
 
 ---

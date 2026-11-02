@@ -1,23 +1,22 @@
-> Gate definition. The spawning skill passes this file's path to the director agent; the AGENT reads it — the parent session should not.
+> 质量闸门定义。发起调用的技能会把本文件路径传给总监代理；由该 AGENT 读取——父会话不应读取。
 
-# AD-VISUAL — Art Director Visual Consistency Review
+# AD-VISUAL — 美术总监视觉一致性评审
 
-Agent: `art-director` | Model tier: session (inherit)
+Agent：`art-director` | 模型层级：session（继承）
 
-**Trigger**: After art direction decisions are made, when new asset types are
-introduced, or when a tech art decision affects visual style
+**触发时机**：做出美术方向决策之后、引入新资源类型时，或某项技术美术决策
+影响视觉风格时
 
-**Context to pass**:
-- Art bible path (if exists at `design/art/art-bible.md`)
-- The specific asset type, style decision, or visual direction being reviewed
-- Reference images or style descriptions
-- Platform and performance constraints
+**需传入的上下文**：
+- 美术圣经路径（如存在于 `design/art/art-bible.md`）
+- 正在评审的具体资源类型、风格决策或视觉方向
+- 参考图或风格描述
+- 平台与性能约束
 
-**Prompt**:
-> "Review this visual direction decision for consistency with the established art
-> style and production constraints. Does it match the art bible? Is it achievable
-> within the platform's performance budget? Are there asset pipeline implications
-> that create technical risk? Return APPROVE, CONCERNS [specific adjustments], or
-> REJECT [style violation or production risk that must be resolved first]."
+**提示词**：
+> "审查这项视觉方向决策，判断其是否与既定美术风格及制作约束一致。它是否契合
+> 美术圣经？在平台的性能预算内是否可达成？是否存在会造成技术风险的资源流水线
+> 影响？返回 APPROVE、CONCERNS [具体调整建议]，或 REJECT [必须先解决的风格违规
+> 或制作风险]。"
 
-**Verdicts**: APPROVE / CONCERNS / REJECT
+**结论**：APPROVE / CONCERNS / REJECT

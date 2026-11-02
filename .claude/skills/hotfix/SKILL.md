@@ -1,6 +1,6 @@
 ---
 name: hotfix
-description: "Emergency fix bypassing normal sprint process — hotfix branch, approvals tracked, backport verified, full audit trail."
+description: "绕过常规冲刺流程的紧急修复——建立热修复分支、跟踪审批、验证回填、保留完整审计轨迹。"
 argument-hint: "[bug-id or description]"
 user-invocable: true
 disable-model-invocation: true
@@ -8,32 +8,32 @@ allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, Bash(git r
 model: sonnet
 ---
 
-# Hotfix
+# 热修复（Hotfix）
 
-> **Explicit invocation only**: This skill should only run when the user explicitly requests it with `/hotfix`. Do not auto-invoke based on context matching.
+> **仅限显式调用**：仅当用户用 `/hotfix` 显式请求时才应运行本技能。不要基于上下文匹配自动调用。
 
-## Phase 1: Assess Severity
+## Phase 1: 评估严重程度
 
-Read the bug description or ID. Assess severity on `/bug-triage`'s scale:
+读取缺陷描述或 ID。按 `/bug-triage` 的量表评估严重程度：
 
-- **S1 (Critical)**: Crash, data loss, or complete feature failure — the game cannot proceed (rate a security issue by that impact)
-- **S2 (High)**: Major feature broken, but the game is still playable
-- **S3 or lower**: Feature degraded with a workaround, or cosmetic — normal bug fix workflow applies
+- **S1（Critical，致命）**：崩溃、数据丢失或功能完全失效——游戏无法继续（安全问题的评级依据其影响）
+- **S2（High，高）**：主要功能损坏，但游戏仍可游玩
+- **S3 或更低**：功能降级但有绕过办法，或仅外观问题——适用常规缺陷修复工作流
 
-Confirm with `AskUserQuestion`:
-- Prompt: "I've assessed this as **[assessed severity]** — [brief rationale]. Confirm severity to proceed:"
-- Options:
-  - `[A] S1 (Critical) — crash, data loss, or complete feature failure`
-  - `[B] S2 (High) — major feature broken, game still playable`
-  - `[C] S3 or lower — redirect to normal bug fix workflow`
+用 `AskUserQuestion` 确认：
+- 提示："我评估为 **[assessed severity]** —— [brief rationale]。请确认严重程度以继续："
+- 选项：
+  - `[A] S1（Critical，致命）—— 崩溃、数据丢失或功能完全失效`
+  - `[B] S2（High，高）—— 主要功能损坏，但游戏仍可游玩`
+  - `[C] S3 或更低 —— 重定向到常规缺陷修复工作流`
 
-If [C]: stop. Verdict: **REDIRECTED** — use the normal bug fix workflow for S3 and below.
+若选 [C]：停止。结论：**REDIRECTED** —— S3 及以下请使用常规缺陷修复工作流。
 
 ---
 
-## Phase 2: Create Hotfix Record
+## Phase 2: 创建热修复记录
 
-Draft the hotfix record:
+起草热修复记录：
 
 ```markdown
 ## Hotfix: [Short Description]
@@ -63,134 +63,104 @@ Status: IN PROGRESS
 [How to revert if the fix causes new issues]
 ```
 
-Ask: "May I write this to `production/hotfixes/hotfix-[date]-[short-name].md`?"
+询问："我可以把它写入 `production/hotfixes/hotfix-[date]-[short-name].md` 吗？"
 
-If yes, write the file, creating the directory if needed.
+若同意，写入文件，必要时创建目录。
 
 ---
 
-## Phase 3: Create Hotfix Branch
+## Phase 3: 创建热修复分支
 
-Check whether this is a git repository:
+检查这是否为 git 仓库：
 
 `Bash: git rev-parse --is-inside-work-tree 2>/dev/null`
 
-If this command fails or returns empty: note "Not a git repository — create the branch manually." and skip branch creation.
+若该命令失败或返回为空：记录"不是 git 仓库——请手动创建分支。"并跳过分支创建。
 
-`[base-ref]` is the release the bug is in. Releases are tags on `main` (the
-trunk), so it is that release's tag (`git tag --list`; the newest is usually
-the live build) — or its `release/*` branch, if one was cut to stabilise that
-release (`git branch --list 'release/*'`). Never the head of `main`: it may carry
-work that has not shipped.
+`[base-ref]` 是缺陷所在的发布版本。发布是 `main`（主干）上的标签，因此它就是该发布的标签（`git tag --list`；最新的通常是在线构建）——或者，若曾经切出过用于稳定该发布的 `release/*` 分支，则是该分支（`git branch --list 'release/*'`）。绝不用 `main` 的头部：它可能包含尚未发布的工作。
 
-If the check passes, use `AskUserQuestion` before creating the branch:
-- Prompt: "Ready to create hotfix branch 'hotfix/[short-name]' from [base-ref]?"
-- Options:
-  - `[A] Yes — create branch`
-  - `[B] Use a different base ref — I'll specify it`
-  - `[C] Skip — I'll create the branch myself`
+若检查通过，在创建分支前使用 `AskUserQuestion`：
+- 提示："准备从 [base-ref] 创建热修复分支 'hotfix/[short-name]' 吗？"
+- 选项：
+  - `[A] 是 —— 创建分支`
+  - `[B] 使用其他基准引用 —— 我来指定`
+  - `[C] 跳过 —— 我自己创建分支`
 
-Only run `git checkout -b hotfix/[short-name] [base-ref]` if user selects [A]. If [B]: ask the user for the base ref, then run the command with that ref. If [C]: skip branch creation and proceed to Phase 4.
+仅在用户选 [A] 时运行 `git checkout -b hotfix/[short-name] [base-ref]`。若选 [B]：向用户询问基准引用，然后用该引用运行命令。若选 [C]：跳过分支创建并继续 Phase 4。
 
 ---
 
-## Phase 4: Investigate and Propose
+## Phase 4: 调查并提出方案
 
-Find the root cause. Draft the minimal fix: which files change, what the change does, and what it deliberately leaves alone. Do NOT refactor, clean up, or add features alongside the hotfix.
+找出根因。起草最小修复：哪些文件改动、改动做什么，以及刻意不去碰什么。不要借热修复之名重构、清理或添加功能。
 
-Present the root cause and proposed fix, then ask: "May I implement this fix?" Do not modify any code before this approval — an emergency flow earns its audit trail by approving the change *before* it exists, not after.
-
----
-
-## Phase 4b: Implement (only after approval)
-
-Implement the approved minimal change. Validate the fix by running targeted tests for the affected system, with `commands.test` from `project.yaml` (narrowed to the affected suite where the runner allows) — never a runner line written from memory, which drops the flags the engine needs (gdUnit4 hangs without `--remote-debug tcp://127.0.0.1:0`). Check for regressions in adjacent systems. If `commands.test` is unset, or no test covers the affected system, say so and record `Tests: NOT RUN — [reason]` in the hotfix record's Testing section; the Phase 5b QA gate then carries the verification.
-
-Update the hotfix record with root cause, fix details, and test results.
+呈现根因与拟议修复，然后询问："我可以实施这个修复吗？" 在此批准之前不要修改任何代码——紧急流程之所以能赢得审计轨迹，是因为它在变更*存在之前*就批准变更，而不是之后。
 
 ---
 
-## Phase 5: Collect Approvals
+## Phase 4b: 实施（仅限批准后）
 
-Use the `Agent` tool to request sign-off in parallel:
+实施已批准的最小变更。通过运行受影响系统的定向测试来验证修复，使用 `project.yaml` 中的 `commands.test`（在运行器允许时收窄到受影响的套件）——绝不凭记忆写运行器命令行，那会丢掉引擎需要的参数（gdUnit4 缺少 `--remote-debug tcp://127.0.0.1:0` 会挂起）。检查相邻系统是否出现回归。若 `commands.test` 未设置，或没有测试覆盖受影响的系统，说明该情况，并在热修复记录的 Testing 章节记录 `Tests: NOT RUN — [reason]`；随后 Phase 5b 的 QA 闸门（gate）会承担验证职责。
 
-- `subagent_type: lead-programmer` — Review the fix for correctness and side effects
-- `subagent_type: qa-tester` — Run targeted regression tests on the affected system
-- `subagent_type: producer` — Approve deployment timing and communication plan
-
-All three must return APPROVE before proceeding. If any returns CONCERNS or REJECT, do not deploy — surface the issue and resolve it first.
+用根因、修复细节与测试结果更新热修复记录。
 
 ---
 
-## Phase 5b: QA Re-Entry Gate
+## Phase 5: 收集审批
 
-After approvals, determine the QA scope required before deploying the hotfix. Spawn `qa-lead` via `Agent` with:
-- The hotfix description and affected system
-- The regression test results from Phase 5
-- A list of all systems that touch the changed files (use Grep to find callers)
+使用 `Agent` 工具并行请求签核：
 
-Ask qa-lead: **Is a full smoke check sufficient, or does this fix require a targeted team-qa pass?**
+- `subagent_type: lead-programmer` —— 评审修复的正确性与副作用
+- `subagent_type: qa-tester` —— 对受影响的系统运行定向回归测试
+- `subagent_type: producer` —— 批准部署时机与沟通计划
 
-Apply the verdict:
-- **Smoke check sufficient** — run `/smoke-check` against the hotfix build. If PASS or
-  PASS WITH WARNINGS, proceed to Phase 6 (carry the warnings into the hotfix record).
-  If **FAIL**, do not deploy: return to Phase 4 with the failing checks, get the
-  revised fix approved there, implement it (Phase 4b), then re-run Phase 5's
-  approvals — qa-tester's regression run among them — and this QA step. A hotfix
-  that breaks the smoke suite is a second incident, not a fix.
-- **Targeted QA pass required** — run `/team-qa feature: [affected-system]` scoped to the changed system only. If QA returns APPROVED or APPROVED WITH CONDITIONS, proceed to Phase 6; if NOT APPROVED or BLOCKED, handle it as a smoke-check FAIL above.
-- **Full QA required** — S1 fixes that touch core systems may require a full `/team-qa sprint`. This delays deployment but prevents a bad patch.
-
-**If the QA step returns `NOT ASSESSED`, the gate did not run — treat it as unmet,
-not as met.** `/smoke-check` returns it when the suite never executed and
-`/team-qa` when a cycle produced no executed evidence. **A NOT ASSESSED result is
-not a pass** — from either skill — and under time pressure the permissive reading
-is the one that will feel reasonable,
-which is exactly why it is written down here. Either obtain the missing result —
-the verdict names what would make it runnable — or take the decision to the
-producer explicitly, as a decision to deploy an unverified hotfix rather than as a
-gate that quietly cleared. Log that decision — who made it, and why — in the
-hotfix record's Testing section.
-
-Do not skip this gate. A hotfix that breaks something else is worse than the original bug.
+三者都必须返回 APPROVE 才能继续。若任一返回 CONCERNS 或 REJECT，不要部署——先暴露问题并解决它。
 
 ---
 
-## Phase 6: Update Bug Status and Deploy
+## Phase 5b: QA 重新入场闸门
 
-> **STOP — deployment requires explicit approval, unconditionally.** Merging a
-> hotfix and tagging the patch release is the one irreversible act in this skill,
-> so it is gated even though branch creation (reversible) already is. Before any
-> merge, tag, or deploy, use `AskUserQuestion`:
+审批之后，确定部署热修复前所需的 QA 范围。通过 `Agent` 启动 `qa-lead`，提供：
+- 热修复描述与受影响系统
+- Phase 5 的回归测试结果
+- 所有涉及被改动文件的系统清单（用 Grep 查找调用方）
+
+询问 qa-lead：**完整冒烟检查是否足够，还是该修复需要一次定向 team-qa 复核？**
+
+应用结论：
+- **Smoke check sufficient** —— 针对热修复构建运行 `/smoke-check`。若 PASS 或
+  PASS WITH WARNINGS，进入 Phase 6（将警告带入热修复记录）。
+  若 **FAIL**，不要部署：带着失败的检查项回到 Phase 4，在那里让修订后的修复获得批准，实施它（Phase 4b），然后重新运行 Phase 5 的审批——其中包括 qa-tester 的回归运行——以及本 QA 步骤。一个破坏冒烟套件的热修复是第二起事故，不是修复。
+- **Targeted QA pass required** —— 运行 `/team-qa feature: [affected-system]`，仅限定在受影响的系统。若 QA 返回 APPROVED 或 APPROVED WITH CONDITIONS，进入 Phase 6；若 NOT APPROVED 或 BLOCKED，按上述冒烟检查 FAIL 处理。
+- **Full QA required** —— 触及核心系统的 S1 修复可能需要完整的 `/team-qa sprint`。这会推迟部署，但能防止坏补丁。
+
+**若 QA 步骤返回 `NOT ASSESSED`，说明闸门未运行——应视为未满足，而不是已满足。** `/smoke-check` 在套件从未执行时返回该值，`/team-qa` 在某个周期未产生已执行证据时返回该值。**NOT ASSESSED 结果不是通过**——无论来自哪个技能——而在时间压力下，宽松的解读方式恰恰会显得合理，
+这正是此处要把它写下来的原因。要么取得缺失的结果——结论会说明怎样才能让它可运行——要么将决策明确交给制作人，明说这是决定部署一个未验证的热修复，而不是一个悄悄放行的闸门。在热修复记录的 Testing 章节记录该决策——谁做的、为什么。
+
+不要跳过此闸门。破坏其他东西的热修复比原缺陷更糟。
+
+---
+
+## Phase 6: 更新缺陷状态并部署
+
+> **停止——部署需要明确批准，无一例外。** 合并热修复并为补丁发布打标签是本技能中唯一不可逆的动作，
+> 因此即便分支创建（可逆）已经被闸门化，它同样需要闸门。在任何合并、打标签或部署之前，使用 `AskUserQuestion`：
 >
-> - Prompt: "Hotfix validated and approved. Merge to [targets], tag [patch tag]
->   and deploy?" — `[targets]` is `main`, plus the release's `release/*` branch
->   only if it has one
-> - Options: `[A] Yes — merge and deploy` / `[B] Merge to main only — hold
->   the release` / `[C] Stop here`
+> - 提示："热修复已验证并获批准。合并到 [targets]、打标签 [patch tag]
+>   并部署？" —— `[targets]` 为 `main`，仅当该发布有 `release/*` 分支时才加上它
+> - 选项：`[A] 是 —— 合并并部署` / `[B] 仅合并到 main —— 暂缓
+>   发布` / `[C] 在此停止`
 >
-> This holds regardless of `modes.automation`, including `autonomous`. An
-> emergency process is exactly where an unreviewed irreversible step is most
-> likely and least recoverable.
+> 无论 `modes.automation` 为何（包括 `autonomous`）都适用。紧急流程恰恰是最可能出现、也最难恢复未经评审的不可逆步骤的地方。
 
-On `[A]`: merge the hotfix branch to `main`, and to the release's `release/*`
-branch if it has one; tag the patch release (the next patch version, e.g.
-`v1.2.0` → `v1.2.1`) on the fixed build — the `release/*` branch head if there
-is one, else the hotfix branch head — and deploy that tag, not the head of
-`main`. On `[B]`: merge to `main` only — no release-branch merge, no tag, no
-deploy. On `[C]`: stop — no merge, no tag, no deploy and no bug-file update; the
-hotfix record's Status stays IN PROGRESS, and say so.
+选 `[A]` 时：将热修复分支合并到 `main`，若该发布有 `release/*` 分支也合并到它；在修复后的构建上打补丁发布标签（下一个补丁版本，例如 `v1.2.0` → `v1.2.1`）——若有 `release/*` 分支则打在该分支头部，否则打在热修复分支头部——并部署该标签，而不是 `main` 的头部。选 `[B]` 时：仅合并到 `main`——不合并发布分支、不打标签、不部署。选 `[C]` 时：停止——不合并、不打标签、不部署，也不更新缺陷文件；热修复记录的状态保持 IN PROGRESS，并说明这一点。
 
-> **Backport is not verified unless you verify it.** The frontmatter advertises
-> "backport verified". After merging, confirm the fix is present on `main` (the
-> trunk) — and on the release's `release/*` branch, if it has one — and state
-> the result. An unbackported hotfix means the bug returns in the next release
-> tagged from `main`, which is the single most common hotfix regression.
+> **除非你验证，否则回填未经验证。** frontmatter 宣称
+> "backport verified"。合并之后，确认修复已存在于 `main`（主干）——以及该发布的 `release/*` 分支（若存在）——并说明结果。未回填的热修复意味着缺陷会在下一个从 `main` 打出的发布中重现，这是最常见的热修复回归。
 
-Update the original bug file if one exists — find it in `production/qa/bugs/`
-by its number, as `/bug-report verify` does. Ask first: "May I update
-`production/qa/bugs/[bug file]` with the fix record below and set its Status to
-`Fixed — Pending Verification`?"
+若存在原始缺陷文件则更新它——按编号在 `production/qa/bugs/` 中查找，方式与 `/bug-report verify` 相同。先询问："我可以更新
+`production/qa/bugs/[bug file]`，写入下面的修复记录并将其 Status 设为
+`Fixed — Pending Verification` 吗？"
 
 ```markdown
 ## Fix Record
@@ -199,12 +169,11 @@ by its number, as `/bug-report verify` does. Ask first: "May I update
 **Status**: Fixed — Pending Verification
 ```
 
-Set `**Status**: Fixed — Pending Verification` in the bug file header.
+在缺陷文件头部设置 `**Status**: Fixed — Pending Verification`。
 
-Output a deployment summary. Its title follows the Phase 6 answer — `Hotfix
-Deployed: [short-name]` on `[A]`, `Hotfix Merged to main — release held:
-[short-name]` on `[B]` — and on `[B]` the closing line omits the Tag, since none
-was created:
+输出部署摘要。其标题随 Phase 6 的回答而定——选 `[A]` 时为 `Hotfix
+Deployed: [short-name]`，选 `[B]` 时为 `Hotfix Merged to main — release held:
+[short-name]`——且选 `[B]` 时结尾行省略 Tag，因为未创建任何标签：
 
 ```
 ## Hotfix Deployed: [short-name]
@@ -223,33 +192,31 @@ Merge to: [targets] · Tag: [patch tag]
 Next: /bug-report verify [BUG-ID] after deploy to confirm resolution
 ```
 
-### Rules
-- Hotfixes must be the MINIMUM change to fix the issue — no cleanup, no refactoring
-- Every hotfix must have a rollback plan documented before deployment
-- A hotfix branch starts from the release it fixes — its tag, or its `release/*`
-  branch if one exists — and merges to `main` (the trunk), and to that
-  `release/*` branch only if it exists; the patch release is tagged
-- All hotfixes require a post-incident review within 48 hours
-- If the fix is complex enough to need more than 4 hours, escalate to `technical-director`
+### 规则（Rules）
+- 热修复必须是修复问题的最小变更——不清理、不重构
+- 每次热修复都必须在部署前记录回滚计划
+- 热修复分支从它所修复的发布开始——取其标签，或取其 `release/*`
+  分支（若存在）——并合并到 `main`（主干），仅当该 `release/*` 分支存在时才合并到它；补丁发布打标签
+- 所有热修复都要求在 48 小时内进行事后复盘
+- 若修复复杂到需要超过 4 小时，上报给 `technical-director`
 
 ---
 
-## Phase 7: Post-Deploy Verification
+## Phase 7: 部署后验证
 
-After deploying, run `/bug-report verify [BUG-ID]` to confirm the fix resolved the issue in the deployed build.
+部署后，运行 `/bug-report verify [BUG-ID]` 以确认修复在已部署构建中解决了问题。
 
-If VERIFIED FIXED: run `/bug-report close [BUG-ID]` to formally close it.
-If STILL PRESENT: the hotfix failed — immediately re-open, assess rollback, and escalate.
-If CANNOT VERIFY: the fix is unconfirmed — do not close the bug; play its reproduction steps in the deployed build, then run `/bug-report verify [BUG-ID]` again and answer its manual-play question to settle it.
+若为 VERIFIED FIXED：运行 `/bug-report close [BUG-ID]` 正式关闭。
+若为 STILL PRESENT：热修复失败——立即重新打开、评估回滚并上报。
+若为 CANNOT VERIFY：修复未获确认——不要关闭缺陷；在已部署构建中按复现步骤游玩一遍，然后再次运行 `/bug-report verify [BUG-ID]`，回答其手动游玩问题以确定结果。
 
-Schedule a post-incident review within 48 hours. `/retrospective` reviews a
-sprint or milestone, not an incident: record the review with
-`.claude/docs/templates/incident-response.md`, and raise its lessons at the next
-`/retrospective`.
+在 48 小时内安排事后复盘。`/retrospective` 回顾的是冲刺或里程碑，不是事故：使用
+`.claude/docs/templates/incident-response.md` 记录该复盘，并在下一次
+`/retrospective` 上提出其经验教训。
 
-Use `AskUserQuestion`:
-- Prompt: "Hotfix complete. What's the next step?"
-- Options:
-  - `[A] Run /smoke-check to verify the fix`
-  - `[B] Run /patch-notes to document this hotfix`
-  - `[C] Stop here`
+使用 `AskUserQuestion`：
+- 提示："热修复完成。下一步是什么？"
+- 选项：
+  - `[A] 运行 /smoke-check 验证修复`
+  - `[B] 运行 /patch-notes 记录本次热修复`
+  - `[C] 在此停止`

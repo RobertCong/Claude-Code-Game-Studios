@@ -1,23 +1,22 @@
-> Gate definition. The spawning skill passes this file's path to the director agent; the AGENT reads it — the parent session should not.
+> 质量闸门定义。发起调用的技能会把本文件路径传给总监代理；由该 AGENT 读取——父会话不应读取。
 
-# QL-TEST-COVERAGE — QA Lead Test Coverage Review
+# QL-TEST-COVERAGE — QA 主管测试覆盖率评审
 
-Agent: `qa-lead` | Model tier: session (inherit)
+Agent：`qa-lead` | 模型层级：session（继承）
 
-**Trigger**: After implementation stories are complete — `/story-done` runs it for
-each story before marking it Complete
+**触发时机**：实现类用户故事完成之后——`/story-done` 会在将每个故事标记为
+Complete 之前对其运行本闸门
 
-**Context to pass**:
-- List of implemented stories with story types (Logic / Integration / Visual / UI / Config)
-- Test file paths in `tests/`
-- GDD acceptance criteria for the system
+**需传入的上下文**：
+- 已实现用户故事清单及其故事类型（Logic / Integration / Visual / UI / Config）
+- `tests/` 中的测试文件路径
+- 该系统的 GDD 验收标准
 
-**Prompt**:
-> "Review the test coverage for these implementation stories. Are all Logic stories
-> covered by passing unit tests? Are Integration stories covered by integration
-> tests or documented playtests? Are the GDD acceptance criteria each mapped to at
-> least one test? Are there untested edge cases from the GDD Edge Cases section?
-> Return ADEQUATE (coverage meets standards), GAPS [specific missing tests], or
-> INADEQUATE [critical logic is untested — do not advance]."
+**提示词**：
+> "审查这些实现类用户故事的测试覆盖率。所有 Logic 故事是否都由通过的单元测试
+> 覆盖？Integration 故事是否由集成测试或记录在案的试玩测试覆盖？GDD 验收标准是否
+> 每条都至少映射到一个测试？GDD Edge Cases（边界情况）章节中是否存在未被测试的
+> 边界情况？返回 ADEQUATE（覆盖率达到标准）、GAPS [具体缺失的测试]，或
+> INADEQUATE [关键逻辑未测试——不得推进]。"
 
-**Verdicts**: ADEQUATE / GAPS / INADEQUATE
+**结论**：ADEQUATE / GAPS / INADEQUATE

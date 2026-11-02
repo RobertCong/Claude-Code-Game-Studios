@@ -1,22 +1,22 @@
 ## Where You Are: [Phase Label]
 
-**In progress:** [from active.md, if any]
+**In progress:** [若有，来自 active.md]
 
 ### ✓ Done
-- [completed step name]
-- [completed step name]
+- [已完成的步骤名]
+- [已完成的步骤名]
 
 ### → Next up (REQUIRED)
-**[Step name]** — [description]
+**[Step name]** — [描述]
 Command: `[/command]`
 
 ### ~ Also available (OPTIONAL)
-- **[Step name]** — [description] → `/command`
-- **[Step name]** — [description] → `/command`
+- **[Step name]** — [描述] → `/command`
+- **[Step name]** — [描述] → `/command`
 
 ### Coming up after that
-- [Next required step name] (`/command`)
-- [Next required step name] (`/command`)
+- [下一个必需步骤名] (`/command`)
+- [下一个必需步骤名] (`/command`)
 
 ---
-Approaching **[next phase]** gate → run `/gate-check` when ready.
+即将到达 **[next phase]** gate → 准备好后运行 `/gate-check`。

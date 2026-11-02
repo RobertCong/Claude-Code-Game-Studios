@@ -2,299 +2,293 @@
 
 ## Skill Summary
 
-`/adopt` audits an existing project's artifacts — GDDs, ADRs, stories, infrastructure
-files, and `technical-preferences.md` — for format compliance with the template's
-skill pipeline. It classifies every gap by severity (BLOCKING / HIGH / MEDIUM / LOW),
-composes a numbered, ordered migration plan, and writes it to `docs/adoption-plan-[date].md`
-after explicit user approval via `AskUserQuestion`.
+`/adopt` 审计既有项目的产出物——GDD、ADR、用户故事、基础设施文件与
+`technical-preferences.md`——检查其格式是否符合模板技能流水线的要求。它按严重程度
+（BLOCKING / HIGH / MEDIUM / LOW）对每处差距分类，编排一份编号且有序的迁移计划，
+并在用户通过 `AskUserQuestion` 明确批准之后写入
+`docs/adoption-plan-[date].md`。
 
-The resolved `workflow` tier scopes the audit: `full` requires all 8 GDD sections,
-`standard` requires 5 (+ Formulas for numeric systems), and `minimal` — the
-default, since `modes.rigor` defaults to `minimal` — audits `design/game-brief.md`
-instead and checks any existing GDD only advisorily, and the plan prescribes no
-infrastructure bootstrap (`/architecture-review`, `/create-control-manifest`,
-`/sprint-plan`, `/gate-check` are not on the minimal path). Fixtures that exercise the
-GDD and ADR audits therefore set `modes.rigor: full` in `project.yaml`.
+解析后的 `workflow` 层级限定审计范围：`full` 要求全部 8 个 GDD 章节，
+`standard` 要求 5 个（数值系统另需 Formulas），而 `minimal`——默认值，因为
+`modes.rigor` 默认为 `minimal`——改为审计 `design/game-brief.md`，并且仅作为
+建议性检查审计任何现有 GDD，计划中也不规定基础设施引导（`/architecture-review`、
+`/create-control-manifest`、`/sprint-plan`、`/gate-check` 都不在 minimal 路径上）。
+因此，涉及 GDD 与 ADR 审计的 Fixture 会在 `project.yaml` 中设置 `modes.rigor: full`。
 
-A v1.0 project (no `project.yaml`, legacy config with real values) is migrated
-only by `.claude/scripts/migrate-v1-config.sh` — `--dry-run` first, the real run
-after an ask naming the files it writes, and `--finalize` left until the user
-has read the migration report. `/adopt` never writes a review mode; it reports
-the resolved one.
+v1.0 项目（没有 `project.yaml`，旧版配置含真实值）只能由
+`.claude/scripts/migrate-v1-config.sh` 迁移——先 `--dry-run`，在询问并指明其写入
+的文件之后才真正运行，`--finalize` 则留到用户读过迁移报告之后再执行。`/adopt`
+从不写入评审模式；它只报告解析出的评审模式。
 
-This skill is distinct from `/project-stage-detect` (which checks what exists).
-`/adopt` checks whether what exists will actually work with the template's skills.
+本技能与 `/project-stage-detect`（检查存在什么）不同。
+`/adopt` 检查已有内容是否真的能与模板的技能配合工作。
 
-No director gates apply. The skill does NOT invoke any director agents.
+不适用任何总监闸门。本技能不调用任何总监代理。
 
 ---
 
 ## Static Assertions (Structural)
 
-Checked against the SKILL.md by `/skill-test spec` — no fixture needed.
+由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] Has required frontmatter fields: `name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`
-- [ ] Has ≥2 phase headings
-- [ ] Contains severity tier keywords: BLOCKING, HIGH, MEDIUM, LOW
-- [ ] Contains "May I write" or `AskUserQuestion` language before writing the adoption plan
-- [ ] Has a next-step handoff at the end (e.g., offering to fix the highest-priority gap immediately)
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 有 ≥2 个 phase 标题
+- [ ] 包含严重程度层级关键词：BLOCKING、HIGH、MEDIUM、LOW
+- [ ] 在写入采用计划之前包含 "May I write" 或 `AskUserQuestion` 措辞
+- [ ] 结尾有下一步交接（例如提出立即修复优先级最高的差距）
 
 ---
 
 ## Director Gate Checks
 
-None. `/adopt` is a brownfield audit utility. No director gates apply.
+无。`/adopt` 是遗留项目审计类实用技能。不适用任何总监闸门。
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非某个用例自己的 Fixture 另有说明，否则每个用例的 `project.yaml` 都设置
+`modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/CLAUDE.md` §
+Fixture defaults。
 
 ---
 
 ## Test Cases
 
-### Case 1: Happy Path — All GDDs compliant, no BLOCKING or HIGH gaps
+### Case 1: Happy Path — 所有 GDD 合规，无 BLOCKING 或 HIGH 差距
 
 **Fixture:**
-- `project.yaml` sets `modes.rigor: full`, `project.stage`, and `engine.name`,
-  `engine.version`, `engine.language`, `engine.rendering`, `engine.physics`
-- `design/gdd/` contains 3 GDD files; each has all 8 required sections with content
-  and a valid `> **Status**:` field
-- `docs/architecture/adr-0001.md` exists with `## Status`, `## ADR Dependencies`,
-  `## Engine Compatibility`, `## GDD Requirements Addressed` and `## Performance Implications`
-- `docs/architecture/tr-registry.yaml` and `docs/architecture/control-manifest.md` exist
-- `docs/engine-reference/[engine]/VERSION.md` exists
+- `project.yaml` 设置 `modes.rigor: full`、`project.stage`，以及 `engine.name`、
+  `engine.version`、`engine.language`、`engine.rendering`、`engine.physics`
+- `design/gdd/` 包含 3 个 GDD 文件；每个都有全部 8 个必需章节且含内容，
+  并有有效的 `> **Status**:` 字段
+- `docs/architecture/adr-0001.md` 存在，含 `## Status`、`## ADR Dependencies`、
+  `## Engine Compatibility`、`## GDD Requirements Addressed` 与 `## Performance Implications`
+- `docs/architecture/tr-registry.yaml` 与 `docs/architecture/control-manifest.md` 存在
+- `docs/engine-reference/[engine]/VERSION.md` 存在
 
 **Input:** `/adopt`
 
 **Expected behavior:**
-1. Skill emits "Scanning project artifacts..." then reads all artifacts silently
-2. Reports detected phase, GDD count, ADR count, story count
-3. Phase 2 audit: `gdd-structure-check.sh` is run once per GDD path; all 3 GDDs
-   have all 8 sections and a valid Status field
-4. ADR audit: all critical sections present
-5. Infrastructure audit: registry, manifest and engine reference all exist
-6. Phase 3: zero BLOCKING and zero HIGH gaps — the project is reported
-   template-compatible with only advisory improvements remaining (any MEDIUM/LOW
-   item, e.g. a missing `sprint-status.yaml`, is listed as advisory)
-7. Uses `AskUserQuestion` to ask about writing the plan; user selects write
-8. Adoption plan is written to `docs/adoption-plan-[date].md`
-9. Phase 6b reports the resolved review mode ("Review mode resolves to `full` —
-   from `modes.rigor`, unless something pins it") and writes nothing for it
-10. Phase 7 takes the "no BLOCKING or HIGH" branch: "No blocking gaps — this project
+1. 技能输出 "Scanning project artifacts..."，随后静默读取所有产出物
+2. 报告检测到的阶段、GDD 数量、ADR 数量、用户故事数量
+3. Phase 2 审计：对每个 GDD 路径各运行一次 `gdd-structure-check.sh`；3 个 GDD
+   都具备全部 8 个章节与有效的 Status 字段
+4. ADR 审计：所有关键章节均存在
+5. 基础设施审计：注册表、清单与引擎参考资料均存在
+6. Phase 3：零个 BLOCKING 且零个 HIGH 差距——项目被报告为
+   与模板兼容，仅剩建议性改进（任何 MEDIUM/LOW 项，例如缺少
+   `sprint-status.yaml`，都列为建议）
+7. 使用 `AskUserQuestion` 询问是否写入计划；用户选择写入
+8. 采用计划写入 `docs/adoption-plan-[date].md`
+9. Phase 6b 报告解析出的评审模式（"Review mode resolves to `full` —
+   from `modes.rigor`, unless something pins it"），且不为其写入任何内容
+10. Phase 7 走 "no BLOCKING or HIGH" 分支："No blocking gaps — this project
    is template-compatible. What next?"
 
 **Assertions:**
-- [ ] Skill reads silently before presenting any output
-- [ ] "Scanning project artifacts..." appears before the silent read phase
-- [ ] `gdd-structure-check.sh` is invoked with an explicit path per GDD (not bare)
-- [ ] Gap counts show `BLOCKING: 0` and `HIGH: 0`, and the project is reported template-compatible
-- [ ] `AskUserQuestion` is used before writing the adoption plan
-- [ ] Adoption plan file is written to `docs/adoption-plan-[date].md`
-- [ ] `modes.review_mode` is not written to `project.yaml` and `production/review-mode.txt` is not created — the review mode is reported, never pinned
-- [ ] Phase 7 asks "No blocking gaps — this project is template-compatible. What next?" via `AskUserQuestion`
+- [ ] 技能在呈现任何输出之前静默读取
+- [ ] "Scanning project artifacts..." 出现在静默读取阶段之前
+- [ ] 每个 GDD 都以显式路径调用 `gdd-structure-check.sh`（不是无参数调用）
+- [ ] 差距计数显示 `BLOCKING: 0` 与 `HIGH: 0`，且项目被报告为与模板兼容
+- [ ] 在写入采用计划之前使用 `AskUserQuestion`
+- [ ] 采用计划文件写入 `docs/adoption-plan-[date].md`
+- [ ] 不向 `project.yaml` 写入 `modes.review_mode`，也不创建 `production/review-mode.txt`——评审模式只被报告，从不固定
+- [ ] Phase 7 通过 `AskUserQuestion` 询问 "No blocking gaps — this project is template-compatible. What next?"
 
 ---
 
-### Case 2: Non-Compliant Documents — GDDs missing sections, BLOCKING and HIGH gaps
+### Case 2: Non-Compliant Documents — GDD 缺章节，存在 BLOCKING 与 HIGH 差距
 
 **Fixture:**
-- `project.yaml` sets `modes.rigor: full` and configures the engine
-- `design/gdd/` contains 2 GDD files:
-  - `combat.md` — missing `## Acceptance Criteria` and `## Formulas` sections
-  - `movement.md` — all 8 sections present
-- One ADR (`adr-0001.md`) is missing `## Status` section
-- `docs/architecture/tr-registry.yaml` does not exist
+- `project.yaml` 设置 `modes.rigor: full` 并配置引擎
+- `design/gdd/` 包含 2 个 GDD 文件：
+  - `combat.md` — 缺少 `## Acceptance Criteria` 与 `## Formulas` 章节
+  - `movement.md` — 全部 8 个章节均存在
+- 一个 ADR（`adr-0001.md`）缺少 `## Status` 章节
+- `docs/architecture/tr-registry.yaml` 不存在
 
 **Input:** `/adopt`
 
 **Expected behavior:**
-1. Skill scans all artifacts
-2. Phase 2 audit finds:
-   - `combat.md`: 2 missing sections (Acceptance Criteria, Formulas)
-   - `adr-0001.md`: missing `## Status` — BLOCKING impact
-   - `tr-registry.yaml`: missing — HIGH impact
-3. Phase 3 classifies:
-   - BLOCKING: `adr-0001.md` missing `## Status` (story-readiness silently passes)
-   - HIGH: `tr-registry.yaml` missing; `combat.md` missing Acceptance Criteria (can't generate stories)
-   - MEDIUM: `combat.md` missing Formulas
-4. Phase 4 builds ordered migration plan:
-   - Step 1 (BLOCKING): Add `## Status` to `adr-0001.md` — command: `/architecture-decision retrofit`
-   - Step 2 (HIGH): Run `/architecture-review` to bootstrap tr-registry.yaml
-   - Step 3 (HIGH): Add Acceptance Criteria to `combat.md` — command: `/design-system retrofit`
-   - Step 4 (MEDIUM): Add Formulas to `combat.md`
-5. Gap Preview shows BLOCKING items as bullets (actual file names), HIGH/MEDIUM as counts
-6. `AskUserQuestion` asks to write the plan; writes after approval
-7. Phase 7 offers to fix the highest-priority gap (ADR Status) immediately
+1. 技能扫描所有产出物
+2. Phase 2 审计发现：
+   - `combat.md`：缺少 2 个章节（Acceptance Criteria、Formulas）
+   - `adr-0001.md`：缺少 `## Status`——BLOCKING 影响
+   - `tr-registry.yaml`：缺失——HIGH 影响
+3. Phase 3 分类：
+   - BLOCKING：`adr-0001.md` 缺少 `## Status`（用户故事就绪检查会静默通过）
+   - HIGH：`tr-registry.yaml` 缺失；`combat.md` 缺少 Acceptance Criteria（无法生成用户故事）
+   - MEDIUM：`combat.md` 缺少 Formulas
+4. Phase 4 构建有序迁移计划：
+   - 步骤 1（BLOCKING）：为 `adr-0001.md` 添加 `## Status`——命令：`/architecture-decision retrofit`
+   - 步骤 2（HIGH）：运行 `/architecture-review` 以引导生成 tr-registry.yaml
+   - 步骤 3（HIGH）：为 `combat.md` 添加 Acceptance Criteria——命令：`/design-system retrofit`
+   - 步骤 4（MEDIUM）：为 `combat.md` 添加 Formulas
+5. 差距预览把 BLOCKING 项以条目形式列出（写出实际文件名），HIGH/MEDIUM 以计数显示
+6. `AskUserQuestion` 询问是否写入计划；获批后写入
+7. Phase 7 提出立即修复优先级最高的差距（ADR Status）
 
 **Assertions:**
-- [ ] BLOCKING gaps are listed as explicit file-name bullets in the Gap Preview
-- [ ] HIGH and MEDIUM shown as counts in Gap Preview
-- [ ] Migration plan items are in BLOCKING-first order
-- [ ] Each plan item includes the fix command or manual steps
-- [ ] `AskUserQuestion` is used before writing
-- [ ] Phase 7 offers to immediately retrofit the first BLOCKING item
+- [ ] 差距预览中 BLOCKING 差距以显式文件名条目列出
+- [ ] 差距预览中 HIGH 与 MEDIUM 以计数显示
+- [ ] 迁移计划各项按 BLOCKING 优先排序
+- [ ] 每个计划项都包含修复命令或手工步骤
+- [ ] 写入之前使用 `AskUserQuestion`
+- [ ] Phase 7 提出立即回填第一个 BLOCKING 项
 
 ---
 
-### Case 3: Mixed State — Some docs compliant, some not, partial report
+### Case 3: Mixed State — 部分文档合规、部分不合规，报告不完整
 
 **Fixture:**
-- `project.yaml` sets `modes.rigor: full` and configures engine, naming and performance
-- 4 GDD files: 2 fully compliant, 2 with gaps (one missing Tuning Knobs, one missing Formulas)
-- ADRs: 3 files — 2 compliant, 1 missing `## ADR Dependencies`
-- Stories: 5 files — 3 have TR-ID references, 2 do not
-- Infrastructure: all critical files present
+- `project.yaml` 设置 `modes.rigor: full` 并配置引擎、命名与性能
+- 4 个 GDD 文件：2 个完全合规，2 个有差距（一个缺 Tuning Knobs，一个缺 Formulas）
+- ADR：3 个文件——2 个合规，1 个缺 `## ADR Dependencies`
+- 用户故事：5 个文件——3 个有 TR-ID 引用，2 个没有
+- 基础设施：所有关键文件均存在
 
 **Input:** `/adopt`
 
 **Expected behavior:**
-1. Skill audits all artifact types
-2. Adoption Audit Summary shows `GDDs audited: 4 (2 fully compliant, 2 with gaps)`,
-   `ADRs audited: 3 (2 fully compliant, 1 with gaps)` and `Stories audited: 5`
-3. Gap classification:
-   - No BLOCKING gaps
-   - HIGH: 1 ADR missing `## ADR Dependencies`
-   - MEDIUM: 2 GDDs with missing sections (Tuning Knobs, Formulas); 2 stories missing TR-IDs
-4. Gap Preview has no BLOCKING bullets and shows HIGH / MEDIUM as counts
-5. Migration plan lists the HIGH gap first, then MEDIUM gaps with GDD gaps before story gaps
-6. Note included: "Existing stories continue to work — do not regenerate stories
+1. 技能审计所有产出物类型
+2. 采用审计摘要显示 `GDDs audited: 4 (2 fully compliant, 2 with gaps)`、
+   `ADRs audited: 3 (2 fully compliant, 1 with gaps)` 与 `Stories audited: 5`
+3. 差距分类：
+   - 无 BLOCKING 差距
+   - HIGH：1 个 ADR 缺少 `## ADR Dependencies`
+   - MEDIUM：2 个 GDD 缺章节（Tuning Knobs、Formulas）；2 个用户故事缺少 TR-ID
+4. 差距预览没有 BLOCKING 条目，并以计数显示 HIGH / MEDIUM
+5. 迁移计划先列 HIGH 差距，再列 MEDIUM 差距，且 GDD 差距先于用户故事差距
+6. 包含说明："Existing stories continue to work — do not regenerate stories
    that are in progress or done"
-7. `AskUserQuestion` to write plan; writes after approval
+7. 使用 `AskUserQuestion` 询问写入计划；获批后写入
 
 **Assertions:**
-- [ ] Summary shows GDD and ADR tallies as `N (X fully compliant, Y with gaps)` and `Stories audited: 5`
-- [ ] Summary shows `BLOCKING: 0` and the Gap Preview lists no BLOCKING bullets
-- [ ] The 2 stories without TR-IDs are counted as MEDIUM gaps
-- [ ] Existing story compatibility note is included in the plan
-- [ ] HIGH gap precedes MEDIUM gaps; MEDIUM GDD gaps precede MEDIUM story gaps
-- [ ] `AskUserQuestion` is used before writing
+- [ ] 摘要以 `N (X fully compliant, Y with gaps)` 与 `Stories audited: 5` 显示 GDD 与 ADR 计数
+- [ ] 摘要显示 `BLOCKING: 0`，且差距预览不列出任何 BLOCKING 条目
+- [ ] 2 个缺少 TR-ID 的用户故事被计为 MEDIUM 差距
+- [ ] 计划中包含既有用户故事兼容性说明
+- [ ] HIGH 差距先于 MEDIUM 差距；MEDIUM 的 GDD 差距先于 MEDIUM 的用户故事差距
+- [ ] 写入之前使用 `AskUserQuestion`
 
 ---
 
-### Case 4: No Artifacts Found — Fresh project, guidance to run /start
+### Case 4: No Artifacts Found — 全新项目，指引运行 /start
 
 **Fixture:**
-- Repository has no files in `design/gdd/`, `docs/architecture/`, `production/epics/`
-- No `project.stage` in `project.yaml` and no `production/stage.txt`
-- No source code: none of `src/`, `Assets/` or `Source/` exists
-- No game-concept.md, no game-brief.md, no systems-index.md
+- 仓库在 `design/gdd/`、`docs/architecture/`、`production/epics/` 中没有任何文件
+- `project.yaml` 中没有 `project.stage`，也没有 `production/stage.txt`
+- 没有源代码：`src/`、`Assets/` 或 `Source/` 均不存在
+- 没有 game-concept.md、没有 game-brief.md、没有 systems-index.md
 
 **Input:** `/adopt`
 
 **Expected behavior:**
-1. Phase 1 existence check finds no artifacts
-2. Skill infers "Fresh" — no brownfield work to migrate
-3. Uses `AskUserQuestion`:
+1. Phase 1 的存在性检查未找到任何产出物
+2. 技能推断为 "Fresh"——没有可迁移的遗留工作
+3. 使用 `AskUserQuestion`：
    - "This looks like a fresh project — no existing artifacts found. `/adopt` is for
      projects with work to migrate. What would you like to do?"
-   - Options: "Run `/start`", "My artifacts are in a non-standard location", "Cancel"
-4. The user picks "Run `/start`"; the skill says so and stops — no audit
+   - 选项："Run `/start`"、"My artifacts are in a non-standard location"、"Cancel"
+4. 用户选择 "Run `/start`"；技能说明后停止——不进行审计
 
 **Assertions:**
-- [ ] `AskUserQuestion` is used (not a plain text message) when no artifacts are found
-- [ ] `/start` is presented as a named option
-- [ ] After `/start` or Cancel the skill stops — no audit phases run; "help me find them" leads to a search, not a stop
-- [ ] No adoption plan file is written
+- [ ] 未找到任何产出物时使用 `AskUserQuestion`（而不是纯文本消息）
+- [ ] `/start` 作为具名选项呈现
+- [ ] 在 `/start` 或 Cancel 之后技能停止——不运行审计阶段；"help me find them" 会进入搜索，而不是停止
+- [ ] 不写入任何采用计划文件
 
 ---
 
-### Case 5: Director Gate Check — No gate; minimal tier scopes the audit to the brief
+### Case 5: Director Gate Check — 无闸门；minimal 层级把审计范围限定在简报
 
 **Fixture:**
-- `project.yaml` configures the engine and has no `modes` block (`workflow`
-  resolves to `minimal`)
-- `design/game-brief.md` exists
-- `design/gdd/combat.md` exists and is missing `## Acceptance Criteria`
+- `project.yaml` 配置了引擎，且没有 `modes` 块（`workflow`
+  解析为 `minimal`）
+- `design/game-brief.md` 存在
+- `design/gdd/combat.md` 存在且缺少 `## Acceptance Criteria`
 
 **Input:** `/adopt`
 
 **Expected behavior:**
-1. Phase 2 audits `design/game-brief.md`; GDDs, ADRs and UX specs are not expected
-2. `combat.md` is checked at the `standard` bar advisorily — its missing Acceptance
-   Criteria is reported as informational, not as a HIGH gap
-3. The plan does not prescribe the infrastructure bootstrap: its Step 3 says in
-   one line that it is not on the minimal path and names `/create-stories` as
-   the next step (no stories exist)
-4. No director agents are spawned at any point
-5. No gate IDs (CD-*, TD-*, AD-*, PR-*) appear in output
-6. No `/gate-check` is invoked during the skill run
+1. Phase 2 审计 `design/game-brief.md`；不预期 GDD、ADR 与 UX 规格
+2. `combat.md` 按 `standard` 标准作为建议性检查——其缺少的 Acceptance
+   Criteria 作为参考信息报告，而不计为 HIGH 差距
+3. 计划不规定基础设施引导：其步骤 3 用一行说明它不在 minimal 路径上，并把
+   `/create-stories` 命名为下一步（尚不存在用户故事）
+4. 任何时点都不生成总监代理
+5. 输出中不出现任何闸门 ID（CD-*、TD-*、AD-*、PR-*）
+6. 技能运行期间不调用 `/gate-check`
 
 **Assertions:**
-- [ ] `design/game-brief.md` is audited
-- [ ] Absent ADRs and UX specs are not reported as gaps
-- [ ] `combat.md`'s missing Acceptance Criteria is not counted in the HIGH total
-- [ ] The plan prescribes none of `/architecture-review`, `/create-control-manifest`, `/sprint-plan` or `/gate-check` — none is on the minimal path
-- [ ] No director gate is invoked and no gate skip messages appear
-- [ ] Skill reaches plan-writing or cancellation without any gate verdict
+- [ ] 审计 `design/game-brief.md`
+- [ ] 缺失的 ADR 与 UX 规格不被报告为差距
+- [ ] `combat.md` 缺少的 Acceptance Criteria 不计入 HIGH 总数
+- [ ] 计划不规定 `/architecture-review`、`/create-control-manifest`、`/sprint-plan` 或 `/gate-check` 中的任何一项——它们都不在 minimal 路径上
+- [ ] 不调用任何总监闸门，也不出现闸门跳过消息
+- [ ] 技能在没有任何闸门结论的情况下到达计划写入或取消
 
 ---
 
-### Case 6: v1.0 Project — Converter run, never hand-migrated
+### Case 6: v1.0 Project — 运行转换器，绝不手工迁移
 
 **Fixture:**
-- No `project.yaml` at the repo root
-- `production/stage.txt` reads `Production`; `.claude/docs/technical-preferences.md`
-  has `- **Engine**: Godot 4.6` and a filled naming section
-- `design/gdd/` holds GDDs; no `production/migration-report.md`
+- 仓库根目录没有 `project.yaml`
+- `production/stage.txt` 内容为 `Production`；`.claude/docs/technical-preferences.md`
+  含 `- **Engine**: Godot 4.6` 以及已填写的命名章节
+- `design/gdd/` 含 GDD；没有 `production/migration-report.md`
 
 **Input:** `/adopt`
 
 **Expected behavior:**
-1. Phase 2g identifies a v1.0 project needing migration (no `project.yaml`,
-   legacy files with real, migratable values)
-2. It runs `bash .claude/scripts/migrate-v1-config.sh --dry-run` during the
-   audit (the dry run writes nothing) — it does not hand-write `project.yaml`
-3. The migration is classified BLOCKING in Phase 3 and heads the plan, which
-   reports what the dry run listed
-4. After the plan, Phase 7 offers the migration first: it asks "May I run the
-   converter? It writes `project.yaml` and `production/migration-report.md`."
-   and runs it without `--dry-run` only after approval
-5. It tells the user to read `production/migration-report.md` before running
-   `bash .claude/scripts/migrate-v1-config.sh --finalize`, and does not run
-   `--finalize` itself before the user has read the report
+1. Phase 2g 识别出需要迁移的 v1.0 项目（没有 `project.yaml`，
+   旧版文件含真实、可迁移的值）
+2. 它在审计期间运行 `bash .claude/scripts/migrate-v1-config.sh --dry-run`
+   （试运行不写入任何内容）——它不会手工编写 `project.yaml`
+3. 迁移在 Phase 3 被归类为 BLOCKING 并排在计划首位，计划报告试运行列出的内容
+4. 计划之后，Phase 7 首先提出迁移：它询问 "May I run the
+   converter? It writes `project.yaml` and `production/migration-report.md`."，
+   并且仅在获批之后才不带 `--dry-run` 运行它
+5. 它告知用户在运行 `bash .claude/scripts/migrate-v1-config.sh --finalize`
+   之前先阅读 `production/migration-report.md`，且在用户读过报告之前不自行运行
+   `--finalize`
 
 **Assertions:**
-- [ ] `--dry-run` runs before any real migration, and its output is reported
-- [ ] `project.yaml` is written only by the converter, after the ask naming `project.yaml` and `production/migration-report.md` is approved
-- [ ] `--finalize` is not run before the user has read `production/migration-report.md`
-- [ ] The migration is a BLOCKING item, first in the plan
-- [ ] No legacy file is deleted during the run
+- [ ] 在任何真实迁移之前运行 `--dry-run`，并报告其输出
+- [ ] `project.yaml` 仅由转换器写入，且在指明 `project.yaml` 与 `production/migration-report.md` 的询问获批之后
+- [ ] 在用户读过 `production/migration-report.md` 之前不运行 `--finalize`
+- [ ] 迁移是 BLOCKING 项，且排在计划首位
+- [ ] 运行期间不删除任何旧版文件
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Emits "Scanning project artifacts..." before silent read phase
-- [ ] Reads all artifacts silently before presenting any results
-- [ ] Shows Adoption Audit Summary and Gap Preview before asking to write
-- [ ] Uses `AskUserQuestion` before writing the adoption plan file
-- [ ] Adoption plan written to `docs/adoption-plan-[date].md` — not to any other path
-- [ ] Migration plan items ordered: BLOCKING first, HIGH second, MEDIUM third, LOW last
-- [ ] Phase 7 always offers a single specific next action (not a generic list)
-- [ ] Never regenerates existing artifacts — only fills gaps in what exists
-- [ ] Does not invoke director gates at any point
+- [ ] 在静默读取阶段之前输出 "Scanning project artifacts..."
+- [ ] 在呈现任何结果之前静默读取所有产出物
+- [ ] 在询问是否写入之前展示采用审计摘要与差距预览
+- [ ] 在写入采用计划文件之前使用 `AskUserQuestion`
+- [ ] 采用计划写入 `docs/adoption-plan-[date].md`——不写入任何其他路径
+- [ ] 迁移计划各项排序：BLOCKING 最先，HIGH 其次，MEDIUM 第三，LOW 最后
+- [ ] Phase 7 始终给出单个具体的下一步动作（而不是通用列表）
+- [ ] 绝不重新生成既有产出物——只填补已有内容中的差距
+- [ ] 任何时点都不调用总监闸门
 
 ---
 
 ## Coverage Notes
 
-- The `gdds`, `adrs`, `stories`, and `infra` argument modes narrow the audit scope;
-  each follows the same pattern as the full audit but limited to that artifact type.
-  Not separately fixture-tested here.
-- The systems-index.md parenthetical status value check (BLOCKING) is a special case
-  that triggers an immediate fix offer before writing the plan; not separately tested.
-- The "help me find them" path (search by heading, ask before each move as a
-  `file_deletions` decision, never overwrite, then rerun Phase 1) is not given a
-  fixture.
-- Phase 6b reports the resolved review mode and writes nothing — `review_mode` is
-  fronted by `modes.rigor`, so pinning it would shadow the rigor expansion; Case 1
-  asserts that nothing is written for it.
-- The converter's refusals (exit 3 when its values disagree or a migration
-  already ran; `--finalize` exiting 4 on a mismatch) are not separately tested;
-  Case 6 covers the migration itself.
+- `gdds`、`adrs`、`stories` 与 `infra` 参数模式会缩小审计范围；
+  每种模式都遵循与完整审计相同的模式，但只限于该产出物类型。
+  此处未单独做 fixture 测试。
+- systems-index.md 括号中状态值的检查（BLOCKING）是一个特例，
+  会在写入计划之前触发立即修复提议；未单独测试。
+- "help me find them" 路径（按标题搜索，每次移动前作为
+  `file_deletions` 决策询问，绝不覆盖，然后重新运行 Phase 1）未给出
+  fixture。
+- Phase 6b 报告解析出的评审模式且不写入任何内容——`review_mode` 由
+  `modes.rigor` 统领，因此固定它会遮蔽 rigor 的展开；Case 1
+  断言不为它写入任何内容。
+- 转换器的拒绝情形（当其值与配置不一致或迁移已运行时退出 3；`--finalize`
+  在值不匹配时退出 4）未单独测试；Case 6 覆盖迁移本身。

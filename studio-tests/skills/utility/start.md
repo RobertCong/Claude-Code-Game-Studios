@@ -2,310 +2,267 @@
 
 ## Skill Summary
 
-`/start` is the first-time onboarding skill. Phase 1 reads the project with
-`project-state.sh` without printing it (engine, code root and source files,
-concept or brief, GDDs, ADRs, other work, and whether `origin` still points at
-the template repo); `source_files: unknown` is reported as an unknown code root,
-never as no code. Phase 2 asks where the user is with four options (A No idea
-yet, B Vague idea, C Clear concept, D Existing work); the engine is not asked
-here, `/setup-engine` chooses it.
+`/start` 是首次上手引导技能。Phase 1 使用 `project-state.sh` 读取项目但不打印内容（引擎、代码根目录与源文件、概念或简报、GDD、ADR、其他工作，以及 `origin` 是否仍指向模板仓库）；`source_files: unknown` 被报告为代码根目录未知，而绝不报告为没有代码。Phase 2 用四个选项询问用户当前所处的位置（A 还没有想法，B 模糊的想法，C 清晰的概念，D 已有工作）；此处不问引擎，由 `/setup-engine` 选择。
 
-Phase 3 routes by answer and names only the immediate next step. Phase 4 works
-out the stage (A/B/C: `Concept`; D: from the GDD and ADR counts) and the rigor:
-kept when `modes.rigor` is set, otherwise inferred from what the user said
-(`settings-guidance.md` §3; no signal or no idea → `minimal`). It shows both on
-an assumptions card, which names `/settings` for later changes, and asks one
-question: `Save them` / `Don't save`. It asks no rigor question. Only an explicit
-yes writes: the stage through `set-stage.sh`
-(`project.yaml` and the legacy mirror `production/stage.txt`) and an inferred
-rigor through `config-set.sh`. Phase 5 asks the automation question unless the
-key is set, and writes the pick through `config-set.sh`. `/start` never writes
-any of the six knobs `modes.rigor` fronts (`modes.review_mode`,
-`modes.workflow`, `docs.density`, `qa.level`, `modes.story_granularity`,
-`team.size`) or `production/review-mode.txt`.
+Phase 3 按回答进行路由，并且只给出紧接着的下一步。Phase 4 判定阶段（A/B/C：`Concept`；D：依据 GDD 与 ADR 数量）以及 rigor：若已设置 `modes.rigor` 则保留该值，否则根据用户所述内容推断（`settings-guidance.md` §3；没有信号或没有想法 → `minimal`）。它把两者展示在一张假设卡片上，卡片指明后续修改使用 `/settings`，并询问一个问题：`Save them` / `Don't save`。它不问 rigor 相关问题。只有明确的肯定才会写入：通过 `set-stage.sh` 写入阶段（`project.yaml` 与旧版镜像 `production/stage.txt`），并通过 `config-set.sh` 写入推断出的 rigor。Phase 5 在键未设置时询问自动化问题，并通过 `config-set.sh` 写入所选项。`/start` 从不写入 `modes.rigor` 所统领的六个旋钮中的任何一个（`modes.review_mode`、`modes.workflow`、`docs.density`、`qa.level`、`modes.story_granularity`、`team.size`），也不写入 `production/review-mode.txt`。
 
-Phase 6 prints the path for the rigor (Path D's existing-work path included;
-at `minimal` a D user with no brief is told where the brief comes from) and
-asks which step to take first; Phase 7 prints a single "Type `[skill]` to
-begin." line and starts nothing. A returning user (engine set and a concept or
-brief present) skips onboarding. No director gates apply. Verdict: COMPLETE.
+Phase 6 打印对应 rigor 的路径（包含 Path D 的已有工作路径；在 `minimal` 下，没有简报的 D 类用户会被告知简报从何而来），并询问先执行哪一步；Phase 7 只打印一行 "Type `[skill]` to begin."，不启动任何内容。回访用户（已设置引擎且存在概念或简报）跳过上手引导。不适用任何总监质量闸门。结论：COMPLETE。
 
 ---
 
 ## Static Assertions (Structural)
 
-Checked against the SKILL.md by `/skill-test spec`, no fixture needed.
+由 `/skill-test spec` 对照 SKILL.md 检查，无需 fixture。
 
-- [ ] Has required frontmatter fields: `name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`
-- [ ] Has ≥2 phase headings
-- [ ] Contains verdict keyword: COMPLETE
-- [ ] States the write rule for every write: the stage and an inferred rigor only after an explicit yes to the save question that names `project.yaml` and `production/stage.txt`; `modes.automation` from the user's pick, and never when the save was declined
-- [ ] Has a next-step handoff at the end (Phase 7: "Type `[skill]` to begin.")
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 有 ≥2 个 phase 标题
+- [ ] 包含结论关键词：COMPLETE
+- [ ] 为每一次写入说明写入规则：阶段与推断出的 rigor 只在用户对保存问题明确回答是之后写入，且该问题需指明 `project.yaml` 与 `production/stage.txt`；`modes.automation` 按用户选择写入，且当保存被拒绝时绝不写入
+- [ ] 结尾有下一步交接（Phase 7："Type `[skill]` to begin."）
 
 ---
 
 ## Director Gate Checks
 
-None. `/start` is a utility setup skill. No director agents exist yet at the
-point this skill runs.
+无。`/start` 是实用型设置技能。在该技能运行的时间点上，尚不存在任何总监代理。
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非某个用例自己的 Fixture 另有说明，否则每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/CLAUDE.md` §
+Fixture defaults。
 
 ---
 
 ## Test Cases
 
-### Case 1: Happy Path — Fresh repo, Path A, rigor inferred
+### Case 1: Happy Path — 全新仓库、Path A、rigor 为推断值
 
 **Fixture:**
-- No `project.yaml`, no `production/stage.txt`; `technical-preferences.md`
-  holds only placeholders (runs without the Fixture Defaults block)
-- No design documents, prototypes or source code; `origin` is the user's own repo
-- The user picks `A) No idea yet`, then `Save them`, then `Guided`
+- 无 `project.yaml`、无 `production/stage.txt`；`technical-preferences.md` 仅含占位符（运行时不含 Fixture Defaults 块）
+- 没有设计文档、原型或源代码；`origin` 是用户自己的仓库
+- 用户依次选择 `A) No idea yet`、`Save them`、`Guided`
 
 **Input:** `/start`
 
 **Expected behavior:**
-1. Phase 1 runs `project-state.sh` without printing its rows
-2. Phase 2 offers exactly A–D; no engine question is asked
-3. Path A names only `/brainstorm open` as the next step and leaves the full path for later
-4. Phase 4 shows the card: stage `Concept`, rigor `minimal` with the reason (no
-   concept yet), and asks to save them to `project.yaml` and the stage to
-   `production/stage.txt`; it asks no rigor question
-5. After `Save them`, `set-stage.sh Concept` creates `project.yaml` and writes
-   `production/stage.txt`, and `config-set.sh modes.rigor minimal` adds the rigor
-6. Phase 5 asks the automation question; `config-set.sh modes.automation guided` runs on the pick
-7. Phase 6 prints the minimal 4-step path (`/setup-engine`, `/brainstorm`,
-   `/create-stories`, `/dev-story`) and asks which step to take first
-8. Phase 7 prints only "Type `[skill]` to begin."; verdict COMPLETE
+1. Phase 1 运行 `project-state.sh` 但不打印其各行内容
+2. Phase 2 只提供 A–D 四个选项；不问引擎问题
+3. Path A 只把 `/brainstorm open` 命名为下一步，完整路径留待之后
+4. Phase 4 展示卡片：阶段 `Concept`、rigor `minimal` 及其原因（尚无概念），并请求将它们保存到 `project.yaml`、将阶段保存到 `production/stage.txt`；它不问 rigor 问题
+5. 在 `Save them` 之后，`set-stage.sh Concept` 创建 `project.yaml` 并写入 `production/stage.txt`，`config-set.sh modes.rigor minimal` 添加 rigor
+6. Phase 5 询问自动化问题；按所选项运行 `config-set.sh modes.automation guided`
+7. Phase 6 打印 minimal 的 4 步路径（`/setup-engine`、`/brainstorm`、`/create-stories`、`/dev-story`）并询问先执行哪一步
+8. Phase 7 只打印 "Type `[skill]` to begin."；Verdict COMPLETE
 
 **Assertions:**
-- [ ] Phase 2 offers exactly the four A–D options and no engine choice
-- [ ] No rigor question is asked; the inferred `minimal` is on the card with its reason
-- [ ] Nothing is written before the explicit `Save them`
-- [ ] `project.stage` and `production/stage.txt` are both `Concept`
-- [ ] `project.yaml` ends up holding only `project.stage`, `modes.rigor` and `modes.automation` from `/start`: none of the six rigor-fronted knobs, and no `production/review-mode.txt`
-- [ ] `project.yaml` has exactly one `modes:` block, holding `rigor` and `automation`
-- [ ] Phase 6 prints the minimal 4-step path
-- [ ] The next skill is not started; Verdict is COMPLETE
+- [ ] Phase 2 只提供 A–D 四个选项，且没有引擎选择
+- [ ] 不问 rigor 问题；推断出的 `minimal` 连同原因显示在卡片上
+- [ ] 在明确的 `Save them` 之前不写入任何内容
+- [ ] `project.stage` 与 `production/stage.txt` 均为 `Concept`
+- [ ] `project.yaml` 最终只包含 `/start` 写入的 `project.stage`、`modes.rigor` 与 `modes.automation`：六个 rigor 旋钮一个都没有，也没有 `production/review-mode.txt`
+- [ ] `project.yaml` 恰好有一个 `modes:` 块，包含 `rigor` 与 `automation`
+- [ ] Phase 6 打印 minimal 的 4 步路径
+- [ ] 不启动下一个技能；结论为 COMPLETE
 
 ---
 
-### Case 2: Returning User — Onboarding skipped
+### Case 2: Returning User — 跳过上手引导
 
 **Fixture:**
-- `project.yaml` has `engine.name: Godot` and `modes.rigor: minimal`; no explicit `modes.review_mode`
-- `design/game-brief.md` exists
+- `project.yaml` 含 `engine.name: Godot` 与 `modes.rigor: minimal`；没有显式的 `modes.review_mode`
+- `design/game-brief.md` 存在
 
 **Input:** `/start`
 
 **Expected behavior:**
-1. Phase 1 finds the engine set and the brief present
-2. The skill skips onboarding and names the engine (Godot) and the brief
-3. Review mode is reported as `solo` (from `modes.rigor: minimal`)
-4. The skill points to `/help`
+1. Phase 1 发现引擎已设置且简报已存在
+2. 技能跳过上手引导，并指明引擎（Godot）与简报
+3. 评审模式被报告为 `solo`（源自 `modes.rigor: minimal`）
+4. 技能指向 `/help`
 
 **Assertions:**
-- [ ] The A–D starting-point question is not asked
-- [ ] The message names the configured engine (Godot) and the brief path
-- [ ] Review mode is reported as `solo`, resolved from rigor
-- [ ] No write is made to `project.yaml` or `production/stage.txt`
+- [ ] 不问 A–D 起点问题
+- [ ] 消息指明已配置的引擎（Godot）与简报路径
+- [ ] 评审模式被报告为 `solo`，由 rigor 解析得出
+- [ ] 不对 `project.yaml` 或 `production/stage.txt` 做任何写入
 
 ---
 
-### Case 3: Existing Work on Unity — Path D, stage from the files, rigor already set
+### Case 3: Existing Work on Unity — Path D、阶段由文件推断、rigor 已设置
 
 **Fixture:**
-- `project.yaml` has `engine.name: Unity`, `modes.rigor: standard` and
+- `project.yaml` 含 `engine.name: Unity`、`modes.rigor: standard` 与
   `modes.automation: collaborative`
-- C# scripts exist under `Assets/Scripts/`; `design/gdd/` holds 3 system GDDs;
-  no `design/gdd/game-concept.md`, no `docs/architecture/`
-- The user picks `D) Existing work` and `Save them`
+- `Assets/Scripts/` 下存在 C# 脚本；`design/gdd/` 含 3 份系统 GDD；
+  没有 `design/gdd/game-concept.md`，也没有 `docs/architecture/`
+- 用户选择 `D) Existing work` 与 `Save them`
 
 **Input:** `/start`
 
 **Expected behavior:**
-1. Phase 1 resolves the code root as `Assets/` and finds source files there (it
-   does not scan `src/` and conclude there is no code)
-2. Phase 3 D shares what it found (source files, 3 GDDs, engine Unity) and names
-   `/project-stage-detect` as the immediate step
-3. Phase 4's card shows stage `Systems Design` (GDDs, no ADRs) and rigor
-   `standard` as already set
-4. After the yes, `set-stage.sh "Systems Design"` writes both files; no rigor write
-5. Phase 5 says "Automation is `collaborative`" and asks nothing
-6. Phase 6 prints the existing-work path at `standard`: `/project-stage-detect`,
-   `/adopt`, `/design-system retrofit`, `/architecture-decision retrofit`,
-   `/architecture-review`, `/gate-check`
+1. Phase 1 解析出代码根目录为 `Assets/` 并在那里找到源文件（它不会扫描 `src/` 然后断定没有代码）
+2. Phase 3 的 D 分支说明其发现（源文件、3 份 GDD、引擎 Unity），并把 `/project-stage-detect` 命名为紧接的步骤
+3. Phase 4 的卡片显示阶段 `Systems Design`（有 GDD，无 ADR），rigor 为已设置的 `standard`
+4. 在用户回答是之后，`set-stage.sh "Systems Design"` 写入两个文件；不写入 rigor
+5. Phase 5 说明 "Automation is `collaborative`"，不再提问
+6. Phase 6 打印 `standard` 下的已有工作路径：`/project-stage-detect`、
+   `/adopt`、`/design-system retrofit`、`/architecture-decision retrofit`、
+   `/architecture-review`、`/gate-check`
 
 **Assertions:**
-- [ ] Source files are found under `Assets/`, not reported as absent
-- [ ] Stage `Systems Design` is written to both `project.yaml` and `production/stage.txt`, after the yes
-- [ ] No rigor or automation question is asked, and neither key is rewritten
-- [ ] The existing-work path at `standard` includes the GDD, ADR and registry retrofit steps
-- [ ] Verdict is COMPLETE
+- [ ] 源文件在 `Assets/` 下被发现，而不是被报告为不存在
+- [ ] 阶段 `Systems Design` 在用户回答是之后写入 `project.yaml` 与 `production/stage.txt` 两个文件
+- [ ] 不问 rigor 或自动化问题，且两个键都不会被重写
+- [ ] `standard` 下的已有工作路径包含 GDD、ADR 与注册表回填步骤
+- [ ] 结论为 COMPLETE
 
 ---
 
-### Case 4: Clone Still Wired to the Template Repo — remote note, never run
+### Case 4: Clone Still Wired to the Template Repo — 远程提示、绝不执行
 
 **Fixture:**
-- Fresh project as in Case 1
-- `.git/config` has `[remote "origin"]` with url
+- 与 Case 1 相同的全新项目
+- `.git/config` 含 `[remote "origin"]`，其 url 为
   `https://github.com/Donchitos/Claude-Code-Game-Studios.git`
-- The user picks `B) Vague idea` with the hint "a small weekend puzzler", then `Save them`
+- 用户选择 `B) Vague idea`，提示为 "a small weekend puzzler"，随后选择 `Save them`
 
 **Input:** `/start`
 
 **Expected behavior:**
-1. `origin_url` matches the template repo case-insensitively
-2. Path B names `/brainstorm a small weekend puzzler` as the immediate step
-3. The card infers rigor `minimal` from "weekend" and "small"
-4. After the Phase 6 path, the skill adds once that `origin` still points at the
-   CCGS template repo, suggests `git remote rename origin template` then
-   `git remote add origin <your repo URL>`, and says to skip `UPGRADING.md`'s own
-   `git remote add template` step since that remote now exists
-5. The commands are suggested only; no git command is run
+1. `origin_url` 以不区分大小写的方式匹配模板仓库
+2. Path B 把 `/brainstorm a small weekend puzzler` 命名为紧接的步骤
+3. 卡片根据 "weekend" 与 "small" 推断 rigor 为 `minimal`
+4. 在 Phase 6 的路径之后，技能追加一次说明：`origin` 仍指向 CCGS 模板仓库，建议先执行 `git remote rename origin template` 再执行 `git remote add origin <your repo URL>`，并说明应跳过 `UPGRADING.md` 自带的 `git remote add template` 步骤，因为该远程现在已存在
+5. 这些命令仅为建议；不执行任何 git 命令
 
 **Assertions:**
-- [ ] The template-origin note appears exactly once, after the path
-- [ ] Both suggested commands are given as written above
-- [ ] The note says to skip `UPGRADING.md`'s `git remote add template` step after the rename, and why
-- [ ] No git command is executed
-- [ ] The card's rigor is `minimal`, with the user's words as the reason
+- [ ] 模板起点提示恰好出现一次，且位于路径之后
+- [ ] 两条建议命令与上文所述完全一致
+- [ ] 提示说明在重命名之后应跳过 `UPGRADING.md` 的 `git remote add template` 步骤，并说明原因
+- [ ] 不执行任何 git 命令
+- [ ] 卡片的 rigor 为 `minimal`，并以用户的原话作为原因
 
 ---
 
-### Case 5: Director Gate Check — No gate; start is a utility setup skill
+### Case 5: Director Gate Check — 无闸门；start 是实用型设置技能
 
 **Fixture:**
-- Fresh project and answers as in Case 1
+- 全新项目，回答同 Case 1
 
 **Input:** `/start`
 
 **Expected behavior:**
-1. The skill completes the onboarding flow through Phase 7
-2. No director agent is handed any work
-3. No gate IDs (CD-*, TD-*, AD-*, PR-*) appear in the output
+1. 技能完成从 Phase 1 到 Phase 7 的上手引导流程
+2. 不向任何总监代理交接工作
+3. 输出中不出现任何闸门 ID（CD-*、TD-*、AD-*、PR-*）
 
 **Assertions:**
-- [ ] No director gate runs
-- [ ] No gate skip messages appear (gates are absent, not suppressed)
-- [ ] The skill reaches COMPLETE without any gate verdict
+- [ ] 不运行任何总监闸门
+- [ ] 不出现闸门跳过消息（闸门本就不存在，而非被抑制）
+- [ ] 技能在没有任何闸门结论的情况下到达 COMPLETE
 
 ---
 
-### Case 6: Path D With Rigor Unset — inferred from the description, not asked
+### Case 6: Path D With Rigor Unset — 由描述推断，而非提问
 
 **Fixture:**
-- `project.yaml` has `engine.name: Godot` and no `modes` block
-- `src/` holds GDScript files; `design/gdd/` holds 4 system GDDs; no
+- `project.yaml` 含 `engine.name: Godot`，且没有 `modes` 块
+- `src/` 含 GDScript 文件；`design/gdd/` 含 4 份系统 GDD；没有
   `docs/architecture/`
-- The user picks `D) Existing work` and says "a commercial game for Steam with
-  one clear core loop", then picks `Save them`, then `Collaborative`
+- 用户选择 `D) Existing work` 并说 "a commercial game for Steam with
+  one clear core loop"，随后选择 `Save them`，再选择 `Collaborative`
 
 **Input:** `/start`
 
 **Expected behavior:**
-1. Phase 3 D names `/project-stage-detect` as the immediate step and prints no tiered path yet
-2. The card shows stage `Systems Design` and rigor `standard`, with the user's
-   words ("commercial", "Steam") as the reason, and the line naming `/settings`
-3. The save question offers only `Save them` / `Don't save`; no rigor question
-   is asked
-4. After `Save them`, `modes.rigor: standard` is written with the stage
-5. Phase 6 prints the existing-work path at `standard`, including
-   `/design-system retrofit`, `/architecture-decision retrofit` and
+1. Phase 3 的 D 分支把 `/project-stage-detect` 命名为紧接的步骤，且此时不打印分层路径
+2. 卡片显示阶段 `Systems Design` 与 rigor `standard`，以用户的原话（"commercial"、"Steam"）作为原因，并有一行指明 `/settings`
+3. 保存问题只提供 `Save them` / `Don't save`；不问 rigor 问题
+4. 在 `Save them` 之后，`modes.rigor: standard` 与阶段一同写入
+5. Phase 6 打印 `standard` 下的已有工作路径，包含
+   `/design-system retrofit`、`/architecture-decision retrofit` 与
    `/architecture-review`
 
 **Assertions:**
-- [ ] No tiered path is printed before the rigor is known
-- [ ] No rigor question is asked; the card names `/settings` as the way to change it
-- [ ] The written rigor is the inferred `standard`
-- [ ] None of the six rigor-fronted knobs is written; the file holds one `modes:` block
+- [ ] 在 rigor 未知之前不打印分层路径
+- [ ] 不问 rigor 问题；卡片指明 `/settings` 作为修改途径
+- [ ] 写入的 rigor 为推断出的 `standard`
+- [ ] 六个 rigor 旋钮中的任何一个都不写入；文件只含一个 `modes:` 块
 
 ---
 
-### Case 7: Existing `modes:` Block — rigor and automation go into it, never a second one
+### Case 7: Existing `modes:` Block — rigor 与 automation 写入其中，绝不新建第二个
 
 **Fixture:**
-- `project.yaml` has `engine.name: Godot` and an existing block `modes:` with
-  only `review_mode: lean` under it; `modes.rigor` and `modes.automation` are
-  unset (runs without the Fixture Defaults block, since it tests how the keys
-  are added)
-- No `design/game-brief.md` and no concept, so this is not a returning user
-- The user picks `A) No idea yet`, `Save them`, then `Guided`
+- `project.yaml` 含 `engine.name: Godot`，并已有一个 `modes:` 块，其下只有
+  `review_mode: lean`；`modes.rigor` 与 `modes.automation` 未设置（运行时不含
+  Fixture Defaults 块，因为本用例测试这些键如何被添加）
+- 没有 `design/game-brief.md`，也没有概念，因此这不是回访用户
+- 用户依次选择 `A) No idea yet`、`Save them`、`Guided`
 
 **Input:** `/start`
 
 **Expected behavior:**
-1. `set-stage.sh Concept` adds the `project:` block to the existing file
-2. `config-set.sh modes.rigor minimal` and `config-set.sh modes.automation guided`
-   add both keys under the existing `modes:` block
-3. `review_mode: lean` is left as the user had it
+1. `set-stage.sh Concept` 在已有文件中添加 `project:` 块
+2. `config-set.sh modes.rigor minimal` 与 `config-set.sh modes.automation guided`
+   在已有的 `modes:` 块下添加这两个键
+3. `review_mode: lean` 保持用户原有设置不变
 
 **Assertions:**
-- [ ] The finished `project.yaml` has exactly one `modes:` key, holding `review_mode`, `rigor` and `automation`
-- [ ] The existing `review_mode: lean` is unchanged and `/start` writes none of the other rigor-fronted knobs
-- [ ] There is one save question for the stage and rigor, and the automation pick needs no further ask
+- [ ] 最终的 `project.yaml` 恰好只有一个 `modes:` 键，包含 `review_mode`、`rigor` 与 `automation`
+- [ ] 已有的 `review_mode: lean` 未被改动，且 `/start` 不写入其他任何 rigor 旋钮
+- [ ] 阶段与 rigor 只有一个保存问题，自动化选择无需再次询问
 
 ---
 
-### Case 8: Path D at `minimal` With No Brief — names where the brief comes from
+### Case 8: Path D at `minimal` With No Brief — 指明简报从何而来
 
 **Fixture:**
-- `project.yaml` has `engine.name: Godot`, `modes.rigor: minimal` and
+- `project.yaml` 含 `engine.name: Godot`、`modes.rigor: minimal` 与
   `modes.automation: collaborative`
-- `src/` holds 14 GDScript files; `design/gdd/` holds 2 system GDDs; no
-  `docs/architecture/`; no `design/game-brief.md` and no
+- `src/` 含 14 个 GDScript 文件；`design/gdd/` 含 2 份系统 GDD；没有
+  `docs/architecture/`；没有 `design/game-brief.md`，也没有
   `design/gdd/game-concept.md`
-- The user picks `D) Existing work` and `Save them`
+- 用户选择 `D) Existing work` 与 `Save them`
 
 **Input:** `/start`
 
 **Expected behavior:**
-1. Phase 1 finds the engine set but no concept or brief, so the A–D question is asked
-2. Phase 3 D names `/project-stage-detect` as the immediate step
-3. The card shows `Systems Design` and rigor `minimal` as already set; Phase 5 asks nothing
-4. Phase 6 prints the existing-work path at `minimal`: `/project-stage-detect`,
-   `/adopt`, then the brief's source, with no GDD, ADR or registry retrofit
-5. With no brief and 10 or more source files, the brief's source is
-   `/reverse-document design src/`; `/brainstorm` is not offered as the source
+1. Phase 1 发现引擎已设置，但没有概念或简报，因此提出 A–D 问题
+2. Phase 3 的 D 分支把 `/project-stage-detect` 命名为紧接的步骤
+3. 卡片显示 `Systems Design` 与已设置的 rigor `minimal`；Phase 5 不再提问
+4. Phase 6 打印 `minimal` 下的已有工作路径：`/project-stage-detect`、
+   `/adopt`，然后是简报的来源，不含 GDD、ADR 或注册表回填
+5. 在没有简报且源文件达到 10 个或更多时，简报的来源为
+   `/reverse-document design src/`；不把 `/brainstorm` 提供为来源
 
 **Assertions:**
-- [ ] The minimal path lists `/project-stage-detect` and `/adopt`, and no `/design-system retrofit`, `/architecture-decision retrofit` or `/architecture-review`
-- [ ] With no `design/game-brief.md`, the path names `/reverse-document design src/` as the brief's source, with the code root filled in
-- [ ] `/brainstorm` is not named as the brief's source
-- [ ] Variant — `src/` holds only 4 source files: the brief's source is `/brainstorm`, and `/reverse-document` is not named
-- [ ] Variant — `design/game-brief.md` exists: this is the returning-user skip
+- [ ] minimal 路径列出 `/project-stage-detect` 与 `/adopt`，且不含 `/design-system retrofit`、`/architecture-decision retrofit` 或 `/architecture-review`
+- [ ] 没有 `design/game-brief.md` 时，路径把 `/reverse-document design src/` 命名为简报的来源，并填入代码根目录
+- [ ] 不把 `/brainstorm` 命名为简报的来源
+- [ ] 变体——`src/` 只有 4 个源文件：简报的来源为 `/brainstorm`，且不指明 `/reverse-document`
+- [ ] 变体——`design/game-brief.md` 存在：此时为回访用户跳过
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Reads the project with `project-state.sh` before the first question, without printing it
-- [ ] Asks the starting-point question with options A–D; leaves the engine to `/setup-engine`
-- [ ] Never writes any of the six rigor-fronted knobs (`modes.review_mode`, `modes.workflow`, `docs.density`, `qa.level`, `modes.story_granularity`, `team.size`) or `production/review-mode.txt`
-- [ ] Shows the stage and rigor on a card and writes them only on an explicit yes; asks no rigor question
-- [ ] Skips the automation question when the key is set
-- [ ] Writes through `set-stage.sh` and `config-set.sh`, never by editing YAML by hand
-- [ ] Prints the existing-work path only in Phase 6, after the rigor is known
-- [ ] Never starts the next skill; a completed run (not the returning-user skip, which ends at its `/help` pointer) ends with "Type `[skill]` to begin." and Verdict COMPLETE
+- [ ] 在第一个问题之前用 `project-state.sh` 读取项目，且不打印内容
+- [ ] 用 A–D 选项提出起点问题；把引擎留给 `/setup-engine`
+- [ ] 绝不写入六个 rigor 旋钮中的任何一个（`modes.review_mode`、`modes.workflow`、`docs.density`、`qa.level`、`modes.story_granularity`、`team.size`），也不写入 `production/review-mode.txt`
+- [ ] 在卡片上展示阶段与 rigor，仅在明确回答是时写入；不问 rigor 问题
+- [ ] 当键已设置时跳过自动化问题
+- [ ] 通过 `set-stage.sh` 与 `config-set.sh` 写入，绝不手工编辑 YAML
+- [ ] 只在 Phase 6 中、rigor 已知之后打印已有工作路径
+- [ ] 绝不启动下一个技能；一次完成的运行（不含以 `/help` 指引结束的回访用户跳过）以 "Type `[skill]` to begin." 与 Verdict COMPLETE 结束
 
 ---
 
 ## Coverage Notes
 
-- Path C (clear concept, `Formalize it first` vs `Jump straight in`) is not
-  separately tested.
-- The `standard` and `full` paths for a new game follow Case 1 with the longer
-  pipeline; not separately tested.
-- The edge cases "picks D but project is empty" / "picks A but code exists" are
-  not separately tested.
-- `Don't save` (nothing written, the values kept for the run and reported as not
-  saved, and no automation write) is not separately tested.
+- Path C（清晰概念，`Formalize it first` 对比 `Jump straight in`）未单独测试。
+- 新游戏的 `standard` 与 `full` 路径遵循 Case 1，只是流水线更长；未单独测试。
+- 边界情况 "picks D but project is empty" / "picks A but code exists" 未单独测试。
+- `Don't save`（不写入任何内容，值仅保留用于本次运行并报告为未保存，且不写入自动化）未单独测试。

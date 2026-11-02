@@ -1,39 +1,39 @@
-# Unreal Engine 5.8 — UI Module Reference
+# Unreal Engine 5.8 — UI 模块参考
 
-**Last verified:** 2026-10-17 (UE 5.8 changes block); 2026-02-13 (rest of file, written against 5.7)
-**Knowledge Gap:** UE 5.7-5.8 UMG and CommonUI improvements (Enhanced Input unified with Common UI in 5.8)
+**Last verified:** 2026-10-17（UE 5.8 变更区块）；2026-02-13（文件其余部分，针对 5.7 编写）
+**Knowledge Gap:** UE 5.7-5.8 的 UMG 与 CommonUI 改进（5.8 中 Enhanced Input 与 Common UI 已统一）
 
-> **UE 5.8 changes:** Enhanced Input and Common Input/UI are unified (no
-> duplicate data assets; Input Debugger for Enhanced Input UI). Slate:
-> `EWindowType::GameWindow` → `EWindowType::Normal`; the "OnlyGameWindow" CVars
-> are renamed "OnlyProjectContent" and `bDebugGameWindowOnly` is now
-> `bDebugProjectContentOnly`; a module depending on `SlateRHIRender` may also
-> need `SlateBaseRenderer`. Source: UE 5.8 release notes, https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-5-8-release-notes?application_version=5.8
-
----
-
-## Overview
-
-UE 5.8 UI systems:
-- **UMG (Unreal Motion Graphics)**: Visual widget-based UI (RECOMMENDED)
-- **CommonUI**: Cross-platform input-aware UI framework (console/PC)
-- **Slate**: Low-level C++ UI (engine/editor UI)
+> **UE 5.8 变更：** Enhanced Input 与 Common Input/UI 已统一（无需
+> 重复的数据资源；为 Enhanced Input UI 新增了 Input Debugger）。Slate：
+> `EWindowType::GameWindow` → `EWindowType::Normal`；"OnlyGameWindow" CVar
+> 重命名为 "OnlyProjectContent"，`bDebugGameWindowOnly` 现在为
+> `bDebugProjectContentOnly`；依赖 `SlateRHIRender` 的模块可能还
+> 需要 `SlateBaseRenderer`。来源：UE 5.8 发布说明，https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-5-8-release-notes?application_version=5.8
 
 ---
 
-## UMG (Unreal Motion Graphics)
+## 概述
 
-### Create Widget Blueprint
+UE 5.8 UI 系统：
+- **UMG (Unreal Motion Graphics)**：基于可视化控件的 UI（推荐）
+- **CommonUI**：面向跨平台、输入感知的 UI 框架（主机/PC）
+- **Slate**：底层 C++ UI（引擎/编辑器 UI）
+
+---
+
+## UMG（Unreal Motion Graphics）
+
+### 创建 Widget Blueprint
 
 1. Content Browser > User Interface > Widget Blueprint
-2. Open Widget Designer
-3. Drag widgets from Palette: Button, Text, Image, ProgressBar, etc.
+2. 打开 Widget Designer
+3. 从 Palette 中拖拽控件：Button、Text、Image、ProgressBar 等
 
 ---
 
-## Basic UMG Setup in C++
+## 在 C++ 中进行基础 UMG 设置
 
-### Create and Display Widget
+### 创建并显示控件
 
 ```cpp
 #include "Blueprint/UserWidget.h"
@@ -52,7 +52,7 @@ void AMyCharacter::BeginPlay() {
 }
 ```
 
-### Remove Widget
+### 移除控件
 
 ```cpp
 HealthBarWidget->RemoveFromParent();
@@ -60,9 +60,9 @@ HealthBarWidget->RemoveFromParent();
 
 ---
 
-## Access Widget Elements from C++
+## 从 C++ 访问控件元素
 
-### Bind to Widget Elements
+### 绑定到控件元素
 
 ```cpp
 UCLASS()
@@ -86,7 +86,7 @@ public:
 
 ---
 
-## Common UMG Widgets
+## 常用 UMG 控件
 
 ### Text Block
 
@@ -155,7 +155,7 @@ void OnVolumeChanged(float Value) {
 }
 ```
 
-### EditableTextBox (Input Field)
+### EditableTextBox（输入框）
 
 ```cpp
 UPROPERTY(meta = (BindWidget))
@@ -174,9 +174,9 @@ void OnNameChanged(const FText& Text) {
 
 ---
 
-## UMG Animations
+## UMG 动画
 
-### Play Animation
+### 播放动画
 
 ```cpp
 UPROPERTY(Transient, meta = (BindWidgetAnim))
@@ -187,7 +187,7 @@ void ShowUI() {
 }
 ```
 
-### Stop Animation
+### 停止动画
 
 ```cpp
 StopAnimation(FadeInAnimation);
@@ -195,28 +195,28 @@ StopAnimation(FadeInAnimation);
 
 ---
 
-## Canvas Panel (Layout)
+## Canvas Panel（布局）
 
-### Canvas Panel (Absolute Positioning)
+### Canvas Panel（绝对定位）
 
 ```cpp
 // Use in Widget Blueprint for absolute positioning
 // Anchor widgets to corners/edges for responsive UI
 ```
 
-### Vertical Box (Stack Vertically)
+### Vertical Box（垂直堆叠）
 
 ```cpp
 // Auto-stacks children vertically
 ```
 
-### Horizontal Box (Stack Horizontally)
+### Horizontal Box（水平堆叠）
 
 ```cpp
 // Auto-stacks children horizontally
 ```
 
-### Grid Panel (Grid Layout)
+### Grid Panel（网格布局）
 
 ```cpp
 // Arranges children in a grid
@@ -224,9 +224,9 @@ StopAnimation(FadeInAnimation);
 
 ---
 
-## World Space UI (3D UI)
+## 世界空间 UI（3D UI）
 
-### Widget Component (3D UI in World)
+### Widget Component（世界中的 3D UI）
 
 ```cpp
 #include "Components/WidgetComponent.h"
@@ -240,9 +240,9 @@ HealthBarWidget->SetDrawSize(FVector2D(200, 50));
 
 ---
 
-## Input Handling in UMG
+## UMG 中的输入处理
 
-### Override Keyboard Input
+### 重写键盘输入
 
 ```cpp
 UCLASS()
@@ -263,16 +263,16 @@ public:
 
 ---
 
-## CommonUI (Cross-Platform Input)
+## CommonUI（跨平台输入）
 
-### Enable CommonUI Plugin
+### 启用 CommonUI 插件
 
 ```cpp
 // Enable: Edit > Plugins > CommonUI
 // Restart editor
 ```
 
-### Use CommonUI Widgets
+### 使用 CommonUI 控件
 
 ```cpp
 // CommonUI widgets:
@@ -281,7 +281,7 @@ public:
 // - CommonTextBlock: Text with styling
 ```
 
-### CommonActivatableWidget Example
+### CommonActivatableWidget 示例
 
 ```cpp
 UCLASS()
@@ -303,9 +303,9 @@ public:
 
 ---
 
-## HUD Class (Alternative to UMG)
+## HUD 类（UMG 的替代方案）
 
-### Create HUD
+### 创建 HUD
 
 ```cpp
 UCLASS()
@@ -327,9 +327,9 @@ public:
 
 ---
 
-## Performance Tips
+## 性能技巧
 
-### Optimize UMG
+### 优化 UMG
 
 ```cpp
 // Invalidation boxes: Only redraw when content changes
@@ -342,9 +342,9 @@ SetVisibility(ESlateVisibility::Collapsed); // Collapsed = not rendered
 
 ---
 
-## Debugging
+## 调试
 
-### UI Debug Commands
+### UI 调试命令
 
 ```cpp
 // Console commands:
@@ -355,6 +355,6 @@ SetVisibility(ESlateVisibility::Collapsed); // Collapsed = not rendered
 
 ---
 
-## Sources
+## 来源
 - https://docs.unrealengine.com/5.7/en-US/umg-ui-designer-for-unreal-engine/
 - https://docs.unrealengine.com/5.7/en-US/commonui-plugin-for-advanced-user-interfaces-in-unreal-engine/

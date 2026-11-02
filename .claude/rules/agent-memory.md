@@ -3,63 +3,33 @@ paths:
   - ".claude/agent-memory/**"
 ---
 
-# Agent Memory Rules
+# 代理记忆规则
 
-**Agent memory is one of three writes that need no "May I write?"** The other two
-are named in `CLAUDE.md`:
+**代理记忆是三种无需询问「可以写入吗？」的写入之一。** 另外两种在 `CLAUDE.md` 中列出：
 
-- **Appends to `production/session-state/active.md`** — the session checkpoint
-  the hooks and the next session rely on. An append, never a rewrite of what is
-  already there.
-- **A subagent's new file at the path its orchestrating skill named.** Only a
-  new file under `production/`, `docs/` or `tests/`, only at a path the skill's
-  prompt names (never one you chose), and only inside a phase the user approved.
+- **向 `production/session-state/active.md` 追加内容** —— 这是钩子和下一次会话所依赖的会话检查点。只能是追加，绝不能重写已有内容。
+- **子代理在编排技能指定的路径上新建文件。** 只能是在 `production/`、`docs/` 或 `tests/` 下的新文件，只能是技能提示词中点名的路径（绝不能是你自己选的），并且只能在用户已批准的阶段内。
 
-`.claude/agent-memory/` is gitignored, per-agent, and never ships. Its exemption
-exists because the memory is the agent's own working notes about how to do its
-job, not a project artifact.
+`.claude/agent-memory/` 已被 gitignore，按代理隔离，且从不随项目发布。它之所以享有豁免，是因为记忆是代理自己关于如何完成工作的笔记，而不是项目产出物。
 
-None of the three extends anywhere else. The Collaboration Protocol still governs
-every other write under the code root (`src/`, `Assets/` or `Source/`),
-`design/`, `docs/`, `production/` and `assets/`: ask first, naming the path.
-Writing a memory is never a substitute for asking, and a memory must never be
-used to record something the user declined to have written.
+这三种豁免都不延伸到其他任何地方。协作协议仍管辖代码根目录（`src/`、`Assets/` 或 `Source/`）、`design/`、`docs/`、`production/` 和 `assets/` 下的所有其他写入：先询问，并指明路径。写记忆永远不能替代询问，记忆也绝不能用来记录用户拒绝写入的内容。
 
-## Never record a temporary absence as a durable fact
+## 绝不把暂时缺失记为持久事实
 
-This is the failure this file exists to prevent, and this repo is unusually
-exposed to it.
+这是本文件要防止的失败，而本仓库对此异常敏感。
 
-**CCGS ships as a template the user clones *as their game*.** So on day one every
-agent observes the same things — no game code, no GDDs, no engine configured, no
-`tests/performance/` — and every one of those observations is **guaranteed to
-stop being true**. A memory reading *"this repo is the framework, not a game;
-perf requests have no target"* is accurate when written and actively harmful two
-weeks later, when it tells a future run to return BLOCKED on a project that now
-has a build. The agent will not re-derive it; that is what memory is for.
+**CCGS 作为模板发布，用户将其克隆*作为自己的游戏*。** 因此在第一天，每个代理都会观察到同样的现象——没有游戏代码、没有 GDD、没有配置引擎、没有 `tests/performance/`——而这些观察**注定会不再成立**。一条写着*「本仓库是框架而不是游戏；性能请求没有目标」*的记忆在写下时是准确的，两周后却会主动造成伤害，因为它会让未来的运行在一个已经有构建的项目上返回 BLOCKED。代理不会重新推导它；记忆的用途正在于此。
 
-So:
+所以：
 
-- **Prefer recording a method over a state.** "Confirm an engine project and a
-  captured profile exist before profiling; return BLOCKED naming what is missing
-  rather than estimating" is durable. "There is no game here" is a timestamp.
-- **If you must record a state, state what invalidates it**, on the same line:
-  `INVALIDATED WHEN: project.yaml declares an engine, or the code root (src/, Assets/ or Source/) contains game code.`
-  A reader with no other context must be able to tell whether the note still
-  holds.
-- **Never record absence of a game, of assets, of tests or of config as a
-  settled property of the project.** Those are the states CCGS exists to move a
-  user out of.
+- **优先记录方法而不是状态。** 「在性能分析前，先确认存在引擎项目和已捕获的性能档案；若缺失，返回 BLOCKED 并指明缺什么，而不是估算」是持久的。「这里没有游戏」只是一个时间戳。
+- **如果必须记录状态，就在同一行写明什么会使它失效**：`INVALIDATED WHEN: project.yaml declares an engine, or the code root (src/, Assets/ or Source/) contains game code.` 没有其他上下文的读者必须能判断这条笔记是否仍然成立。
+- **绝不要把缺少游戏、资源、测试或配置记录为项目的固定属性。** 那些正是 CCGS 要帮助用户摆脱的状态。
 
-## Disclose the write
+## 披露写入
 
-Say in your response that you recorded a memory and where. An unmentioned write
-is indistinguishable from no write, and the user cannot correct a note they do
-not know exists — the same reason a skipped check has to announce itself
-(`.claude/rules/skill-authoring.md`, obligation 3).
+在回复中说明你记录了一条记忆以及记录在哪里。未提及的写入与没有写入无法区分，而用户无法纠正一条他们不知道存在的笔记——这和跳过的检查必须自我声明是同一个道理（`.claude/rules/skill-authoring.md`，义务 3）。
 
-## Verify before you trust
+## 先验证再信任
 
-A recalled memory reflects what was true when it was written. If it names a file,
-a path, a setting or a count, **check that it still holds before acting on it**.
-Memory is a starting point for investigation, never evidence.
+被回忆起的记忆反映的是它写下时为真的事情。如果它指名了文件、路径、设置或数量，**在据此行动前先检查它是否仍然成立**。记忆是调查的起点，绝不是证据。

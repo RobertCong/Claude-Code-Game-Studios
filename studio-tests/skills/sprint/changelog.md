@@ -2,262 +2,215 @@
 
 ## Skill Summary
 
-`/changelog` is a Sonnet-tier skill that generates two changelogs — an internal
-one and a player-facing one — from the git commits since the last release tag.
-Before using the injected history it classifies every commit as Game or
-Framework / maintenance (Unclear counts as Framework), uses only the Game
-commits, and says how many of how many it used; with zero Game commits it stops.
-With no history at all (not a git repository, or no commits) it skips that check
-and stops at Phase 1. It reads sprint plans in `production/sprints/` and GDDs in
-`design/gdd/` for context, and sorts changes into New Features, Improvements, Bug
-Fixes, Balance Changes, Technical Debt / Refactoring (internal changelog only),
-Known Issues and Miscellaneous. The internal changelog ends with a Metrics
-section that counts commits without a task reference. With no tags it bounds the
-range to `git log --oneline -n 100` rather than reading the full log. No director
-gates are used. The skill asks "May I write this changelog to
-`docs/CHANGELOG.md`?" with append / overwrite / decline options. Verdicts:
-CHANGELOG WRITTEN after a write, COMPLETE when the user declines the write,
-BLOCKED when there is no history or none of it is the game's.
+`/changelog` 是一个 Sonnet 档技能，它根据自上一个发布标签以来的 git 提交生成两份变更日志——一份内部用，一份面向玩家。在使用注入的历史记录之前，它会把每个提交归类为 Game 或 Framework / maintenance（Unclear 计入 Framework），只使用 Game 提交，并说明用了多少个、总共多少个；若 Game 提交为零则停止。若完全没有历史记录（不是 git 仓库，或没有任何提交），它会跳过该检查并在 Phase 1 停止。它读取 `production/sprints/` 中的冲刺计划与 `design/gdd/` 中的 GDD 作为上下文，并把变更归入 New Features、Improvements、Bug Fixes、Balance Changes、Technical Debt / Refactoring（仅内部变更日志）、Known Issues 和 Miscellaneous。内部变更日志以 Metrics 小节结尾，统计没有任务引用的提交数。无标签时，它把范围限定为 `git log --oneline -n 100`，而不是读取完整日志。不使用总监闸门。该技能会询问“May I write this changelog to `docs/CHANGELOG.md`?”，并提供追加 / 覆盖 / 拒绝三个选项。结论：写入后为 CHANGELOG WRITTEN，用户拒绝写入时为 COMPLETE，没有历史记录或没有一条属于本游戏时为 BLOCKED。
 
 ---
 
 ## Static Assertions (Structural)
 
-Checked against the SKILL.md by `/skill-test spec` — no fixture needed.
+由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] Has required frontmatter fields: `name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`
-- [ ] Has ≥2 phase headings
-- [ ] Contains verdict keywords: CHANGELOG WRITTEN, COMPLETE, BLOCKED
-- [ ] Contains "May I write" language (skill writes changelog)
-- [ ] Has a next-step handoff (`/patch-notes` for a player-facing release, `/release-checklist`)
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备 ≥2 个 phase 标题
+- [ ] 包含结论关键词：CHANGELOG WRITTEN、COMPLETE、BLOCKED
+- [ ] 包含 "May I write" 措辞（技能会写入变更日志）
+- [ ] 具有下一步交接（面向玩家发布时为 `/patch-notes`，或 `/release-checklist`）
 
 ---
 
 ## Director Gate Checks
 
-None. Changelog generation is a fast compilation task; no gates are invoked.
+无。变更日志生成是一个快速编译任务，不调用任何闸门。
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非该用例自己的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
 
 ---
 
 ## Test Cases
 
-### Case 1: Happy Path — Multiple sprints since last release tag
+### Case 1: 正常路径 —— 自上个发布标签以来有多个冲刺
 
 **Fixture:**
-- Git history has a tag `v0.3.0`; it is the newest tag in the injected tag list
-- Since that tag: 12 commits across sprints 006, 007, 008 — all Game commits
-  (mechanics, content, bug fixes) naming systems that appear in `design/`
-- `production/sprints/sprint-006.md` through `sprint-008.md` exist and list the
-  stories whose task IDs appear in the commit messages
-- `docs/CHANGELOG.md` does not yet exist
+- Git 历史中有标签 `v0.3.0`；它是注入标签列表中最新的标签
+- 自该标签以来：跨冲刺 006、007、008 有 12 个提交——全部为 Game 提交（机制、内容、缺陷修复），并指名了出现在 `design/` 中的系统
+- `production/sprints/sprint-006.md` 至 `sprint-008.md` 存在，并列出任务 ID 出现在提交信息中的那些用户故事
+- `docs/CHANGELOG.md` 尚不存在
 
 **Input:** `/changelog`
 
 **Expected behavior:**
-1. Skill classifies the injected commits as Game or Framework / maintenance and
-   states how many of how many it used
-2. Skill reads `git log --oneline v0.3.0..HEAD`
-3. Skill reads the sprint plans for sprints 006–008 in `production/sprints/`
-   for the context behind the changes
-4. Skill categorizes changes into New Features, Improvements, Bug Fixes,
-   Balance Changes, Technical Debt / Refactoring, Known Issues and
-   Miscellaneous, with a Metrics section
-5. Skill outputs both the internal and the player-facing changelog
-6. Skill asks "May I write this changelog to `docs/CHANGELOG.md`?" with options
-   [A] append, [B] overwrite, [C] no
-7. User selects [B]; the file is created; verdict CHANGELOG WRITTEN
+1. 技能把注入的提交归类为 Game 或 Framework / maintenance，并说明用了多少个、总共多少个
+2. 技能读取 `git log --oneline v0.3.0..HEAD`
+3. 技能读取 `production/sprints/` 中冲刺 006–008 的冲刺计划，作为变更背后的上下文
+4. 技能把变更分类为 New Features、Improvements、Bug Fixes、Balance Changes、Technical Debt / Refactoring、Known Issues 和 Miscellaneous，并带有 Metrics 小节
+5. 技能同时输出内部变更日志和面向玩家的变更日志
+6. 技能询问“May I write this changelog to `docs/CHANGELOG.md`?”，选项为 [A] 追加、[B] 覆盖、[C] 否
+7. 用户选择 [B]；文件被创建；结论 CHANGELOG WRITTEN
 
 **Assertions:**
-- [ ] Changelog covers the commits in `v0.3.0..HEAD`, and the output states how many of how many injected commits it used
-- [ ] Entries use the skill's section set — New Features, Improvements, Bug Fixes, Balance Changes, Technical Debt / Refactoring, Known Issues, Miscellaneous — not a generic Features/Fixes split
-- [ ] Sprint plans in `production/sprints/` for the covered sprints are read for context before categorizing
-- [ ] Both changelogs are presented before the "May I write" prompt, and nothing is written before approval
-- [ ] Verdict is CHANGELOG WRITTEN after the write
+- [ ] 变更日志覆盖 `v0.3.0..HEAD` 中的提交，且输出说明使用了注入提交中的多少个、总共多少个
+- [ ] 条目采用该技能的小节集合——New Features、Improvements、Bug Fixes、Balance Changes、Technical Debt / Refactoring、Known Issues、Miscellaneous——而不是笼统的 Features/Fixes 划分
+- [ ] 分类之前读取 `production/sprints/` 中相关冲刺的冲刺计划作为上下文
+- [ ] 两份变更日志都在“May I write”提示前展示，且在批准前不写入任何内容
+- [ ] 写入后结论为 CHANGELOG WRITTEN
 
 ---
 
-### Case 2: No Git Tags Found — Bounded range used
+### Case 2: 未找到 Git 标签 —— 使用限定范围
 
 **Fixture:**
-- Git repository has 20 commits and no tags; all 20 are Game commits
-- The injected tag list is empty
-- `docs/CHANGELOG.md` does not exist
+- Git 仓库有 20 个提交且没有标签；20 个全部为 Game 提交
+- 注入的标签列表为空
+- `docs/CHANGELOG.md` 不存在
 
 **Input:** `/changelog`
 
 **Expected behavior:**
-1. Skill finds no tag to anchor the range
-2. Skill bounds the range with `git log --oneline -n 100` — it does not read an
-   unbounded full log
-3. All 20 commits fall inside the 100-commit bound, so the window reaches the
-   start of history and the skill does not need to ask for a start ref
-4. Skill states how many of the commits it used
-5. Skill compiles the categorized changelog and asks "May I write" before writing
+1. 技能找不到可用于锚定范围的标签
+2. 技能用 `git log --oneline -n 100` 限定范围——它不读取无界的完整日志
+3. 20 个提交都落在 100 个提交的界限内，因此窗口到达历史起点，技能无需请求起始引用
+4. 技能说明它使用了多少个提交
+5. 技能编译分类后的变更日志，并在写入前询问“May I write”
 
 **Assertions:**
-- [ ] Skill does not error when no git tags exist
-- [ ] The range is read with the bounded `git log --oneline -n 100`, never an unbounded full log
-- [ ] All 20 commits are covered, and the skill does not ask for a start ref (the bound reaches the first commit)
-- [ ] Output states how many of the 20 commits were used
-- [ ] Changelog is still organized into sections despite the missing tag
+- [ ] 不存在 git 标签时技能不报错
+- [ ] 范围通过有界的 `git log --oneline -n 100` 读取，绝不使用无界的完整日志
+- [ ] 覆盖全部 20 个提交，且技能不请求起始引用（界限到达第一个提交）
+- [ ] 输出说明 20 个提交中使用了多少个
+- [ ] 尽管缺少标签，变更日志仍按小节组织
 
 ---
 
-### Case 3: Commit Messages Without Task IDs — Categorized by content, counted in Metrics
+### Case 3: 提交信息无任务 ID —— 按内容分类，在 Metrics 中统计
 
 **Fixture:**
-- Git log since the last tag has 8 Game commits
-- 3 commits reference task IDs (e.g. `[STORY-012]`) matching sprint stories
-- 5 commits have no task ID: "tweak dash cooldown 0.8 -> 0.6",
-  "fix player clipping through ledge", "add footstep sounds", "level tweaks",
-  "combat cleanup"
+- 自上个标签以来的 git 日志有 8 个 Game 提交
+- 3 个提交引用了与冲刺用户故事匹配的任务 ID（例如 `[STORY-012]`）
+- 5 个提交没有任务 ID："tweak dash cooldown 0.8 -> 0.6"、"fix player clipping through ledge"、"add footstep sounds"、"level tweaks"、"combat cleanup"
 
 **Input:** `/changelog`
 
 **Expected behavior:**
-1. Skill categorizes every commit by what it changed, whether or not it has a
-   task ID
-2. "tweak dash cooldown 0.8 -> 0.6" goes to Balance Changes; "fix player
-   clipping through ledge" goes to Bug Fixes
-3. "combat cleanup" says it cleans up and names no fix, feature or tuning, so it
-   goes to Technical Debt / Refactoring — in the internal changelog only
-4. "level tweaks" is too vague to classify confidently and goes to
-   Miscellaneous
-5. The Metrics section reports `Commits without task reference: 5`
-6. Skill asks "May I write" and writes on approval
+1. 技能按每个提交改动了什么来分类，无论它是否有任务 ID
+2. "tweak dash cooldown 0.8 -> 0.6" 归入 Balance Changes；"fix player clipping through ledge" 归入 Bug Fixes
+3. "combat cleanup" 只说明做了清理，未指明任何修复、功能或调优，因此归入 Technical Debt / Refactoring——仅出现在内部变更日志中
+4. "level tweaks" 过于含糊、无法自信分类，归入 Miscellaneous
+5. Metrics 小节报告 `Commits without task reference: 5`
+6. 技能询问“May I write”，并在批准后写入
 
 **Assertions:**
-- [ ] Commits are categorized by content with or without a task ID — the untagged "tweak dash cooldown 0.8 -> 0.6" lands in Balance Changes, not in a separate no-ID group
-- [ ] "combat cleanup" is listed under Technical Debt / Refactoring in the internal changelog and does not appear in the player-facing changelog
-- [ ] "level tweaks", too vague to classify, is listed under Miscellaneous
-- [ ] Metrics section contains `Commits without task reference: 5`
-- [ ] No commits are silently dropped — all 8 appear in a section
+- [ ] 无论有无任务 ID，提交都按内容分类——未标记的 "tweak dash cooldown 0.8 -> 0.6" 归入 Balance Changes，而非单独的无 ID 分组
+- [ ] "combat cleanup" 列在内部变更日志的 Technical Debt / Refactoring 下，且不出现在面向玩家的变更日志中
+- [ ] 过于含糊、无法分类的 "level tweaks" 列在 Miscellaneous 下
+- [ ] Metrics 小节包含 `Commits without task reference: 5`
+- [ ] 没有提交被悄悄丢弃——全部 8 个都出现在某个小节中
 
 ---
 
-### Case 4: Existing CHANGELOG.md — New entry at the top, old entries preserved
+### Case 4: 已存在 CHANGELOG.md —— 新条目置于顶部，旧条目保留
 
 **Fixture:**
-- `docs/CHANGELOG.md` already exists with sections for `v0.2.0` and `v0.3.0`
-- New Game commits exist since the `v0.3.0` tag
+- `docs/CHANGELOG.md` 已存在，包含 `v0.2.0` 和 `v0.3.0` 的小节
+- 自 `v0.3.0` 标签以来存在新的 Game 提交
 
 **Input:** `/changelog`
 
 **Expected behavior:**
-1. Skill compiles new entries for the period since `v0.3.0`
-2. Before asking, skill checks whether `docs/CHANGELOG.md` exists — it does, so
-   it recommends [A] append
-3. Skill asks "May I write this changelog to `docs/CHANGELOG.md`?" with
-   [A] append (recommended), [B] overwrite, [C] no
-4. User selects [A]; the new entry is placed at the top of the file (newest
-   first); the `v0.2.0` and `v0.3.0` sections are intact; verdict CHANGELOG WRITTEN
+1. 技能编译自 `v0.3.0` 以来这一时期的新条目
+2. 在询问之前，技能检查 `docs/CHANGELOG.md` 是否存在——它存在，因此推荐 [A] 追加
+3. 技能询问“May I write this changelog to `docs/CHANGELOG.md`?”，选项为 [A] 追加（推荐）、[B] 覆盖、[C] 否
+4. 用户选择 [A]；新条目被置于文件顶部（最新在前）；`v0.2.0` 和 `v0.3.0` 小节保持完整；结论 CHANGELOG WRITTEN
 
 **Assertions:**
-- [ ] Skill checks whether `docs/CHANGELOG.md` exists before asking, and recommends [A] append because it does
-- [ ] The prompt offers append, overwrite and decline as distinct options
-- [ ] On [A], the new entry is placed at the top of the file (newest first), not at the bottom and not replacing the file
-- [ ] Existing `v0.2.0` and `v0.3.0` entries are preserved in the written file
+- [ ] 技能在询问前检查 `docs/CHANGELOG.md` 是否存在，并因存在而推荐 [A] 追加
+- [ ] 提示把追加、覆盖和拒绝作为不同选项提供
+- [ ] 选择 [A] 时，新条目被置于文件顶部（最新在前），而非底部，也不会替换整个文件
+- [ ] 写入的文件中保留已有的 `v0.2.0` 和 `v0.3.0` 条目
 
 ---
 
-### Case 5: Gate Compliance — No gate; declined write ends COMPLETE
+### Case 5: 闸门合规 —— 无闸门；拒绝写入以 COMPLETE 结束
 
 **Fixture:**
-- Git history has Game commits since the last tag
-- `project.yaml` sets `modes.review_mode: full`
+- Git 历史中自上个标签以来有 Game 提交
+- `project.yaml` 设置 `modes.review_mode: full`
 
 **Input:** `/changelog`
 
 **Expected behavior:**
-1. Skill compiles both changelogs; no director gate is spawned (the skill
-   resolves only `automation`, never `review_mode`)
-2. Skill goes straight from presenting the changelogs to the write prompt
-3. User selects [C] No — I'll copy it manually
-4. Skill stops without writing; verdict COMPLETE
+1. 技能编译两份变更日志；不生成总监闸门（技能只解析 `automation`，从不解析 `review_mode`）
+2. 技能从展示变更日志直接进入写入提示
+3. 用户选择 [C] 否 —— 我会手动复制
+4. 技能停止且不写入；结论 COMPLETE
 
 **Assertions:**
-- [ ] No director gate is invoked regardless of review mode
-- [ ] Output does not reference any gate result
-- [ ] Skill proceeds directly from presenting the changelogs to the "May I write" prompt
-- [ ] On [C], no file is written and the verdict is COMPLETE, not CHANGELOG WRITTEN
+- [ ] 无论评审模式如何，都不调用总监闸门
+- [ ] 输出不引用任何闸门结果
+- [ ] 技能从展示变更日志直接进入“May I write”提示
+- [ ] 选择 [C] 时不写入文件，结论为 COMPLETE，而非 CHANGELOG WRITTEN
 
 ---
 
-### Case 6: Provenance Stop — Zero Game commits
+### Case 6: 来源校验停止 —— 零 Game 提交
 
 **Fixture:**
-- The 30 injected commits all touch the framework or tooling — subjects such as
-  "fix: session-start hook timeout", "docs: skill catalog", "ci: cache the test
-  runner" — and none names a game system in `design/` or the code root
-- `docs/CHANGELOG.md` does not exist
+- 注入的 30 个提交全部触及框架或工具链——提交主题诸如 "fix: session-start hook timeout"、"docs: skill catalog"、"ci: cache the test runner"——且没有一个指名 `design/` 或代码根目录中的游戏系统
+- `docs/CHANGELOG.md` 不存在
 
 **Input:** `/changelog`
 
 **Expected behavior:**
-1. Skill classifies every injected commit: 0 Game, 30 Framework / maintenance
-2. Skill stops with "The git history in this repo does not appear to belong to
-   [game] …", describing what the commits actually cover
-3. No changelog is generated and nothing is written; verdict BLOCKED
+1. 技能对每个注入的提交进行分类：0 个 Game，30 个 Framework / maintenance
+2. 技能以“The git history in this repo does not appear to belong to [game] …”停止，并描述这些提交实际覆盖了什么
+3. 不生成变更日志，也不写入任何内容；结论 BLOCKED
 
 **Assertions:**
-- [ ] Output names the classification result — 0 of 30 commits are Game commits
-- [ ] Output contains the "does not appear to belong to" stop, not a changelog built from framework commits (no "Fixed an issue where …" copy from a hook fix)
-- [ ] No "May I write" prompt appears and no file is written
-- [ ] Verdict is BLOCKED — not COMPLETE and not CHANGELOG WRITTEN
+- [ ] 输出给出分类结果——30 个提交中 0 个为 Game 提交
+- [ ] 输出包含 "does not appear to belong to" 停止语，而不是用框架提交构建的变更日志（不会把钩子修复写成“Fixed an issue where …”）
+- [ ] 不出现“May I write”提示，也不写入文件
+- [ ] 结论为 BLOCKED——而非 COMPLETE，也非 CHANGELOG WRITTEN
 
 ---
 
-### Case 7: No History — Not a git repository
+### Case 7: 无历史记录 —— 不是 git 仓库
 
 **Fixture:**
-- The project directory is not a git repository, so both injected history
-  blocks are empty
-- `docs/CHANGELOG.md` does not exist
+- 项目目录不是 git 仓库，因此两个注入的历史块都为空
+- `docs/CHANGELOG.md` 不存在
 
 **Input:** `/changelog`
 
 **Expected behavior:**
-1. The injected commit list is empty, so the provenance check is skipped —
-   there is nothing to classify
-2. Phase 1's `git rev-parse --is-inside-work-tree` fails; skill outputs "No git
-   history found. A changelog is built from commits …"
-3. Nothing is generated or written; verdict BLOCKED
+1. 注入的提交列表为空，因此跳过来源校验——没有可分类的内容
+2. Phase 1 的 `git rev-parse --is-inside-work-tree` 失败；技能输出“No git history found. A changelog is built from commits …”
+3. 不生成也不写入任何内容；结论 BLOCKED
 
 **Assertions:**
-- [ ] The "does not appear to belong to" provenance stop is NOT shown — an empty history is not a wrong history
-- [ ] Output says no git history was found and offers committing the work or supplying the change list directly
-- [ ] No changelog is generated, no "May I write" prompt appears, and no file is written
-- [ ] Verdict is BLOCKED
+- [ ] 不显示 "does not appear to belong to" 来源校验停止语——空历史不等于错误的历史
+- [ ] 输出说明未找到 git 历史，并提供两个选项：提交现有工作，或直接提供变更清单
+- [ ] 不生成变更日志，不出现“May I write”提示，也不写入文件
+- [ ] 结论为 BLOCKED
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Classifies the injected commits as Game or Framework / maintenance and uses only Game commits
-- [ ] Reads the git log and the sprint plans in `production/sprints/` before compiling
-- [ ] Always asks "May I write" before writing the changelog
-- [ ] No director gates are invoked
-- [ ] Verdict is CHANGELOG WRITTEN after a write, COMPLETE when the write is declined, and BLOCKED when there is no history or no Game commit
-- [ ] Declares `model: sonnet` — it writes player-facing copy
+- [ ] 把注入的提交归类为 Game 或 Framework / maintenance，并且只使用 Game 提交
+- [ ] 编译之前读取 git 日志和 `production/sprints/` 中的冲刺计划
+- [ ] 写入变更日志之前始终询问“May I write”
+- [ ] 不调用任何总监闸门
+- [ ] 写入后结论为 CHANGELOG WRITTEN，拒绝写入时为 COMPLETE，没有历史记录或没有 Game 提交时为 BLOCKED
+- [ ] 声明 `model: sonnet`——它撰写面向玩家的文案
 
 ---
 
 ## Coverage Notes
 
-- A git repository with no commits yet (the same Phase 1 stop as Case 7) is not
-  separately tested.
-- More than 100 commits with no tag (the skill says so and asks for a start ref
-  instead of widening the range) is not tested.
-- Merge commits vs. squash commits are not explicitly differentiated in
-  these tests; implementation detail of the git log parsing phase.
-- The `/patch-notes` skill should be run after `/changelog` for player-facing
-  output; that handoff is verified in the patch-notes spec.
+- 尚无任何提交的 git 仓库（与 Case 7 相同的 Phase 1 停止）未单独测试。
+- 超过 100 个提交且无标签（技能会说明并请求起始引用，而非扩大范围）未测试。
+- 合并提交与压缩提交在这些测试中未显式区分；这属于 git 日志解析阶段的实现细节。
+- 面向玩家输出时，应在 `/changelog` 之后运行 `/patch-notes` 技能；该交接在 patch-notes 规格中验证。

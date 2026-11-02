@@ -1,75 +1,70 @@
-# Path-Specific Rules
+# 路径专属规则（Path-Specific Rules）
 
-Rules in `.claude/rules/` carry `paths:` frontmatter. Claude Code loads a
-path-scoped rule **when it READS a file matching one of those globs** — not on
-every tool use, and not when it creates one.
+`.claude/rules/` 中的规则带有 `paths:` frontmatter。Claude Code **在它读取匹配
+其中某个 glob 的文件时**加载路径作用域规则 — 不是每次工具调用时，也不是在创建
+文件时。
 
-Three consequences, and none of them are optional reading:
+由此产生三个后果，没有一个是可选阅读的：
 
-1. **Reading, not editing.** A rule scoped to a gameplay folder reaches the
-   model when a file there is opened. An agent that writes a brand-new file in that
-   directory without opening an existing one never sees it. Most work in this
-   framework creates files rather than reads them, so this is the common case,
-   not the corner case.
-2. **Context, not enforcement.** A loaded rule is guidance the model weighs, the
-   same as `CLAUDE.md`. Anything that must hold regardless of what the model
-   decides belongs in a hook — `.claude/hooks/` already enforces JSON validity
-   and commit shape that way.
-3. **A rule with no `paths:` loads every session**, at the same priority as
-   `.claude/CLAUDE.md`. That is the lever for a rule that must always apply; it
-   costs context in every session, so it is a deliberate trade, not a default.
+1. **是读取，不是编辑。** 作用域为某个玩法文件夹的规则，只有在打开该处文件时才会
+   到达模型。一个在该目录中写入全新文件却从未打开现有文件的代理永远看不到它。本
+   框架中的多数工作是在创建文件而非读取文件，所以这是常见情况，而不是边缘情况。
+2. **是上下文，不是强制。** 已加载的规则是模型会权衡的指导，与 `CLAUDE.md` 相同。
+   任何必须不论模型如何决定都要成立的内容，都应放入钩子 — `.claude/hooks/` 已经
+   以这种方式强制 JSON 有效性和提交格式。
+3. **没有 `paths:` 的规则会在每个会话中加载**，优先级与 `.claude/CLAUDE.md` 相同。
+   这是让规则始终生效的杠杆；它会在每个会话中消耗上下文，因此是有意的取舍，而不是
+   默认做法。
 
-Where a rule duplicates guidance an agent definition already carries, the two
-must agree. Contradicting instructions are resolved arbitrarily, so a rule and
-an agent stating different versions of the same standard is worse than either
-alone.
+当某条规则与某份代理定义已经携带的指导重复时，两者必须一致。相互矛盾的指令会被
+任意地取舍，因此规则与代理对同一标准表述不同版本，比只有其中任何一个都更糟。
 
-To see which rules actually load, and why, wire the `InstructionsLoaded` hook —
-`.claude/hooks/log-instructions.sh` records every instruction file and its load
-reason (`session_start`, `path_glob_match`, `nested_traversal`, `include`,
-`compact`) to `production/session-logs/instructions-loaded.log`.
+要查看实际加载了哪些规则以及原因，请接入 `InstructionsLoaded` 钩子 —
+`.claude/hooks/log-instructions.sh` 会把每个指令文件及其加载原因（`session_start`、
+`path_glob_match`、`nested_traversal`、`include`、`compact`）记录到
+`production/session-logs/instructions-loaded.log`。
 
-**Globs match regardless of case.** Claude Code 2.1.282 matches `paths:`
-gitignore-style and case-insensitively (observed; the docs do not say), so
-`Assets/**/UI/**` also matches a Godot project's `assets/ui/` art. That is why
-the Unity and Unreal code globs below name their file types.
+**Glob 匹配不区分大小写。** Claude Code 2.1.282 以 gitignore 风格且不区分大小写地
+匹配 `paths:`（实测；文档未说明），因此 `Assets/**/UI/**` 也会匹配 Godot 项目的
+`assets/ui/` 美术资源。这就是下文中 Unity 与 Unreal 的代码 glob 要指明文件类型的
+原因。
 
-Paths are listed Godot · Unity · Unreal. Folder names are shown in one case;
-each rule's own globs list the case variants (`{AI,Ai,ai}`).
+路径按 Godot · Unity · Unreal 顺序列出。文件夹名只展示一种大小写形式；每条规则
+自身的 glob 会列出所有大小写变体（`{AI,Ai,ai}`）。
 
-| Rule File | Path Pattern | Enforces |
+| 规则文件 | 路径模式 | 强制内容 |
 | ---- | ---- | ---- |
-| `gameplay-code.md` | `src/gameplay/**` · `Assets/**/Gameplay/**/*.cs` · `Source/**/Gameplay/**/*.{h,cpp}` | Data-driven values, delta time, no UI references |
-| `engine-code.md` | `src/core/**` · `Assets/**/Core/**/*.cs` · `Source/**/Core/**/*.{h,cpp}` | Zero allocs in hot paths, thread safety, API stability |
-| `ai-code.md` | `src/ai/**` · `Assets/**/AI/**/*.cs` · `Source/**/AI/**/*.{h,cpp}` | Performance budgets, debuggability, data-driven params |
-| `network-code.md` | `src/networking/**` · `Assets/**/Network(ing)/**/*.cs` · `Source/**/Network(ing)/**/*.{h,cpp}` | Server-authoritative, versioned messages, security |
-| `ui-code.md` | `src/ui/**` · `Assets/**/UI/**/*.cs` · `Source/**/UI/**/*.{h,cpp}` | No game state ownership, localization-ready, accessibility |
-| `design-docs.md` | `design/gdd/**` | Required sections per `modes.workflow` (8 at `full`, 5 at `standard`), formula format, edge cases |
-| `narrative.md` | `design/narrative/**` | Lore consistency, character voice, canon levels |
-| `data-files.md` | `assets/data/**/*.json` · `Assets/**/Data/**/*.json` · `Content/**/Data/**/*.json` | JSON validity, naming conventions, schema rules |
-| `test-standards.md` | `tests/**` · `Assets/Tests/**/*.cs` · `Source/**/Tests/**/*.{h,cpp}` | Test naming, coverage requirements, fixture patterns |
-| `prototype-code.md` | `prototypes/**` | Relaxed standards, README required, hypothesis documented |
-| `shader-code.md` | `assets/shaders/**`, `**/*.gdshader` · `Assets/**/*.{shader,hlsl,cginc,compute,shadergraph}` · `Shaders/**`, `**/*.{usf,ush}` | Naming conventions, performance targets, cross-platform rules |
-| `scene-files.md` | `**/*.tscn`, `**/*.tres` · `**/*.unity`, `**/*.prefab`, `Assets/**/*.asset` · — | Hand-edit limits for editor-written scene and asset files; Unreal `.uasset`/`.umap` are binary, and `settings.json` denies edits to them |
-| `agent-memory.md` | `.claude/agent-memory/**` | The one place an agent may write unasked — and why a temporary absence must never be recorded as a durable fact |
-| `skill-authoring.md` | `.claude/skills/**`, `.claude/agents/**` | A check must be able to report that it did not run — the five obligations for verdicts, defaults, skips, sourcing and derived coverage |
+| `gameplay-code.md` | `src/gameplay/**` · `Assets/**/Gameplay/**/*.cs` · `Source/**/Gameplay/**/*.{h,cpp}` | 数据驱动取值、delta time、不引用 UI |
+| `engine-code.md` | `src/core/**` · `Assets/**/Core/**/*.cs` · `Source/**/Core/**/*.{h,cpp}` | 热路径零分配、线程安全、API 稳定性 |
+| `ai-code.md` | `src/ai/**` · `Assets/**/AI/**/*.cs` · `Source/**/AI/**/*.{h,cpp}` | 性能预算、可调试性、数据驱动参数 |
+| `network-code.md` | `src/networking/**` · `Assets/**/Network(ing)/**/*.cs` · `Source/**/Network(ing)/**/*.{h,cpp}` | 服务器权威、版本化消息、安全 |
+| `ui-code.md` | `src/ui/**` · `Assets/**/UI/**/*.cs` · `Source/**/UI/**/*.{h,cpp}` | 不持有游戏状态、可本地化、无障碍 |
+| `design-docs.md` | `design/gdd/**` | 按 `modes.workflow` 规定的必需章节（`full` 为 8 个，`standard` 为 5 个）、公式格式、边界情况 |
+| `narrative.md` | `design/narrative/**` | 设定一致性、角色口吻、正典层级 |
+| `data-files.md` | `assets/data/**/*.json` · `Assets/**/Data/**/*.json` · `Content/**/Data/**/*.json` | JSON 有效性、命名约定、schema 规则 |
+| `test-standards.md` | `tests/**` · `Assets/Tests/**/*.cs` · `Source/**/Tests/**/*.{h,cpp}` | 测试命名、覆盖率要求、fixture 模式 |
+| `prototype-code.md` | `prototypes/**` | 放宽的标准、必需 README、记录假设 |
+| `shader-code.md` | `assets/shaders/**`, `**/*.gdshader` · `Assets/**/*.{shader,hlsl,cginc,compute,shadergraph}` · `Shaders/**`, `**/*.{usf,ush}` | 命名约定、性能目标、跨平台规则 |
+| `scene-files.md` | `**/*.tscn`, `**/*.tres` · `**/*.unity`, `**/*.prefab`, `Assets/**/*.asset` · — | 对编辑器写入的场景与资源文件的手工编辑限制；Unreal 的 `.uasset`/`.umap` 是二进制文件，`settings.json` 禁止编辑它们 |
+| `agent-memory.md` | `.claude/agent-memory/**` | 代理唯一可未经请求写入的地方 — 以及为何暂时的缺失绝不能被记录为持久事实 |
+| `skill-authoring.md` | `.claude/skills/**`, `.claude/agents/**` | 检查必须能够报告自己未运行 — 关于结论、默认值、跳过、来源和派生覆盖率的五项义务 |
 
-Each engine-facing rule loads on all three engines:
+每条面向引擎的规则都会在三个引擎上加载：
 
-- **Code rules** (`gameplay`, `engine`, `ai`, `network`, `ui`) match
-  `Assets/**/<System>/**/*.cs` and `Source/**/<System>/**/*.{h,cpp}` (`Core`,
-  `AI`, `Networking`/`Network`, `UI` for the others).
-- **`data-files.md`** matches `Assets/**/Data/**/*.json` and `Content/**/Data/**/*.json`
-  — JSON only, so C# or C++ in a `Data/` folder does not pick up its file-naming rule.
-- **`shader-code.md`** matches shader files by type: `.gdshader`, `.shader`,
-  `.hlsl`, `.cginc`, `.compute`, `.shadergraph`, `.usf`, `.ush`, plus `Shaders/**`.
-- **`test-standards.md`** matches `Assets/Tests/**/*.cs` and `Source/**/Tests/**/*.{h,cpp}`.
-- **`scene-files.md`** is the exception: Godot and Unity scene and asset files are text and have
-  rules; Unreal's are binary, so a deny rule blocks edits instead of a rule guiding them.
+- **代码规则**（`gameplay`、`engine`、`ai`、`network`、`ui`）匹配
+  `Assets/**/<System>/**/*.cs` 和 `Source/**/<System>/**/*.{h,cpp}`（其余规则对应
+  `Core`、`AI`、`Networking`/`Network`、`UI`）。
+- **`data-files.md`** 匹配 `Assets/**/Data/**/*.json` 和
+  `Content/**/Data/**/*.json` — 仅限 JSON，因此 `Data/` 文件夹中的 C# 或 C++ 不会
+  套用其文件命名规则。
+- **`shader-code.md`** 按类型匹配着色器文件：`.gdshader`、`.shader`、
+  `.hlsl`、`.cginc`、`.compute`、`.shadergraph`、`.usf`、`.ush`，以及 `Shaders/**`。
+- **`test-standards.md`** 匹配 `Assets/Tests/**/*.cs` 和
+  `Source/**/Tests/**/*.{h,cpp}`。
+- **`scene-files.md`** 是例外：Godot 与 Unity 的场景和资源文件是文本，因此有对应
+  规则；Unreal 的是二进制，所以用 deny 规则阻止编辑，而不是用规则加以引导。
 
-> **`skill-authoring.md` is the odd one out and deliberately so.** Every other
-> rule here scopes a *game* directory; that one scopes the **framework's own**
-> authoring paths. It exists because one failure shape kept recurring across
-> unrelated subsystems — a step that could not run producing output
-> indistinguishable from a step that ran and found nothing. The same mistake in
-> nine places is a missing design rule, not nine mistakes.
+> **`skill-authoring.md` 是异类，而且是有意为之。** 这里的其他规则都作用于*游戏*
+> 目录；它作用于**框架自身**的编写路径。它之所以存在，是因为同一种失败形态在不相关的
+> 子系统中反复出现 — 一个无法运行的步骤产出的结果，与运行了却什么也没找到的步骤
+> 无法区分。同一个错误出现在九个地方，说明缺失的是一条设计规则，而不是九个错误。

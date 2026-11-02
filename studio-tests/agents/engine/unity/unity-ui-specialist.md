@@ -1,82 +1,82 @@
 # Agent Test Spec: unity-ui-specialist
 
 ## Agent Summary
-Domain: Unity UI Toolkit (UXML/USS), UGUI (Canvas), data binding, runtime UI performance, and UI input event handling.
-Does NOT own: UX flow design (ux-designer), visual art style (art-director).
-No gate IDs assigned.
+领域：Unity UI Toolkit（UXML/USS）、UGUI（Canvas）、数据绑定、运行时 UI 性能以及 UI 输入事件处理。
+不负责：UX 流程设计（ux-designer）、视觉美术风格（art-director）。
+未分配质量闸门（gate）ID。
 
 ---
 
 ## Static Assertions (Structural)
 
-- [ ] `description:` field is present and domain-specific (references UI Toolkit / UGUI / Canvas / data binding)
-- [ ] `tools:` list includes Read, Write, Edit, Bash, Glob, Grep
-- [ ] Model tier is `sonnet` — frontmatter `model:` reads exactly `sonnet` (tiers: `.claude/docs/model-tiers.md`)
-- [ ] Agent definition does not claim authority over UX flow design or visual art direction
+- [ ] `description:` 字段存在且与领域相关（提及 UI Toolkit / UGUI / Canvas / 数据绑定）
+- [ ] `tools:` 列表包含 Read、Write、Edit、Bash、Glob、Grep
+- [ ] 模型层级为 `sonnet` — frontmatter `model:` 的内容恰好为 `sonnet`（层级说明：`.claude/docs/model-tiers.md`）
+- [ ] 代理定义未声明对 UX 流程设计或视觉美术方向的权限
 
 ---
 
 ## Test Cases
 
-### Case 1: In-domain request — appropriate output
-**Input:** "Implement an inventory UI screen using Unity UI Toolkit."
+### Case 1: 领域内请求 — 输出得当
+**Input:** "使用 Unity UI Toolkit 实现一个背包 UI 界面。"
 **Expected behavior:**
-- Produces a UXML document defining the inventory panel structure (ListView, item templates, detail panel)
-- Produces USS styles for the inventory layout and item states (default, hover, selected)
-- Provides C# code binding the inventory data model to the UI through the runtime binding system: a ViewModel implementing `INotifyBindablePropertyChanged`, with the UI reading through bindings and never writing game state
-- Uses `ListView` with `makeItem` / `bindItem` callbacks for the scrollable item list
-- Does NOT produce the UX flow design — implements from a provided spec
+- 生成定义背包面板结构的 UXML 文档（ListView、物品模板、详情面板）
+- 为背包布局与物品状态（默认、悬停、选中）生成 USS 样式
+- 提供通过运行时绑定系统把背包数据模型绑定到 UI 的 C# 代码：实现 `INotifyBindablePropertyChanged` 的 ViewModel，UI 通过绑定读取，绝不写入游戏状态
+- 对可滚动物品列表使用带 `makeItem` / `bindItem` 回调的 `ListView`
+- 不生成 UX 流程设计 — 而是依据提供的规格实现
 
-### Case 2: Out-of-domain redirect
-**Input:** "Design the UX flow for the inventory — what happens when the player equips vs. drops an item."
+### Case 2: 领域外重定向
+**Input:** "设计背包的 UX 流程 — 玩家装备与丢弃物品时分别会发生什么。"
 **Expected behavior:**
-- Does NOT produce UX flow design
-- Explicitly states that interaction flow design belongs to `ux-designer`
-- Redirects the request to `ux-designer`
-- Notes it will implement whatever flow the ux-designer specifies
+- 不生成 UX 流程设计
+- 明确说明交互流程设计属于 `ux-designer`
+- 将请求重定向到 `ux-designer`
+- 说明它将实现 ux-designer 指定的任何流程
 
-### Case 3: UI Toolkit data binding for dynamic list
-**Input:** "The inventory list needs to update in real time as items are added or removed from the player's bag."
+### Case 3: UI Toolkit 动态列表数据绑定
+**Input:** "背包列表需要随着物品被加入或移出玩家背包实时更新。"
 **Expected behavior:**
-- Produces the `ListView` pattern over the inventory's backing collection, virtualized with `makeItem` / `bindItem` so only visible rows exist
-- Drives the refresh from the inventory's change event (game state → ViewModel → binding), not from per-frame polling
-- Does NOT refresh the list by querying the visual tree for each element — flags per-frame visual-tree queries as an antipattern and caches references instead
-- Does NOT create and destroy row elements on each change — reuses rows through the virtualized list
+- 在背包的后备集合上生成 `ListView` 模式，通过 `makeItem` / `bindItem` 虚拟化，从而仅存在可见行
+- 由背包的变更事件驱动刷新（游戏状态 → ViewModel → 绑定），而非逐帧轮询
+- 不通过逐元素查询可视化树来刷新列表 — 将逐帧可视化树查询标记为反模式，并改为缓存引用
+- 不在每次变更时创建和销毁行元素 — 通过虚拟化列表复用行
 
-### Case 4: Canvas performance — overdraw
-**Input:** "The main menu canvas is causing GPU overdraw warnings; there are many overlapping panels."
+### Case 4: Canvas 性能 — 过度绘制
+**Input:** "主菜单 canvas 触发了 GPU 过度绘制（overdraw）警告；有很多重叠面板。"
 **Expected behavior:**
-- Confirms the hotspot with a profiler before changing structure (Frame Debugger, Profiler UI module)
-- Recommends its documented Canvas remediation:
-  - One Canvas per logical UI layer, with frequently changing and static content on separate Canvases
-  - Explicit `Canvas.sortingOrder` rather than hierarchy order
-  - Shared sprite atlases so panels batch, and Raycast Target disabled on non-interactive elements
-  - A `CanvasGroup` to fade or hide a group of elements, not per-Image alpha changes
-- Notes that screen-space menus are UI Toolkit territory under its own selection rules (the engine reference also marks UGUI Canvas as superseded for new projects), offered as an option rather than a unilateral rewrite
+- 在改动结构前先用性能分析工具确认热点（Frame Debugger、Profiler 的 UI 模块）
+- 推荐其有文档记录的 Canvas 改进措施：
+  - 每个逻辑 UI 层一个 Canvas，将频繁变化的内容与静态内容放在不同 Canvas 上
+  - 使用显式的 `Canvas.sortingOrder` 而非依赖层级顺序
+  - 共享 sprite 图集以便面板合批，并在非交互元素上禁用 Raycast Target
+  - 使用 `CanvasGroup` 淡出或隐藏一组元素，而非逐个更改 Image 的 alpha
+- 说明按其自身选型规则，屏幕空间菜单属于 UI Toolkit 范畴（引擎参考资料也将 UGUI Canvas 标记为对新项目已被取代），将其作为选项提供，而非单方面重写
 
-### Case 5: Context pass — Unity version
-**Input:** Project context: Unity 2022.3 LTS. Request: "Implement the settings panel with data binding."
+### Case 5: 上下文校验 — Unity 版本
+**Input:** 项目上下文：Unity 2022.3 LTS。请求："用数据绑定实现设置面板。"
 **Expected behavior:**
-- Checks the stated version against `docs/engine-reference/unity/VERSION.md`, which pins Unity 6.3 LTS, and asks which editor is actually installed before choosing a binding API
-- Does NOT state from memory which Unity version introduced runtime data binding — the engine reference does not document it, so the claim is flagged as unverified
-- Does NOT emit the runtime binding system (`INotifyBindablePropertyChanged`) for a 2022.3 editor until that API is confirmed available there
-- Keeps the version-independent parts of its pattern regardless: UI reads state, user actions dispatch commands, the panel never writes game state directly
+- 将所述版本与锁定 Unity 6.3 LTS 的 `docs/engine-reference/unity/VERSION.md` 对照，并在选择绑定 API 前询问实际安装的是哪个编辑器版本
+- 不凭记忆断言哪个 Unity 版本引入了运行时数据绑定 — 引擎参考资料未记录该信息，因此该说法被标记为未核实
+- 在确认该 API 在 2022.3 编辑器中可用之前，不为其输出运行时绑定系统（`INotifyBindablePropertyChanged`）
+- 无论如何都保留其模式中与版本无关的部分：UI 读取状态，用户操作派发命令，面板绝不直接写入游戏状态
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Stays within declared domain (UI Toolkit, UGUI, data binding, UI performance)
-- [ ] Redirects UX flow design to ux-designer
-- [ ] Returns structured output (UXML, USS, C# binding code)
-- [ ] Checks the project's Unity version against `docs/engine-reference/unity/VERSION.md` before using version-dependent UI APIs, and asks when the stated version and the pin disagree
-- [ ] Flags Canvas overdraw as a performance antipattern and provides specific remediation (Canvas split by layer and update rate, atlasing, Raycast Target off)
-- [ ] Hides elements with its documented mechanism — `VisualElement.visible = false` in UI Toolkit, a `CanvasGroup` in UGUI — never by setting each element's alpha to 0
-- [ ] Asks "May I write this to [filepath]?" naming the file before writing
+- [ ] 保持在声明的领域内（UI Toolkit、UGUI、数据绑定、UI 性能）
+- [ ] 将 UX 流程设计重定向到 ux-designer
+- [ ] 返回结构化输出（UXML、USS、C# 绑定代码）
+- [ ] 在使用依赖版本的 UI API 前，将项目 Unity 版本与 `docs/engine-reference/unity/VERSION.md` 对照，并在所述版本与锁定版本不一致时询问
+- [ ] 将 Canvas 过度绘制标记为性能反模式，并提供具体改进措施（按层与更新频率拆分 Canvas、图集化、关闭 Raycast Target）
+- [ ] 用其有文档记录的机制隐藏元素 — UI Toolkit 中用 `VisualElement.visible = false`，UGUI 中用 `CanvasGroup` — 绝不通过把每个元素的 alpha 设为 0 来隐藏
+- [ ] 写入前询问 "May I write this to [filepath]?" 并指明文件名
 
 ---
 
 ## Coverage Notes
-- Inventory UI (Case 1) should have a retained screenshot of each screen touched in `production/qa/evidence/`
-- Dynamic list binding (Case 3) should have an integration test or automated interaction test
-- Canvas overdraw (Case 4) verifies the agent knows the correct Unity UI performance patterns
+- 背包 UI（Case 1）应在 `production/qa/evidence/` 中保留涉及到的每个界面的截图
+- 动态列表绑定（Case 3）应有集成测试或自动化交互测试
+- Canvas 过度绘制（Case 4）验证代理掌握正确的 Unity UI 性能模式

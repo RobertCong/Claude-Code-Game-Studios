@@ -1,70 +1,40 @@
-# Code Root Resolution
+# 代码根目录解析
 
-Shared procedure for any skill that reads, scans, counts or writes game source
-files. **An unresolved code root means the check did not run.** This file gives
-the resolution order.
+任何读取、扫描、统计或写入游戏源代码文件的技能都共用此流程。**代码根目录未解析，就意味着检查没有运行。** 本文件给出解析顺序。
 
-`.claude/docs/directory-structure.md` is the authority for which directory holds
-code. This file is the procedure for applying it.
+`.claude/docs/directory-structure.md` 是判定哪个目录存放代码的权威依据。本文件是应用该依据的流程。
 
-## The roots
+## 各根目录
 
-| `engine.name` | Code root | Why it cannot be `src/` |
+| `engine.name` | 代码根目录 | 为什么不能是 `src/` |
 |---|---|---|
-| Godot | `src/` | No constraint; Godot loads from `res://` anywhere under the project root |
-| Unity | `Assets/` | Unity compiles **only** `Assets/` and `Packages/` |
-| Unreal | `Source/<Module>/` | UnrealBuildTool discovers modules under `Source/`; content lives in `Content/` |
+| Godot | `src/` | 无约束；Godot 会从项目根目录下的任意位置通过 `res://` 加载 |
+| Unity | `Assets/` | Unity **只**编译 `Assets/` 和 `Packages/` |
+| Unreal | `Source/<Module>/` | UnrealBuildTool 在 `Source/` 下发现模块；内容位于 `Content/` |
 
-`src/` is the **Godot row of that table, not a universal path.**
+`src/` 是**上表中的 Godot 那一行，而不是通用路径。**
 
-## Resolution order
+## 解析顺序
 
-1. `engine.name` from `project.local.yaml`, then `project.yaml`.
-2. The legacy mirror: an `Engine:` line in
-   `.claude/docs/technical-preferences.md`. A value of `[TO BE CONFIGURED]`
-   does not count.
-3. Derivation from the tree, but **only when it is unambiguous**. Exactly one of
-   `src/`, `Assets/` or `Source/` present means that is the root. Two or more
-   present means the project is genuinely undecidable — do not guess. Compare the
-   names exactly as the directory listing spells them: on Windows and default
-   macOS an existence test for `Assets/` also succeeds on Godot's own `assets/`,
-   which would make `src/` + `assets/` look ambiguous and a lone `assets/` look
-   like Unity.
-4. Otherwise: **unresolved.**
+1. 从 `project.local.yaml` 读取 `engine.name`，再读 `project.yaml`。
+2. 兼容镜像：`.claude/docs/technical-preferences.md` 中的 `Engine:` 行。值为 `[TO BE CONFIGURED]` 时不算数。
+3. 从目录树推导，但**仅在其明确无歧义时**才这样做。`src/`、`Assets/`、`Source/` 中恰好存在一个，就说明它是根目录。存在两个或更多，则项目确实无法判定 —— 不要猜测。按目录列表的拼写精确比较名称：在 Windows 和默认 macOS 上，对 `Assets/` 的存在性检测在 Godot 自带的 `assets/` 上也会成功，这会使 `src/` + `assets/` 看起来有歧义，而单独的 `assets/` 看起来像 Unity。
+4. 否则：**未解析。**
 
-The hooks already implement exactly this as `resolve_code_root()` in
-`.claude/hooks/yaml-helper.sh`. Skills must match its semantics so that a hook
-and a skill never disagree about where the code lives.
+钩子已经在 `.claude/hooks/yaml-helper.sh` 中以 `resolve_code_root()` 精确实现了这一点。技能必须与它的语义保持一致，这样钩子和技能就不会在代码位置的问题上产生分歧。
 
-## Unresolved does not default to `src/`
+## 未解析不会默认回退到 `src/`
 
-This is the rule the whole file exists for, and it is obligation 2 of
-`.claude/rules/skill-authoring.md`: an absent value may not default to the
-permissive one.
+这正是本文件存在的意义所在，它也是 `.claude/rules/skill-authoring.md` 中第 2 条义务：缺失值不得默认取宽松的那一个。
 
-**For a read or scan:** report `NOT ASSESSED — code root unresolved` and say
-which check did not run. Never report zero hits.
+**对于读取或扫描：** 报告 `NOT ASSESSED — code root unresolved`，并说明是哪项检查没有运行。绝不要报告零命中。
 
-A scan anchored to a root the project does not use matches nothing, and
-**nothing is indistinguishable from a clean result.** A localization check finds
-no hardcoded strings; a security scan finds no secrets; a content audit counts
-no implemented content; a stage detector counts no source files and calls a
-finished project greenfield. Every one of those reads as a pass. This has been
-found repeatedly across skills and hooks, which is why the resolution lives in
-one place now.
+以项目并未使用的根目录为锚点的扫描什么也匹配不到，而**什么都匹配不到与干净结果无法区分。** 本地化检查发现不了硬编码字符串；安全扫描发现不了密钥；内容审计统计不到已实现的内容；阶段检测器统计不到源文件，并把一个已完成的项目判定为全新项目。上述每一项都会被读作通过。这在技能和钩子中已被反复发现，这也是如今把解析集中在一处的原因。
 
-**For a write:** do not write. Report the unresolved root and stop.
+**对于写入：** 不要写入。报告未解析的根目录并停止。
 
-Writing game code to the wrong root is worse than a false pass, because it
-produces a project that cannot build: on Unity, source placed outside `Assets/`
-is never compiled and never appears in the editor, so the work is silently
-inert. Resolving the engine in order to pick a specialist agent is **not** the
-same as resolving the code root — a skill can do the first correctly and still
-write to the wrong directory.
+把游戏代码写入错误的根目录比误报通过更糟，因为它会产生一个无法构建的项目：在 Unity 上，放在 `Assets/` 之外的源代码永远不会被编译，也永远不会出现在编辑器中，因此这些工作会悄无声息地失效。为了挑选专家 agent 而解析引擎，**并不**等同于解析代码根目录 —— 技能可能正确完成了前者，却仍然写入了错误的目录。
 
-## Applying it
+## 应用方式
 
-Where a skill says `src/`, read it as *the code root* and substitute the table
-above. Where a skill greps, glob the resolved root. Where a skill writes,
-write under the resolved root and use the engine's own conventions beneath it
-(`Assets/Scripts/<System>/` on Unity, `Source/<Module>/<System>/` on Unreal).
+当技能中提到 `src/` 时，应读作*代码根目录*，并代入上表。当技能执行 grep 时，在解析出的根目录下执行 glob。当技能执行写入时，写入解析出的根目录之下，并在其下沿用引擎自身的约定（Unity 上为 `Assets/Scripts/<System>/`，Unreal 上为 `Source/<Module>/<System>/`）。

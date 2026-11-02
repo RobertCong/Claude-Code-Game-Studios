@@ -1,7 +1,6 @@
-# CLAUDE.local.md Template
+# CLAUDE.local.md 模板
 
-Copy this file to the project root as `CLAUDE.local.md` for personal overrides.
-This file is gitignored and will not be committed.
+将此文件复制到项目根目录并命名为 `CLAUDE.local.md`，用于个人覆盖配置。该文件已被 gitignore，不会被提交。
 
 ```markdown
 # Personal Preferences
@@ -30,8 +29,8 @@ This file is gitignored and will not be committed.
 - When I say "status", show git status + sprint progress
 ```
 
-## Setup
+## 设置
 
-1. Copy this template to your project root: `cp .claude/docs/CLAUDE-local-template.md CLAUDE.local.md`
-2. Edit to match your preferences
-3. Verify `CLAUDE.local.md` is in `.gitignore` (Claude Code reads it from the project root)
+1. 将此模板复制到项目根目录：`cp .claude/docs/CLAUDE-local-template.md CLAUDE.local.md`
+2. 按你的偏好进行编辑
+3. 确认 `CLAUDE.local.md` 已列入 `.gitignore`（Claude Code 会从项目根目录读取它）

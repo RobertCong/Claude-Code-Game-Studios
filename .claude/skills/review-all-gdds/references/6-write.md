@@ -1,35 +1,32 @@
-# /review-all-gdds — Phase 6: Write Report and Flag GDDs
+# /review-all-gdds — Phase 6: 编写报告并标记 GDD
 
-> Part of `/review-all-gdds`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> 属于 `/review-all-gdds`。`SKILL.md` 指明何时读取本文件；它解析出的设置以及其后各标题下的规则在此同样适用。
 
-## Phase 6: Write Report and Flag GDDs
+## Phase 6: 编写报告并标记 GDD
 
-Use `AskUserQuestion` for write permission:
-- Prompt: "May I write this review to `design/gdd/gdd-cross-review-[date].md`?"
-- Options: `[A] Yes — write the report` / `[B] No — skip`
+使用 `AskUserQuestion` 请求写入权限：
+- 提示："May I write this review to `design/gdd/gdd-cross-review-[date].md`?"
+- 选项：`[A] Yes — write the report` / `[B] No — skip`
 
-> **`[date]` here means ISO 8601 — `YYYY-MM-DD`, e.g.
-> `gdd-cross-review-2026-08-19.md`. This is not a style preference.**
-> `.claude/scripts/review-scope.sh` picks the prior review with
-> `sort | tail -1`, so lexical order IS chronological order only for ISO dates.
-> Written as `aug-19-2026` or `19-08-2026`, the wrong file is chosen as the
-> baseline, the changed-set is computed from it, and GDDs modified since the
-> real last review silently escape the next one. That is the same
-> quiet-escape failure the three fixes documented at the top of that script
-> exist to prevent.
+> **此处的 `[date]` 指 ISO 8601 — `YYYY-MM-DD`，例如
+> `gdd-cross-review-2026-08-19.md`。这不是风格偏好。**
+> `.claude/scripts/review-scope.sh` 用 `sort | tail -1` 选取上一次评审，
+> 因此只有 ISO 日期下字典序才等于时间序。
+> 若写成 `aug-19-2026` 或 `19-08-2026`，选中的基准文件就是错的，
+> 变更集合会基于它计算，而自真正上一次评审以来被修改的 GDD
+> 会悄悄逃过下一次评审。这正是该脚本顶部记录的三处修复
+> 所要防止的静默逃逸失效。
 
-If any GDDs are flagged for revision, use a second `AskUserQuestion`:
-- Prompt: "Should I update the systems index to mark these GDDs as needing revision? ([list of flagged GDDs])"
-- Options: `[A] Yes — update systems index` / `[B] No — leave as-is`
-- If yes: update each flagged GDD's Status field in systems-index.md to "Needs Revision".
-  (Do NOT append parentheticals to the status value — other skills match "Needs Revision"
-  as an exact string and parentheticals break that match.)
+如果有任何 GDD 被标记为需要修订，使用第二次 `AskUserQuestion`：
+- 提示："Should I update the systems index to mark these GDDs as needing revision? ([list of flagged GDDs])"
+- 选项：`[A] Yes — update systems index` / `[B] No — leave as-is`
+- 若选是：把 systems-index.md 中每个被标记 GDD 的 Status 字段更新为 "Needs Revision"。
+  （不要给状态值追加括号说明 — 其他技能按精确字符串匹配 "Needs Revision"，
+  括号说明会破坏该匹配。）
 
-### Session State Update
+### 会话状态更新
 
-After writing the report (and updating systems index if approved), silently
-append to `production/session-state/active.md`:
+在编写报告（以及若获批准则更新系统索引）之后，静默追加到 `production/session-state/active.md`：
 
     ## Session Extract — /review-all-gdds [date]
     - Verdict: [PASS / NOT ASSESSED / CONCERNS / FAIL]
@@ -41,9 +38,8 @@ append to `production/session-state/active.md`:
     - Report: design/gdd/gdd-cross-review-[date].md   ← only if user approved the write
     - Report: (not written — user declined at [date])  ← only if user declined the write
 
-Use the appropriate line based on the user's response to the write-permission widget in Phase 6.
+根据用户对 Phase 6 写入权限组件的回应，使用相应的那一行。
 
-If `active.md` does not exist, create it with this block as the initial content.
-Confirm in conversation: "Session state updated."
+如果 `active.md` 不存在，则以该块作为初始内容创建它。在对话中确认："Session state updated."
 
 ---

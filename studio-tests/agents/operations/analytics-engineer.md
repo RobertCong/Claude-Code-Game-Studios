@@ -1,94 +1,94 @@
 # Agent Test Spec: analytics-engineer
 
 ## Agent Summary
-- **Domain**: Telemetry event taxonomy and naming (`[category].[action].[detail]`), funnel definitions, A/B test framework design (hypothesis, segmentation, variant assignment, success metrics, minimum sample size, minimum run duration, mutual exclusion between concurrent tests), dashboard specification, privacy compliance of data collection, data-informed design recommendations
-- **Does NOT own**: Implementing tracking in game code (programmers — it writes specs for them), design decisions (game-designer decides; data informs), economy design decisions (economy-designer), live ops event design (live-ops-designer)
-- **Gate IDs**: None; reports to technical-director for system design and producer for insights
+- **Domain**: 遥测事件分类与命名（`[category].[action].[detail]`）、漏斗定义、A/B 测试框架设计（假设、分群、变体分配、成功指标、最小样本量、最短运行时长、并发测试之间的互斥）、仪表盘规格、数据采集的隐私合规、数据驱动的设计建议
+- **Does NOT own**: 在游戏代码中实现埋点（由程序员实现 —— 它为他们编写规格）、设计决策（由 game-designer 决定；数据提供参考）、经济系统设计决策（economy-designer）、长线运营活动设计（live-ops-designer）
+- **Gate IDs**: None；系统设计向 technical-director 汇报，洞察向 producer 汇报
 
 ---
 
 ## Static Assertions (Structural)
 
-- [ ] `description:` field is present and domain-specific (references telemetry, A/B testing, event tracking, analytics)
-- [ ] `tools:` reads `Read, Glob, Grep, Write, Edit, Bash, WebSearch` — Bash serves the data-pipeline work `description:` names; tracking in game code is excluded by the body's "What This Agent Must NOT Do" list, not by the tool list
-- [ ] Model tier is `inherit` — frontmatter `model:` reads exactly `inherit` (tiers: `.claude/docs/model-tiers.md`)
-- [ ] Agent definition does not claim authority over game implementation, economy design, or live ops scheduling
+- [ ] `description:` 字段存在且限定于本领域（引用遥测、A/B 测试、事件埋点、分析）
+- [ ] `tools:` 为 `Read, Glob, Grep, Write, Edit, Bash, WebSearch` —— Bash 服务于 `description:` 所述的数据流水线工作；游戏代码中的埋点由正文的「What This Agent Must NOT Do」清单排除，而非工具清单
+- [ ] 模型档位为 `inherit` —— frontmatter `model:` 精确为 `inherit`（档位见：`.claude/docs/model-tiers.md`）
+- [ ] 代理定义未声称对游戏实现、经济系统设计或长线运营排期拥有权限
 
 ---
 
 ## Test Cases
 
-### Case 1: In-domain request — tutorial event tracking design
-**Input**: "Design the analytics event tracking for our tutorial. We want to know where players drop off and which steps they complete."
+### Case 1: In-domain request — 教程事件埋点设计
+**Input**: "为我们的教程设计分析事件埋点。我们想知道玩家在哪里流失，以及他们完成了哪些步骤。"
 **Expected behavior**:
-- Produces an event taxonomy for the tutorial: events for step start and step completion plus a drop-off event when a player exits mid-step, each with its properties and the exact condition that fires it
-- Names events in its Event Naming Convention, `[category].[action].[detail]` — e.g. `tutorial.step.started`, `tutorial.step.completed`, `tutorial.step.abandoned`
-- Gives every event a documented purpose ("Every event must have a documented purpose")
-- Defines the tutorial as an onboarding funnel with the event that marks each funnel step (Funnel Analysis Design)
-- Collects no personally identifiable information without an explicit requirement, and notes the opt-out path (Privacy Compliance)
-- Does NOT produce implementation code — the output is a spec for programmers
+- 为教程产出事件分类：步骤开始和步骤完成的事件，以及玩家中途退出时的流失事件，每个事件都带有属性和触发它的确切条件
+- 按 Event Naming Convention 的 `[category].[action].[detail]` 命名事件 —— 例如 `tutorial.step.started`、`tutorial.step.completed`、`tutorial.step.abandoned`
+- 为每个事件记录目的（「Every event must have a documented purpose」）
+- 将教程定义为上手引导漏斗，并标明标记每个漏斗步骤的事件（Funnel Analysis Design）
+- 在没有明确需求时不采集任何个人身份信息，并注明选择退出路径（Privacy Compliance）
+- 不产出实现代码 —— 输出是给程序员的规格
 
-### Case 2: Out-of-domain request — implement the event tracking in code
-**Input**: "Now that the event schema is designed, write the GDScript code to fire these events in our Godot tutorial scene."
+### Case 2: Out-of-domain request — 在代码中实现事件埋点
+**Input**: "现在事件 schema 设计好了，请编写 GDScript 代码，在我们 Godot 教程场景中触发这些事件。"
 **Expected behavior**:
-- Does not produce GDScript or any implementation code — "Implement tracking in game code (write specs for programmers)" is on its Must-NOT list
-- Says implementation belongs to the programmers (e.g. `gameplay-programmer`) and that its part is the specification
-- Produces the integration spec the programmer needs: event names, properties, when each event fires, and any privacy or opt-out constraint — the spec is its deliverable here, not an optional extra
-- Asks before writing the spec to a file
+- 不产出 GDScript 或任何实现代码 ——「Implement tracking in game code (write specs for programmers)」在其 Must-NOT 清单上
+- 说明实现属于程序员（例如 `gameplay-programmer`），它的部分是规格
+- 产出程序员所需的集成规格：事件名称、属性、每个事件的触发时机，以及任何隐私或选择退出约束 —— 该规格是它在此处的交付物，而非可选的附加项
+- 在将规格写入文件前先询问
 
-### Case 3: Domain boundary — A/B test design for a UI change
-**Input**: "We want to A/B test two versions of our HUD: the current version and a minimal version with only a health bar. Design the test."
+### Case 3: Domain boundary — 针对 UI 变更的 A/B 测试设计
+**Input**: "我们想对 HUD 的两个版本做 A/B 测试：当前版本，以及只有血条的极简版本。设计这个测试。"
 **Expected behavior**:
-- Produces a test design covering every element its A/B Test Framework names, none skipped:
-  - **Hypothesis**: what the minimal HUD is expected to change and why (e.g. it raises session length by reducing UI cognitive load)
-  - **Segmentation**: which players are eligible and how they are split
-  - **Variant assignment**: assigned per player ID, not per session, so no player sees both HUDs
-  - **Success metrics**: a primary metric (e.g. average session length) plus secondary metrics (e.g. tutorial completion rate, Day 1 retention)
-  - **Minimum sample size**: an estimate from the expected effect size — or, where baseline data is missing, a statement that the calculation needs it — never an omitted field
-  - **Minimum run duration**: e.g. at least two weeks, to capture weekly play patterns
-- Output is structured as a formal test design, not a bullet list of ideas
-- Does not decide in advance which HUD ships — results go to game-designer ("data informs, designers decide")
+- 产出覆盖其 A/B Test Framework 所列每个要素的测试设计，一项不缺：
+  - **Hypothesis**：极简 HUD 预期会改变什么以及为什么（例如通过降低 UI 认知负荷来提升会话时长）
+  - **Segmentation**：哪些玩家符合条件，以及如何分流
+  - **Variant assignment**：按玩家 ID 分配，而非按会话，因此没有玩家会看到两种 HUD
+  - **Success metrics**：一个主指标（例如平均会话时长）加次要指标（例如教程完成率、次日留存）
+  - **Minimum sample size**：基于预期效应量的估算 —— 若缺少基线数据，则声明该计算需要基线数据 —— 绝不省略该字段
+  - **Minimum run duration**：例如至少两周，以捕捉每周游玩模式
+- 输出为结构化的正式测试设计，而非点子列表
+- 不预先决定哪个 HUD 上线 —— 结果交给 game-designer（「data informs, designers decide」）
 
-### Case 4: Conflict — test result vs. design intent
-**Input**: "The HUD test finished: the minimal HUD raised average session length by 8%. Our game-designer still wants the full HUD because playtesters kept missing the ammo counter. Just ship the minimal HUD — the data is clear."
+### Case 4: Conflict — 测试结果与设计意图
+**Input**: "HUD 测试结束了：极简 HUD 使平均会话时长提升了 8%。我们的 game-designer 仍想要完整 HUD，因为试玩测试者总是漏看弹药计数器。直接上极简 HUD 吧 —— 数据很清楚。"
 **Expected behavior**:
-- Does not make the call on data alone — "Make game design decisions based solely on data" and "Override design intuition with data" are both on its Must-NOT list
-- Presents both the result and the design concern to `game-designer`, who decides ("present both to game-designer")
-- States what the data does and does not show (session length rose; nothing measured whether players lost information they needed) and may propose a follow-up test, without presenting it as the decision
-- Does NOT tell the team to ship the minimal HUD on its own authority
+- 不单凭数据做决定 ——「Make game design decisions based solely on data」和「Override design intuition with data」都在其 Must-NOT 清单上
+- 将结果与设计顾虑一并提交给 `game-designer`，由其决定（「present both to game-designer」）
+- 说明数据能说明与不能说明什么（会话时长上升了；没有测量玩家是否丢失了他们需要的信息），并可提议后续测试，但不将其当作决策
+- 不会凭自身权限告诉团队上线极简 HUD
 
-### Case 5: Context pass — new events consistent with existing schema
-**Input context**: Existing event schema uses the naming convention: `[domain]_[object]_[action]` in snake_case. Example events: `combat_enemy_killed`, `inventory_item_equipped`, `tutorial_step_completed`.
-**Input**: "Design event tracking for our new crafting system: players gather materials, open the crafting menu, and craft items."
+### Case 5: Context pass — 与现有 schema 一致的新事件
+**Input context**: 现有事件 schema 使用命名约定：snake_case 的 `[domain]_[object]_[action]`。示例事件：`combat_enemy_killed`、`inventory_item_equipped`、`tutorial_step_completed`。
+**Input**: "为我们新的制作系统设计事件埋点：玩家采集材料、打开制作菜单并制作物品。"
 **Expected behavior**:
-- Notices that the supplied schema differs from its own `[category].[action].[detail]` convention and says so — its Collaboration Protocol has it "flag conflicts with existing documents rather than resolving them silently" and "call out any departure from the governing document explicitly"
-- Either asks which convention governs, or follows the existing schema (`crafting_material_gathered`, `crafting_menu_opened`, `crafting_item_crafted`) and states that it did
-- Does NOT silently emit dot-notation names (e.g. `crafting.material.gathered`) into the snake_case schema, and never mixes the two conventions in one output
-- Gives each new event a documented purpose and its domain-specific properties (e.g. material type, item id)
+- 注意到所提供的 schema 与其自身的 `[category].[action].[detail]` 约定不同，并说明这一点 —— 其 Collaboration Protocol 要求它「flag conflicts with existing documents rather than resolving them silently」以及「call out any departure from the governing document explicitly」
+- 要么询问以哪个约定为准，要么遵循现有 schema（`crafting_material_gathered`、`crafting_menu_opened`、`crafting_item_crafted`）并说明其已这样做
+- 不会静默地把点号命名（例如 `crafting.material.gathered`）写入 snake_case schema，也绝不在同一输出中混用两种约定
+- 为每个新事件记录目的，并给出其领域特定属性（例如材料类型、物品 id）
 
-### Case 6: Conflict — overlapping A/B tests
-**Input**: "We have two A/B tests running simultaneously: Test A (HUD variants) affects all players, and Test B (tutorial variants) also affects all players."
+### Case 6: Conflict — 重叠的 A/B 测试
+**Input**: "我们同时运行两个 A/B 测试：测试 A（HUD 变体）影响所有玩家，测试 B（教程变体）也影响所有玩家。"
 **Expected behavior**:
-- Flags the overlap as a mutual exclusion violation: a player in both tests sees a HUD variant and a tutorial variant at once, so neither test can attribute an outcome difference to its own variable
-- Proposes resolution options: (a) run the tests one after the other, (b) split the population into exclusive segments (e.g. 50% in Test A, 50% in Test B, none in both), or (c) a factorial design if the interaction itself matters (needs a larger sample)
-- Does NOT recommend continuing both tests on overlapping populations
+- 将该重叠标记为互斥违规：同时处于两个测试中的玩家会同时看到 HUD 变体和教程变体，因此两个测试都无法将结果差异归因于自身变量
+- 提出解决选项：(a) 先后运行两个测试，(b) 将人群拆分为互斥分段（例如 50% 进测试 A，50% 进测试 B，无人同时进入两者），或 (c) 若交互本身重要则采用析因设计（需要更大样本）
+- 不建议在重叠人群上继续两个测试
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Stays within declared domain (event taxonomy, funnels, A/B test design, dashboards, privacy)
-- [ ] Redirects implementation requests to programmers with an integration spec, not code
-- [ ] Produces A/B test designs covering hypothesis, segmentation, variant assignment, success metrics, minimum sample size and minimum run duration — never partial
-- [ ] Flags concurrent tests on overlapping players as a mutual exclusion violation and proposes exclusive segments or sequencing
-- [ ] Presents data and design intent to game-designer rather than deciding on data alone
-- [ ] Flags a mismatch between a supplied naming convention and its own; never silently emits or mixes conventions
+- [ ] 保持在声明领域内（事件分类、漏斗、A/B 测试设计、仪表盘、隐私）
+- [ ] 将实现请求连同集成规格转交程序员，而非代码
+- [ ] 产出的 A/B 测试设计覆盖假设、分群、变体分配、成功指标、最小样本量和最短运行时长 —— 绝不残缺
+- [ ] 将重叠玩家上的并发测试标记为互斥违规，并提出互斥分段或排序方案
+- [ ] 将数据与设计意图一并提交给 game-designer，而非仅凭数据决定
+- [ ] 标记所提供的命名约定与其自身约定的不一致；绝不静默输出或混用约定
 
 ---
 
 ## Coverage Notes
-- Case 3 (A/B test design completeness) is a quality gate — an incomplete test design wastes experiment budget
-- Case 6 (mutual exclusion) is a data integrity test — overlapping tests produce unusable results; this must be caught
-- Case 4 (data vs. design intent) is a coordination test — verify the agent leaves the call to game-designer
-- Case 5 is the most important context-awareness test; naming convention drift across schemas causes dashboard breakage
-- No automated runner; review manually or via `/skill-test`
+- Case 3（A/B 测试设计完整性）是质量闸门（gate）—— 不完整的测试设计会浪费实验预算
+- Case 6（互斥）是数据完整性测试 —— 重叠测试会产生不可用的结果；必须捕获
+- Case 4（数据与设计意图）是协调测试 —— 验证代理把决定权留给 game-designer
+- Case 5 是最重要的上下文感知测试；跨 schema 的命名约定漂移会导致仪表盘失效
+- 无自动运行器；请手动审查或通过 `/skill-test`

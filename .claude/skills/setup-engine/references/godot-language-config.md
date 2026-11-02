@@ -1,23 +1,22 @@
-# Godot Language Configuration — setup-engine reference
+# Godot 语言配置 — setup-engine 参考资料
 
-Lookup tables for `/setup-engine`, split out of the skill body so they cost
-nothing on invocations that are not Godot. Read this file only when the
-chosen engine is Godot, and then only the subsection for the chosen language.
+为 `/setup-engine` 提供的查找表，从技能主体中拆分出来，以便在非 Godot 的调用中
+不产生任何成本。仅当所选引擎为 Godot 时读取本文件，且只需读取所选语言的
+对应小节。
 
-Referenced from Sections 4, 5 and 5.5 of `/setup-engine` by the names A1, A2
-and A3.
+在第 4、5 和 5.5 节中以 A1、A2 和 A3 的名称被引用。
 
-**In this file:**
+**本文件内容：**
 
-- A1. CLAUDE.md Technology Stack Templates
-- A2. Naming Conventions
-- A3. Engine Specialists Routing
+- A1. CLAUDE.md 技术栈模板
+- A2. 命名约定
+- A3. 引擎专家路由
 
 ---
 
-### A1. CLAUDE.md Technology Stack Templates
+### A1. CLAUDE.md 技术栈模板
 
-**GDScript:**
+**GDScript：**
 ```markdown
 - **Engine**: Godot [version]
 - **Language**: GDScript
@@ -25,9 +24,9 @@ and A3.
 - **Asset Pipeline**: Godot Import System + custom resource pipeline
 ```
 
-> **Guardrail**: When using this GDScript template, write the Language field as exactly "`GDScript`" — no additions. Do NOT append "C++ via GDExtension" or any other language. The C# template below includes GDExtension because C# projects commonly wrap native code; GDScript projects do not.
+> **防护栏**：使用此 GDScript 模板时，Language 字段必须严格写为"`GDScript`" — 不得添加任何内容。不要追加 "C++ via GDExtension" 或任何其他语言。下面的 C# 模板包含 GDExtension，因为 C# 项目通常会封装原生代码；GDScript 项目不会。
 
-**C#:**
+**C#：**
 ```markdown
 - **Engine**: Godot [version]
 - **Language**: C# (.NET 8+, primary), C++ via GDExtension (native plugins only)
@@ -35,7 +34,7 @@ and A3.
 - **Asset Pipeline**: Godot Import System + custom resource pipeline
 ```
 
-**Both — GDScript + C#:**
+**两者 — GDScript + C#：**
 ```markdown
 - **Engine**: Godot [version]
 - **Language**: GDScript (gameplay/UI scripting), C# (performance-critical systems), C++ via GDExtension (native only)
@@ -45,39 +44,39 @@ and A3.
 
 ---
 
-### A2. Naming Conventions
+### A2. 命名约定
 
-**GDScript:**
-- Classes: PascalCase (e.g., `PlayerController`)
-- Variables/functions: snake_case (e.g., `move_speed`)
-- Signals: snake_case past tense (e.g., `health_changed`)
-- Files: snake_case matching class (e.g., `player_controller.gd`)
-- Scenes: snake_case matching the file (e.g., `player_controller.tscn`)
-- Constants: UPPER_SNAKE_CASE (e.g., `MAX_HEALTH`)
+**GDScript：**
+- 类：PascalCase（例如 `PlayerController`）
+- 变量/函数：snake_case（例如 `move_speed`）
+- 信号：snake_case 过去式（例如 `health_changed`）
+- 文件：snake_case，与类名一致（例如 `player_controller.gd`）
+- 场景：snake_case，与文件一致（例如 `player_controller.tscn`）
+- 常量：UPPER_SNAKE_CASE（例如 `MAX_HEALTH`）
 
-> **This list and the `naming` enum table in Section 5.5.1 of the skill must
-> agree, value for value.** They are written into two different files —
-> `technical-preferences.md` from here, `project.yaml` from there — and Section
-> 5.5.3 compares them and **stops the skill** on any mismatch.
+> **此列表与技能第 5.5.1 节中的 `naming` 枚举表必须逐值一致。**
+> 它们被写入两个不同的文件 — `technical-preferences.md` 来自这里，
+> `project.yaml` 来自那里 — 第 5.5.3 节会比较它们，并在任何不匹配时
+> **停止技能**。
 
-**C#:**
-- Classes: PascalCase (`PlayerController`) — must also be `partial`
-- Public properties/fields: PascalCase (`MoveSpeed`, `JumpVelocity`)
-- Private fields: `_camelCase` (`_currentHealth`, `_isGrounded`)
-- Methods: PascalCase (`TakeDamage()`, `GetCurrentHealth()`)
-- Signal delegates: PascalCase + `EventHandler` suffix (`HealthChangedEventHandler`)
-- Files: PascalCase matching class (`PlayerController.cs`)
-- Scenes: PascalCase matching root node (`PlayerController.tscn`)
-- Constants: PascalCase (`MaxHealth`, `DefaultMoveSpeed`)
+**C#：**
+- 类：PascalCase（`PlayerController`）— 还必须为 `partial`
+- 公共属性/字段：PascalCase（`MoveSpeed`、`JumpVelocity`）
+- 私有字段：`_camelCase`（`_currentHealth`、`_isGrounded`）
+- 方法：PascalCase（`TakeDamage()`、`GetCurrentHealth()`）
+- 信号委托：PascalCase + `EventHandler` 后缀（`HealthChangedEventHandler`）
+- 文件：PascalCase，与类名一致（`PlayerController.cs`）
+- 场景：PascalCase，与根节点一致（`PlayerController.tscn`）
+- 常量：PascalCase（`MaxHealth`、`DefaultMoveSpeed`）
 
-**Both — GDScript + C#:**
-Use GDScript conventions for `.gd` files and C# conventions for `.cs` files. Mixed-language files do not exist — the boundary is per-file. When in doubt about which language a new system should use, ask the user and record the decision in `technical-preferences.md`.
+**两者 — GDScript + C#：**
+`.gd` 文件使用 GDScript 约定，`.cs` 文件使用 C# 约定。不存在混合语言的文件 — 边界是按文件划分的。对某个新系统应使用哪种语言有疑问时，询问用户并将决定记录在 `technical-preferences.md` 中。
 
 ---
 
-### A3. Engine Specialists Routing
+### A3. 引擎专家路由
 
-**GDScript:**
+**GDScript：**
 ```markdown
 ## Engine Specialists
 - **Primary**: godot-specialist
@@ -99,7 +98,7 @@ Use GDScript conventions for `.gd` files and C# conventions for `.cs` files. Mix
 | General architecture review | godot-specialist |
 ```
 
-**C#:**
+**C#：**
 ```markdown
 ## Engine Specialists
 - **Primary**: godot-specialist
@@ -122,7 +121,7 @@ Use GDScript conventions for `.gd` files and C# conventions for `.cs` files. Mix
 | General architecture review | godot-specialist |
 ```
 
-**Both — GDScript + C#:**
+**两者 — GDScript + C#：**
 ```markdown
 ## Engine Specialists
 - **Primary**: godot-specialist

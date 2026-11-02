@@ -1,6 +1,6 @@
 ---
 name: playtest-report
-description: "Structured playtest report template, or turn existing playtest notes into structured feedback."
+description: "结构化的试玩测试报告模板，或把现有的试玩测试记录整理成结构化反馈。"
 argument-hint: "[new|analyze path-to-notes] [--review full|lean|solo]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Agent, AskUserQuestion, Bash(bash "*/.claude/skills/playtest-report/../../hooks/yaml-helper.sh" resolve_config *)
@@ -9,36 +9,36 @@ model: sonnet
 
 !`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation`
 
-Resolved above — use as-is; `--review` overrides `review_mode` for this run. No
-block → defaults in `.claude/docs/config-resolution.md`.
+以上为解析结果——直接使用；`--review` 会覆盖本次运行的 `review_mode`。若无
+解析块，则采用 `.claude/docs/config-resolution.md` 中的默认值。
 
-# Playtest Report
-
-
-
-## Phase 1: Parse Arguments
+# 试玩测试报告
 
 
-See `.claude/docs/director-gates.md` for the full check pattern. Individual gate definitions live in `.claude/docs/director-gates/[gate-id].md` — the spawned agent reads its own gate file; do not read it in the parent session.
+
+## Phase 1: 解析参数
 
 
-Every `AskUserQuestion` call follows `.claude/docs/automation-modes.md`
-(collaborative asks always · guided major-only · autonomous logs and proceeds;
-`automation_always_ask` categories always prompt).
+完整的检查模式见 `.claude/docs/director-gates.md`。各闸门定义位于 `.claude/docs/director-gates/[gate-id].md`——派生出的代理会读取自己的闸门文件；不要在父会话中读取它。
 
-Determine the mode:
 
-- `new` → generate a blank playtest report template. This mode ends after
-  Phase 2A: a blank template has nothing to route, review or save.
-- `analyze [path]` → read raw notes and fill in the template with structured findings
-- No argument → ask via `AskUserQuestion`: `[A] New blank template` /
-  `[B] Analyze notes — I'll give you the path`
+每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+（collaborative 始终询问 · guided 仅重要事项 · autonomous 记录并继续；
+`automation_always_ask` 类别始终提示）。
+
+确定模式：
+
+- `new` → 生成一份空白的试玩测试报告模板。此模式在
+  Phase 2A 之后结束：空白模板没有可分流、评审或保存的内容。
+- `analyze [path]` → 读取原始记录，并用结构化发现填充模板
+- 无参数 → 通过 `AskUserQuestion` 询问：`[A] 新建空白模板` /
+  `[B] 分析记录——我来提供路径`
 
 ---
 
-## Phase 2A: New Template Mode
+## Phase 2A: 新建模板模式
 
-Generate this template and output it to the user:
+生成此模板并输出给用户：
 
 ```markdown
 # Playtest Report
@@ -102,73 +102,72 @@ Generate this template and output it to the user:
 3. [Third priority]
 ```
 
-In `new` mode, stop here with: Verdict: **COMPLETE** — blank template output; nothing saved.
+在 `new` 模式下，在此停止并给出：结论：**COMPLETE**——已输出空白模板；未保存任何内容。
 
 ---
 
-## Phase 2B: Analyze Mode
+## Phase 2B: 分析模式
 
-Read the raw notes at the provided path. Cross-reference with existing design documents, reading each by section: find the headings you need with the Grep tool (pattern `^#`, content mode) and Read those ranges with offset and limit. Fill in the template above with structured findings. Flag any playtest observations that conflict with design intent.
+读取所提供路径下的原始记录。与现有设计文档交叉对照，按章节阅读：用 Grep 工具（模式 `^#`，content 模式）找到所需标题，再用 offset 和 limit 读取相应区间。用结构化发现填充上面的模板。标记任何与设计意图冲突的试玩测试观察。
 
-An observation that describes a defect — a crash, a framerate drop, a softlock,
-something that plainly breaks rather than plays badly — goes in the **Bugs
-Encountered** table, not under Gameplay Flow → Pain points, and is routed as a
-bug in Phase 3. Pain points are for how the game feels to play.
-
----
-
-## Phase 3: Action Routing
-
-Categorize all findings into four buckets:
-
-- **Design changes needed** — fun issues, player confusion, broken mechanics, observations that conflict with the GDD's intended experience
-- **Balance adjustments** — numbers feel wrong, difficulty too spiked or too flat
-- **Bug reports** — clear implementation defects that are reproducible
-- **Polish items** — not blocking progress, but friction or feel issues for later
-
-Present the categorized list, then route:
-
-- **Design changes:** "Run `/propagate-design-change [path]` on the affected design document to find downstream impacts before making changes."
-- **Balance adjustments:** "Run `/balance-check [system]` to verify the full balance picture before tuning values."
-- **Bugs:** "Use `/bug-report` to formally track these."
-- **Polish items:** "Add to the polish backlog in `production/` when the team reaches that phase."
+描述缺陷的观察——崩溃、帧率下降、软锁，或任何明显“坏掉”而非“玩起来不佳”的问题——应放入 **Bugs Encountered**
+表格，而不是 Gameplay Flow → Pain points，并在 Phase 3 作为缺陷分流。
+Pain points 用于描述游戏玩起来的感觉。
 
 ---
 
-## Phase 3b: Creative Director Player Experience Review
+## Phase 3: 行动分流
 
-**Review mode check** — apply before spawning CD-PLAYTEST:
-- `solo` → skip. Note: "CD-PLAYTEST skipped — Solo mode." Proceed to Phase 4 (save the report).
-- `lean` → skip (not a PHASE-GATE). Note: "CD-PLAYTEST skipped — Lean mode." Proceed to Phase 4 (save the report).
-- `full` → spawn as normal.
+把所有发现归入四类：
 
-After categorising findings, spawn `creative-director` via `Agent` using gate **CD-PLAYTEST** (`.claude/docs/director-gates/cd-playtest.md`).
+- **需要设计变更**——趣味性问题、玩家困惑、损坏的机制、与 GDD 预期体验冲突的观察
+- **平衡性调整**——数值感觉不对、难度过于陡峭或过于平缓
+- **缺陷报告**——可复现的明确实现缺陷
+- **打磨项**——不阻塞进度，但属于留待后续处理的摩擦或手感问题
 
-Pass: the structured report content, game pillars and core fantasy (from
-`design/gdd/game-concept.md`), the specific hypothesis being tested. **If
-`game-concept.md` does not exist** — expected at `minimal`, where
-`design/game-brief.md` replaces it — the brief has no pillars: pass its
-one-sentence pitch and its "Who it's for / what they feel" line instead, and say
-they stand in for pillars. If neither document exists, say so in the prompt:
-*"No pillars available — assess against the hypothesis alone."* A director gate
-handed silence about pillars will invent them.
+呈现归类后的清单，然后分流：
 
-Present the creative director's assessment before saving the report. If CONCERNS or REJECT, add a `## Creative Director Assessment` section to the report capturing the verdict and feedback. If APPROVE, note the approval in the report. If NOT ASSESSED (the director lacked an input — `.claude/docs/director-gates.md`), add the same section naming what was missing; it is not an approval.
+- **设计变更：**“对受影响的设计文档运行 `/propagate-design-change [path]`，在改动前找出下游影响。”
+- **平衡性调整：**“运行 `/balance-check [system]`，在调整数值前确认完整的平衡性全貌。”
+- **缺陷：**“使用 `/bug-report` 正式跟踪这些问题。”
+- **打磨项：**“当团队进入该阶段时，加入 `production/` 中的打磨待办清单。”
 
 ---
 
-## Phase 4: Save Report
+## Phase 3b: 创意总监的玩家体验评审
 
-Ask: "May I write this playtest report to `production/qa/playtests/playtest-[date]-[tester].md`?"
+**评审模式检查**——在派生 CD-PLAYTEST 之前应用：
+- `solo` → 跳过。注明：“已跳过 CD-PLAYTEST——Solo 模式。”继续到 Phase 4（保存报告）。
+- `lean` → 跳过（非 PHASE-GATE）。注明：“已跳过 CD-PLAYTEST——Lean 模式。”继续到 Phase 4（保存报告）。
+- `full` → 照常派生。
 
-If yes, write the file, creating the directory if needed.
+完成发现归类后，通过 `Agent` 使用闸门 **CD-PLAYTEST**（`.claude/docs/director-gates/cd-playtest.md`）派生 `creative-director`。
+
+传入：结构化报告内容、游戏支柱与核心幻想（来自
+`design/gdd/game-concept.md`）、正在检验的具体假设。**如果
+`game-concept.md` 不存在**——这在 `minimal` 下是预期情况，此时
+`design/game-brief.md` 取而代之——简述中没有支柱：改为传入它的一句话
+提案（pitch）及其“面向谁 / 他们感受什么”一行，并说明这些内容
+代替支柱。如果两份文档都不存在，在提示中说明：
+*“没有可用的游戏支柱——仅依据假设进行评估。”* 对支柱闭口不谈的总监闸门
+会自行编造支柱。
+
+在保存报告前呈现创意总监的评估。如果为 CONCERNS 或 REJECT，在报告中加入 `## Creative Director Assessment` 一节，记录结论与反馈。如果为 APPROVE，在报告中注明已批准。如果为 NOT ASSESSED（总监缺少某项输入——见 `.claude/docs/director-gates.md`），加入同样的一节并指出缺失的内容；这不等于批准。
 
 ---
 
-## Phase 5: Next Steps
+## Phase 4: 保存报告
 
-Verdict: **COMPLETE** — playtest report generated.
+询问：“我可以把这份试玩测试报告写入 `production/qa/playtests/playtest-[date]-[tester].md` 吗？”
 
-- Act on the highest-priority finding category first.
-- After addressing design changes: re-run `/design-review` on the updated GDD.
-- After fixing bugs: re-run `/bug-triage` to update priorities.
+如果同意，则写入文件，必要时创建目录。
+
+---
+
+## Phase 5: 下一步
+
+结论：**COMPLETE**——已生成试玩测试报告。
+
+- 先处理优先级最高的发现类别。
+- 处理完设计变更后：对更新后的 GDD 重新运行 `/design-review`。
+- 修复缺陷后：重新运行 `/bug-triage` 以更新优先级。

@@ -2,275 +2,271 @@
 
 ## Skill Summary
 
-`/hotfix` runs an emergency fix outside the sprint process, with an audit trail.
-It runs only when the user types it (`disable-model-invocation: true`). The flow:
+`/hotfix` 在冲刺流程之外执行紧急修复，并留有审计记录。
+只有当用户主动输入时它才运行（`disable-model-invocation: true`）。流程：
 
-1. **Assess severity** (S1 Critical / S2 High / S3 or lower, on `/bug-triage`'s scale) and confirm it with
-   `AskUserQuestion`; S3 or lower stops with `Verdict: **REDIRECTED**`.
-2. **Hotfix record** — asks "May I write this to
+1. **评估严重程度**（按 `/bug-triage` 的量表为 S1 Critical / S2 High / S3 或更低），并通过
+   `AskUserQuestion` 确认；S3 或更低时停止并给出 `Verdict: **REDIRECTED**`。
+2. **热修复记录**——询问 "May I write this to
    `production/hotfixes/hotfix-[date]-[short-name].md`?"
-3. **Branch** — checks for a git repo, then asks before running
-   `git checkout -b hotfix/[short-name] [base-ref]`. `[base-ref]` is the
-   release the bug is in: its tag on `main`, or its `release/*` branch if one
-   was cut to stabilise it — never the head of `main`.
-4. **Investigate and propose** — root cause and minimal fix, then
-   "May I implement this fix?" before any code changes; implement, run targeted tests.
-5. **Approvals** — `lead-programmer`, `qa-tester` and `producer` spawned in
-   parallel; all three must return APPROVE, and CONCERNS or REJECT blocks deployment.
-6. **QA re-entry gate** — `qa-lead` picks smoke check, targeted
-   `/team-qa feature: [system]`, or full QA; a smoke-check FAIL sends the fix
-   back to Phase 4. A NOT ASSESSED result is not a pass: deploying anyway takes
-   an explicit producer decision, logged in the hotfix record.
-7. **Deploy** — an unconditional `AskUserQuestion` before any merge, tag or deploy
-   (even in `autonomous` mode); merge to `main`, and to the release's
-   `release/*` branch only if one exists; tag the patch release and verify the
-   backport; ask before updating the bug file, then set it to
-   `Fixed — Pending Verification`; print "Hotfix Deployed" (on `[B]`,
-   "Hotfix Merged to main — release held", with no Tag); `[C]` stops with no
-   merge, tag or bug-file update; then `/bug-report verify` (a CANNOT VERIFY is
-   settled by playing the reproduction steps and answering its manual-play
-   question) and a post-incident review (recorded with the incident-response
-   template — `/retrospective` has no incident mode).
+3. **分支**——检查是否为 git 仓库，然后在运行
+   `git checkout -b hotfix/[short-name] [base-ref]` 之前询问。`[base-ref]` 是
+   缺陷所在的发布版本：`main` 上的标签，或为该版本稳定化而切出的 `release/*`
+   分支——绝不是 `main` 的最新提交。
+4. **调查与提案**——根因与最小修复，然后在任何代码改动之前询问
+   "May I implement this fix?"；随后实现并运行针对性测试。
+5. **批准**——`lead-programmer`、`qa-tester` 与 `producer` 并行生成；三者都必须
+   返回 APPROVE，而 CONCERNS 或 REJECT 会阻止部署。
+6. **QA 再入闸门**——`qa-lead` 选择冒烟测试、针对性的
+   `/team-qa feature: [system]`，或完整 QA；冒烟测试 FAIL 会把修复送回 Phase 4。
+   NOT ASSESSED 的结果不算通过：仍要部署的话，需要 producer 明确决策，
+   并记录在热修复记录中。
+7. **部署**——在任何合并、打标签或部署之前无条件使用 `AskUserQuestion`
+   （即使在 `autonomous` 模式下也是如此）；合并到 `main`，且仅当发布版本存在
+   `release/*` 分支时才合并到该分支；为补丁发布打标签并验证
+   回填；在更新缺陷文件之前询问，然后将其设为
+   `Fixed — Pending Verification`；打印 "Hotfix Deployed"（选择 `[B]` 时打印
+   "Hotfix Merged to main — release held"，且不含 Tag）；`[C]` 则停止，不合并、
+   不打标签、不更新缺陷文件；随后执行 `/bug-report verify`（CANNOT VERIFY 通过
+   实际游玩复现步骤并回答其手动游玩问题来解决）以及事后复盘
+   （使用 incident-response 模板记录——`/retrospective` 没有事故模式）。
 
-Targeted tests run with `commands.test` from `project.yaml`; when it is unset or
-no test covers the system, the hotfix record says `Tests: NOT RUN — [reason]`.
-A `/team-qa` pass that returns NOT APPROVED or BLOCKED is handled like a
-smoke-check FAIL. S1 is `/bug-triage`'s definition: crash, data loss, or
-complete feature failure.
+针对性测试使用 `project.yaml` 中的 `commands.test` 运行；当它未设置或
+没有测试覆盖该系统时，热修复记录写明 `Tests: NOT RUN — [reason]`。
+返回 NOT APPROVED 或 BLOCKED 的 `/team-qa` 通过与冒烟测试 FAIL 相同的方式处理。
+S1 采用 `/bug-triage` 的定义：崩溃、数据丢失，或功能完全失效。
 
 ---
 
 ## Static Assertions (Structural)
 
-Checked against the SKILL.md by `/skill-test spec` — no fixture needed.
+由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] Has required frontmatter fields: `name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`
-- [ ] Frontmatter sets `disable-model-invocation: true`
-- [ ] Has ≥2 phase headings
-- [ ] Contains verdict keywords: REDIRECTED, APPROVE / CONCERNS / REJECT (sign-offs), NOT ASSESSED (QA gate)
-- [ ] Contains "May I write" (hotfix record), "May I implement this fix?" (code) and "May I update" (bug file) language
-- [ ] Has a next-step handoff (`/bug-report verify [BUG-ID]`, a post-incident review)
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] Frontmatter 设置 `disable-model-invocation: true`
+- [ ] 有 ≥2 个 phase 标题
+- [ ] 包含结论关键词：REDIRECTED、APPROVE / CONCERNS / REJECT（签核）、NOT ASSESSED（QA 闸门）
+- [ ] 包含 "May I write"（热修复记录）、"May I implement this fix?"（代码）与 "May I update"（缺陷文件）措辞
+- [ ] 有下一步交接（`/bug-report verify [BUG-ID]`、事后复盘）
 
 ---
 
 ## Director Gate Checks
 
-No named director-gate ID (CD-*, TD-*, AD-*, PR-*) is used and the review mode
-does not apply. Phase 5 spawns three **blocking sign-offs** in parallel —
-`lead-programmer`, `qa-tester` and `producer` (the only director-tier agent) —
-and all three must return APPROVE before deployment. Phase 5b spawns `qa-lead` to
-choose the QA scope.
+不使用任何具名总监闸门 ID（CD-*、TD-*、AD-*、PR-*），评审模式
+也不适用。Phase 5 并行生成三个**阻塞性签核**——
+`lead-programmer`、`qa-tester` 与 `producer`（唯一的总监层级代理）——
+三者都必须在部署前返回 APPROVE。Phase 5b 生成 `qa-lead` 以
+选择 QA 范围。
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非某个用例自己的 Fixture 另有说明，否则每个用例的 `project.yaml` 都设置
+`modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/CLAUDE.md` §
+Fixture defaults。
 
 ---
 
 ## Test Cases
 
-### Case 1: Happy Path — S1 crash fixed with record, branch, approvals and backport
+### Case 1: Happy Path — S1 崩溃修复，含记录、分支、批准与回填
 
 **Fixture:**
-- Git repository; the live build is the release tag `v1.2.0` on `main`, and no
-  `release/*` branch exists (the trunk default)
-- Bug in `src/gameplay/arena.gd` (crash on boss arena entry);
-  `production/qa/bugs/BUG-0031.md` exists with `**Status**: Open`
-- All three sign-offs return APPROVE; `qa-lead` picks a smoke check, which returns PASS
+- Git 仓库；线上构建是 `main` 上的发布标签 `v1.2.0`，且不存在
+  `release/*` 分支（trunk 默认形态）
+- `src/gameplay/arena.gd` 中存在缺陷（进入首领竞技场时崩溃）；
+  `production/qa/bugs/BUG-0031.md` 存在且 `**Status**: Open`
+- 三个签核都返回 APPROVE；`qa-lead` 选择冒烟测试，结果为 PASS
 
 **Input:** `/hotfix BUG-0031`
 
 **Expected behavior:**
-1. Assesses S1 and confirms via `AskUserQuestion`; user picks `[A] S1 (Critical)`
-2. Asks "May I write this to `production/hotfixes/hotfix-[date]-boss-arena-crash.md`?" and writes it
-3. Runs `git rev-parse --is-inside-work-tree`, asks "Ready to create hotfix branch
-   'hotfix/boss-arena-crash' from v1.2.0?", and runs
-   `git checkout -b hotfix/boss-arena-crash v1.2.0` only after `[A] Yes — create branch`
-4. Presents root cause and minimal fix, asks "May I implement this fix?", then implements and runs targeted tests
-5. Spawns `lead-programmer`, `qa-tester` and `producer` in parallel; all APPROVE
-6. `qa-lead` → smoke check PASS
-7. Asks "Hotfix validated and approved. Merge to `main`, tag v1.2.1 and deploy?"
-   (no release branch is named — none exists); user picks `[A]`
-8. Merges to `main`, tags `v1.2.1` on the fixed build, and confirms the fix is on `main`
-9. Asks "May I update `production/qa/bugs/BUG-0031.md` …?" before setting it to
-   `Fixed — Pending Verification`, then prints "Hotfix Deployed: boss-arena-crash"
-   with `Tag: v1.2.1` and `Next: /bug-report verify`
+1. 评估为 S1 并通过 `AskUserQuestion` 确认；用户选择 `[A] S1 (Critical)`
+2. 询问 "May I write this to `production/hotfixes/hotfix-[date]-boss-arena-crash.md`?" 并写入
+3. 运行 `git rev-parse --is-inside-work-tree`，询问 "Ready to create hotfix branch
+   'hotfix/boss-arena-crash' from v1.2.0?"，并在 `[A] Yes — create branch` 之后
+   才运行 `git checkout -b hotfix/boss-arena-crash v1.2.0`
+4. 呈现根因与最小修复，询问 "May I implement this fix?"，随后实现并运行针对性测试
+5. 并行生成 `lead-programmer`、`qa-tester` 与 `producer`；三者均 APPROVE
+6. `qa-lead` → 冒烟测试 PASS
+7. 询问 "Hotfix validated and approved. Merge to `main`, tag v1.2.1 and deploy?"
+   （不指明发布分支——因为不存在）；用户选择 `[A]`
+8. 合并到 `main`，在修复后的构建上打标签 `v1.2.1`，并确认修复已在 `main` 上
+9. 在将其设为 `Fixed — Pending Verification` 之前询问 "May I update
+   `production/qa/bugs/BUG-0031.md` …?"，然后打印 "Hotfix Deployed: boss-arena-crash"，
+   并带有 `Tag: v1.2.1` 与 `Next: /bug-report verify`
 
 **Assertions:**
-- [ ] The hotfix record is written before the branch is created
-- [ ] The branch starts from the release tag `v1.2.0`, not from the head of `main`
-- [ ] The branch is created only after the user picks `[A]`
-- [ ] No code is modified before "May I implement this fix?" is approved
-- [ ] The three sign-off agents are spawned as simultaneous `Agent` calls
-- [ ] No merge happens before the Phase 6 deploy question is answered
-- [ ] No `release/*` branch is created or merged; the patch release is tagged
-- [ ] The summary's Backport line states presence on `main`
-- [ ] The bug file is not edited before the user approves the "May I update" question
-- [ ] `BUG-0031.md` Status becomes `Fixed — Pending Verification`
+- [ ] 热修复记录在创建分支之前写入
+- [ ] 分支从发布标签 `v1.2.0` 开始，而不是从 `main` 的最新提交
+- [ ] 仅在用户选择 `[A]` 之后才创建分支
+- [ ] 在 "May I implement this fix?" 获批之前不修改任何代码
+- [ ] 三个签核代理作为同时发出的 `Agent` 调用生成
+- [ ] 在 Phase 6 部署问题得到回答之前不发生任何合并
+- [ ] 不创建或合并任何 `release/*` 分支；补丁发布被打上标签
+- [ ] 摘要的 Backport 行说明其在 `main` 上存在
+- [ ] 在用户批准 "May I update" 问题之前不编辑缺陷文件
+- [ ] `BUG-0031.md` 的 Status 变为 `Fixed — Pending Verification`
 
 ---
 
-### Case 2: Sign-off REJECT — Deployment blocked
+### Case 2: Sign-off REJECT — 部署被阻止
 
 **Fixture:**
-- Fix implemented for an S1 bug
-- `qa-tester` returns REJECT: "Player health clamping regression detected";
-  `lead-programmer` and `producer` return APPROVE
+- 针对 S1 缺陷的修复已实现
+- `qa-tester` 返回 REJECT："Player health clamping regression detected"；
+  `lead-programmer` 与 `producer` 返回 APPROVE
 
 **Input:** `/hotfix`
 
 **Expected behavior:**
-1. Phase 5 collects all three responses
-2. Because one returned REJECT, the skill does not deploy: it surfaces the regression and resolves it first
-3. The Phase 5b QA gate and the Phase 6 deploy question are not reached while the REJECT stands
-4. No merge, tag or deploy occurs
+1. Phase 5 收集全部三个响应
+2. 由于其中一个返回 REJECT，技能不部署：它呈现该回归并先解决它
+3. 在 REJECT 仍成立期间，不会到达 Phase 5b 的 QA 闸门与 Phase 6 的部署问题
+4. 不发生任何合并、打标签或部署
 
 **Assertions:**
-- [ ] The qa-tester's REJECT and its regression are shown to the user
-- [ ] Skill does not proceed to deployment with a REJECT outstanding
-- [ ] The deploy `AskUserQuestion` is not issued while the REJECT stands
-- [ ] No merge is performed
+- [ ] qa-tester 的 REJECT 及其回归被展示给用户
+- [ ] 在 REJECT 未解决时，技能不会继续部署
+- [ ] 在 REJECT 仍成立期间不发出部署 `AskUserQuestion`
+- [ ] 不执行任何合并
 
 ---
 
-### Case 3: Release Branch — Deploy approval holds even in autonomous mode
+### Case 3: Release Branch — 即使在 autonomous 模式下也保留部署批准
 
 **Fixture:**
-- `project.yaml` sets `modes.automation: autonomous`
-- The live release `v1.3.0` has a `release/1.3` branch, cut to stabilise it for
-  certification; the hotfix branch was started from `release/1.3`
-- An S2 fix has all three APPROVE sign-offs and a smoke check PASS
+- `project.yaml` 设置 `modes.automation: autonomous`
+- 线上发布 `v1.3.0` 有 `release/1.3` 分支，为认证稳定化而切出；
+  热修复分支从 `release/1.3` 开始
+- 一个 S2 修复获得全部三个 APPROVE 签核，且冒烟测试 PASS
 
 **Input:** `/hotfix`
 
 **Expected behavior:**
-1. Despite `autonomous`, Phase 6 asks "Hotfix validated and approved. Merge to `main`
-   and `release/1.3`, tag v1.3.1 and deploy?" with `[A] Yes — merge and deploy` /
+1. 尽管设置为 `autonomous`，Phase 6 仍询问 "Hotfix validated and approved. Merge to `main`
+   and `release/1.3`, tag v1.3.1 and deploy?"，选项为 `[A] Yes — merge and deploy` /
    `[B] Merge to main only — hold the release` / `[C] Stop here`
-2. User picks `[B]`
-3. The fix is merged to `main` only; nothing is merged to `release/1.3`, tagged or deployed
-4. The summary is titled "Hotfix Merged to main — release held" and has no Tag line
+2. 用户选择 `[B]`
+3. 修复只合并到 `main`；不合并到 `release/1.3`，不打标签，也不部署
+4. 摘要标题为 "Hotfix Merged to main — release held"，且没有 Tag 行
 
 **Assertions:**
-- [ ] The deploy question is asked even though `modes.automation` is `autonomous`
-- [ ] The question names `release/1.3`, because this release has one
-- [ ] All three options are offered
-- [ ] With `[B]`, `release/1.3` is not merged, no tag is created and nothing is deployed
-- [ ] With `[B]`, `main` receives the fix
-- [ ] With `[B]`, the summary does not say "Deployed" and names no tag
+- [ ] 即使 `modes.automation` 为 `autonomous`，仍提出部署问题
+- [ ] 问题指明 `release/1.3`，因为该发布版本存在此分支
+- [ ] 提供全部三个选项
+- [ ] 选择 `[B]` 时，不合并 `release/1.3`、不创建标签，也不部署任何内容
+- [ ] 选择 `[B]` 时，`main` 收到该修复
+- [ ] 选择 `[B]` 时，摘要不写 "Deployed"，也不指明任何标签
 
 ---
 
-### Case 4: Not an Emergency — a cosmetic S4 redirected before any work
+### Case 4: Not an Emergency — 外观类 S4 在任何工作开始前被重定向
 
 **Fixture:**
-- User reports a typo on the credits screen
+- 用户报告制作人员名单页面的一处拼写错误
 
 **Input:** `/hotfix typo in the credits screen`
 
 **Expected behavior:**
-1. Phase 1 assesses S4 (Low — cosmetic) and asks the user to confirm severity
-2. User picks `[C] S3 or lower — redirect to normal bug fix workflow`
-3. Skill stops: Verdict REDIRECTED — use the normal bug fix workflow for S3 and below
+1. Phase 1 评估为 S4（Low——外观类），并请用户确认严重程度
+2. 用户选择 `[C] S3 or lower — redirect to normal bug fix workflow`
+3. 技能停止：结论 REDIRECTED——S3 及以下使用常规缺陷修复流程
 
 **Assertions:**
-- [ ] Severity is confirmed via `AskUserQuestion` with S1 / S2 / S3-or-lower options
-- [ ] Verdict is REDIRECTED
-- [ ] No hotfix record is written and no branch is created
-- [ ] No code is modified and no agents are spawned
+- [ ] 通过 `AskUserQuestion` 确认严重程度，选项为 S1 / S2 / S3-or-lower
+- [ ] 结论为 REDIRECTED
+- [ ] 不写入任何热修复记录，也不创建任何分支
+- [ ] 不修改任何代码，也不生成任何代理
 
 ---
 
-### Case 5: Director Gate Check — Producer sign-off, and NOT ASSESSED QA is not a pass
+### Case 5: Director Gate Check — Producer 签核，且 NOT ASSESSED 的 QA 不算通过
 
 **Fixture:**
-- `project.yaml`: `modes.rigor: standard` (so a project with no game tests gets NOT ASSESSED, not WAIVED)
-- S1 fix implemented; all three sign-offs APPROVE
-- `qa-lead` picks a smoke check; `/smoke-check` returns `NOT ASSESSED — no game tests found`
+- `project.yaml`：`modes.rigor: standard`（因此没有游戏测试的项目得到 NOT ASSESSED，而非 WAIVED）
+- S1 修复已实现；三个签核均 APPROVE
+- `qa-lead` 选择冒烟测试；`/smoke-check` 返回 `NOT ASSESSED — no game tests found`
 
 **Input:** `/hotfix`
 
 **Expected behavior:**
-1. `producer` is spawned as a blocking sign-off, not as a named director gate; no gate IDs appear
-2. The NOT ASSESSED QA result is treated as unmet, not as a pass
-3. The skill either obtains the missing result or takes the decision to the producer
-   explicitly as a decision to deploy an unverified hotfix. This escape hatch is
-   deliberate: an emergency fix may have to ship before a suite exists, but only
-   as a named decision, never as a gate that quietly cleared
-4. If the producer decides to deploy unverified, that decision — who made it and
-   why — is logged in the hotfix record, and the summary's QA gate line reads
-   NOT ASSESSED with why and whose explicit decision it was
+1. `producer` 作为阻塞性签核生成，而非具名总监闸门；不出现任何闸门 ID
+2. NOT ASSESSED 的 QA 结果被视为未满足，而非通过
+3. 技能要么获取缺失的结果，要么把决策明确交给 producer，
+   作为部署未验证热修复的决策。这一兜底出口是刻意设计的：
+   紧急修复可能必须在测试套件存在之前就发布，但只能作为
+   具名决策，绝不能作为悄然放行的闸门
+4. 如果 producer 决定部署未验证的修复，该决策——由谁做出以及
+   原因——会记录在热修复记录中，摘要的 QA 闸门行写为
+   NOT ASSESSED，并说明原因以及这是谁的明确决策
 
 **Assertions:**
-- [ ] No gate IDs (CD-*, TD-*, AD-*, PR-*) appear in output
-- [ ] NOT ASSESSED does not advance to Phase 6 as if the QA gate passed
-- [ ] Deployment goes ahead only with the three APPROVE sign-offs plus an explicit producer decision to deploy unverified
-- [ ] That decision is logged in the hotfix record
-- [ ] The summary records the QA gate as NOT ASSESSED with the reason and whose decision it was
+- [ ] 输出中不出现任何闸门 ID（CD-*、TD-*、AD-*、PR-*）
+- [ ] NOT ASSESSED 不会像 QA 闸门已通过那样推进到 Phase 6
+- [ ] 只有在三个 APPROVE 签核加上 producer 明确决定部署未验证版本之后，才会继续部署
+- [ ] 该决策记录在热修复记录中
+- [ ] 摘要把 QA 闸门记录为 NOT ASSESSED，并写明原因以及是谁的决策
 
 ---
 
-### Case 6: Smoke Check FAIL — back to Phase 4, and a CONCERNS sign-off still blocks
+### Case 6: Smoke Check FAIL — 回到 Phase 4，且 CONCERNS 签核仍会阻止
 
 **Fixture:**
-- S1 fix implemented; all three sign-offs APPROVE; `qa-lead` picks a smoke check
-- `/smoke-check` returns FAIL: "Player health clamping regression detected"
-- On the revised fix, `lead-programmer` returns CONCERNS ("the clamp now runs on
-  the save path too"); `qa-tester` and `producer` return APPROVE
+- S1 修复已实现；三个签核均 APPROVE；`qa-lead` 选择冒烟测试
+- `/smoke-check` 返回 FAIL："Player health clamping regression detected"
+- 在修订后的修复上，`lead-programmer` 返回 CONCERNS（"the clamp now runs on
+  the save path too"）；`qa-tester` 与 `producer` 返回 APPROVE
 
 **Input:** `/hotfix`
 
 **Expected behavior:**
-1. The FAIL stops deployment: the skill returns to Phase 4 with the failing check,
-   presents a revised fix and asks "May I implement this fix?" again before
-   changing code
-2. After implementing it (Phase 4b), it re-runs all three Phase 5 sign-offs —
-   qa-tester's regression run among them — and then the QA step
-3. `lead-programmer`'s CONCERNS blocks exactly as a REJECT does: it is shown to the
-   user and resolved before the skill continues
-4. The Phase 6 deploy question is asked only once all three return APPROVE and a
-   re-run smoke check passes
+1. FAIL 阻止部署：技能带着失败的检查回到 Phase 4，
+   呈现修订后的修复，并在改动代码之前再次询问 "May I implement this fix?"
+2. 实现之后（Phase 4b），它重新运行 Phase 5 的全部三个签核——
+   其中包括 qa-tester 的回归运行——然后重新执行 QA 步骤
+3. `lead-programmer` 的 CONCERNS 与 REJECT 一样会阻止：它被展示给
+   用户，并在技能继续之前解决
+4. 只有在三者都返回 APPROVE 且重新运行的冒烟测试通过之后，才提出
+   Phase 6 的部署问题
 
 **Assertions:**
-- [ ] A smoke-check FAIL never reaches the deploy question
-- [ ] The revised fix gets its own "May I implement this fix?" approval
-- [ ] All three sign-offs and the QA step are re-run for the revised fix
-- [ ] CONCERNS from a sign-off blocks deployment until resolved; it is not treated as an approval
-- [ ] No merge, tag or deploy occurs while the FAIL or the CONCERNS stands
+- [ ] 冒烟测试 FAIL 绝不会到达部署问题
+- [ ] 修订后的修复有自己的 "May I implement this fix?" 批准
+- [ ] 针对修订后的修复重新运行全部三个签核与 QA 步骤
+- [ ] 签核中的 CONCERNS 在解决之前会阻止部署；它不被视为批准
+- [ ] FAIL 或 CONCERNS 仍成立期间不发生任何合并、打标签或部署
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Confirms severity before any work; S3 or lower is REDIRECTED
-- [ ] Asks "May I write" before the hotfix record
-- [ ] Asks before creating the branch
-- [ ] Asks "May I implement this fix?" before modifying code
-- [ ] Runs targeted tests with `commands.test`, never a runner line from memory; with the key unset (or no covering test) records `Tests: NOT RUN — [reason]`
-- [ ] Treats a `/team-qa` NOT APPROVED or BLOCKED like a smoke-check FAIL
-- [ ] On the deploy question's `[C] Stop here`, merges, tags and updates nothing, and the record stays IN PROGRESS
-- [ ] Deploys only with all three APPROVE sign-offs and a QA gate that ran — or,
-      when the QA gate was NOT ASSESSED, an explicit producer decision to deploy
-      unverified, logged in the hotfix record
-- [ ] Asks before any merge, tag or deploy regardless of `modes.automation`
-- [ ] Starts the hotfix branch from the release it fixes (its tag, or its `release/*` branch if one exists)
-- [ ] Verifies the backport on `main`, and on the release's `release/*` branch only when one exists
-- [ ] Asks "May I update" before editing the bug file
+- [ ] 在任何工作开始前确认严重程度；S3 或更低为 REDIRECTED
+- [ ] 在热修复记录之前询问 "May I write"
+- [ ] 在创建分支之前询问
+- [ ] 在修改代码之前询问 "May I implement this fix?"
+- [ ] 使用 `commands.test` 运行针对性测试，绝不凭记忆写运行器命令；当该键未设置（或没有覆盖该系统的测试）时记录 `Tests: NOT RUN — [reason]`
+- [ ] 把 `/team-qa` 的 NOT APPROVED 或 BLOCKED 按冒烟测试 FAIL 处理
+- [ ] 在部署问题中选 `[C] Stop here` 时，不合并、不打标签、不更新任何内容，记录保持 IN PROGRESS
+- [ ] 只有在三个 APPROVE 签核且 QA 闸门已运行的情况下才部署——或者，
+      当 QA 闸门为 NOT ASSESSED 时，必须有 producer 明确决定部署
+      未验证版本，并记录在热修复记录中
+- [ ] 无论 `modes.automation` 如何，在任何合并、打标签或部署之前都先询问
+- [ ] 从该修复所针对的发布版本（其标签，或若存在则其 `release/*` 分支）开始热修复分支
+- [ ] 在 `main` 上验证回填，且仅当发布版本存在 `release/*` 分支时才在该分支上验证
+- [ ] 在编辑缺陷文件之前询问 "May I update"
 
 ---
 
 ## Coverage Notes
 
-- A non-git working directory ("Not a git repository — create the branch manually.")
-  is not separately tested.
-- `qa-lead` choosing a targeted `/team-qa feature: [system]` pass (APPROVED /
-  APPROVED WITH CONDITIONS) or full QA is not separately tested.
-- Phase 7 post-deploy verification (VERIFIED FIXED → `/bug-report close`; STILL
-  PRESENT → re-open and assess rollback; CANNOT VERIFY → the bug stays open until
-  its reproduction steps are played in the deployed build and reported through
-  `/bug-report verify`'s manual-play question) is not separately tested.
+- 非 git 工作目录（"Not a git repository — create the branch manually."）
+  未单独测试。
+- `qa-lead` 选择针对性的 `/team-qa feature: [system]` 通过（APPROVED /
+  APPROVED WITH CONDITIONS）或完整 QA 未单独测试。
+- Phase 7 部署后验证（VERIFIED FIXED → `/bug-report close`；STILL
+  PRESENT → 重新打开并评估回滚；CANNOT VERIFY → 缺陷保持打开，直到
+  在已部署构建中实际游玩其复现步骤，并通过 `/bug-report verify` 的
+  手动游玩问题上报）未单独测试。

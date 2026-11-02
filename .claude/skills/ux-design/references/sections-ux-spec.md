@@ -1,269 +1,272 @@
-> Section-authoring guidance, loaded by `/ux-design` for the ACTIVE MODE ONLY.
-> Never load the other two — one mode applies per invocation.
+> 小节撰写指导，由 `/ux-design` 仅在当前活动模式下加载。
+> 绝不要加载另外两个文件 — 每次调用只适用一种模式。
 
-# Section Guidance — UX Spec Mode
+# 小节撰写指导 — UX 规格模式
 
-**In this file:**
+**本文件包含：**
 
-- Section A: Purpose & Player Need
-- Section B: Player Context on Arrival
-- Section B2: Navigation Position
-- Section B3: Entry & Exit Points
-- Section C: Layout Specification
-- Section D: States & Variants
-- Section E: Interaction Map
-- Section E2: Events Fired
-- Section E3: Transitions & Animations
-- Section F: Data Requirements
-- Section F2: Input Method Completeness Checklist
-- Section G: Accessibility
-- Section H: Localization Considerations
-- Section I: Acceptance Criteria
+- Section A：目的与玩家需求
+- Section B：玩家到达时的情境
+- Section B2：导航位置
+- Section B3：进入与退出点
+- Section C：布局规格
+- Section D：状态与变体
+- Section E：交互映射
+- Section E2：触发的事件
+- Section E3：转场与动画
+- Section F：数据需求
+- Section F2：输入方式完整性清单
+- Section G：无障碍
+- Section H：本地化考量
+- Section I：验收标准
 
-#### Section A: Purpose & Player Need
+#### Section A：目的与玩家需求
 
-This section is the foundation. Every other decision flows from it.
+本小节是基础。其他每一项决策都由此衍生。
 
-**Questions to ask**:
-- "What player goal does this screen serve? What is the player trying to DO here?"
-- "What would go wrong if this screen didn't exist or was hard to use?"
-- "Complete this sentence: 'The player arrives at this screen wanting to ___.' "
+**要问的问题**：
+- “这个屏幕服务于什么玩家目标？玩家在这里想做什么？”
+- “如果这个屏幕不存在或难以使用，会出什么问题？”
+- “补全这句话：‘玩家到达这个屏幕时想要 ___。’”
 
-Cross-reference the player journey context gathered in Phase 2. The stated purpose
-must align with the journey phase and emotional state.
-
----
-
-#### Section B: Player Context on Arrival
-
-**Questions to ask**:
-- "When in the game does a player first encounter this screen?"
-- "What were they just doing immediately before reaching this screen?"
-- "What emotional state should the design assume? (calm, stressed, curious, time-pressured)"
-- "Do players arrive at this screen voluntarily, or are they sent here by the game?"
-
-Offer to map this against the journey phases if the player journey doc exists.
+交叉引用 Phase 2 收集的玩家旅程上下文。所述目的
+必须与旅程阶段和情绪状态一致。
 
 ---
 
-#### Section B2: Navigation Position
+#### Section B：玩家到达时的情境
 
-Where does this screen sit in the game's navigation hierarchy? This is a one-paragraph orientation map — not a full flow diagram.
+**要问的问题**：
+- “玩家在游戏的什么时候第一次遇到这个屏幕？”
+- “在到达这个屏幕之前，他们刚刚在做什么？”
+- “设计应假定玩家处于什么情绪状态？（平静、紧张、好奇、有时间压力）”
+- “玩家是自愿到达这个屏幕的，还是被游戏送到这里的？”
 
-**Questions to ask**:
-- "Is this screen accessed from the main menu, from pause, from within gameplay, or from another screen?"
-- "Is it a top-level destination (always reachable) or a context-dependent one (only accessible in certain states)?"
-- "Can the player reach this screen from more than one place in the game?"
-
-Present as: "This screen lives at: [root] → [parent] → [this screen]" plus any alternate entry paths.
+如果玩家旅程文档存在，提议将其与旅程阶段进行对照。
 
 ---
 
-#### Section B3: Entry & Exit Points
+#### Section B2：导航位置
 
-Map every way the player can arrive at and leave this screen.
+这个屏幕位于游戏导航层级中的什么位置？这是一段式的定位图 — 不是完整的流程图。
 
-**Questions to ask**:
-- "What are all the ways a player can reach this screen?" (List each trigger: button press, game event, redirect from another screen, etc.)
-- "What can the player do to exit? What happens when they do?" (Back button, confirm action, timeout, game event)
-- "Are there any exits that are one-way — where the player cannot return to this screen without starting over?"
+**要问的问题**：
+- “这个屏幕是从主菜单、暂停菜单、玩法内，还是从另一个屏幕进入的？”
+- “它是顶层目的地（始终可达），还是依赖上下文的目的地（仅在特定状态可访问）？”
+- “玩家能否从游戏中的多个位置到达这个屏幕？”
 
-Present as two tables:
+呈现为：“这个屏幕位于：[root] → [parent] → [this screen]”，以及任何备用的进入路径。
 
-| Entry Source | Trigger | Player carries this context |
+---
+
+#### Section B3：进入与退出点
+
+梳理玩家到达和离开这个屏幕的所有方式。
+
+**要问的问题**：
+- “玩家到达这个屏幕的所有方式有哪些？”（列出每个触发条件：按键、游戏事件、从另一个屏幕重定向等）
+- “玩家可以怎样退出？退出时会发生什么？”（返回按钮、确认操作、超时、游戏事件）
+- “是否存在单向出口 — 玩家不重新开始就无法返回这个屏幕？”
+
+呈现为两个表格：
+
+| 进入来源 | 触发条件 | 玩家携带的情境 |
 |---|---|---|
 | [screen/event] | [how] | [state/data they arrive with] |
 
-| Exit Destination | Trigger | Notes |
+| 退出目的地 | 触发条件 | 备注 |
 |---|---|---|
 | [screen/event] | [how] | [any irreversible state changes] |
 
 ---
 
-#### Section C: Layout Specification
+#### Section C：布局规格
 
-This is the largest and most interactive section. Work through it in sub-sections:
+这是篇幅最大、交互性最强的小节。按子小节逐步处理：
 
-**Sub-section 1 — Information Hierarchy** (establish this before any layout):
-- Ask the user to list every piece of information this screen must communicate.
-- Then ask them to rank the items: "What is the single most important thing a player
-  needs to see first? What is second? What can be discovered rather than immediately visible?"
-- Present the resulting hierarchy for approval before moving to zones.
+**子小节 1 — 信息层级**（在任何布局之前确立）：
+- 请用户列出这个屏幕必须传达的每一条信息。
+- 然后请他们排序：“玩家最需要首先看到的一件事是什么？第二是什么？
+  哪些可以供发现而非立即显示？”
+- 在进入区域划分之前，呈现所得层级以供批准。
 
-**Sub-section 2 — Layout Zones**:
-- Based on the information hierarchy, propose rough screen zones (header, content
-  area, action bar, sidebar, etc.).
-- Offer 2-3 zone arrangements with rationale for each. Reference platform and
-  input context gathered from game concept.
-- Use `AskUserQuestion` to capture the choice:
-  - "Which zone arrangement fits best?"
-  - Options: [the 2-3 named arrangements you just presented] + "None — build a custom arrangement"
+**子小节 2 — 布局区域**：
+- 基于信息层级，提议粗略的屏幕区域（页眉、内容
+  区、操作栏、侧边栏等）。
+- 提供 2-3 种区域排布方案，并附各自理由。参考从游戏概念中
+  收集的平台和输入上下文。
+- 使用 `AskUserQuestion` 捕获选择：
+  - “哪种区域排布最合适？”
+  - 选项：[你刚刚呈现的 2-3 种具名排布] + “都不合适 — 构建自定义排布”
 
-**Sub-section 3 — Component Inventory**:
-- For each zone, list the UI components it contains. For each component, note:
-  - Component type (button, list, card, stat display, input field, etc.)
-  - Content it displays
-  - Whether it is interactive
-  - If it uses an existing pattern from the library (reference by pattern name)
-  - If it introduces a new pattern (flag for later addition to the library)
+**子小节 3 — 组件清单**：
+- 对每个区域，列出其包含的 UI 组件。对每个组件，注明：
+  - 组件类型（按钮、列表、卡片、属性显示、输入字段等）
+  - 它显示的内容
+  - 它是否可交互
+  - 它是否使用库中的现有模式（按模式名称引用）
+  - 它是否引入新模式（标记以便之后加入库中）
 
-**Sub-section 4 — ASCII Wireframe**:
-- Offer to generate an ASCII wireframe based on the zone layout and component list.
-- Use `AskUserQuestion`: "Want an ASCII wireframe as part of this spec?"
-  - Options: "Yes, include one", "No, I'll attach a separate file"
-- If yes, produce the wireframe in conversation first. Ask for feedback before
-  writing it to file.
+**子小节 4 — ASCII 线框图**：
+- 提议基于区域布局和组件列表生成 ASCII 线框图。
+- 使用 `AskUserQuestion`：“希望本规格包含 ASCII 线框图吗？”
+  - 选项：“是，包含一个”、“否，我会附加单独的文件”
+- 如果是，先在对话中产出线框图。在写入文件之前征求反馈。
 
 ---
 
-#### Section D: States & Variants
+#### Section D：状态与变体
 
-Guide the user to think beyond the happy path.
+引导用户超越正常路径去思考。
 
-**Questions to ask** (work through these one at a time):
-- "What does this screen look like the very first time a player sees it, when there
-  is no data yet? (empty state)"
-- "What happens when something goes wrong — an error, a failed action, a missing
-  resource? (error state)"
-- "Is there ever a loading wait on this screen? If so, what does it show? (loading state)"
-- "Are there any player progression states that change what this screen shows? For
-  example, locked content, premium content, or tutorial-mode overlays?"
-- "Does this screen behave differently on any supported platform? (platform variant)"
+**要问的问题**（逐一处理）：
+- “玩家第一次看到这个屏幕、还没有数据时，它是什么样子？
+  （空状态）”
+- “当出现问题时会发生什么 — 错误、操作失败、资源缺失？
+  （错误状态）”
+- “这个屏幕是否会出现加载等待？如果会，显示什么？（加载状态）”
+- “是否有任何玩家进度状态会改变这个屏幕显示的内容？例如，
+  锁定内容、付费内容或教程模式覆盖层？”
+- “这个屏幕在任何支持的平台上行为是否不同？（平台变体）”
 
-Present the collected states as a table for approval:
+将收集到的状态以表格呈现以供批准：
 
-| State / Variant | Trigger | What Changes |
+| 状态 / 变体 | 触发条件 | 变化内容 |
 |-----------------|---------|--------------|
-| Default | Normal load | — |
-| Empty | No data available | [content area description] |
+| 默认 | 正常加载 | — |
+| 空 | 无可用数据 | [content area description] |
 | [etc.] | [trigger] | [changes] |
 
 ---
 
-#### Section E: Interaction Map
+#### Section E：交互映射
 
-For each interactive component identified in the Layout Specification, define:
-- The action (tap, click, press, hold, scroll, drag)
-- The platform input(s) that trigger it (mouse click, gamepad A, keyboard Enter)
-- The immediate feedback (visual, audio, haptic)
-- The outcome (navigation target, state change, data write)
+对布局规格中识别出的每个可交互组件，定义：
+- 动作（点击、单击、按下、按住、滚动、拖拽）
+- 触发它的平台输入（鼠标点击、手柄 A、键盘 Enter）
+- 即时反馈（视觉、音频、触觉）
+- 结果（导航目标、状态变更、数据写入）
 
-Use the input methods resolved in Phase 2h — do
-not ask the user again. State them upfront: "Mapping interactions for:
-[Input Methods resolved in Phase 2h]. Covering [Gamepad Support] gamepad support."
+使用 Phase 2h 中确定的输入方式 — 不要再次询问
+用户。主动说明它们：“正在为以下输入方式映射交互：
+[Input Methods resolved in Phase 2h]。覆盖 [Gamepad Support] 手柄支持。”
 
-Work through components one at a time rather than asking for all at once.
-For navigation actions (going to another screen), verify the target matches
-an existing UX spec or note it as a spec dependency.
+逐一处理组件，而不是一次询问全部。
+对于导航操作（前往另一个屏幕），验证目标是否匹配
+现有 UX 规格，或将其记为规格依赖。
 
 ---
 
-#### Section E2: Events Fired
+#### Section E2：触发的事件
 
-For every player action in the Interaction Map, document the corresponding event the game or analytics system should fire — or explicitly note "no event" if none applies.
+对交互映射中的每个玩家操作，记录游戏或分析系统
+应触发的对应事件 — 或在无适用事件时明确注明“无事件”。
 
-**Questions to ask**:
-- "For each action, should the game fire an analytics event, trigger a game-state change, or both?"
-- "Are there any actions that should NOT fire an event — and is that a deliberate choice?"
+**要问的问题**：
+- “对每个操作，游戏应触发分析事件、触发游戏状态变更，还是两者都触发？”
+- “是否有任何操作不应触发事件 — 这是有意选择吗？”
 
-Present as a table alongside the Interaction Map:
+与交互映射并排呈现为表格：
 
-| Player Action | Event Fired | Payload / Data |
+| 玩家操作 | 触发的事件 | 负载 / 数据 |
 |---|---|---|
 | [action] | [EventName] or none | [data passed with event] |
 
-Flag any action that modifies persistent game state (save data, progress, economy) — these need explicit attention from the architecture team.
+标记任何会修改持久游戏状态（存档数据、进度、经济）的操作 —
+这些需要架构团队明确关注。
 
 ---
 
-#### Section E3: Transitions & Animations
+#### Section E3：转场与动画
 
-Specify how the screen enters and exits, and how it responds to state changes.
+明确屏幕如何进入和退出，以及它如何响应状态变更。
 
-**Questions to ask**:
-- "How does this screen appear? (fade in, slide from right, instant pop, scale from button)"
-- "How does it dismiss? (fade out, slide back, cut)"
-- "Are there any in-screen state transitions that need animation? (loading spinner, success state, error flash)"
-- "Is there any animation that could cause motion sickness — and does the game have a reduced-motion option?"
+**要问的问题**：
+- “这个屏幕如何出现？（淡入、从右侧滑入、瞬间弹出、从按钮缩放）”
+- “它如何消失？（淡出、滑回、硬切）”
+- “是否有任何屏幕内的状态转场需要动画？（加载旋转指示器、成功状态、错误闪烁）”
+- “是否有任何动画可能引起晕动症 — 游戏是否提供减少动态效果选项？”
 
-Minimum required:
-- Screen enter transition
-- Screen exit transition
-- At least one state-change animation if the screen has multiple states
+最低要求：
+- 屏幕进入转场
+- 屏幕退出转场
+- 如果屏幕有多个状态，至少一个状态变更动画
 
 ---
 
-#### Section F: Data Requirements
+#### Section F：数据需求
 
-Cross-reference the GDD UI Requirements sections gathered in Phase 2.
+交叉引用 Phase 2 收集的 GDD UI 要求小节。
 
-For each piece of information the screen displays, ask:
-- "Where does this data come from? Which system owns it?"
-- "Does this screen need to write data back, or is it read-only?"
-- "Is any of this data time-sensitive or real-time? (health bars, cooldown timers)"
+对屏幕显示的每一条信息，询问：
+- “这些数据来自哪里？哪个系统拥有它？”
+- “这个屏幕是否需要写回数据，还是只读？”
+- “这些数据中有任何对时间敏感或实时的吗？（生命条、冷却计时器）”
 
-Flag any case where the UI would need to own or manage game state as an architectural
-concern. UX specs define what the UI needs; they do not dictate how the data is
-delivered. That is an architecture decision.
+标记任何 UI 需要拥有或管理游戏状态的情况，将其作为架构
+关注项。UX 规格定义 UI 需要什么；它们不规定数据如何
+交付。那是架构决策。
 
-Present the data requirements as a table:
+将数据需求呈现为表格：
 
-| Data | Source System | Read / Write | Notes |
+| 数据 | 来源系统 | 读 / 写 | 备注 |
 |------|--------------|--------------|-------|
 | [item] | [system] | Read | — |
 | [item] | [system] | Write | [concern if any] |
 
 ---
 
-#### Section F2: Input Method Completeness Checklist
+#### Section F2：输入方式完整性清单
 
-One checklist block per input method in the spec's **Platform Target** line —
-keyboard, gamepad, mouse, touch; drop the blocks for methods this game does not
-support and say so. Take the items from section 11 of
-`.claude/docs/templates/ux-spec.md` (reachability, tab/d-pad order, visible
-focus, focus trap for modals, Esc/back behavior, hit-target sizes, controller
-disconnect). Tick an item only when the Interaction Map above already specifies
-it; an unticked item is an open implementation question — list it under Open
-Questions rather than ticking it.
-
----
-
-#### Section G: Accessibility
-
-Cross-reference `design/accessibility-requirements.md` if it exists.
-
-Walk through the ux-designer agent's standard checklist for this screen:
-- Keyboard-only navigation path through all interactive elements
-- Gamepad navigation order (if applicable)
-- Text contrast and minimum readable font sizes
-- Color-independent communication (no information conveyed by color alone)
-- Screen reader considerations for any non-text elements
-- Any motion or animation that needs a reduced-motion alternative
-
-If no accessibility tier has been defined for this project, note the gap in the UX spec's Open Questions section:
-> "Accessibility tier not yet defined — consider WCAG-AA as a baseline. Run `/gate-check` to see whether this blocks any phase gates."
-Then continue to the next section without stopping.
+对规格 **Platform Target** 行中的每种输入方式各提供一个清单块 —
+键盘、手柄、鼠标、触摸；对游戏不支持的输入方式删除对应块并说明。
+从 `.claude/docs/templates/ux-spec.md` 第 11 节获取条目（可达性、Tab/方向键顺序、
+可见焦点、模态框焦点陷阱、Esc/返回行为、命中目标尺寸、控制器
+断开连接）。只有在上方交互映射中已经明确时，才勾选某项；
+未勾选的条目是未决的实现问题 — 将其列在待解决问题中，
+而不是勾选。
 
 ---
 
-#### Section H: Localization Considerations
+#### Section G：无障碍
 
-Document constraints that affect how this screen behaves when text is translated.
+如果存在 `design/accessibility-requirements.md`，请交叉引用。
 
-**Questions to ask**:
-- "Which text elements on this screen are the longest? What is the maximum character count that fits the layout?"
-- "Are there any elements where text length is layout-critical — e.g., a button label that must stay on one line?"
-- "Are there any elements that display numbers, dates, or currencies that need locale-specific formatting?"
+走查 ux-designer 代理针对此屏幕的标准清单：
+- 穿过所有可交互元素的仅键盘导航路径
+- 手柄导航顺序（如适用）
+- 文本对比度与最小可读字号
+- 不依赖颜色的信息传达（不得仅用颜色传达信息）
+- 任何非文本元素的屏幕阅读器考量
+- 任何需要减少动态效果替代方案的动作或动画
 
-Note: aim to flag any element where a 40% text expansion (common in translations from English to German or French) would break the layout. Mark those as HIGH PRIORITY for the localization engineer.
+如果本项目尚未定义无障碍级别，请在 UX 规格的待解决问题小节中记录该缺口：
+> “无障碍级别尚未定义 — 可考虑以 WCAG-AA 作为基线。运行 `/gate-check` 查看这是否会阻塞任何阶段质量闸门（gate）。”
+然后继续下一小节，不要停下。
 
 ---
 
-#### Section I: Acceptance Criteria
+#### Section H：本地化考量
 
-Write at least 5 specific, testable criteria that a QA tester can verify without reading any other design document. These become the pass/fail conditions for `/story-done`.
+记录影响此屏幕在文本被翻译后行为的约束。
 
-**Format**: Use checkboxes. Each criterion must be verifiable by a human tester:
+**要问的问题**：
+- “这个屏幕上哪些文本元素最长？布局可容纳的最大字符数是多少？”
+- “是否有任何元素的文本长度对布局至关重要 — 例如，必须保持在一行内的按钮标签？”
+- “是否有任何元素显示需要特定区域格式的数字、日期或货币？”
+
+注意：目标是标记任何在文本膨胀 40%（从英语翻译为德语或法语时常见）时
+会破坏布局的元素。将其标记为本地化工程师的
+高优先级。
+
+---
+
+#### Section I：验收标准
+
+写出至少 5 条具体、可测试的标准，QA 测试人员无需阅读任何其他设计文档
+即可验证。这些将成为 `/story-done` 的通过/失败条件。
+
+**格式**：使用复选框。每条标准都必须可由人类测试人员验证：
 
 ```
 - [ ] Screen opens within [X]ms from [trigger]
@@ -274,13 +277,13 @@ Write at least 5 specific, testable criteria that a QA tester can verify without
 - [ ] [Accessibility requirement] is met — e.g., "all interactive elements have focus indicators"
 ```
 
-**Minimum required**:
-- 1 performance criterion (load/open time)
-- 1 navigation criterion (at least one entry or exit path verified)
-- 1 error/empty state criterion
-- 1 accessibility criterion (per committed tier)
-- 1 criterion specific to this screen's core purpose
+**最低要求**：
+- 1 条性能标准（加载/打开时间）
+- 1 条导航标准（至少验证一条进入或退出路径）
+- 1 条错误/空状态标准
+- 1 条无障碍标准（按已承诺的级别）
+- 1 条针对此屏幕核心目的的标准
 
-Use `AskUserQuestion` to confirm:
-- "Do these acceptance criteria cover what would make this screen 'done' for your QA process?"
-- Options: "Yes — these are solid", "Add one more criterion", "Remove or rephrase one"
+使用 `AskUserQuestion` 确认：
+- “这些验收标准是否涵盖了在你的 QA 流程中让这个屏幕‘完成’所需的内容？”
+- 选项：“是 — 这些很扎实”、“再加一条标准”、“删除或改写一条”

@@ -1,83 +1,83 @@
 # Agent Test Spec: devops-engineer
 
 ## Agent Summary
-- **Domain**: CI/CD pipeline configuration, build scripts, version control workflow and branching strategy (trunk-based, per `CLAUDE.md`), release tagging scheme, automated test integration in CI, artifact management, environment management
-- **Does NOT own**: Game code or assets, technology stack decisions and server infrastructure changes (technical-director approves), security audits (security-engineer), QA test strategy (qa-lead), game networking logic (network-programmer)
-- **Gate IDs**: None; reports to technical-director and escalates build-time and infrastructure concerns there
+- **Domain**: CI/CD 流水线配置、构建脚本、版本控制工作流与分支策略（基于主干的开发，依据 `CLAUDE.md`）、发布标签方案、CI 中的自动化测试集成、产物管理、环境管理
+- **Does NOT own**: 游戏代码或资源、技术栈决策与服务器基础设施变更（由 technical-director 批准）、安全审计（security-engineer）、QA 测试策略（qa-lead）、游戏网络逻辑（network-programmer）
+- **Gate IDs**: None；向 technical-director 汇报，并将构建时长与基础设施方面的顾虑上报到那里
 
 ---
 
 ## Static Assertions (Structural)
 
-- [ ] `description:` field is present and domain-specific (references CI/CD, build, deployment, version control)
-- [ ] `tools:` reads `Read, Glob, Grep, Write, Edit, Bash` — Bash to run builds and pipelines; game code and assets are excluded by the body's "What This Agent Must NOT Do" list, not by the tool list
-- [ ] Model tier is `sonnet` — frontmatter `model:` reads exactly `sonnet` (tiers: `.claude/docs/model-tiers.md`)
-- [ ] Agent definition does not claim authority over game logic, security audits, or QA test design
-- [ ] Its Implementation Workflow questions are pipeline questions (which platforms, engine version and export presets CI builds; where build secrets and signing keys live) — none asks how game code should be structured
+- [ ] `description:` 字段存在且限定于本领域（引用 CI/CD、构建、部署、版本控制）
+- [ ] `tools:` 为 `Read, Glob, Grep, Write, Edit, Bash` —— Bash 用于运行构建和流水线；游戏代码与资源由正文的「What This Agent Must NOT Do」清单排除，而非工具清单
+- [ ] 模型档位为 `sonnet` —— frontmatter `model:` 精确为 `sonnet`（档位见：`.claude/docs/model-tiers.md`）
+- [ ] 代理定义未声称对游戏逻辑、安全审计或 QA 测试设计拥有权限
+- [ ] 其 Implementation Workflow 的问题都是流水线问题（CI 构建哪些平台、引擎版本和导出预设；构建密钥与签名密钥存放何处）—— 没有一个询问游戏代码应如何组织
 
 ---
 
 ## Test Cases
 
-### Case 1: In-domain request — CI setup for a Godot project
-**Input**: "Set up a CI pipeline for our Godot 4 project. It should run tests on every push to main and every pull request, and fail the build if tests fail."
+### Case 1: In-domain request — Godot 项目的 CI 设置
+**Input**: "为我们的 Godot 4 项目设置 CI 流水线。它应在每次推送到 main 和每个拉取请求时运行测试，并在测试失败时使构建失败。"
 **Expected behavior**:
-- Produces a GitHub Actions workflow YAML (`.github/workflows/ci.yml` or equivalent)
-- Uses the Godot headless test runner command from `coding-standards.md`: `godot --headless -s -d --remote-debug tcp://127.0.0.1:0 res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a res://tests --ignoreHeadlessMode`
-- Configures trigger on `push` to main and `pull_request`
-- Sets the job to fail (non-zero exit) when tests fail — does NOT add `continue-on-error` or any other setting that lets the pipeline pass on a test failure
-- Shows the workflow and asks "May I write this to `.github/workflows/<file>`?" before writing it (Collaboration Protocol, step 5)
+- 产出 GitHub Actions workflow YAML（`.github/workflows/ci.yml` 或等价文件）
+- 使用 `coding-standards.md` 中的 Godot 无头测试运行命令：`godot --headless -s -d --remote-debug tcp://127.0.0.1:0 res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a res://tests --ignoreHeadlessMode`
+- 配置在推送到 main 和 `pull_request` 时触发
+- 设置任务在测试失败时失败（非零退出）—— 不添加 `continue-on-error` 或任何其他让流水线在测试失败时仍通过的设置
+- 展示该 workflow，并在写入前询问「May I write this to `.github/workflows/<file>`?」（Collaboration Protocol 第 5 步）
 
-### Case 2: Out-of-domain request — game networking implementation
-**Input**: "Implement the server-authoritative movement system for our multiplayer game."
+### Case 2: Out-of-domain request — 游戏网络实现
+**Input**: "为我们的多人游戏实现服务器权威移动系统。"
 **Expected behavior**:
-- Does not produce game networking or movement code — "Modify game code or assets" is on its "What This Agent Must NOT Do" list
-- Says the work belongs to a programmer and names who takes it: `lead-programmer` or `technical-director`, the agents its file names (naming `network-programmer`, the owner of netcode, also satisfies this)
-- States what it can do instead: the infrastructure that builds, tests, and deploys the game once the netcode exists
-- Does not conflate CI pipeline configuration with in-game network architecture
+- 不产出游戏网络或移动代码 ——「Modify game code or assets」在其「What This Agent Must NOT Do」清单上
+- 说明该工作属于程序员，并指明由谁承担：`lead-programmer` 或 `technical-director`，即其文件所指定的代理（指明网络代码负责人 `network-programmer` 也满足要求）
+- 说明它转而能做什么：在网络代码存在后负责构建、测试和部署游戏的基础设施
+- 不将 CI 流水线配置与游戏内网络架构混为一谈
 
-### Case 3: Build failure diagnosis
-**Input**: "Our CI pipeline is failing on the merge step. The error is: 'Asset import failed: texture compression format unsupported in headless mode.'"
+### Case 3: 构建失败诊断
+**Input**: "我们的 CI 流水线在合并步骤失败。错误是：'Asset import failed: texture compression format unsupported in headless mode.'"
 **Expected behavior**:
-- Diagnoses the failure as an environment problem in the headless CI runner (the import step needs a capability the headless runner lacks), not a flaky step to retry
-- Before stating how Godot 4.7 imports or compresses textures headlessly, cross-references `docs/engine-reference/godot/` — `VERSION.md` pins 4.7, past the model's training data — and says so when the reference does not cover it, rather than asserting version-specific behavior from memory
-- Proposes at least one actionable fix that keeps the import and test steps in the pipeline, and names its tradeoff
-- Does NOT remove the import step, skip the tests, or mark the job `continue-on-error` to get a green build — "Skip CI steps for speed" is forbidden, and `coding-standards.md` says "Never disable or skip failing tests to make CI pass — fix the underlying issue"
-- Does NOT declare the pipeline unfixable
+- 将该失败诊断为无头 CI 运行器中的环境问题（导入步骤需要无头运行器所缺少的能力），而非需要重试的不稳定步骤
+- 在说明 Godot 4.7 如何无头导入或压缩纹理之前，交叉查阅 `docs/engine-reference/godot/` —— `VERSION.md` 固定为 4.7，超出模型训练数据 —— 并在参考资料未覆盖时说明这一点，而不是凭记忆断言特定版本行为
+- 提出至少一个可操作的修复方案，保持导入和测试步骤仍在流水线中，并说明其取舍
+- 不移除导入步骤、不跳过测试，也不将任务标记为 `continue-on-error` 以换取绿色构建 ——「Skip CI steps for speed」被禁止，且 `coding-standards.md` 规定「Never disable or skip failing tests to make CI pass — fix the underlying issue」
+- 不宣称流水线无法修复
 
-### Case 4: Branching strategy conflict
-**Input**: "Half the team wants to use GitFlow with long-lived feature branches. The other half wants trunk-based development. How should we set this up?"
+### Case 4: 分支策略冲突
+**Input**: "一半团队想用 GitFlow 和长期存活的特性分支。另一半想用基于主干的开发。我们该如何搭建？"
 **Expected behavior**:
-- Recommends trunk-based development because `CLAUDE.md` names it under Version Control ("Git with trunk-based development"), and says that is the model it followed
-- Explains the model as its Branching Strategy section defines it: `main` is the always-shippable trunk, built and tested by CI on every push and pull request; work happens on short-lived branches merged back within a day or two through a pull request that passes CI; unfinished work ships dark behind a feature flag
-- Rejects GitFlow's long-lived branches specifically — there is no long-lived integration branch beside `main`
-- Covers releases and hotfixes per the same section: a release is a tag on `main`; a `release/*` branch is cut only to stabilise a release (bug fixes only, every fix also lands on `main`); a `hotfix/*` branch starts from the release tag (or its `release/*` branch, if one exists) and merges back to `main`, and to that `release/*` branch only if it exists
-- Does NOT present this as a 50/50 choice, and does not adopt GitFlow on its own authority — the model comes from `CLAUDE.md`'s Version Control line, so switching means changing that line
+- 推荐基于主干的开发，因为 `CLAUDE.md` 在 Version Control 下列出了它（「Git with trunk-based development」），并说明这是其遵循的模式
+- 按其 Branching Strategy 一节的描述解释该模式：`main` 是始终可交付的主干，由 CI 在每次推送和拉取请求时构建与测试；工作在短生命周期分支上进行，在一两天内通过通过 CI 的拉取请求合并回去；未完成的工作以功能开关（feature flag）形式暗发布
+- 明确拒绝 GitFlow 的长期存活分支 —— 除 `main` 外没有长期存活的集成分支
+- 按同一节说明发布与热修复：发布是 `main` 上的一个标签；仅在需要稳定发布时才切出 `release/*` 分支（只做缺陷修复，每个修复也同时落到 `main`）；`hotfix/*` 分支从发布标签（或其 `release/*` 分支，若存在）开始，并合并回 `main`，且仅在 `release/*` 分支存在时合并到该分支
+- 不将其呈现为 50/50 的选择，也不凭自身权限采用 GitFlow —— 该模式来自 `CLAUDE.md` 的 Version Control 行，因此切换意味着修改该行
 
-### Case 5: Context pass — platform-specific build matrix
-**Input context**: Project targets PC (Windows, Linux), Nintendo Switch, and PlayStation 5. CI runs on GitHub-hosted runners, which have no console export templates or SDKs installed.
-**Input**: "Set up our CI build matrix so we get a build artifact for each target platform on every release branch push."
+### Case 5: Context pass — 平台专属构建矩阵
+**Input context**: 项目目标平台为 PC（Windows、Linux）、Nintendo Switch 和 PlayStation 5。CI 运行在 GitHub 托管的运行器上，这些运行器未安装主机导出模板或 SDK。
+**Input**: "设置我们的 CI 构建矩阵，使每次向发布分支推送时都为每个目标平台产出一个构建产物。"
 **Expected behavior**:
-- Produces a build matrix configuration with four platform entries — Windows, Linux, Switch, PS5 — each a one-command build (Build Pipeline)
-- Triggers release builds the way its Branching Strategy defines a release: on release tags on `main`, and on pushes to a `release/*` branch while one exists for stabilisation — and says why, rather than assuming a standing release branch
-- Does NOT provision new build infrastructure for the console entries (e.g., self-hosted runners with the platform SDKs) on its own — "Change server infrastructure without technical-director approval" is forbidden, so it flags the requirement for technical-director approval instead of silently writing it into the config
-- Organizes artifacts by platform name, with versioning and retention (Artifact Management)
+- 产出包含四个平台条目的构建矩阵配置 —— Windows、Linux、Switch、PS5 —— 每个都是一条命令完成构建（Build Pipeline）
+- 按其 Branching Strategy 对发布的规定触发发布构建：在 `main` 的发布标签上，以及推送到 `release/*` 分支时（当存在用于稳定的该分支时）—— 并说明原因，而非假设存在常设发布分支
+- 不会自行为主机条目准备新的构建基础设施（例如带平台 SDK 的自托管运行器）——「Change server infrastructure without technical-director approval」被禁止，因此它标记该需求以获取 technical-director 批准，而不是静默写入配置
+- 按平台名称组织产物，并包含版本管理与保留策略（Artifact Management）
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Stays within declared domain (CI/CD, build scripts, version control, artifacts, environments)
-- [ ] Declines game code and networking requests and names who takes them (`lead-programmer` / `technical-director`, or the owning programmer)
-- [ ] Recommends trunk-based development when branching strategy is contested, citing `CLAUDE.md`'s Version Control line
-- [ ] Returns structured pipeline configurations (YAML, scripts), not freeform advice, and asks before writing them
-- [ ] Never skips CI or test steps to get a green build, and routes infrastructure changes to technical-director for approval
+- [ ] 保持在声明领域内（CI/CD、构建脚本、版本控制、产物、环境）
+- [ ] 拒绝游戏代码与网络请求，并指明由谁承担（`lead-programmer` / `technical-director`，或所属程序员）
+- [ ] 分支策略有争议时推荐基于主干的开发，并引用 `CLAUDE.md` 的 Version Control 行
+- [ ] 返回结构化流水线配置（YAML、脚本），而非自由建议，并在写入前询问
+- [ ] 绝不为获得绿色构建而跳过 CI 或测试步骤，并将基础设施变更交由 technical-director 批准
 
 ---
 
 ## Coverage Notes
-- Case 1 references `coding-standards.md` CI rules — verify this file is present and current before running this test
-- Case 3 tests that the agent consults `docs/engine-reference/godot/` for version-specific behavior; it does not require the reference to cover headless import
-- Case 4 (branching strategy) is a convention-enforcement test — agent must know the project convention, not just give neutral advice
-- Case 5 supplies the target platforms in context; in a real project they come from `project.yaml`
-- No automated runner; review manually or via `/skill-test`
+- Case 1 引用 `coding-standards.md` 的 CI 规则 —— 运行此测试前确认该文件存在且为最新
+- Case 3 测试代理是否查阅 `docs/engine-reference/godot/` 了解版本特定行为；它不要求该参考资料覆盖无头导入
+- Case 4（分支策略）是约定执行测试 —— 代理必须了解项目约定，而不仅是给出中立建议
+- Case 5 在上下文中提供了目标平台；真实项目中它们来自 `project.yaml`
+- 无自动运行器；请手动审查或通过 `/skill-test`

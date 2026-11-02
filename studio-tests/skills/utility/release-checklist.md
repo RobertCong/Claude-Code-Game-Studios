@@ -2,294 +2,294 @@
 
 ## Skill Summary
 
-`/release-checklist [platform: pc|console|mobile|all]` builds a pre-release
-checklist scoped to the project. It resolves `modes.rigor`, `modes.workflow`,
-`project.stage` and `platform.cert_tier`, reads `CLAUDE.md` and the current
-milestone in `production/milestones/`, and reads open bugs from
-`production/qa/bugs/` (Severity and Status lines). The bug items use the release
-gate's thresholds for the resolved `workflow` — an open S1, S2 or S3 fails at
-`full`, only an open S1 at `standard`/`minimal` (an open S2/S3 is a listed risk)
-— and with no bug files they read `NOT ASSESSED — no bug records`, never zero.
-It scans the code root for TODO / FIXME / HACK,
-always stating the denominator (`scanned [N] source files: …`), or
-`NOT ASSESSED — code root unresolved` when no root resolves, or
-`NOT ASSESSED — no source files found to scan` when the root is absent or empty.
-Missing test output is reported as
-`Test results: NOT ASSESSED — no test output or CI logs found`.
+`/release-checklist [platform: pc|console|mobile|all]` 生成按项目范围收窄的
+预发布清单。它解析 `modes.rigor`、`modes.workflow`、
+`project.stage` 与 `platform.cert_tier`，读取 `CLAUDE.md` 与
+`production/milestones/` 中的当前里程碑，并从
+`production/qa/bugs/` 读取未解决缺陷（Severity 与 Status
+行）。缺陷条目使用解析出的 `workflow` 对应的发布
+闸门阈值——未解决的 S1、S2 或 S3 在
+`full` 下失败，在 `standard`/`minimal` 下仅未解决的 S1 失败（未解决的 S2/S3 列为风险）
+——且没有缺陷文件时读作 `NOT ASSESSED — no bug records`，绝不为零。
+它扫描代码根中的 TODO / FIXME / HACK，
+始终说明分母（`scanned [N] source files: …`），或
+在无根可解析时为 `NOT ASSESSED — code root unresolved`，或在
+根不存在或为空时为 `NOT ASSESSED — no source files found to scan`。
+缺少测试输出时报告为
+`Test results: NOT ASSESSED — no test output or CI logs found`。
 
-The checklist has Codebase Health, Build Verification, Quality Gates and Content
-Complete sections, device blocks chosen by the argument (default `all`), then a
-certification block chosen **only** by `platform.cert_tier`: `none` → a single
-"Certification: omitted — cert_tier is 'none' …" line; `itch` → itch.io rows;
-`steam` → Steamworks rows; `console` → TRC/XR/Lotcheck rows. Unset `cert_tier`
-means asking which platforms are in scope, or
-`### Certification: NOT ASSESSED — cert tier unknown`; unset is never treated as
-`none`. It ends with Store / Distribution, Launch Readiness and
-`### Go / No-Go: [READY / NOT ASSESSED / NOT READY]` — first match NOT READY (a
-blocking item fails), then NOT ASSESSED (any section or item NOT ASSESSED), then READY —
-then asks "May I write this to
-`production/releases/release-checklist-[version].md`?". No director gates apply.
+清单包含 Codebase Health、Build Verification、Quality Gates 与 Content
+Complete 节，设备块由参数选择（默认 `all`），随后是
+**仅**由 `platform.cert_tier` 选择的认证块：`none` → 单行
+"Certification: omitted — cert_tier is 'none' …"；`itch` → itch.io 行；
+`steam` → Steamworks 行；`console` → TRC/XR/Lotcheck 行。未设置 `cert_tier`
+意味着询问哪些平台在范围内，或使用
+`### Certification: NOT ASSESSED — cert tier unknown`；未设置绝不被当作
+`none`。它以 Store / Distribution、Launch Readiness 和
+`### Go / No-Go: [READY / NOT ASSESSED / NOT READY]` 结束——首个命中顺序为 NOT READY（
+阻塞项失败），然后是 NOT ASSESSED（任何节或条目 NOT ASSESSED），然后是 READY——
+最后询问 "May I write this to
+`production/releases/release-checklist-[version].md`?"。不适用任何总监闸门。
 
 ---
 
 ## Static Assertions (Structural)
 
-Checked against the SKILL.md by `/skill-test spec` — no fixture needed.
+由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] Has required frontmatter fields: `name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`
-- [ ] Has ≥2 phase headings
-- [ ] Contains verdict keywords: READY, NOT READY, NOT ASSESSED
-- [ ] Contains "May I write" language before writing the checklist
-- [ ] Has a next-step handoff (`/gate-check` for the formal verdict, `/team-release` for sign-offs)
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 有 ≥2 个 phase 标题
+- [ ] 包含结论关键词：READY、NOT READY、NOT ASSESSED
+- [ ] 在写入清单之前包含 "May I write" 用语
+- [ ] 有下一步交接（正式结论用 `/gate-check`，签核用 `/team-release`）
 
 ---
 
 ## Director Gate Checks
 
-None. `/release-checklist` spawns no agents (`Agent` is not in its allowed
-tools). The Sign-offs Required list (QA Lead, Technical Director, Producer,
-Creative Director) is a checklist for humans, not spawned gates. Formal phase
-advancement is `/gate-check`.
+无。`/release-checklist` 不派发任何代理（`Agent` 不在其允许
+工具中）。Sign-offs Required 列表（QA Lead、Technical Director、Producer、
+Creative Director）是给人工使用的清单，而非被派发的闸门。正式的阶段
+推进由 `/gate-check` 负责。
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非某个用例自己的 Fixture 另有说明，否则每个用例的 `project.yaml` 都设置
+`modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。
+规则见：`studio-tests/CLAUDE.md` §
+Fixture defaults。
 
 ---
 
 ## Test Cases
 
-### Case 1: Happy Path — PC Build on the Steam Tier
+### Case 1: 正常路径 — Steam 层级的 PC 构建
 
 **Fixture:**
-- `platform.cert_tier: steam`; `project.stage: Polish`; `engine.name: Godot`
-- `src/` has 40 source files containing 3 TODO, 1 FIXME and 0 HACK comments
-- `production/milestones/` holds the current milestone
-- `production/qa/bugs/` holds `BUG-0003.md` (S1, `**Status**: Closed`) and
-  `BUG-0004.md` (S4, `**Status**: Open`); `modes.rigor` is unset (`workflow: minimal`)
-- CI test output exists
+- `platform.cert_tier: steam`；`project.stage: Polish`；`engine.name: Godot`
+- `src/` 有 40 个源文件，包含 3 条 TODO、1 条 FIXME 与 0 条 HACK 注释
+- `production/milestones/` 有当前里程碑
+- `production/qa/bugs/` 有 `BUG-0003.md`（S1，`**Status**: Closed`）与
+  `BUG-0004.md`（S4，`**Status**: Open`）；`modes.rigor` 未设置（`workflow: minimal`）
+- CI 测试输出存在
 
 **Input:** `/release-checklist pc`
 
 **Expected behavior:**
-1. Skill reads `CLAUDE.md` and the current milestone
-2. Codebase Health states the denominator: `scanned 40 source files: 3 TODO, 1
-   FIXME, 0 HACK`, listing the FIXME
-3. The PC device block is emitted; no Console or Mobile device block
-4. Certification is the Steamworks block only
-5. Store / Distribution, Launch Readiness and the Go / No-Go line follow
-6. Skill presents total items and known blockers, then asks "May I write this
-   to `production/releases/release-checklist-[version].md`?"; next steps name
-   `/gate-check` and `/team-release`
+1. 技能读取 `CLAUDE.md` 与当前里程碑
+2. Codebase Health 说明分母：`scanned 40 source files: 3 TODO, 1
+   FIXME, 0 HACK`，并列出该 FIXME
+3. 生成 PC 设备块；没有 Console 或 Mobile 设备块
+4. 认证仅为 Steamworks 块
+5. 其后是 Store / Distribution、Launch Readiness 与 Go / No-Go 行
+6. 技能展示条目总数与已知阻塞项，然后询问 "May I write this
+   to `production/releases/release-checklist-[version].md`?"；下一步指明
+   `/gate-check` 与 `/team-release`
 
 **Assertions:**
-- [ ] TODO/FIXME/HACK counts are reported with the number of files scanned
-- [ ] Only the PC device block appears
-- [ ] Certification contains Steamworks rows and no itch.io or console certification rows
-- [ ] Go / No-Go is READY or NOT READY — never NOT ASSESSED, since every section in this fixture could be assessed
-- [ ] The Quality Gates bug line is counted from `production/qa/bugs/` (0 open S1, S2 or S3); the closed S1 and the open S4 fail nothing
-- [ ] Nothing is written before the "May I write" ask naming `production/releases/release-checklist-[version].md`
+- [ ] 报告 TODO/FIXME/HACK 计数时附扫描文件数
+- [ ] 仅出现 PC 设备块
+- [ ] 认证包含 Steamworks 行，且没有 itch.io 或主机认证行
+- [ ] Go / No-Go 为 READY 或 NOT READY——绝不为 NOT ASSESSED，因为此 fixture 中每节都可评估
+- [ ] Quality Gates 缺陷行从 `production/qa/bugs/` 统计（0 个未解决 S1、S2 或 S3）；已关闭的 S1 与未解决的 S4 不导致任何失败
+- [ ] 在指明 `production/releases/release-checklist-[version].md` 的 "May I write" 询问之前不写入任何内容
 
 ---
 
-### Case 2: Device Argument and Certification Tier Are Separate Axes
+### Case 2: 设备参数与认证层级是两个独立维度
 
 **Fixture:**
 - `platform.cert_tier: itch`
-- Source files exist in the code root
+- 代码根中存在源文件
 
 **Input:** `/release-checklist console`
 
 **Expected behavior:**
-1. The `console` argument selects the Console device block (suspend/resume, user
-   switching, controller prompts)
-2. Certification follows `cert_tier`, not the argument: only the itch.io block
-3. No Steamworks rows and no TRC/XR/Lotcheck rows appear
+1. `console` 参数选择 Console 设备块（挂起/恢复、用户
+   切换、手柄提示）
+2. 认证遵循 `cert_tier`，而非参数：仅 itch.io 块
+3. 不出现 Steamworks 行与 TRC/XR/Lotcheck 行
 
 **Assertions:**
-- [ ] The Console device block is present
-- [ ] The only certification block is itch.io
-- [ ] No console certification rows (TRC/Lotcheck, first-party submission) appear
-- [ ] No Steamworks rows appear
+- [ ] Console 设备块存在
+- [ ] 唯一的认证块是 itch.io
+- [ ] 不出现主机认证行（TRC/Lotcheck、第一方提交）
+- [ ] 不出现 Steamworks 行
 
 ---
 
-### Case 3: cert_tier none vs Unset — Different Output
+### Case 3: cert_tier 为 none 与未设置 — 输出不同
 
 **Fixture:**
-- Run A: `platform.cert_tier: none`
-- Run B: `platform.cert_tier` absent (resolved block shows it as unset) and the
-  user cannot say which platforms are in scope
+- 运行 A：`platform.cert_tier: none`
+- 运行 B：`platform.cert_tier` 缺失（解析块显示为未设置），且
+  用户无法说明哪些平台在范围内
 
-**Input:** `/release-checklist` (no argument → device blocks for `all`)
+**Input:** `/release-checklist`（无参数 → `all` 的设备块）
 
 **Expected behavior:**
-1. Run A emits no certification block, only the line "Certification: omitted —
+1. 运行 A 不生成认证块，仅一行 "Certification: omitted —
    cert_tier is 'none' (internal build, alpha or jam release)."
-2. Run B asks which platforms are in scope instead of emitting every track;
-   with no answer it emits `### Certification: NOT ASSESSED — cert tier unknown`
-   and says why
-3. In neither run does the `all` argument cause every certification track to
-   be emitted
+2. 运行 B 询问哪些平台在范围内，而不是生成所有轨道；
+   没有回答时生成 `### Certification: NOT ASSESSED — cert tier unknown`
+   并说明原因
+3. 两次运行中，`all` 参数都不会导致生成所有认证轨道
 
 **Assertions:**
-- [ ] Run A shows the "omitted — cert_tier is 'none'" line and no certification rows
-- [ ] Run B asks which platforms are in scope
-- [ ] Run B's certification section is `NOT ASSESSED — cert tier unknown`, not the `none` line
-- [ ] Neither run emits itch.io, Steamworks and console certification together
+- [ ] 运行 A 显示 "omitted — cert_tier is 'none'" 行且无认证行
+- [ ] 运行 B 询问哪些平台在范围内
+- [ ] 运行 B 的认证节为 `NOT ASSESSED — cert tier unknown`，而非 `none` 行
+- [ ] 两次运行都不会同时生成 itch.io、Steamworks 与主机认证
 
 ---
 
-### Case 4: Edge Case — Nothing to Scan, No Test Output
+### Case 4: 边界情况 — 无内容可扫描，无测试输出
 
 **Fixture:**
 - `platform.cert_tier: steam`
-- No `engine.name`, no legacy engine value, and none of `src/`, `Assets/`,
-  `Source/` exists (code root unresolved)
-- No test output directories or CI logs
-- `production/qa/bugs/` holds one bug, `BUG-0002.md` (S2, `**Status**: Closed`)
+- 没有 `engine.name`，没有遗留引擎值，且 `src/`、`Assets/`、
+  `Source/` 都不存在（代码根无法解析）
+- 没有测试输出目录或 CI 日志
+- `production/qa/bugs/` 有一个缺陷，`BUG-0002.md`（S2，`**Status**: Closed`）
 
 **Input:** `/release-checklist pc`
 
 **Expected behavior:**
-1. The code root is unresolved, so no scan runs
-2. Codebase Health reads `NOT ASSESSED — code root unresolved`
-   (`.claude/docs/code-root-resolution.md`), not `0` TODO/FIXME/HACK
-3. The test line reads `Test results: NOT ASSESSED — no test output or CI logs
-   found` rather than being omitted
-4. The rest of the checklist is still generated and offered for writing
+1. 代码根无法解析，因此不运行扫描
+2. Codebase Health 读作 `NOT ASSESSED — code root unresolved`
+   （`.claude/docs/code-root-resolution.md`），而非 `0` 个 TODO/FIXME/HACK
+3. 测试行读作 `Test results: NOT ASSESSED — no test output or CI logs
+   found`，而非被省略
+4. 清单其余部分仍会生成并提供写入
 
 **Assertions:**
-- [ ] No bare `0` count is reported for TODO/FIXME/HACK
-- [ ] Codebase Health is `NOT ASSESSED — code root unresolved`
-- [ ] The test-results NOT ASSESSED line is present
-- [ ] Go / No-Go is never READY: it is NOT ASSESSED naming both unassessed sections,
-      or NOT READY if a blocking item failed
-- [ ] The write still waits for the "May I write" ask
+- [ ] 不报告 TODO/FIXME/HACK 的裸 `0` 计数
+- [ ] Codebase Health 为 `NOT ASSESSED — code root unresolved`
+- [ ] 存在测试结果的 NOT ASSESSED 行
+- [ ] Go / No-Go 绝不为 READY：它为 NOT ASSESSED 并点名两个未评估的节，
+      若有阻塞项失败则为 NOT READY
+- [ ] 写入仍等待 "May I write" 询问
 
 ---
 
-### Case 5: Director Gate Check — None; Sign-Offs Are Listed, Not Spawned
+### Case 5: 总监闸门检查 — 无；签核列出但不派发
 
 **Fixture:**
-- `platform.cert_tier: console`; source files present
-- Any review mode
+- `platform.cert_tier: console`；存在源文件
+- 任意评审模式
 
 **Input:** `/release-checklist all`
 
 **Expected behavior:**
-1. Skill generates the checklist with all device blocks and the console
-   certification block
-2. The Sign-offs Required list appears as unchecked items
-3. No director or other agent is spawned; no gate IDs appear
-4. Next steps point to `/gate-check` and `/team-release`
+1. 技能生成含所有设备块与主机
+   认证块的清单
+2. Sign-offs Required 列表以未勾选条目出现
+3. 不派发任何总监或其他代理；不出现闸门 ID
+4. 下一步指向 `/gate-check` 与 `/team-release`
 
 **Assertions:**
-- [ ] No director gate is invoked and no gate skip message appears
-- [ ] No subagent is spawned, although sign-offs are listed
-- [ ] The console certification block is the only certification block
-- [ ] Next steps name `/gate-check` and `/team-release`
+- [ ] 不调用任何总监闸门，也不出现闸门跳过消息
+- [ ] 尽管列出了签核，但不派发任何子代理
+- [ ] 主机认证块是唯一的认证块
+- [ ] 下一步指明 `/gate-check` 与 `/team-release`
 
 ---
 
-### Case 6: A Known Blocker Outranks an Unassessed Section
+### Case 6: 已知阻塞项高于未评估节
 
 **Fixture:**
-- `platform.cert_tier: steam`; `project.stage: Polish`
-- No `engine.name`, no legacy engine value, and none of `src/`, `Assets/`,
-  `Source/` exists (code root unresolved)
-- CI test output exists
-- `production/qa/bugs/BUG-0007.md` is an S1 (Critical) bug with `**Status**: Open`
+- `platform.cert_tier: steam`；`project.stage: Polish`
+- 没有 `engine.name`，没有遗留引擎值，且 `src/`、`Assets/`、
+  `Source/` 都不存在（代码根无法解析）
+- CI 测试输出存在
+- `production/qa/bugs/BUG-0007.md` 是 S1（Critical）缺陷，`**Status**: Open`
 
 **Input:** `/release-checklist pc`
 
 **Expected behavior:**
-1. Codebase Health reads `NOT ASSESSED — code root unresolved`
-2. Quality Gates' "Zero open S1 (Critical) bugs" fails — a blocking item, at every tier
-3. Go / No-Go is NOT READY: first match wins, and NOT READY ranks above
+1. Codebase Health 读作 `NOT ASSESSED — code root unresolved`
+2. Quality Gates 的 "Zero open S1 (Critical) bugs" 失败——这是阻塞项，在所有层级
+3. Go / No-Go 为 NOT READY：首个命中者胜出，NOT READY 高于
    NOT ASSESSED
-4. The Rationale lists the S1 bug as a blocking item; the unassessed Codebase
-   Health section still reads NOT ASSESSED rather than being dropped
+4. Rationale 将该 S1 缺陷列为阻塞项；未评估的 Codebase
+   Health 节仍读作 NOT ASSESSED，而非被丢弃
 
 **Assertions:**
-- [ ] Go / No-Go is NOT READY — not NOT ASSESSED
-- [ ] The S1 bug is listed in the Rationale as a blocking item
-- [ ] Codebase Health still shows `NOT ASSESSED — code root unresolved`
+- [ ] Go / No-Go 为 NOT READY——而非 NOT ASSESSED
+- [ ] S1 缺陷在 Rationale 中列为阻塞项
+- [ ] Codebase Health 仍显示 `NOT ASSESSED — code root unresolved`
 
 ---
 
-### Case 7: Bug Thresholds Follow the Workflow Tier
+### Case 7: 缺陷阈值遵循工作流层级
 
 **Fixture:**
-- `platform.cert_tier: steam`; source files present; CI test output exists
-- Run A: `modes.rigor: standard` (`workflow: standard`); `production/qa/bugs/BUG-0012.md`
-  is an S2 (High) bug with `**Status**: Open`, and no other bug is open
-- Run B: `modes.rigor: full` (`workflow: full`); `production/qa/bugs/BUG-0013.md`
-  is an S3 (Medium) bug with `**Status**: Open`, and no other bug is open
+- `platform.cert_tier: steam`；存在源文件；CI 测试输出存在
+- 运行 A：`modes.rigor: standard`（`workflow: standard`）；`production/qa/bugs/BUG-0012.md`
+  是 S2（High）缺陷，`**Status**: Open`，且没有其他未解决缺陷
+- 运行 B：`modes.rigor: full`（`workflow: full`）；`production/qa/bugs/BUG-0013.md`
+  是 S3（Medium）缺陷，`**Status**: Open`，且没有其他未解决缺陷
 
 **Input:** `/release-checklist pc`
 
 **Expected behavior:**
-1. Both runs read the bugs from `production/qa/bugs/`, not from the milestone
-2. Run A: the open S2 fails no item — at `standard` only an open S1 blocks — and
-   is listed in the Rationale as a risk; the S2/S3 row is not emitted
-3. Run B: the "Zero open S2 (High) and S3 (Medium) bugs" row fails on the open
-   S3, which is named in the Rationale as a blocking item; Go / No-Go is NOT READY
+1. 两次运行都从 `production/qa/bugs/` 读取缺陷，而非从里程碑
+2. 运行 A：未解决的 S2 不导致任何条目失败——在 `standard` 下仅未解决的 S1 阻塞——
+   并在 Rationale 中列为风险；不生成 S2/S3 行
+3. 运行 B："Zero open S2 (High) and S3 (Medium) bugs" 行因未解决的
+   S3 失败，该缺陷在 Rationale 中列为阻塞项；Go / No-Go 为 NOT READY
 
 **Assertions:**
-- [ ] Run A's Go / No-Go is not NOT READY because of the S2, and the S2 appears in the Rationale as a risk
-- [ ] Run B's Go / No-Go is NOT READY, naming BUG-0013 as a blocking item
-- [ ] Neither run offers a "documented exception" for the S3 at `workflow: full`
+- [ ] 运行 A 的 Go / No-Go 不因该 S2 而为 NOT READY，且该 S2 在 Rationale 中作为风险出现
+- [ ] 运行 B 的 Go / No-Go 为 NOT READY，并点名 BUG-0013 为阻塞项
+- [ ] 两次运行都不为 `workflow: full` 下的 S3 提供 "documented exception"
 
 ---
 
-### Case 8: No Bug Records — NOT ASSESSED, Not Zero
+### Case 8: 无缺陷记录 — NOT ASSESSED，而非零
 
 **Fixture:**
-- `platform.cert_tier: steam`; source files present; CI test output exists
-- `production/qa/bugs/` does not exist
+- `platform.cert_tier: steam`；存在源文件；CI 测试输出存在
+- `production/qa/bugs/` 不存在
 
 **Input:** `/release-checklist pc`
 
 **Expected behavior:**
-1. The Quality Gates bug line reads `NOT ASSESSED — no bug records`, not `0`
-2. The bug items are not ticked
-3. Go / No-Go is NOT ASSESSED (naming the bug items), unless a blocking item
-   failed elsewhere — never READY
-4. The output says bugs are filed with `/bug-report`
+1. Quality Gates 缺陷行读作 `NOT ASSESSED — no bug records`，而非 `0`
+2. 缺陷条目不被勾选
+3. Go / No-Go 为 NOT ASSESSED（点名这些缺陷条目），除非其他位置有阻塞项
+   失败——绝不为 READY
+4. 输出说明缺陷通过 `/bug-report` 提交
 
 **Assertions:**
-- [ ] No bare `0` bug count and no ticked "Zero open S1 (Critical) bugs" item
-- [ ] `NOT ASSESSED — no bug records` appears
-- [ ] Go / No-Go is not READY
+- [ ] 没有裸 `0` 缺陷计数，也没有勾选的 "Zero open S1 (Critical) bugs" 条目
+- [ ] 出现 `NOT ASSESSED — no bug records`
+- [ ] Go / No-Go 不为 READY
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Resolves `platform.cert_tier` and branches only on `none | itch | steam | console`
-- [ ] Treats unset `cert_tier` as a question (or NOT ASSESSED), never as `none`
-- [ ] Chooses device blocks from the argument and certification from `cert_tier`
-- [ ] States a denominator with every scan count, or reports NOT ASSESSED
-- [ ] Reads open bugs from `production/qa/bugs/` and applies the release gate's thresholds for the resolved `workflow` (S1–S3 at `full`, S1 at `standard`/`minimal`); no bug files → `NOT ASSESSED — no bug records`
-- [ ] Go / No-Go takes the first match: NOT READY, then NOT ASSESSED, then READY
-- [ ] Presents totals and blockers before asking "May I write"
-- [ ] Ends with `/gate-check` and `/team-release` as next steps
+- [ ] 解析 `platform.cert_tier`，且仅按 `none | itch | steam | console` 分支
+- [ ] 将未设置的 `cert_tier` 视为提问（或 NOT ASSESSED），绝不视为 `none`
+- [ ] 设备块由参数选择，认证由 `cert_tier` 选择
+- [ ] 每次扫描计数都说明分母，或报告 NOT ASSESSED
+- [ ] 从 `production/qa/bugs/` 读取未解决缺陷，并按解析出的 `workflow` 应用发布闸门阈值（`full` 下 S1–S3，`standard`/`minimal` 下 S1）；无缺陷文件 → `NOT ASSESSED — no bug records`
+- [ ] Go / No-Go 取首个命中：NOT READY，然后 NOT ASSESSED，然后 READY
+- [ ] 在询问 "May I write" 之前展示总数与阻塞项
+- [ ] 以 `/gate-check` 与 `/team-release` 作为下一步结束
 
 ---
 
 ## Coverage Notes
 
-- `project.stage` scoping (items for unreached phases marked out of scope) and
-  `modes.rigor: minimal` trimming are not separately tested.
-- The mobile device block (App Store / Play Store rows kept in the device block
-  by design) is not tested by a dedicated case.
-- How READY vs NOT READY is decided depends on the unchecked items and the
-  user's inputs; a live run is needed to verify the rationale text.
-- A resolved code root that is absent or empty reads
-  `NOT ASSESSED — no source files found to scan`; not separately tested.
+- `project.stage` 收窄（未到达阶段的条目标记为不在范围内）与
+  `modes.rigor: minimal` 裁剪未单独测试。
+- 移动设备块（按设计将 App Store / Play Store 行保留在设备块中）
+  没有专门用例测试。
+- READY 与 NOT READY 的判定取决于未勾选条目与
+  用户输入；需要实机运行来验证理由文本。
+- 已解析但不存在或为空的代码根读作
+  `NOT ASSESSED — no source files found to scan`；未单独测试。

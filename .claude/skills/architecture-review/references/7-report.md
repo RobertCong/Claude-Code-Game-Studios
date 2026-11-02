@@ -1,9 +1,9 @@
-# /architecture-review — Phase 7: Output the Review Report
+# /architecture-review — Phase 7: 输出评审报告
 
-> Part of `/architecture-review`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> 属于 `/architecture-review` 的一部分。`SKILL.md` 指定何时读取本文件；它已解析的设置
+> 以及其后续标题下的规则在此处仍然适用。
 
-## Phase 7: Output the Review Report
+## Phase 7: 输出评审报告
 
 ```
 ## Architecture Review Report

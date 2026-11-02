@@ -2,340 +2,304 @@
 
 ## Skill Summary
 
-`/design-system <system-name>` authors a Game Design Document for one system at
-`design/gdd/[system-name].md`. Which sections are required depends on the
-resolved `workflow` tier (a `system_overrides` row wins for that system): all 8
-at `full` (Overview, Player Fantasy, Detailed Design, Formulas, Edge Cases,
-Dependencies, Tuning Knobs, Acceptance Criteria); 5 plus conditional Formulas at
-`standard`; 5 at a voluntary `minimal`. `## Summary` is authored at every tier,
-after the other sections.
+`/design-system <system-name>` 为单个系统在 `design/gdd/[system-name].md` 编写游戏设计文档（GDD）。需要哪些小节取决于解析出的 `workflow` 层级（该系统的 `system_overrides` 行优先）：`full` 下全部 8 个（Overview、Player Fantasy、Detailed Design、Formulas、Edge Cases、Dependencies、Tuning Knobs、Acceptance Criteria）；`standard` 下 5 个加条件性的 Formulas；自愿的 `minimal` 下 5 个。`## Summary` 在每个层级都会编写，且位于其他小节之后。
 
-Each of the five phases is a `references/N-*.md` file the skill reads before doing
-that phase and reads again if the conversation is compacted during it.
+五个阶段中的每一个都是 `references/N-*.md` 文件，技能在执行该阶段之前读取它，如果在该阶段期间对话被压缩（compacted），则再次读取。
 
-The skill reads context first (game concept, systems index, entity registry,
-dependency GDD sections, engine reference), presents a context summary and a
-Technical Feasibility Brief, then asks "May I create the skeleton file at
-`design/gdd/[system-name].md`?". Each section then runs the cycle Context →
-Questions → Options → Decision → Draft → Approval → Write: in `collaborative`
-mode the draft and the "Approve the [Section Name] section?" widget appear in
-the same response, and the approved section is written immediately with Edit.
-Specialist agents are consulted per section, subject to per-section review-mode
-checks.
+技能先读取上下文（游戏概念、系统索引、实体注册表、依赖 GDD 的小节、引擎参考资料），呈现上下文摘要和技术可行性简报（Technical Feasibility Brief），然后询问 “May I create the skeleton file at `design/gdd/[system-name].md`?”。随后每个小节运行 Context → Questions → Options → Decision → Draft → Approval → Write 循环：在 `collaborative` 模式下，草稿和 “Approve the [Section Name] section?” 组件出现在同一响应中，获批的小节立即用 Edit 写入。每个小节都会咨询专家代理，受各小节的评审模式检查约束。
 
-After all sections are written, the CD-GDD-ALIGN gate runs once in `full` mode
-only. `retrofit <path>` fills only the missing or placeholder sections of an
-existing GDD. The skill never offers `/design-review` inline — it directs the
-user to a fresh session.
+所有小节写完后，CD-GDD-ALIGN 闸门只在 `full` 模式下运行一次。`retrofit <path>` 只填充现有 GDD 中缺失或占位的小节。技能绝不内联提供 `/design-review`——它会引导用户到新会话。
 
 ---
 
 ## Static Assertions (Structural)
 
-Checked against the SKILL.md by `/skill-test spec` — no fixture needed.
+由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] Has required frontmatter fields: `name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`
-- [ ] Has ≥2 phase headings
-- [ ] Contains verdict keywords: `APPROVED`, `CONCERNS`, `BLOCKED`
-- [ ] Contains "May I write" / "May I create" collaborative protocol language (skeleton and per-section approval)
-- [ ] Has a next-step handoff at the end
-- [ ] Documents skeleton-first approach (file created with headers before content, after approval)
-- [ ] Documents CD-GDD-ALIGN gate: runs in full mode only; skipped in lean and solo with a named note
-- [ ] Documents retrofit mode for existing GDD files
+- [ ] 具有必填的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 至少包含 2 个阶段标题
+- [ ] 包含结论关键词：`APPROVED`、`CONCERNS`、`BLOCKED`
+- [ ] 包含 “May I write” / “May I create” 协作协议用语（骨架和逐节审批）
+- [ ] 结尾包含下一步交接
+- [ ] 记录骨架优先方式（获批后先创建带标题的文件，再填写内容）
+- [ ] 记录 CD-GDD-ALIGN 闸门：仅在 full 模式下运行；在 lean 和 solo 下跳过并给出明确说明
+- [ ] 记录针对现有 GDD 文件的 retrofit 模式
 
 ---
 
 ## Director Gate Checks
 
-Review mode comes from the resolved `review_mode` (`modes.review_mode` in
-`project.yaml`); `--review full|lean|solo` overrides it for one run.
+评审模式取自解析后的 `review_mode`（`project.yaml` 中的 `modes.review_mode`）；`--review full|lean|solo` 可对单次运行进行覆盖。
 
-**CD-GDD-ALIGN** (`creative-director`) runs once, in Step 5a-bis, after every
-section and the Summary are written and the self-check has read the GDD back
-from file. It is passed the GDD path, the game pillars, the MDA aesthetics
-target and the GDD's Player Fantasy section (or a statement that the tier did not
-author one). The verdict is recorded in the GDD Status header as
-`> **Creative Director Review (CD-GDD-ALIGN)**: APPROVED [date] / CONCERNS (accepted) [date] / REVISED [date] / NOT ASSESSED [date] — [missing input]`.
+**CD-GDD-ALIGN**（`creative-director`）在 Step 5a-bis 中运行一次，时机是所有小节和 Summary 都已写入、且自检已从文件中读回 GDD 之后。它接收 GDD 路径、游戏支柱、MDA 美学目标以及 GDD 的 Player Fantasy 小节（或说明该层级未编写该小节）。结论记录在 GDD 的 Status 头中，格式为 `> **Creative Director Review (CD-GDD-ALIGN)**: APPROVED [date] / CONCERNS (accepted) [date] / REVISED [date] / NOT ASSESSED [date] — [missing input]`。
 
-- `full` → spawned.
-- `lean` → skipped (not a PHASE-GATE). Note: "CD-GDD-ALIGN skipped — Lean mode."
-- `solo` → skipped. Note: "CD-GDD-ALIGN skipped — Solo mode."
+- `full` → 启动。
+- `lean` → 跳过（不是 PHASE-GATE）。说明：“CD-GDD-ALIGN skipped — Lean mode.”
+- `solo` → 跳过。说明：“CD-GDD-ALIGN skipped — Solo mode.”
 
-Per-section specialist spawns (not director gates) have their own checks:
-`solo` skips them all; `lean` skips them except for Sections D (Formulas) and
-H (Acceptance Criteria), Section G (Tuning Knobs) when Section D defines a
-formula whose knobs interact, and Visual/Audio when the system's visual feedback
-is central to it (a `Gameplay` or `UI` system whose events the player reads to
-play); `full` spawns them. Every skipped spawn prints the section's note naming
-the agent and the mode, e.g. "`creative-director` not consulted — Lean mode.
-Review manually before production."
+各小节的专家启动（不是总监闸门）有自己的检查：`solo` 全部跳过；`lean` 跳过它们，但以下情况除外：Section D（Formulas）和 H（Acceptance Criteria）；当 Section D 定义了可调参数相互作用的公式时的 Section G（Tuning Knobs）；以及当系统的视觉反馈处于核心地位时的 Visual/Audio（即玩家需要读取其事件来游玩的 `Gameplay` 或 `UI` 系统）；`full` 会启动它们。每次跳过的启动都会打印该小节的说明，指明代理和模式，例如 “`creative-director` not consulted — Lean mode. Review manually before production.”
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非某个案例自身的 Fixture 另有说明，每个案例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见 `studio-tests/CLAUDE.md` § Fixture defaults。
 
 ---
 
 ## Test Cases
 
-### Case 1: Happy Path — New combat GDD, full mode, full workflow
+### Case 1: 正常路径 — 新建 combat GDD，full 模式，full 工作流
 
 **Fixture:**
-- `design/gdd/game-concept.md` and `design/gdd/systems-index.md` exist; `combat` is listed with `Category: Gameplay`
-- No `design/gdd/combat.md`
-- `project.yaml` has `engine.name: Godot`, `modes.review_mode: full`, `modes.workflow: full`, `modes.automation: collaborative`; `docs/engine-reference/godot/` has `VERSION.md` and `modules/physics.md` (combat maps to the Physics domain)
-- CD-GDD-ALIGN returns APPROVE
+- `design/gdd/game-concept.md` 和 `design/gdd/systems-index.md` 存在；`combat` 被列出，`Category: Gameplay`
+- 没有 `design/gdd/combat.md`
+- `project.yaml` 中 `engine.name: Godot`，`modes.review_mode: full`，`modes.workflow: full`，`modes.automation: collaborative`；`docs/engine-reference/godot/` 包含 `VERSION.md` 和 `modules/physics.md`（combat 映射到 Physics 领域）
+- CD-GDD-ALIGN 返回 APPROVE
 
 **Input:** `/design-system combat`
 
 **Expected behavior:**
-1. Phase 2 reads the concept, systems index, entity registry (if present) and dependency GDD sections before asking anything, then presents the "Designing: Combat" context summary and the Technical Feasibility Brief with its `AskUserQuestion`
-2. "Ready to start designing combat?" is asked
-3. "May I create the skeleton file at `design/gdd/combat.md`?" — on yes, the skeleton is written with all 8 required sections plus the template's other sections, each holding `[To be designed]`; `production/session-state/active.md` is updated
-4. Sections A–H are walked in order; each draft is followed in the same response by "Approve the [Section Name] section?" with `[A] Approve — write it to file` / `[B] Make changes — describe what to fix` / `[C] Start over`
-5. Section B consults `creative-director`; Section C spawns the Combat row's `game-designer` plus supporting agents in parallel; Section D spawns `systems-designer`; Section E `systems-designer`; Section H `qa-lead`
-6. Each approved section is written immediately by an Edit whose `old_string` includes the section heading; `active.md` is updated after each
-7. Visual/Audio and Game Feel are treated as required (Gameplay category) — not offered as skippable
-8. `## Summary` is authored after the other sections; Step 5a reads the GDD back from file
-9. CD-GDD-ALIGN spawns once and returns APPROVE; the Status header records `APPROVED [date]`
-10. The completion summary directs the user to run `/design-review design/gdd/combat.md` in a fresh session
+1. Phase 2 在询问任何内容之前读取游戏概念、系统索引、实体注册表（若存在）和依赖 GDD 的小节，然后呈现 “Designing: Combat” 上下文摘要和技术可行性简报及其 `AskUserQuestion`
+2. 询问 “Ready to start designing combat?”
+3. 询问 “May I create the skeleton file at `design/gdd/combat.md`?”——用户同意后，写入骨架，包含全部 8 个必需小节以及模板中的其他小节，每个小节均为 `[To be designed]`；更新 `production/session-state/active.md`
+4. 按顺序走查 Section A–H；每个草稿都在同一响应中跟随 “Approve the [Section Name] section?”，选项为 `[A] Approve — write it to file` / `[B] Make changes — describe what to fix` / `[C] Start over`
+5. Section B 咨询 `creative-director`；Section C 并行启动 Combat 行的 `game-designer` 及支持代理；Section D 启动 `systems-designer`；Section E `systems-designer`；Section H `qa-lead`
+6. 每个获批的小节立即由一次 Edit 写入，其 `old_string` 包含该小节标题；每写完一个就更新 `active.md`
+7. Visual/Audio 和 Game Feel 被视为必需（Gameplay 类别）——不提供为可跳过项
+8. `## Summary` 在其他小节之后编写；Step 5a 从文件中读回 GDD
+9. CD-GDD-ALIGN 启动一次并返回 APPROVE；Status 头记录 `APPROVED [date]`
+10. 完成摘要引导用户在新会话中运行 `/design-review design/gdd/combat.md`
 
 **Assertions:**
-- [ ] The skeleton is written only after the "May I create the skeleton file" approval, and contains all 8 required section headers
-- [ ] Every section draft is followed in the same response by the "Approve the [Section Name] section?" widget
-- [ ] Each section is written individually, immediately after its approval, by an Edit anchored on its heading
-- [ ] Section C's specialists come from the routing table's Combat row and are spawned in parallel before drafting
-- [ ] CD-GDD-ALIGN spawns once, after all sections and the Summary are written — not per section
-- [ ] The verdict is recorded as `> **Creative Director Review (CD-GDD-ALIGN)**: APPROVED [date]`
-- [ ] `/design-review` is directed to a fresh session and never offered inline
+- [ ] 骨架只在 “May I create the skeleton file” 批准之后写入，且包含全部 8 个必需的小节标题
+- [ ] 每个小节草稿都在同一响应中跟随 “Approve the [Section Name] section?” 组件
+- [ ] 每个小节都在其批准之后立即通过一次以其标题为锚点的 Edit 单独写入
+- [ ] Section C 的专家来自路由表的 Combat 行，并在起草前并行启动
+- [ ] CD-GDD-ALIGN 在所有小节和 Summary 写入之后启动一次——而不是每个小节启动一次
+- [ ] 结论记录为 `> **Creative Director Review (CD-GDD-ALIGN)**: APPROVED [date]`
+- [ ] `/design-review` 被引导到新会话，绝不内联提供
 
 ---
 
-### Case 2: Retrofit Mode — Fill only the incomplete sections at standard tier
+### Case 2: Retrofit 模式 — 在 standard 层级只填充不完整小节
 
 **Fixture:**
-- `project.yaml` has `engine.name: Godot`, `modes.workflow: standard`, `modes.review_mode: lean`
-- `design/gdd/game-concept.md` and `design/gdd/systems-index.md` exist; `inventory` is listed with `Category: Economy` (engine domain Scripting)
-- `docs/engine-reference/godot/` has `VERSION.md` and `modules/`, but no `modules/scripting.md`
-- `design/gdd/inventory.md` exists with Overview, Detailed Design and Formulas fully written; its `## Summary` holds only `[To be designed]`
-- `## Edge Cases` and `## Acceptance Criteria` contain only `[To be designed]`; `## Dependencies` has an empty body
-- The file has no Player Fantasy or Tuning Knobs section
+- `project.yaml` 中 `engine.name: Godot`，`modes.workflow: standard`，`modes.review_mode: lean`
+- `design/gdd/game-concept.md` 和 `design/gdd/systems-index.md` 存在；`inventory` 被列出，`Category: Economy`（引擎领域 Scripting）
+- `docs/engine-reference/godot/` 包含 `VERSION.md` 和 `modules/`，但没有 `modules/scripting.md`
+- `design/gdd/inventory.md` 存在，Overview、Detailed Design 和 Formulas 已完整写入；其 `## Summary` 仅为 `[To be designed]`
+- `## Edge Cases` 和 `## Acceptance Criteria` 仅包含 `[To be designed]`；`## Dependencies` 正文为空
+- 该文件没有 Player Fantasy 或 Tuning Knobs 小节
 
 **Input:** `/design-system retrofit design/gdd/inventory.md`
 
 **Expected behavior:**
-1. The skill reads the existing GDD and identifies which sections are present, placeholder-only or empty
-2. It presents the "Retrofit: Inventory" block: written sections (will not be touched) and missing or incomplete sections (will be authored)
-3. Player Fantasy and Tuning Knobs are listed as available to add, not as gaps, because `standard` does not require them
-4. It asks: "Shall I fill the 3 missing sections? I will not modify any existing content."
-5. On yes, Phase 2 runs as normal; §2e names the missing module — "no engine reference for `Scripting` under `docs/engine-reference/godot/modules/`; feasibility not checked against the pinned engine" — and carries it into §5-pre
-6. No skeleton is created; only Edge Cases, Dependencies and Acceptance Criteria run the section cycle, then §5-pre replaces the Summary placeholder
-7. Each write replaces only the placeholder or empty body; Overview, Detailed Design and Formulas are not modified
+1. 技能读取现有 GDD，并识别哪些小节已存在、仅有占位符或为空
+2. 它呈现 “Retrofit: Inventory” 块：已写入的小节（不会被改动）以及缺失或不完整的小节（将被编写）
+3. Player Fantasy 和 Tuning Knobs 列为可添加项，而不是缺口，因为 `standard` 不要求它们
+4. 它询问：“Shall I fill the 3 missing sections? I will not modify any existing content.”
+5. 用户同意后，Phase 2 照常运行；§2e 指出缺失的模块——“no engine reference for `Scripting` under `docs/engine-reference/godot/modules/`; feasibility not checked against the pinned engine”——并将其带入 §5-pre
+6. 不创建骨架；只有 Edge Cases、Dependencies 和 Acceptance Criteria 运行小节循环，然后 §5-pre 替换 Summary 占位符
+7. 每次写入只替换占位符或空正文；Overview、Detailed Design 和 Formulas 不被修改
 
 **Assertions:**
-- [ ] The retrofit block is shown before any change is made
-- [ ] Sections the tier does not require are not reported as gaps
-- [ ] The skill asks "Shall I fill the 3 missing sections? I will not modify any existing content."
-- [ ] The absent `scripting.md` module is named in the output, not skipped silently as if feasibility had been checked
-- [ ] No skeleton is created and complete sections are not re-authored or overwritten
-- [ ] Each filled section still goes through the per-section approval before its write
+- [ ] 在进行任何更改之前展示 retrofit 块
+- [ ] 该层级不要求的小节不会被报告为缺口
+- [ ] 技能询问 “Shall I fill the 3 missing sections? I will not modify any existing content.”
+- [ ] 缺失的 `scripting.md` 模块在输出中被点名，而不是像已检查过可行性那样静默跳过
+- [ ] 不创建骨架，完整小节不被重新编写或覆盖
+- [ ] 每个填充的小节在写入前仍需经过逐节批准
 
 ---
 
-### Case 3: Director Gate — CD-GDD-ALIGN returns CONCERNS, REJECT or NOT ASSESSED
+### Case 3: 总监闸门 — CD-GDD-ALIGN 返回 CONCERNS、REJECT 或 NOT ASSESSED
 
 **Fixture:**
-- `design/gdd/game-concept.md` (pillars include "Fearless Exploration") and `design/gdd/systems-index.md` exist; `stamina` is listed with `Category: Gameplay`
-- `project.yaml` has `modes.review_mode: full` and `modes.workflow: full`
-- All eight sections, Player Fantasy included, and the Summary are written for `design/gdd/stamina.md`
-- Scenario (a): CD-GDD-ALIGN returns CONCERNS: "Detailed Design's stamina drain undercuts the 'Fearless Exploration' pillar"
-- Scenario (b): CD-GDD-ALIGN returns REJECT: "stamina exhaustion strands the player mid-exploration, which the 'Fearless Exploration' pillar rules out"
-- Scenario (c): CD-GDD-ALIGN returns NOT ASSESSED — no MDA aesthetics target was available to check the GDD against
+- `design/gdd/game-concept.md`（支柱包含 “Fearless Exploration”）和 `design/gdd/systems-index.md` 存在；`stamina` 被列出，`Category: Gameplay`
+- `project.yaml` 中 `modes.review_mode: full`，`modes.workflow: full`
+- 全部八个小节（包括 Player Fantasy）以及 Summary 都已为 `design/gdd/stamina.md` 写入
+- Scenario (a)：CD-GDD-ALIGN 返回 CONCERNS：“Detailed Design's stamina drain undercuts the 'Fearless Exploration' pillar”
+- Scenario (b)：CD-GDD-ALIGN 返回 REJECT：“stamina exhaustion strands the player mid-exploration, which the 'Fearless Exploration' pillar rules out”
+- Scenario (c)：CD-GDD-ALIGN 返回 NOT ASSESSED——没有可用的 MDA 美学目标来对照检查 GDD
 
-**Input:** `/design-system stamina` (reaching Step 5a-bis)
+**Input:** `/design-system stamina`（运行到 Step 5a-bis）
 
 **Expected behavior:**
-1. `creative-director` is spawned with gate CD-GDD-ALIGN and passed the GDD path, the game pillars, the MDA aesthetics target and the GDD's Player Fantasy section
-2. (a) The CONCERNS are surfaced via `AskUserQuestion` with the standard options: `Revise flagged items` / `Accept and proceed` / `Discuss further`
-3. (a) If "Revise flagged items": Detailed Design runs its section cycle again — its specialists consulted first — and is approved through "Approve the Detailed Design section?" before it is written; the Status header records `REVISED [date]`
-4. (a) If "Accept and proceed": the Status header records `CONCERNS (accepted) [date]`
-5. (b) The blockers are shown; the flagged section is re-drafted and re-approved the same way before anything else is written, and the Status header records `REVISED [date]`, never `APPROVED`
-6. (c) The missing input is named; the user can supply it and re-run the gate, or the Status header records `NOT ASSESSED [date] — [missing input]`, never `APPROVED`
-7. Only after the verdict is recorded does the skill continue to the entity registry step (5b)
+1. `creative-director` 携带质量闸门（gate）CD-GDD-ALIGN 启动，并接收 GDD 路径、游戏支柱、MDA 美学目标和 GDD 的 Player Fantasy 小节
+2. (a) CONCERNS 通过 `AskUserQuestion` 呈现，并附上标准选项：`Revise flagged items` / `Accept and proceed` / `Discuss further`
+3. (a) 如果选择 “Revise flagged items”：Detailed Design 再次运行其小节循环——先咨询其专家——并通过 “Approve the Detailed Design section?” 批准后才写入；Status 头记录 `REVISED [date]`
+4. (a) 如果选择 “Accept and proceed”：Status 头记录 `CONCERNS (accepted) [date]`
+5. (b) 展示阻塞项；被标记的小节以相同方式重新起草并重新批准，然后才写入其他任何内容，Status 头记录 `REVISED [date]`，绝不记录 `APPROVED`
+6. (c) 指出缺失的输入；用户可以补充并重新运行闸门，或由 Status 头记录 `NOT ASSESSED [date] — [missing input]`，绝不记录 `APPROVED`
+7. 只有在结论记录之后，技能才继续进入实体注册表步骤（5b）
 
 **Assertions:**
-- [ ] CD-GDD-ALIGN receives the completed GDD path, the pillars, the MDA target and the Player Fantasy section
-- [ ] (a) CONCERNS are shown to the user with the three standard options, not auto-accepted
-- [ ] A revised section re-runs its section cycle and is re-approved before it is written
-- [ ] The Status header records `REVISED [date]` or `CONCERNS (accepted) [date]` to match the user's choice
-- [ ] (b) After a REJECT, no later step (5b registry, 5d systems index) runs until the flagged section has been revised
-- [ ] (c) NOT ASSESSED is never recorded or reported as an approval
+- [ ] CD-GDD-ALIGN 接收已完成的 GDD 路径、游戏支柱、MDA 目标和 Player Fantasy 小节
+- [ ] (a) CONCERNS 连同三个标准选项一起展示给用户，不会自动接受
+- [ ] 修订的小节会重新运行其小节循环，并在写入前重新获批
+- [ ] Status 头记录 `REVISED [date]` 或 `CONCERNS (accepted) [date]`，与用户的选择一致
+- [ ] (b) REJECT 之后，在被标记的小节修订完成之前，不运行任何后续步骤（5b 注册表、5d 系统索引）
+- [ ] (c) NOT ASSESSED 绝不会被记录或报告为批准
 
 ---
 
-### Case 4: Lean and Solo Modes — Gate skipped once; specialist spawns follow their own checks
+### Case 4: Lean 与 Solo 模式 — 闸门只跳过一次；专家启动遵循各自检查
 
 **Fixture:**
-- `design/gdd/game-concept.md` and `design/gdd/systems-index.md` exist; the system is `stamina` (`Category: Gameplay`); no `design/gdd/stamina.md`
-- `project.yaml` has `engine.name: Godot` and `modes.workflow: full`
-- Section D's stamina formula has no knobs that interact; the stamina bar is feedback the player reads to play
-- Scenario (a): `modes.review_mode: lean`
-- Scenario (b): `modes.review_mode: solo`
+- `design/gdd/game-concept.md` 和 `design/gdd/systems-index.md` 存在；系统为 `stamina`（`Category: Gameplay`）；没有 `design/gdd/stamina.md`
+- `project.yaml` 中 `engine.name: Godot`，`modes.workflow: full`
+- Section D 的耐力公式没有相互作用的可调参数；耐力条是玩家游玩时需要读取的反馈
+- Scenario (a)：`modes.review_mode: lean`
+- Scenario (b)：`modes.review_mode: solo`
 
 **Input:** `/design-system stamina`
 
 **Expected behavior:**
-1. (a) Sections B, C, E and G are drafted without specialist spawns, and each prints its note with the mode, e.g. "`creative-director` not consulted — Lean mode. Review manually before production."
-2. (a) Section D still spawns `systems-designer`, Section H `qa-lead`, and Visual/Audio `art-director` — stamina's feedback is central to play
-3. (a) At Step 5a-bis: "CD-GDD-ALIGN skipped — Lean mode." — printed once, not per section
-4. (b) No specialist or director agent is spawned; each section whose spawn was skipped carries its note, e.g. "`creative-director` not consulted — Solo mode. Review manually before production."
-5. (b) At Step 5a-bis: "CD-GDD-ALIGN skipped — Solo mode."
-6. In both scenarios every section still requires the "Approve the [Section Name] section?" approval before it is written
+1. (a) Section B、C、E 和 G 在不启动专家的情况下起草，且各自打印带模式的说明，例如 “`creative-director` not consulted — Lean mode. Review manually before production.”
+2. (a) Section D 仍启动 `systems-designer`，Section H 启动 `qa-lead`，Visual/Audio 启动 `art-director`——因为耐力反馈对游玩至关重要
+3. (a) 在 Step 5a-bis：“CD-GDD-ALIGN skipped — Lean mode.”——只打印一次，而不是每个小节一次
+4. (b) 不启动任何专家或总监代理；每个跳过启动的小节都带有其说明，例如 “`creative-director` not consulted — Solo mode. Review manually before production.”
+5. (b) 在 Step 5a-bis：“CD-GDD-ALIGN skipped — Solo mode.”
+6. 两种场景下，每个小节在写入前仍需要 “Approve the [Section Name] section?” 批准
 
 **Assertions:**
-- [ ] (a) In lean mode Sections B, C, E and G are drafted without their specialists, while Sections D and H and Visual/Audio still spawn theirs
-- [ ] (a) Each lean-skipped spawn prints a "not consulted — Lean mode" note naming its agent — none is skipped silently
-- [ ] (a) The CD-GDD-ALIGN skip note appears once, at Step 5a-bis
-- [ ] (b) In solo mode no agent is spawned, and each skipped specialist leaves a "not consulted — Solo mode" note
-- [ ] (b) The skip note reads "CD-GDD-ALIGN skipped — Solo mode."
-- [ ] Per-section user approval is required in both modes
+- [ ] (a) lean 模式下 Section B、C、E 和 G 不启动其专家即可起草，而 Section D、H 和 Visual/Audio 仍会启动各自专家
+- [ ] (a) 每个在 lean 下跳过的启动都会打印 “not consulted — Lean mode” 说明并指出其代理——没有一个被静默跳过
+- [ ] (a) CD-GDD-ALIGN 跳过说明只在 Step 5a-bis 出现一次
+- [ ] (b) solo 模式下不启动任何代理，每个被跳过的专家都会留下 “not consulted — Solo mode” 说明
+- [ ] (b) 跳过说明为 “CD-GDD-ALIGN skipped — Solo mode.”
+- [ ] 两种模式下都需要逐节的用户批准
 
 ---
 
-### Case 5: Missing Input and Declined Skeleton
+### Case 5: 输入缺失与拒绝创建骨架
 
 **Fixture:**
-- `project.yaml` has `modes.workflow: standard` in every scenario — the systems index is required at this tier, so pointing at `/map-systems` is correct
-- Scenario (a): no argument; `design/gdd/systems-index.md` lists `stamina` as the highest-priority "Not Started" system (MVP, Core layer)
-- Scenario (b): no argument; no systems index
-- Scenario (c): `/design-system stamina` with concept and index present; the user declines the skeleton
+- 每个场景中 `project.yaml` 都有 `modes.workflow: standard`——该层级要求系统索引，因此指向 `/map-systems` 是正确的
+- Scenario (a)：无参数；`design/gdd/systems-index.md` 将 `stamina` 列为优先级最高的 “Not Started” 系统（MVP，Core 层）
+- Scenario (b)：无参数；没有系统索引
+- Scenario (c)：`/design-system stamina`，概念和索引都存在；用户拒绝创建骨架
 
 **Input:** (a) `/design-system` (b) `/design-system` (c) `/design-system stamina`
 
 **Expected behavior:**
-1. (a) `AskUserQuestion`: "The next system in your design order is **stamina** (MVP | Core). Start designing it?" with `[A] Yes — design stamina` / `[B] Pick a different system` / `[C] Stop here`
-2. (b) The skill stops with the usage message ("Usage: `/design-system <system-name>` …"), the retrofit example, and "No systems index found. Run `/map-systems` first to map your systems and get the design order."
-3. (c) The skill stops with: "Verdict: **BLOCKED** — skeleton creation declined. …" and does not proceed to Section A
-4. In none of the three scenarios is a GDD file written before an approval
+1. (a) `AskUserQuestion`：“The next system in your design order is **stamina** (MVP | Core). Start designing it?”，选项为 `[A] Yes — design stamina` / `[B] Pick a different system` / `[C] Stop here`
+2. (b) 技能停止，并输出用法消息（“Usage: `/design-system <system-name>` …”）、retrofit 示例，以及 “No systems index found. Run `/map-systems` first to map your systems and get the design order.”
+3. (c) 技能停止并提示：“Verdict: **BLOCKED** — skeleton creation declined. …”，不进入 Section A
+4. 三种场景都不会在批准之前写入 GDD 文件
 
 **Assertions:**
-- [ ] (a) The next system is proposed from the systems index with the three options
-- [ ] (b) The usage message and the `/map-systems` pointer are printed; nothing is written
-- [ ] (c) Declining the skeleton produces the BLOCKED verdict and stops before Section A
-- [ ] No GDD file is created without an approval
+- [ ] (a) 根据系统索引提议下一个系统，并提供三个选项
+- [ ] (b) 打印用法消息和 `/map-systems` 指引；不写入任何内容
+- [ ] (c) 拒绝创建骨架会产生 BLOCKED 结论，并在 Section A 之前停止
+- [ ] 未经批准不会创建 GDD 文件
 
 ---
 
-### Case 6: Minimal Project, One System Raised by `system_overrides`
+### Case 6: Minimal 项目，一个系统被 `system_overrides` 提升
 
 **Fixture:**
-- `project.yaml` has `modes.workflow: minimal`, `modes.review_mode: solo` and `workflow_overrides.system_overrides.combat: standard`
-- `design/game-brief.md` exists; its MVP features describe combat (a damage rule and a stagger threshold), and its build order lists combat first
-- No `design/gdd/game-concept.md`, no `design/gdd/systems-index.md`, no `design/gdd/combat.md`
+- `project.yaml` 中 `modes.workflow: minimal`，`modes.review_mode: solo`，`workflow_overrides.system_overrides.combat: standard`
+- `design/game-brief.md` 存在；其 MVP 功能描述 combat（一条伤害规则和一个硬直阈值），其构建顺序将 combat 列在第一位
+- 没有 `design/gdd/game-concept.md`，没有 `design/gdd/systems-index.md`，没有 `design/gdd/combat.md`
 
 **Input:** `/design-system combat`
 
 **Expected behavior:**
-1. The effective tier for combat is `standard` (the override); the project tier is `minimal`
-2. §2a takes the `minimal` branch because it keys on the project tier: it reads `design/game-brief.md` and skips the systems-index read, and does not stop with "No game concept found" or "No systems index found"
-3. It derives `Category`, `Layer` and `Priority` from the brief once (e.g. `Gameplay`, `Foundation` or `Feature`, `MVP`)
-4. The skeleton and the section walk follow `standard`: A, C, D (combat defines numeric rules), E, F, H — no Player Fantasy or Tuning Knobs
-5. §5-pre's Quick reference marks the derived values, e.g. "Category: Gameplay (inferred from the brief — no systems index at this tier)"
-6. §5d says "no `design/gdd/systems-index.md` at this workflow tier; nothing to update" and writes no systems index
+1. combat 的有效层级是 `standard`（来自覆盖）；项目层级为 `minimal`
+2. §2a 走 `minimal` 分支，因为它以项目层级为准：它读取 `design/game-brief.md` 并跳过系统索引读取，不会以 “No game concept found” 或 “No systems index found” 停止
+3. 它从简报中一次性推导 `Category`、`Layer` 和 `Priority`（例如 `Gameplay`、`Foundation` 或 `Feature`、`MVP`）
+4. 骨架和小节走查遵循 `standard`：A、C、D（combat 定义了数值规则）、E、F、H——没有 Player Fantasy 或 Tuning Knobs
+5. §5-pre 的 Quick reference 标记推导出的值，例如 “Category: Gameplay (inferred from the brief — no systems index at this tier)”
+6. §5d 说明 “no `design/gdd/systems-index.md` at this workflow tier; nothing to update”，且不写入系统索引
 
 **Assertions:**
-- [ ] The run reads the brief and does not stop for the missing concept or systems index
-- [ ] The required section set is `standard`'s (the effective tier) — not the project tier's
-- [ ] Category, Layer and Priority are derived from the brief and marked inferred in the Quick reference
-- [ ] No systems index is created; §5d reports nothing to update
+- [ ] 运行读取简报，不会因缺少游戏概念或系统索引而停止
+- [ ] 所需小节集合为 `standard`（有效层级）的集合——而不是项目层级的
+- [ ] Category、Layer 和 Priority 从简报推导，并在 Quick reference 中标记为推断
+- [ ] 不创建系统索引；§5d 报告没有可更新内容
 
 ---
 
-### Case 7: Phase Files Are Read Before Each Phase, and Again After a Compaction
+### Case 7: 每个阶段之前读取阶段文件，压缩后再次读取
 
 **Fixture:**
-- `project.yaml` has `engine.name: Godot`, `modes.workflow: standard`, `modes.review_mode: solo`
-- `design/gdd/game-concept.md` and `design/gdd/systems-index.md` exist; `stamina` is listed with `Category: Gameplay`; no `design/gdd/stamina.md`
-- The skill folder holds `references/1-parse-arguments.md` through `references/5-post-design.md`
-- Mid-run, while Section D (Formulas) is being drafted, the conversation is compacted; the user then replies to the open question and the run continues
+- `project.yaml` 中 `engine.name: Godot`，`modes.workflow: standard`，`modes.review_mode: solo`
+- `design/gdd/game-concept.md` 和 `design/gdd/systems-index.md` 存在；`stamina` 被列出，`Category: Gameplay`；没有 `design/gdd/stamina.md`
+- 技能文件夹包含 `references/1-parse-arguments.md` 到 `references/5-post-design.md`
+- 运行中，在 Section D（Formulas）起草期间对话被压缩；随后用户回复未决问题，运行继续
 
 **Input:** `/design-system stamina`
 
 **Expected behavior:**
-1. SKILL.md carries no phase steps itself; before starting each phase the run reads that phase's file: `references/1-parse-arguments.md`, then `2-gather-context.md`, then `3-file-skeleton.md`, then `4-section-design.md`, then `5-post-design.md`
-2. No phase's steps are carried out before its file has been read — e.g. no context read or question before `1-parse-arguments.md`, no skeleton ask before `3-file-skeleton.md`, no section cycle before `4-section-design.md`
-3. After the compaction the run reads `references/4-section-design.md` again before resuming Section D, as the skill says: "Read it again if the conversation was compacted or resumed during this phase."
-4. The run does not re-read the phase files of other phases because of the compaction, and it does not continue Section D from memory of the earlier read
-5. The run then reads `references/5-post-design.md` before the Summary and self-check
+1. SKILL.md 本身不承载阶段步骤；在开始每个阶段之前，运行会读取该阶段的文件：`references/1-parse-arguments.md`，然后 `2-gather-context.md`，然后 `3-file-skeleton.md`，然后 `4-section-design.md`，然后 `5-post-design.md`
+2. 在读取某阶段文件之前，不执行该阶段的任何步骤——例如在 `1-parse-arguments.md` 之前不读取上下文或提问，在 `3-file-skeleton.md` 之前不询问骨架，在 `4-section-design.md` 之前不运行小节循环
+3. 压缩之后，运行会在恢复 Section D 之前再次读取 `references/4-section-design.md`，正如技能所述：“Read it again if the conversation was compacted or resumed during this phase.”
+4. 运行不会因为压缩而重新读取其他阶段的阶段文件，也不会凭先前读取的记忆继续 Section D
+5. 随后运行会在 Summary 和自检之前读取 `references/5-post-design.md`
 
 **Assertions:**
-- [ ] The transcript shows a file read of each of the five `references/N-*.md` files, in order, each before that phase's work begins
-- [ ] No phase work (context reads, skeleton ask, section drafts, Summary) happens before its phase file is read
-- [ ] After the compaction, `references/4-section-design.md` is read again before Section D resumes
-- [ ] Settings resolved in SKILL.md (`workflow`, `review_mode`, `automation`, `docs.density`) still apply in the phase files; the run does not ask for them again
+- [ ] 记录显示按顺序读取了五个 `references/N-*.md` 文件，每个都在该阶段工作开始之前读取
+- [ ] 在该阶段文件被读取之前，不发生任何阶段工作（上下文读取、骨架询问、小节草稿、Summary）
+- [ ] 压缩之后，在 Section D 恢复之前再次读取 `references/4-section-design.md`
+- [ ] 在 SKILL.md 中解析的设置（`workflow`、`review_mode`、`automation`、`docs.density`）在阶段文件中仍然适用；运行不会再次询问它们
 
 ---
 
-### Case 8: Populated Registry and Numbered-Heading Dependency GDDs — Block-form greps find the facts
+### Case 8: 已填充的注册表与带编号标题的依赖 GDD — 块形式 grep 能找到事实
 
 **Fixture:**
-- `project.yaml` has `engine.name: Godot`, `modes.workflow: standard`, `modes.review_mode: solo`
-- `design/gdd/game-concept.md` and `design/gdd/systems-index.md` exist; `stamina` is listed with `Category: Gameplay` and `Depends on: combat`
-- `design/registry/entities.yaml` has a live `constants:` list with two entries:
-  - `- name: stagger_threshold` with `value: 40` and `source: design/gdd/combat.md` (owned by combat)
-  - `- name: stamina_cost_dodge` with `value: 25`, `source: design/gdd/stamina.md`, and a block-form `referenced_by:` list (the key on one line, `- design/gdd/combat.md` on the next)
-- The same file's header comments hold an example entry for `gold_carry_limit: 9999` referencing `design/gdd/inventory.md`
-- `design/gdd/combat.md` exists with numbered headings: `## 1. Overview`, `## 3. Detailed Design`, `## 4. Formulas`, `## 5. Edge Cases`, `## 6. Dependencies`, `## 7. Tuning Knobs`; its Formulas section uses `stagger_threshold` and its Tuning Knobs section lists it
-- No `design/gdd/stamina.md`
+- `project.yaml` 中 `engine.name: Godot`，`modes.workflow: standard`，`modes.review_mode: solo`
+- `design/gdd/game-concept.md` 和 `design/gdd/systems-index.md` 存在；`stamina` 被列出，`Category: Gameplay`，且 `Depends on: combat`
+- `design/registry/entities.yaml` 有一个生效的 `constants:` 列表，包含两个条目：
+  - `- name: stagger_threshold`，`value: 40`，`source: design/gdd/combat.md`（由 combat 拥有）
+  - `- name: stamina_cost_dodge`，`value: 25`，`source: design/gdd/stamina.md`，以及块形式的 `referenced_by:` 列表（键在一行，`- design/gdd/combat.md` 在下一行）
+- 同一文件的头部注释中有一个 `gold_carry_limit: 9999` 的示例条目，引用 `design/gdd/inventory.md`
+- `design/gdd/combat.md` 存在，带有编号标题：`## 1. Overview`、`## 3. Detailed Design`、`## 4. Formulas`、`## 5. Edge Cases`、`## 6. Dependencies`、`## 7. Tuning Knobs`；其 Formulas 小节使用 `stagger_threshold`，Tuning Knobs 小节也列出它
+- 没有 `design/gdd/stamina.md`
 
 **Input:** `/design-system stamina`
 
 **Expected behavior:**
-1. Registry lookups use two greps: one for `source: design/gdd/stamina.md` with trailing context (`-A 6`) and one for `design/gdd/stamina.md` with leading context (`-B 8`); the `-B 8` match reaches the owning entry above the `referenced_by` path, so `stamina_cost_dodge` is found as owned by stamina and `stagger_threshold` as a fact stamina must respect
-2. A single-line `referenced_by.*stamina` pattern is not relied on, because the list is block-form
-3. For the dependency GDD `combat.md`, the run greps `^## ([0-9]+\. )?(Dependencies|Formulas|Edge Cases|Tuning Knobs)` so the numbered headings `## 4. Formulas`, `## 5. Edge Cases`, `## 6. Dependencies` and `## 7. Tuning Knobs` all match; the whole GDD is not read
-4. The context summary's "Known cross-system facts (from registry)" lists `stamina_cost_dodge=25` and `stagger_threshold=40` with their owning GDDs, marked locked
-5. The commented `gold_carry_limit: 9999` example is not listed as a known fact
+1. 注册表查询使用两次 grep：一次查找 `source: design/gdd/stamina.md` 并带尾部上下文（`-A 6`），一次查找 `design/gdd/stamina.md` 并带前导上下文（`-B 8`）；`-B 8` 的匹配能到达 `referenced_by` 路径上方的所属条目，因此 `stamina_cost_dodge` 被找到为由 stamina 拥有，`stagger_threshold` 被找到为 stamina 必须遵守的事实
+2. 不依赖单行的 `referenced_by.*stamina` 模式，因为该列表是块形式的
+3. 对于依赖 GDD `combat.md`，运行会 grep `^## ([0-9]+\. )?(Dependencies|Formulas|Edge Cases|Tuning Knobs)`，使编号标题 `## 4. Formulas`、`## 5. Edge Cases`、`## 6. Dependencies` 和 `## 7. Tuning Knobs` 全部匹配；不读取整份 GDD
+4. 上下文摘要的 “Known cross-system facts (from registry)” 列出 `stamina_cost_dodge=25` 和 `stagger_threshold=40` 及其所属 GDD，并标记为锁定
+5. 被注释掉的 `gold_carry_limit: 9999` 示例不会被列为已知事实
 
 **Assertions:**
-- [ ] The registry is searched for `source: design/gdd/stamina.md` and for the path with `-B 8` context, not only with a one-line `referenced_by` pattern
-- [ ] `stamina_cost_dodge` (found through its `source:` and its block-form `referenced_by:`) and `stagger_threshold` appear under Known cross-system facts with their values and owners
-- [ ] The dependency GDD's sections are found despite their `N.` heading numbers — all four of Dependencies, Formulas, Edge Cases and Tuning Knobs are read
-- [ ] `combat.md` is read by section, not whole
-- [ ] The commented `gold_carry_limit` example is not presented as a locked value
+- [ ] 注册表搜索同时使用 `source: design/gdd/stamina.md` 和带 `-B 8` 上下文的路径，而不仅是一行 `referenced_by` 模式
+- [ ] `stamina_cost_dodge`（通过其 `source:` 和块形式 `referenced_by:` 找到）和 `stagger_threshold` 出现在 Known cross-system facts 下，并带有值和拥有者
+- [ ] 依赖 GDD 的各小节尽管带有 `N.` 标题编号仍被找到——Dependencies、Formulas、Edge Cases 和 Tuning Knobs 四项全部读取
+- [ ] `combat.md` 按小节读取，而不是整份读取
+- [ ] 被注释的 `gold_carry_limit` 示例不作为锁定值呈现
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Reads context before asking anything; stops with the `/brainstorm` or `/map-systems` message when the game concept or systems index is missing on a `standard`/`full` project (a `minimal` project reads the brief instead, even for a system `system_overrides` raises)
-- [ ] The skeleton is created only after "May I create the skeleton file at `design/gdd/[system-name].md`?"
-- [ ] In collaborative mode every section draft is followed by its approval widget, and no section is written without approval
-- [ ] Sections are written incrementally, and `production/session-state/active.md` is updated after each
-- [ ] Specialist spawns follow the per-section review-mode checks; every skipped spawn leaves a "not consulted" note naming the agent and the mode, in lean as in solo
-- [ ] CD-GDD-ALIGN runs once in full mode after all sections; lean and solo print a skip note naming the gate and mode
-- [ ] `/design-review` is directed to a fresh session and never run or offered inline
-- [ ] Reads each phase's `references/N-*.md` file before doing that phase, and again after a compaction or resume during it
-- [ ] Ends with a next-step `AskUserQuestion` and Recommended Next Steps (`/consistency-check`, `/map-systems next`, `/design-review` in a fresh session)
+- [ ] 在询问任何内容之前读取上下文；在 `standard`/`full` 项目中缺少游戏概念或系统索引时，以 `/brainstorm` 或 `/map-systems` 消息停止（`minimal` 项目改为读取简报，即使某个系统被 `system_overrides` 提升）
+- [ ] 骨架只在 “May I create the skeleton file at `design/gdd/[system-name].md`?” 之后创建
+- [ ] 在 collaborative 模式下，每个小节草稿之后都跟随其批准组件，未经批准不写入任何小节
+- [ ] 小节增量写入，并在每次之后更新 `production/session-state/active.md`
+- [ ] 专家启动遵循各小节的评审模式检查；每次跳过的启动都会留下 “not consulted” 说明，指出代理和模式，lean 与 solo 均如此
+- [ ] CD-GDD-ALIGN 在所有小节之后于 full 模式下运行一次；lean 和 solo 打印指明闸门和模式的跳过说明
+- [ ] `/design-review` 被引导到新会话，绝不内联运行或提供
+- [ ] 在执行每个阶段之前读取其 `references/N-*.md` 文件，并在该阶段期间发生压缩或恢复后再次读取
+- [ ] 以下一步 `AskUserQuestion` 和 Recommended Next Steps（`/consistency-check`、`/map-systems next`、新会话中的 `/design-review`）结尾
 
 ---
 
 ## Coverage Notes
 
-- `guided` and `autonomous` automation modes (write without the per-section
-  widget; `log_decision` in autonomous) are not fixture-tested.
-- A voluntary GDD on a `minimal` project with no override (the 5 standard
-  sections from `design/game-brief.md`, Formulas never pulled back in) is not
-  fixture-tested; Case 6 covers a `minimal` project whose system an override
-  raises. The no-argument prompt on a `minimal` project, where no systems index
-  exists by design, is not tested either.
-- The registry conflict check after Sections C and D, and the Step 5b entity
-  registry update, are not individually tested.
-- The Step 5d systems index update and the context-window (≥70%) notice are not
-  tested.
-- Recovery and resume after an interrupted session is not tested.
+- `guided` 和 `autonomous` 自动化模式（跳过逐节组件直接写入；
+  autonomous 下的 `log_decision`）未做 fixture 测试。
+- `minimal` 项目中未设覆盖的自愿 GDD（从 `design/game-brief.md` 取
+  5 个标准小节，Formulas 不会被拉回）未做 fixture 测试；Case 6 覆盖的是
+  某个系统被覆盖提升的 `minimal` 项目。`minimal` 项目中无参数提示
+  （按设计不存在系统索引）也未测试。
+- Section C 和 D 之后的注册表冲突检查，以及 Step 5b 的实体注册表更新，
+  未单独测试。
+- Step 5d 的系统索引更新以及上下文窗口（≥70%）提示未测试。
+- 会话中断后的恢复与继续未测试。

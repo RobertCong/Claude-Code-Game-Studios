@@ -2,33 +2,32 @@
 
 > **Status — read before using this template.**
 >
-> The **Identity & Scope**, **Input Contract**, **Output Contract**, **Hard/Soft
-> Constraints** and **Handoff Configuration** sections are live and reflect how
-> contracts are authored today.
+> **Identity & Scope**、**Input Contract**、**Output Contract**、**Hard/Soft
+> Constraints** 与 **Handoff Configuration** 各小节是现行有效的，反映了当前
+> 契约的编写方式。
 >
-> The **Testing Evidence Required** and **Drift Monitoring** sections are
-> **aspirational** — the runners they name (`tests/smoke-tests/`,
-> `tests/golden-datasets/`, `tests/behavioral-tests/`, `tests/integration/`) and
-> `production/session-state/drift-monitor.md` do **not exist**, no skill has a
-> `TESTS.md`, and none of the seven shipped `CONTRACT.md` files use the ASI or
-> drift machinery. Treat them as a design sketch for a future skill-quality
-> system, not as steps to follow.
+> **Testing Evidence Required** 与 **Drift Monitoring** 两节属于
+> **愿景性质**——它们提到的运行器（`tests/smoke-tests/`、
+> `tests/golden-datasets/`、`tests/behavioral-tests/`、`tests/integration/`）以及
+> `production/session-state/drift-monitor.md` 都**不存在**，没有任何技能拥有
+> `TESTS.md`，七个已交付的 `CONTRACT.md` 文件也都没有使用 ASI 或
+> 漂移机制。请把它们当作未来技能质量体系的设计草图，而不是要遵循的步骤。
 >
-> The seven shipped contracts use a simpler shape than this template:
+> 七个已交付的契约采用比本模板更简单的形态：
 > `Inputs Consumed` / `Files That Must Exist` / `Preconditions` /
-> `Outputs Produced` / `Output Guarantees` / `Immutability Rules`. Match an
-> existing contract (e.g. `.claude/skills/dev-story/CONTRACT.md`) rather than
-> this template's schema-heavy form until the two are reconciled.
+> `Outputs Produced` / `Output Guarantees` / `Immutability Rules`。在两者统一
+> 之前，请参照现有契约（例如 `.claude/skills/dev-story/CONTRACT.md`），而不是
+> 本模板这种 schema 繁重的形式。
 
-**Purpose:** Define formal handoff contract for a skill. Create as `.claude/skills/<skill-name>/CONTRACT.md`.
+**Purpose:** 为一个技能定义正式的交接契约。创建为 `.claude/skills/<skill-name>/CONTRACT.md`。
 
 **How to Use:**
-1. Copy this template
-2. Replace `[SKILL_NAME]`, `[ROLE]`, `[DESCRIPTION]` with your skill's details
-3. Define input/output schemas precisely
-4. List hard constraints (must never violate) and soft constraints (recover if violated)
-5. Include examples of valid input/output
-6. Reference this contract in your SKILL.md file
+1. 复制本模板
+2. 用你的技能细节替换 `[SKILL_NAME]`、`[ROLE]`、`[DESCRIPTION]`
+3. 精确地定义输入/输出 schema
+4. 列出硬约束（绝不可违反）与软约束（违反后可恢复）
+5. 加入有效输入/输出的示例
+6. 在你的 SKILL.md 文件中引用本契约
 
 ---
 
@@ -47,22 +46,22 @@
 [ROLE] — [ONE SENTENCE DESCRIBING WHAT THIS SKILL DOES]
 
 ### Example
-Story Author — Decomposes game design epics into atomic, testable user stories with clear acceptance criteria.
+Story Author——将游戏设计史诗（epic）拆解为原子化、可测试的用户故事，并附有清晰的验收标准。
 
 ### Domain Boundaries
 **Can Read:**
-- `design/gdd/` (game design documents)
-- `.claude/docs/` (architectural guidance)
-- `production/session-state/` (context from previous skills)
+- `design/gdd/`（游戏设计文档）
+- `.claude/docs/`（架构指导）
+- `production/session-state/`（来自先前技能的上下文）
 
 **Can Write:**
-- `production/epics/[epic-slug]/` (creates new story markdown files)
-- `production/qa/evidence/` (creates test evidence stubs)
+- `production/epics/[epic-slug]/`（创建新的故事 Markdown 文件）
+- `production/qa/evidence/`（创建测试证据桩）
 
 **Cannot Touch:**
-- The code root — `src/`, `Assets/` or `Source/` by engine (no game code)
-- `assets/` (no asset modifications)
-- Source data files (read-only)
+- 代码根目录——`src/`、`Assets/` 或按引擎而定的 `Source/`（不写游戏代码）
+- `assets/`（不做资源修改）
+- 源数据文件（只读）
 
 ---
 
@@ -70,9 +69,9 @@ Story Author — Decomposes game design epics into atomic, testable user stories
 
 ### What This Skill Receives
 
-**Source Skill:** [PREVIOUS_SKILL_NAME] (e.g., `/create-epics`)
-**Format:** Markdown with structured frontmatter
-**Transport:** Session context or file reference
+**Source Skill:** [PREVIOUS_SKILL_NAME]（例如 `/create-epics`）
+**Format:** 带结构化 frontmatter 的 Markdown
+**Transport:** 会话上下文或文件引用
 
 ### Required Fields
 
@@ -133,11 +132,11 @@ estimated_story_count: 3
 
 ### Validation Rules
 
-- [ ] Epic ID matches pattern `^[A-Z]+-[A-Z0-9]+$` (e.g., `COMBAT-BASIC`)
-- [ ] Epic goal is 10–500 characters (not too brief, not a novel)
-- [ ] At least 1, at most 20 acceptance criteria
-- [ ] Target complexity is one of: `low`, `medium`, `high`
-- [ ] If estimated story count provided, >= 1 and <= 50
+- [ ] Epic ID 匹配模式 `^[A-Z]+-[A-Z0-9]+$`（例如 `COMBAT-BASIC`）
+- [ ] Epic 目标为 10–500 个字符（不能太简略，也不能写成小说）
+- [ ] 至少 1 条、至多 20 条验收标准
+- [ ] 目标复杂度为以下之一：`low`、`medium`、`high`
+- [ ] 若提供了预估故事数，需 >= 1 且 <= 50
 
 ### Examples of Valid Input
 
@@ -176,9 +175,9 @@ estimated_story_count: 12
 
 ### What This Skill Produces
 
-**Destination Skill:** [NEXT_SKILL_NAME] (e.g., `/dev-story`)
-**Format:** Markdown with structured headers
-**Location:** Typically written to `production/epics/[epic-slug]/story-NNN-[slug].md`
+**Destination Skill:** [NEXT_SKILL_NAME]（例如 `/dev-story`）
+**Format:** 带结构化标题的 Markdown
+**Location:** 通常写入 `production/epics/[epic-slug]/story-NNN-[slug].md`
 
 ### Output Structure
 
@@ -268,14 +267,14 @@ estimated_story_count: 12
 
 ### Validation Rules
 
-- [ ] Each story has unique story ID matching pattern `^[A-Z]+-[A-Z0-9]+-[0-9]+$`
-- [ ] Story IDs are sequential by epic (e.g., `COMBAT-BASIC-1`, `COMBAT-BASIC-2`, etc.)
-- [ ] Story count matches epic estimate ± 1 (e.g., if epic estimated 3, produce 2–4)
-- [ ] Each story has ≥3 and ≤5 acceptance criteria
-- [ ] Acceptance criteria are in imperative mood ("Player can...", "System validates...")
-- [ ] No code suggestions in story description (remain abstract)
-- [ ] No modification to original epic acceptance criteria (can expand, not change)
-- [ ] Dependencies reference valid story IDs (not forward references)
+- [ ] 每个故事都有唯一的 story ID，匹配模式 `^[A-Z]+-[A-Z0-9]+-[0-9]+$`
+- [ ] Story ID 按 epic 顺序编号（例如 `COMBAT-BASIC-1`、`COMBAT-BASIC-2` 等）
+- [ ] 故事数量与 epic 预估值相差 ± 1（例如 epic 预估 3，则产出 2–4 个）
+- [ ] 每个故事有 ≥3 且 ≤5 条验收标准
+- [ ] 验收标准使用祈使语气（"Player can..."、"System validates..."）
+- [ ] 故事描述中不给出代码建议（保持抽象）
+- [ ] 不修改原始 epic 的验收标准（可以扩展，但不能更改）
+- [ ] 依赖引用有效的 story ID（不能前向引用）
 
 ### Examples of Valid Output
 
@@ -323,130 +322,130 @@ medium
 
 ## Hard Constraints (Must Never Violate)
 
-Violations automatically trigger intervention/rejection.
+违反将自动触发干预/拒绝。
 
-- ❌ **Do not modify epic goals** — story must not contradict or rewrite the input epic's goal
-- ❌ **Do not change acceptance criteria sources** — if epic says "damage is configurable", don't remove this criteria
-- ❌ **Do not write game code** — stories remain abstract, no code suggestions like `player.attack()`
-- ❌ **Do not modify input epic file** — treat as read-only immutable
-- ❌ **Do not produce invalid story IDs** — must match pattern `EPIC-ID-N`
-- ❌ **Do not produce stories without acceptance criteria** — minimum 3 required
-- ❌ **Do not skip or merge stories** — if epic estimated 5 stories, deliver 4–6, not 2–3
-- ❌ **Do not create circular dependencies** — story cannot depend on later stories
+- ❌ **不要修改 epic 目标**——故事不得与输入 epic 的目标相矛盾或改写它
+- ❌ **不要更改验收标准的来源**——如果 epic 说"伤害可配置"，就不要删除这一条
+- ❌ **不要编写游戏代码**——故事保持抽象，不要给出像 `player.attack()` 这样的代码建议
+- ❌ **不要修改输入的 epic 文件**——将其视为只读、不可变
+- ❌ **不要产出无效的 story ID**——必须匹配模式 `EPIC-ID-N`
+- ❌ **不要产出缺少验收标准的故事**——至少需要 3 条
+- ❌ **不要跳过或合并故事**——如果 epic 预估 5 个故事，就交付 4–6 个，而不是 2–3 个
+- ❌ **不要创建循环依赖**——故事不能依赖于更靠后的故事
 
-**Enforcement:** Schema validation + assertion checks in test runner. Failures block handoff.
+**Enforcement:** 测试运行器中的 schema 校验 + 断言检查。失败将阻止交接。
 
 ---
 
 ## Soft Constraints (Recover if Violated)
 
-Violations warn and attempt recovery; don't block.
+违反会发出警告并尝试恢复；不会阻断。
 
-- ⚠️ **Exceeded story count estimate** — if epic estimated 3, produced 6: log warning and continue (likely not a fatal error, but note for analysis)
-- ⚠️ **Story description too brief** — < 20 characters: resample with examples and continue
-- ⚠️ **Acceptance criteria phrasing unclear** — not imperative mood: ask for clarification or resample
-- ⚠️ **Tone inconsistency** — some stories formal, others casual: resample to match baseline tone
-- ⚠️ **Missing complexity estimates** — only partially provided: fill missing with median of provided values
-- ⚠️ **Vague dependencies** — circular or invalid references: log and continue (downstream can validate)
+- ⚠️ **超出故事数量预估**——如果 epic 预估 3 个却产出 6 个：记录警告并继续（通常不是致命错误，但需记录以便分析）
+- ⚠️ **故事描述过于简略**——< 20 个字符：参考示例重新采样并继续
+- ⚠️ **验收标准措辞不清**——未使用祈使语气：请求澄清或重新采样
+- ⚠️ **语气不一致**——有些故事正式、有些随意：重新采样以对齐基线语气
+- ⚠️ **缺少复杂度预估**——只提供了一部分：用已提供值的中位数补齐
+- ⚠️ **依赖含糊**——循环或无效引用：记录并继续（下游可以校验）
 
-**Enforcement:** Detected during behavioral tests; logged to drift monitor. Do not block handoff, but flag for review.
+**Enforcement:** 在行为测试中检测；记录到漂移监控器。不阻止交接，但标记待评审。
 
 ---
 
 ## Handoff Configuration
 
 ### Receives From
-**Upstream Skill:** `/create-epics` (or equivalent epic-generation skill)
+**Upstream Skill:** `/create-epics`（或等价的 epic 生成技能）
 
 **How Data Arrives:**
-- Option 1: Epic content passed as context string
-- Option 2: Epic file path provided; skill reads it
-- Option 3: Epic data in structured YAML/JSON
+- 选项 1：epic 内容作为上下文字符串传入
+- 选项 2：提供 epic 文件路径；由技能读取
+- 选项 3：epic 数据以结构化 YAML/JSON 提供
 
 **Immutability at Boundary:**
-- Epic goal — read-only, not modified
-- Acceptance criteria sources — read-only, can expand but not contradict
-- Epic ID — read-only, referenced in story IDs
+- Epic 目标——只读，不修改
+- 验收标准来源——只读，可扩展但不可矛盾
+- Epic ID——只读，会被 story ID 引用
 
 ### Delivers To
-**Downstream Skill:** `/dev-story` (or equivalent story-to-task skill)
+**Downstream Skill:** `/dev-story`（或等价的 story 转 task 技能）
 
 **How Data Handed Off:**
-- Option 1: Story markdown written to `production/epics/[epic-slug]/story-NNN-[slug].md`
-- Option 2: Story content passed as context string to next skill
-- Option 3: Story metadata indexed in central registry
+- 选项 1：故事 Markdown 写入 `production/epics/[epic-slug]/story-NNN-[slug].md`
+- 选项 2：故事内容作为上下文字符串传给下一个技能
+- 选项 3：故事元数据索引到中央注册表
 
 **What Downstream Must Receive:**
-- All story IDs and content
-- Acceptance criteria unchanged (downstream may add technical notes, not change criteria)
-- Dependencies preserved
+- 所有 story ID 与内容
+- 验收标准保持不变（下游可以添加技术说明，但不能更改标准）
+- 依赖关系保留
 
 **What Downstream Cannot Change:**
-- Story IDs
-- Story titles (can add context/notes, not rename)
-- Acceptance criteria (can add implementation guidance, not modify criteria)
+- Story ID
+- 故事标题（可以添加上下文/备注，但不能重命名）
+- 验收标准（可以添加实现指导，但不能修改标准）
 
 ### Rollback Procedure
 
-If downstream skill (`/dev-story`) fails to consume stories:
+如果下游技能（`/dev-story`）消费故事失败：
 
-1. **Fail Signal:** Downstream returns error (e.g., "story validation failed")
-2. **Rollback Action:** Discard any partial work in downstream; return to this skill's output
-3. **Recovery:** This skill does NOT re-run; upstream skill decides whether to provide different epic
-4. **No State Mutation:** Story file remains unchanged; epic remains unchanged; no side effects
+1. **Fail Signal:** 下游返回错误（例如"story validation failed"）
+2. **Rollback Action:** 丢弃下游的任何部分工作；回到本技能的输出
+3. **Recovery:** 本技能不会重新运行；由上游技能决定是否提供不同的 epic
+4. **No State Mutation:** 故事文件保持不变；epic 保持不变；没有副作用
 
 ---
 
 ## Testing Evidence Required
 
-Every story skill output must pass this test suite before handoff:
+每个 story 技能的产出在交接前都必须通过以下测试套件：
 
 ### T1: Schema Validation (Deterministic)
-- [ ] Output parses as valid Markdown
-- [ ] Output validates against output schema (JSON schema above)
-- [ ] Story IDs follow pattern `EPIC-ID-N`
-- [ ] Each story has ≥3 acceptance criteria
-- [ ] No hard constraint violations (assertion checks)
+- [ ] 输出可解析为有效 Markdown
+- [ ] 输出通过输出 schema 校验（见上方 JSON schema）
+- [ ] Story ID 遵循模式 `EPIC-ID-N`
+- [ ] 每个故事有 ≥3 条验收标准
+- [ ] 无硬约束违反（断言检查）
 
 **Test File:** `tests/smoke-tests/schema-validate.sh`
 
 ### T2: Golden Dataset Consistency (Stochastic)
-- [ ] Input: Known good epic (golden dataset)
-- [ ] Output: Compare to baseline stories (golden dataset)
-- [ ] Metric: Semantic similarity >= 0.85 (embedding cosine distance)
-- [ ] Pass: If similarity OK, stories are consistent
+- [ ] 输入：已知良好的 epic（golden dataset）
+- [ ] 输出：与基线故事（golden dataset）比较
+- [ ] 指标：语义相似度 >= 0.85（嵌入余弦距离）
+- [ ] 通过：若相似度达标，则故事一致
 
-**Test File:** `tests/golden-datasets/` (stores expected outputs)
+**Test File:** `tests/golden-datasets/`（存放预期输出）
 
 ### T3: Format Stability (Stochastic)
-- [ ] Run skill on same input 5 times
-- [ ] Measure format consistency across runs
-- [ ] Metric: All 5 outputs match structure (no sections added/removed)
-- [ ] Pass: If all 5 runs have same format
+- [ ] 对同一输入运行技能 5 次
+- [ ] 测量多次运行之间的格式一致性
+- [ ] 指标：5 次输出结构一致（不增加/删除小节）
+- [ ] 通过：若 5 次运行格式相同
 
 **Test File:** `tests/behavioral-tests/format-stability.sh`
 
 ### T4: Handoff Integration (Integration)
-- [ ] Downstream skill (`/dev-story`) accepts this output
-- [ ] No schema validation errors from downstream
-- [ ] Downstream produces valid task output
-- [ ] Pass: If downstream accepts >95% of stories
+- [ ] 下游技能（`/dev-story`）接受本输出
+- [ ] 下游无 schema 校验错误
+- [ ] 下游产出有效的 task 输出
+- [ ] 通过：若下游接受 >95% 的故事
 
 **Test File:** `tests/integration/story-to-devstory.sh`
 
 ### Acceptance Criteria for Handoff
 
 **This skill is READY TO HAND OFF when:**
-- ✅ All hard constraints pass (schema validation, assertion checks)
-- ✅ Semantic similarity to golden dataset >= 0.85
-- ✅ Format stability across 5 runs (all match structure)
-- ✅ Downstream skill accepts output (integration test passes)
-- ✅ Drift monitor ASI >= 0.75 (no degradation)
+- ✅ 所有硬约束通过（schema 校验、断言检查）
+- ✅ 与 golden dataset 的语义相似度 >= 0.85
+- ✅ 5 次运行格式稳定（结构全部一致）
+- ✅ 下游技能接受输出（集成测试通过）
+- ✅ 漂移监控器 ASI >= 0.75（无退化）
 
 **Blocking Issues:**
-- ❌ Hard constraint violation → must fix before handoff
-- ❌ Similarity < 0.85 → investigate drift, resample or adjust
-- ❌ Downstream rejection → fix schema or content
+- ❌ 硬约束违反 → 必须在交接前修复
+- ❌ 相似度 < 0.85 → 调查漂移，重新采样或调整
+- ❌ 下游拒绝 → 修复 schema 或内容
 
 ---
 
@@ -456,25 +455,25 @@ Every story skill output must pass this test suite before handoff:
 
 **For `/create-stories`, we measure:**
 
-1. **Response Consistency (30%)** — Are story formats stable across runs?
-   - Measure: Embedding similarity of 5 runs on same input (cosine distance)
-   - Baseline: >= 0.88 (established on 10 historical stories)
-   - Alarm: < 0.85 for 3 consecutive runs
+1. **Response Consistency (30%)**——多次运行之间故事格式是否稳定？
+   - 测量：同一输入 5 次运行的嵌入相似度（余弦距离）
+   - 基线：>= 0.88（基于 10 个历史故事建立）
+   - 告警：连续 3 次运行 < 0.85
 
-2. **Tool Usage Patterns (25%)** — Does the skill use consistent patterns?
-   - Measure: Tool calls, templates, references consistent
-   - Baseline: Same design docs referenced, same patterns followed
-   - Alarm: New patterns emerge without explanation
+2. **Tool Usage Patterns (25%)**——技能是否使用一致的模式？
+   - 测量：工具调用、模板、引用是否一致
+   - 基线：引用相同的设计文档，遵循相同的模式
+   - 告警：出现无解释的新模式
 
-3. **Acceptance Criteria Quality (25%)** — Acceptance criteria stable and testable?
-   - Measure: Phrasing in imperative mood, specific, testable
-   - Baseline: 0 vague criteria per story (e.g., no "should work")
-   - Alarm: >1 vague criterion per story
+3. **Acceptance Criteria Quality (25%)**——验收标准是否稳定且可测试？
+   - 测量：措辞使用祈使语气、具体、可测试
+   - 基线：每个故事 0 条含糊标准（例如不出现"should work"）
+   - 告警：每个故事 >1 条含糊标准
 
-4. **Behavioral Boundaries (20%)** — Skill stays in lane?
-   - Measure: No code suggestions, no modified epic goals, no assets touched
-   - Baseline: 0 violations per output
-   - Alarm: Any violation
+4. **Behavioral Boundaries (20%)**——技能是否守住边界？
+   - 测量：无代码建议、未修改 epic 目标、未触碰资源
+   - 基线：每次输出 0 次违反
+   - 告警：任何一次违反
 
 **ASI Calculation:**
 ```
@@ -487,34 +486,34 @@ ASI = (0.30 * consistency) + (0.25 * tool) + (0.25 * criteria) + (0.20 * boundar
 ```
 
 **Monitoring:**
-- Measure after every 5 story skill invocations
-- Log to `production/session-state/drift-monitor.md`
-- Alert if ASI < 0.75 for 3 consecutive windows
+- 每调用 5 次 story 技能后测量一次
+- 记录到 `production/session-state/drift-monitor.md`
+- 若 ASI 连续 3 个窗口 < 0.75 则告警
 
 ---
 
 ## Glossary & References
 
-**Immutable:** Data that cannot be changed after being read. At skill boundaries, input is immutable (protect source epic).
+**Immutable:** 读取后不可更改的数据。在技能边界上，输入是不可变的（保护源 epic）。
 
-**Handoff:** Moment when one skill's output becomes another skill's input. Must be machine-validated.
+**Handoff:** 一个技能的输出成为另一个技能的输入的时刻。必须经过机器校验。
 
-**Hard Constraint:** Rule that must never be violated. Violation blocks handoff.
+**Hard Constraint:** 绝不可违反的规则。违反将阻止交接。
 
-**Soft Constraint:** Rule that should be followed. Violation warns but doesn't block; recovery attempted.
+**Soft Constraint:** 应当遵循的规则。违反只发出警告而不阻断；会尝试恢复。
 
-**ASI (Agent Stability Index):** Four-dimensional metric measuring skill consistency across 4 dimensions. Threshold 0.75.
+**ASI (Agent Stability Index):** 从 4 个维度衡量技能一致性的四维指标。阈值为 0.75。
 
-**Drift:** Progressive degradation of skill behavior over time or repeated invocations.
+**Drift:** 技能行为随时间或反复调用而逐渐退化。
 
-**Semantic Similarity:** Embedding-based comparison of two texts (0.0 = completely different, 1.0 = identical meaning). Used instead of exact string matching for LLM outputs.
+**Semantic Similarity:** 基于嵌入的两段文本比较（0.0 = 完全不同，1.0 = 含义相同）。用于 LLM 输出，代替精确字符串匹配。
 
-**Golden Dataset:** Curated set of real inputs and expected outputs used as regression test baseline.
+**Golden Dataset:** 精选的真实输入与预期输出集合，用作回归测试基线。
 
-**Schema Validation:** Checking output against JSON/Markdown schema. Deterministic, machine-verifiable.
+**Schema Validation:** 按 JSON/Markdown schema 校验输出。确定性强，可机器验证。
 
 ---
 
 **Template Version:** 1.0
 **Last Updated:** 2026-03-26
-**Audience:** Skill authors creating new skills or upgrading existing ones to include contracts
+**Audience:** 编写新技能或升级现有技能以加入契约的技能作者

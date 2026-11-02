@@ -1,6 +1,6 @@
 ---
 name: quick-design
-description: "Lightweight spec for small changes — tuning adjustments, minor mechanics. Embeds directly into stories; skips full GDD."
+description: "面向小改动的轻量级规格——调参调整、小型机制。直接嵌入用户故事，跳过完整 GDD。"
 argument-hint: "[brief description of the change]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Bash(bash "*/.claude/skills/quick-design/../../hooks/yaml-helper.sh" resolve_config *)
@@ -11,101 +11,92 @@ model: sonnet
 
 
 
-# Quick Design
+# 快速设计（Quick Design）
 
-This is the **lightweight design path** for changes that don't need a full GDD.
-Full GDD authoring via `/design-system` is the heavyweight path. Use this skill
-for work under about one week of implementation — tuning adjustments, minor
-behavioral tweaks, small additions to existing systems, or standalone features too
-small to warrant a full document. Most tweaks are hours; the one-week ceiling is
-the limit for a New Small System (see the categories below).
+这是面向不需要完整 GDD 的变更的**轻量级设计路径**。通过 `/design-system` 撰写完整 GDD 是重量级路径。对于约一周实施以内的工作——调参调整、小幅行为微调、对既有系统的小幅新增，或小到不值得完整文档的独立功能——请使用本技能。大多数微调只需数小时；一周上限是针对"新增小型系统"的限制（见下方类别）。
 
-**Output:** `design/quick-specs/[name]-[date].md`
+**输出：** `design/quick-specs/[name]-[date].md`
 
-**When to run:** Anytime a change is too small for `/design-system` but too
-meaningful to implement without a written rationale.
+**何时运行：** 当某变更小到不适合 `/design-system`，但又重要到没有书面理由就不应实施时。
 
 ---
 
-Every `AskUserQuestion` call follows `.claude/docs/automation-modes.md`
-(collaborative asks always · guided major-only · autonomous logs and proceeds;
-`automation_always_ask` categories always prompt).
+每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+（协作模式总是询问 · 引导模式仅大项询问 · 自主模式记录后继续；
+`automation_always_ask` 类别始终提示）。
 
-## 1. Classify the Change
+## 1. 对变更分类
 
-First, read the argument and determine which category this change falls into:
+首先，读取参数并确定该变更属于哪个类别：
 
-- **Tuning** — changing numbers or balance values in an existing system with no
-  behavioral change (most minimal path). Example: "increase jump height from 5
-  to 6 units", "reduce enemy patrol speed by 10%".
-- **Tweak** — a small behavioral change to an existing system that introduces no
-  new states, branches, or systems. Example: "make dash invincible on frame 1",
-  "allow combo to cancel into roll".
-- **Addition** — adding a small mechanic to an existing system that may introduce
-  1-2 new states or interactions. Example: "add a parry window to the block
-  mechanic", "add a charge variant to the basic attack".
-- **New Small System** — a standalone feature small enough that it has no
-  existing GDD and is under approximately one week of implementation work.
-  Example: "achievement popup system", "simple day/night visual cycle".
+- **Tuning（调参）** —— 修改既有系统中的数字或平衡值，不产生
+  行为变化（最轻量的路径）。示例："将跳跃高度从 5 单位
+  提高到 6 单位"、"将敌人巡逻速度降低 10%"。
+- **Tweak（微调）** —— 对既有系统做小幅行为变更，不引入
+  新状态、新分支或新系统。示例："让冲刺在第 1 帧无敌"、
+  "允许连击取消进入翻滚"。
+- **Addition（新增）** —— 向既有系统添加一个小型机制，可能引入
+  1-2 个新状态或交互。示例："为格挡机制添加格挡判定窗口"、
+  "为基础攻击添加蓄力变体"。
+- **New Small System（新增小型系统）** —— 一个足够小的独立功能，没有
+  既有 GDD，且实施工作约在一周以内。
+  示例："成就弹窗系统"、"简单的昼夜视觉循环"。
 
-If the change does NOT fit these categories — it introduces a new system with
-significant cross-system dependencies, requires more than one week of
-implementation, or fundamentally alters an existing system's core rules — stop
-and redirect to `/design-system` instead. Verdict: **REDIRECTED** — use
-`/design-system` for this change.
+若该变更**不符合**这些类别——它引入了具有
+显著跨系统依赖的新系统、需要超过一周的
+实施时间，或根本性改变了既有系统的核心规则——请停止
+并改为重定向到 `/design-system`。结论：**REDIRECTED** —— 此变更请使用
+`/design-system`。
 
-If there is no argument, ask the user to describe the change (plain text prompt), then classify it using the criteria above.
+若无参数，请用户描述该变更（纯文本提示），然后使用上述标准对其分类。
 
-Present the inferred classification using `AskUserQuestion`:
-- Prompt: "I've classified this as **[inferred type]** — [brief reason]. Is that correct?"
-- Options:
-  - `[A] Yes — [inferred type] is correct`
-  - `[B] Tuning — changing numbers or balance values only`
-  - `[C] Tweak — small behavioral change to an existing system`
-  - `[D] Addition — adding a small mechanic to an existing system`
-  - `[E] New Small System — standalone feature, under one week of work`
-  - `[F] This is too large — redirect me to /design-system`
+使用 `AskUserQuestion` 呈现推断出的分类：
+- 提示："我将其归类为 **[inferred type]** —— [brief reason]。这样正确吗？"
+- 选项：
+  - `[A] 是 —— [inferred type] 正确`
+  - `[B] Tuning —— 仅修改数字或平衡值`
+  - `[C] Tweak —— 对既有系统的小幅行为变更`
+  - `[D] Addition —— 向既有系统添加一个小型机制`
+  - `[E] New Small System —— 独立功能，一周以内的工作量`
+  - `[F] 这太大了 —— 请重定向到 /design-system`
 
-If [F]: stop. Verdict: **REDIRECTED** — use `/design-system` for this change.
-Otherwise: proceed with the selected type.
-
----
-
-## 2. Context Scan
-
-Before drafting anything, read the relevant context. Read the GDD and the systems
-index by section: find the headings you need with the Grep tool (pattern `^#`,
-content mode) and Read those ranges with offset and limit.
-
-- Search `design/gdd/` for the GDD most relevant to this change. Read the
-  sections that this change would affect. If no GDD covers this system — usually
-  the case at `workflow: minimal`, where `design/game-brief.md` and the stories are
-  the design record — read the brief's lines for it and the story the change
-  touches instead, report "No GDD for [system] — using the brief and [story
-  path]", and give the brief as the spec's GDD Reference.
-- Check whether `design/gdd/systems-index.md` exists. If it does, read it to
-  understand where this system sits in the dependency graph and what tier it
-  belongs to. If it does not exist, note "No systems index found — skipping
-  dependency tier check." and continue.
-- Check `design/quick-specs/` for any prior quick specs that touched this
-  system — avoid contradicting them.
-- If this is a Tuning change, also check `assets/data/` for the data file that
-  holds the relevant values.
-
-Report what was found: "Found GDD at [path]. Relevant section: [section name].
-Prior quick specs for this system: [each path, and whether it agrees or
-conflicts with this change — or "none"]." Name a prior spec even when it
-agrees — "no conflicts" alone reads the same as "no prior specs".
+若选 [F]：停止。结论：**REDIRECTED** —— 此变更请使用 `/design-system`。
+否则：按所选类型继续。
 
 ---
 
-## 3. Draft the Quick Design Spec
+## 2. 上下文扫描
 
-Use the appropriate spec format for the change category.
+在起草任何内容之前，先读取相关上下文。按章节读取 GDD 与系统
+索引：用 Grep 工具查找需要的标题（pattern `^#`，
+content 模式），再用 offset 与 limit 读取相应范围。
 
-### For Tuning changes
+- 在 `design/gdd/` 中搜索与该变更最相关的 GDD。读取该变更
+  会影响的章节。若无 GDD 覆盖该系统——通常在 `workflow: minimal` 下如此，
+  那里 `design/game-brief.md` 与用户故事是设计记录——改为读取简报中相关行与该变更
+  触及的用户故事，报告"没有 [system] 的 GDD —— 使用简报与 [story
+  path]"，并将简报作为规格的 GDD Reference。
+- 检查 `design/gdd/systems-index.md` 是否存在。若存在，读取它，
+  以了解该系统在依赖图中的位置及其所属层级。若不存在，注明"未找到系统索引 —— 跳过
+  依赖层级检查。"并继续。
+- 检查 `design/quick-specs/` 中是否有涉及该系统的既往快速规格
+  ——避免与之矛盾。
+- 若这是 Tuning 变更，还要检查 `assets/data/` 中保存相关值的
+  数据文件。
 
-Produce a single table:
+报告发现的内容："在 [path] 找到 GDD。相关章节：[section name]。
+该系统的既往快速规格：[每个路径，以及它与本次变更是相符还是
+冲突 —— 或 "none"]。" 即使既往规格与本次一致也要点名——仅说"无冲突"读起来与"无既往规格"相同。
+
+---
+
+## 3. 起草快速设计规格
+
+使用与变更类别相符的规格格式。
+
+### 针对 Tuning 变更
+
+产出一个单独的表：
 
 ```markdown
 # Quick Design Spec: [Title]
@@ -134,7 +125,7 @@ New value is [within / at the edge of / outside] the documented range.
 - [ ] No regression in [related behavior]
 ```
 
-### For Tweak and Addition changes
+### 针对 Tweak 与 Addition 变更
 
 ```markdown
 # Quick Design Spec: [Title]
@@ -188,11 +179,10 @@ new states, list them. If it introduces new parameters, define their ranges.]
 [If yes: which file, which section, and what the update should say.]
 ```
 
-### For New Small System changes
+### 针对 New Small System 变更
 
-Use a trimmed GDD structure. Include only the sections that are directly
-necessary — skip Player Fantasy, full Formulas, and Edge Cases unless the
-system specifically requires them.
+使用精简的 GDD 结构。只包含直接必要的章节——除非该系统
+特别需要，否则跳过 Player Fantasy、完整 Formulas 与 Edge Cases。
 
 ```markdown
 # Quick Design Spec: [Title]
@@ -238,42 +228,41 @@ tracking threshold — quick spec is sufficient."]
 
 ---
 
-## 4. Approval and Filing
+## 4. 批准与归档
 
-Present the draft to the user in full. Then use `AskUserQuestion`:
-- Prompt: "Here's the Quick Design Spec draft. How do you want to proceed?"
-- Options:
-  - `[A] Approve — write it as shown`
-  - `[B] Revise — I'll describe what to change`
-  - `[C] This grew too large — redirect to /design-system instead`
+向用户完整呈现草稿。然后使用 `AskUserQuestion`：
+- 提示："这是 Quick Design Spec 草稿。你想如何继续？"
+- 选项：
+  - `[A] 批准 —— 按所示内容写入`
+  - `[B] 修订 —— 我来描述要改什么`
+  - `[C] 这变得太大了 —— 改为重定向到 /design-system`
 
-If [B]: collect the requested changes, revise the draft, and re-present this widget.
-If [C]: stop. Verdict: **REDIRECTED** — use `/design-system` for this change.
+若选 [B]：收集所请求的变更，修订草稿，并重新呈现本交互控件。
+若选 [C]：停止。结论：**REDIRECTED** —— 此变更请使用 `/design-system`。
 
-If [A]: ask "May I write this Quick Design Spec to
-`design/quick-specs/[kebab-case-title]-[YYYY-MM-DD].md`?"
+若选 [A]：询问"我可以把这份 Quick Design Spec 写入
+`design/quick-specs/[kebab-case-title]-[YYYY-MM-DD].md` 吗？"
 
-Use today's date in the filename. The title should be a kebab-case description
-of the change (e.g., `jump-height-tuning-2026-03-10`,
-`parry-window-addition-2026-03-10`).
+文件名中使用今天的日期。标题应为变更的 kebab-case 描述
+（例如 `jump-height-tuning-2026-03-10`、
+`parry-window-addition-2026-03-10`）。
 
-If yes, create the `design/quick-specs/` directory if it does not exist, then
-write the file.
+若同意，在 `design/quick-specs/` 目录不存在时创建它，然后
+写入文件。
 
-If a GDD update is required (flagged in the spec), ask separately after
-writing the quick spec:
+若需要更新 GDD（在规格中已标记），在写入快速规格后另行询问：
 
-"This spec modifies rules in [System Name]. May I update
-`design/gdd/[filename].md` — specifically the [section name] section?"
+"此规格修改了 [System Name] 中的规则。我可以更新
+`design/gdd/[filename].md` —— 具体是 [section name] 章节吗？"
 
-Show the exact text that would be changed (old vs. new) before asking. Do not
-make GDD edits without explicit approval.
+询问之前展示将要改动的确切文本（旧 vs 新）。未经明确批准，不要
+进行 GDD 编辑。
 
 ---
 
-## 5. Handoff
+## 5. 交接
 
-After writing the file, output:
+写入文件后，输出：
 
 ```
 Quick Design Spec written to: design/quick-specs/[filename].md
@@ -285,29 +274,29 @@ Next step: This spec is ready for `/story-readiness` validation before
 implementation (at `workflow: minimal`, go straight to `/dev-story`). Reference this spec in the story's GDD Reference field.
 ```
 
-### Pipeline Notes
+### 流水线说明（Pipeline Notes）
 
-Verdict: **COMPLETE** — quick design spec written and ready for implementation.
+结论：**COMPLETE** —— 快速设计规格已写入并可供实施。
 
-Quick Design Specs **bypass** `/design-review` and `/review-all-gdds` by
-design. They are for small, low-risk, well-scoped changes where the cost of
-the full review pipeline exceeds the risk of the change itself.
+快速设计规格按设计**绕过** `/design-review` 与 `/review-all-gdds`。
+它们适用于规模小、风险低、范围明确的变更，此时完整评审流水线的成本超过
+变更本身的风险。
 
-Redirect to the full pipeline if any of the following are true:
-- The change adds a new system that belongs in the systems index
-- The change significantly alters cross-system behavior or a system's
-  contracts with other systems
-- The change introduces new player-facing mechanics that affect the
-  game's MDA aesthetic balance
-- Implementation is likely to exceed one week of work
+若以下任一情况成立，请重定向到完整流水线：
+- 该变更新增的系统应纳入系统索引
+- 该变更显著改变跨系统行为，或改变某系统
+  与其他系统的契约
+- 该变更引入了影响游戏 MDA 美学平衡的
+  新玩家可见机制
+- 实施很可能超过一周工作
 
-In those cases: "This change has grown beyond quick-spec scope. I recommend
-using `/design-system` to author a full GDD for this."
+在这些情况下："此变更已超出快速规格的范围。我建议
+使用 `/design-system` 为其撰写完整 GDD。"
 
 ---
 
-## Recommended Next Steps
+## 推荐后续步骤（Recommended Next Steps）
 
-- Run `/story-readiness [story-path]` to validate the story before implementation begins (skip at `rigor: minimal` — `/dev-story` directly) — reference this spec in the story's GDD Reference field
-- Run `/dev-story [story-path]` to implement once the story passes readiness checks
-- If the change is larger than expected, run `/design-system [system-name]` to author a full GDD instead
+- 运行 `/story-readiness [story-path]` 在实施开始前验证用户故事（`rigor: minimal` 下跳过——直接 `/dev-story`）——在用户故事的 GDD Reference 字段中引用本规格
+- 用户故事通过就绪检查后，运行 `/dev-story [story-path]` 实施
+- 若变更比预期更大，运行 `/design-system [system-name]` 改为撰写完整 GDD

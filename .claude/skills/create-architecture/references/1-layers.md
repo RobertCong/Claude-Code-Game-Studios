@@ -1,12 +1,12 @@
-# /create-architecture — Phase 1: System Layer Mapping
+# /create-architecture — Phase 1: 系统层级映射
 
-> Part of `/create-architecture`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> 属于 `/create-architecture`。`SKILL.md` 指明了何时读取此文件；它所解析的
+> 设置以及其后续标题下的规则在这里同样适用。
 
-## Phase 1: System Layer Mapping
+## Phase 1: 系统层级映射
 
-Map every system from `systems-index.md` into an architecture layer. The standard
-game architecture layers are:
+将 `systems-index.md` 中的每个系统映射到一个架构层。标准的
+游戏架构层是：
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -23,21 +23,20 @@ game architecture layers are:
 └─────────────────────────────────────────────┘
 ```
 
-The Platform layer is the engine and OS the game runs on, not code the project
-writes. No GDD system goes in it, so it has no epic, stories or control-manifest
-rules: a system that wraps a platform or engine API belongs in Foundation.
+Platform 层是游戏所运行的引擎与操作系统，不是项目编写的代码。
+没有 GDD 系统会放入其中，因此它没有史诗、用户故事或 control-manifest
+规则：包装平台或引擎 API 的系统属于 Foundation 层。
 
-For each GDD system, ask:
-- Which layer does it belong to?
-- What are its module boundaries?
-- What does it own exclusively? (data, state, behaviour)
+对每个 GDD 系统，询问：
+- 它属于哪一层？
+- 它的模块边界是什么？
+- 它独家拥有什么？（数据、状态、行为）
 
-Present the proposed layer assignment and ask for approval before proceeding to
-the next section. Record the approved layer map in
-`production/session-state/active.md`; it goes into the document at Phase 7.
+呈现提议的层级分配，并在进入下一章节前请求批准。将批准的层级映射记录到
+`production/session-state/active.md`；它会在 Phase 7 写入文档。
 
-**Engine awareness check**: For each system assigned to the Core and Foundation
-layers, flag if it touches a HIGH or MEDIUM risk engine domain. Show the relevant
-engine reference excerpt inline.
+**引擎感知检查**：对分配到 Core 和 Foundation 层的每个系统，若其触及
+HIGH 或 MEDIUM 风险引擎领域则标出。内联展示相关
+引擎参考摘录。
 
 ---

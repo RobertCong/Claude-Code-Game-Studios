@@ -2,225 +2,224 @@
 
 ## Skill Summary
 
-`/balance-check [system-name|path-to-data-file]` identifies the balance domain
-(combat, economy, progression, loot, or a data file given directly), reads the
-domain's data files from `assets/data/` and `design/balance/`, then reads the
-intended values — from `design/registry/entities.yaml` first (its `constants:` and
-`formulas:` blocks), and from the system's GDD in `design/gdd/` for anything the
-registry does not supply. It compares every data value with its target — a
-registry constant's `value`, a registry formula's `output_range`, or the GDD's
-range — then runs domain-specific checks, and prints a report with
-Data Sources Analyzed, a Health Summary, an Outliers Detected table
-(Item/Value | Expected Range | Actual | Issue), Degenerate Strategies, Progression
-Analysis, a Priority-ranked Recommendations table and Values That Need Attention.
-Inputs it cannot find make the affected section `NOT ASSESSED — NO DATA`, naming
-the missing source and `/design-system`, never an estimate; a value with no
-target is listed as `no stated range — not judged`. After the report, an
-`AskUserQuestion` offers [A] fix now, [B] save the report to
-`design/balance/balance-check-[system]-[date].md`, [C] stop; it writes only on
-[B]. No director gates are invoked. Health Summary, first match wins: CRITICAL
-ISSUES, CONCERNS, NOT ASSESSED, HEALTHY.
+`/balance-check [system-name|path-to-data-file]` 识别平衡性领域
+（战斗、经济、成长、战利品，或直接给出的数据文件），从
+`assets/data/` 与 `design/balance/` 读取该领域的数据文件，然后读取
+目标值——优先来自 `design/registry/entities.yaml`（其 `constants:` 与
+`formulas:` 块），对注册表未提供的内容则来自 `design/gdd/` 中该系统的 GDD。
+它将每个数据值与其目标进行比较——注册表常量的 `value`、注册表公式的
+`output_range`，或 GDD 的范围——再运行领域特定检查，并打印一份报告，
+包含 Data Sources Analyzed、Health Summary、Outliers Detected 表
+（Item/Value | Expected Range | Actual | Issue）、Degenerate Strategies、Progression
+Analysis、按优先级排序的 Recommendations 表与 Values That Need Attention。
+它找不到的输入会使受影响章节变为 `NOT ASSESSED — NO DATA`，并指明
+缺失的来源与 `/design-system`，绝不给估算值；没有目标的值列为
+`no stated range — not judged`。报告之后，
+`AskUserQuestion` 提供 [A] 立即修复、[B] 将报告保存到
+`design/balance/balance-check-[system]-[date].md`、[C] 停止；只有选 [B] 才写入。
+不调用任何总监闸门。Health Summary 首个匹配生效：
+CRITICAL ISSUES、CONCERNS、NOT ASSESSED、HEALTHY。
 
 ---
 
 ## Static Assertions (Structural)
 
-Checked against the SKILL.md by `/skill-test spec` — no fixture needed.
+由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] Has required frontmatter fields: `name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`
-- [ ] Has ≥2 phase headings
-- [ ] Contains verdict keywords: HEALTHY, CONCERNS, CRITICAL ISSUES, NOT ASSESSED
-- [ ] Has ask-before-write language: the save is an `AskUserQuestion` option that names its target path, and the Write happens only when that option is chosen
-- [ ] Has a next-step handoff (what to do after findings are reviewed)
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 有 ≥2 个 phase 标题
+- [ ] 包含结论关键词：HEALTHY、CONCERNS、CRITICAL ISSUES、NOT ASSESSED
+- [ ] 有先询问后写入的措辞：保存是一个 `AskUserQuestion` 选项，并指明其目标路径，且只有选择该选项时才发生 Write
+- [ ] 有下一步交接（发现项评审之后该做什么）
 
 ---
 
 ## Director Gate Checks
 
-None. Balance check is an analysis skill; no gates are invoked in any review mode.
+无。平衡性检查是分析技能；在任何评审模式下都不调用闸门。
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非某个用例自己的 Fixture 另有说明，否则每个用例的 `project.yaml` 都设置
+`modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。
+规则见：`studio-tests/CLAUDE.md` §
+Fixture defaults。
 
 ---
 
 ## Test Cases
 
-### Case 1: Happy Path — All balance values within their intended ranges
+### Case 1: Happy Path — 所有平衡性值都在预期范围内
 
 **Fixture:**
-- `assets/data/combat-balance.json` exists with 6 stat values
-- `design/registry/entities.yaml` has no entries (the shipped empty stub)
-- `design/gdd/combat-system.md` gives an expected range for all 6 stats
-- All 6 values fall inside their ranges; no degenerate strategy exists
+- `assets/data/combat-balance.json` 存在，含 6 个属性值
+- `design/registry/entities.yaml` 没有条目（随附的空桩）
+- `design/gdd/combat-system.md` 为全部 6 个属性给出预期范围
+- 全部 6 个值都落在其范围内；不存在退化策略
 
 **Input:** `/balance-check combat`
 
 **Expected behavior:**
-1. Skill identifies the Combat domain from the argument
-2. Skill reads `assets/data/combat-balance.json` (and any combat files in `design/balance/`)
-3. Registry has no entries, so the skill uses the GDD alone for the intended ranges
-4. Each of the 6 values is compared with its GDD range and none falls outside; the combat checks find no dominant option
-5. Report lists `assets/data/combat-balance.json` and `design/gdd/combat-system.md` under Data Sources Analyzed; the Outliers Detected table has no rows
-6. Health Summary is HEALTHY
-7. Phase 6 `AskUserQuestion` offers [A] / [B] / [C]; nothing is written before the user chooses
+1. 技能从参数识别出 Combat 领域
+2. 技能读取 `assets/data/combat-balance.json`（以及 `design/balance/` 中任何 combat 文件）
+3. 注册表没有条目，因此技能仅用 GDD 来确定预期范围
+4. 6 个值逐一与各自的 GDD 范围比较，没有越界；combat 检查未发现主导选项
+5. 报告在 Data Sources Analyzed 下列出 `assets/data/combat-balance.json` 与 `design/gdd/combat-system.md`；Outliers Detected 表没有行
+6. Health Summary 为 HEALTHY
+7. Phase 6 `AskUserQuestion` 提供 [A] / [B] / [C]；在用户选择之前不写入任何内容
 
 **Assertions:**
-- [ ] Data Sources Analyzed lists every file read, including the data file and the GDD
-- [ ] The empty registry is skipped and the GDD supplies the intended ranges
-- [ ] The Outliers Detected table has no rows
-- [ ] Health Summary is HEALTHY
-- [ ] No file is written before the user picks option [B]
+- [ ] Data Sources Analyzed 列出读取的每个文件，包括数据文件与 GDD
+- [ ] 空注册表被跳过，由 GDD 提供预期范围
+- [ ] Outliers Detected 表没有行
+- [ ] Health Summary 为 HEALTHY
+- [ ] 在用户选择选项 [B] 之前不写入任何文件
 
 ---
 
-### Case 2: Outlier — Player damage far above its intended range
+### Case 2: Outlier — 玩家伤害远高于其预期范围
 
 **Fixture:**
-- `assets/data/combat-balance.json` has `player_damage_base: 140`
-- `design/gdd/combat-system.md` gives `player_damage_base` an expected range of 90–110
-- All other stats are within range
+- `assets/data/combat-balance.json` 中有 `player_damage_base: 140`
+- `design/gdd/combat-system.md` 为 `player_damage_base` 给出 90–110 的预期范围
+- 其他所有属性都在范围内
 
 **Input:** `/balance-check combat`
 
 **Expected behavior:**
-1. Skill reads the data file and the GDD range for `player_damage_base`, and compares each value with its range
-2. The Outliers Detected table lists `player_damage_base` with Expected Range 90–110, Actual 140 and an Issue description
-3. The Recommendations table has a row for it with a Priority, a Suggested Fix and an Impact
-4. Values That Need Attention gives a suggested adjustment with rationale
-5. Health Summary is CONCERNS — one outlier a tuning pass can fix, with no degenerate strategy, stalled progression or sinkless loop
-6. If the user picks [A] and changes `player_damage_base`, which the combat GDD defines, the skill reminds them to run `/propagate-design-change` on that GDD before committing
+1. 技能读取数据文件与 `player_damage_base` 的 GDD 范围，并将每个值与其范围比较
+2. Outliers Detected 表列出 `player_damage_base`，Expected Range 90–110、Actual 140，并附问题描述
+3. Recommendations 表为其提供一行，含 Priority、Suggested Fix 与 Impact
+4. Values That Need Attention 给出建议调整及理由
+5. Health Summary 为 CONCERNS——一个可经调参修复的离群值，且无退化策略、成长停滞或无出口循环
+6. 若用户选择 [A] 并修改由 combat GDD 定义的 `player_damage_base`，技能会提醒他们在提交前对该 GDD 运行 `/propagate-design-change`
 
 **Assertions:**
-- [ ] `player_damage_base` appears in the Outliers Detected table with Expected Range 90–110 and Actual 140
-- [ ] The Recommendations table ranks the fix with a Priority
-- [ ] Health Summary is CONCERNS — not HEALTHY, and not CRITICAL ISSUES without a finding of the critical kind
-- [ ] On [A], a fix to a GDD-defined value is followed by the `/propagate-design-change` reminder
+- [ ] `player_damage_base` 出现在 Outliers Detected 表中，Expected Range 90–110、Actual 140
+- [ ] Recommendations 表以 Priority 对该修复排序
+- [ ] Health Summary 为 CONCERNS——不是 HEALTHY，也不是在没有关键类发现时给出 CRITICAL ISSUES
+- [ ] 选择 [A] 时，对 GDD 定义值的修复之后跟随 `/propagate-design-change` 提醒
 
 ---
 
-### Case 3: No Design Targets — Data exists but no GDD or registry defines the ranges
+### Case 3: No Design Targets — 数据存在，但无 GDD 或注册表定义范围
 
 **Fixture:**
-- `assets/data/economy-balance.yaml` exists with 10 plain stat values (prices and rates, no faucet/sink loop the data alone could show)
-- `design/registry/entities.yaml` has no entries
-- No GDD in `design/gdd/` covers the economy
+- `assets/data/economy-balance.yaml` 存在，含 10 个普通属性值（价格与比率，仅凭数据无法显示 faucet/sink 循环）
+- `design/registry/entities.yaml` 没有条目
+- `design/gdd/` 中没有 GDD 覆盖经济
 
 **Input:** `/balance-check economy`
 
 **Expected behavior:**
-1. Skill records its inputs as FOUND / ABSENT: the data file is FOUND; the registry entries and the economy GDD are ABSENT
-2. Skill reads the data file and lists it under Data Sources Analyzed
-3. The sections that need intended values (Outliers Detected, and Progression Analysis where it needs a target) are marked `NOT ASSESSED — NO DATA`, naming the missing economy GDD and the empty registry, and naming `/design-system` as the skill that writes them
-4. No expected range is invented or inferred from the data itself
-5. Health Summary is NOT ASSESSED — the report says the values could not be judged, not that they are fine
+1. 技能将其输入记录为 FOUND / ABSENT：数据文件为 FOUND；注册表条目与经济 GDD 为 ABSENT
+2. 技能读取数据文件并在 Data Sources Analyzed 下列出它
+3. 需要预期值的章节（Outliers Detected，以及需要目标的 Progression Analysis）被标记为 `NOT ASSESSED — NO DATA`，指明缺失的经济 GDD 与空注册表，并指明 `/design-system` 是写入它们的技能
+4. 不杜撰也不从数据本身推断任何预期范围
+5. Health Summary 为 NOT ASSESSED——报告说这些值无法判定，而不是说它们没问题
 
 **Assertions:**
-- [ ] Skill does not fabricate expected ranges when neither the registry nor a GDD supplies them
-- [ ] The affected sections are marked `NOT ASSESSED — NO DATA` rather than shown as empty tables
-- [ ] Output names the missing design source (economy GDD in `design/gdd/`, empty `design/registry/entities.yaml`) and `/design-system`
-- [ ] Health Summary is NOT ASSESSED — not HEALTHY, and not CONCERNS, since nothing was found wrong
+- [ ] 当注册表与 GDD 都不提供预期范围时，技能不杜撰范围
+- [ ] 受影响章节被标记为 `NOT ASSESSED — NO DATA`，而不是显示为空表
+- [ ] 输出指明缺失的设计来源（`design/gdd/` 中的经济 GDD、空的 `design/registry/entities.yaml`）与 `/design-system`
+- [ ] Health Summary 为 NOT ASSESSED——不是 HEALTHY，也不是 CONCERNS，因为没有发现任何错误
 
 ---
 
-### Case 4: Registry First — The registry value overrides a contradicting GDD
+### Case 4: Registry First — 注册表值覆盖矛盾的 GDD
 
 **Fixture:**
-- `design/registry/entities.yaml` `constants:` lists `player_damage_base` with `value: 100`, `unit: damage`, `source: design/gdd/combat-system.md` (a registry constant carries a value, not a range)
-- `design/gdd/combat-system.md` still says `player_damage_base` range 100–130 (stale)
-- `assets/data/combat-balance.json` has `player_damage_base: 125`
+- `design/registry/entities.yaml` 的 `constants:` 列出 `player_damage_base`，`value: 100`、`unit: damage`、`source: design/gdd/combat-system.md`（注册表常量携带值，而不是范围）
+- `design/gdd/combat-system.md` 仍说 `player_damage_base` 范围为 100–130（已过期）
+- `assets/data/combat-balance.json` 中有 `player_damage_base: 125`
 
 **Input:** `/balance-check combat`
 
 **Expected behavior:**
-1. Skill greps `design/registry/entities.yaml` (`^  - name:` with context) before reading the GDD
-2. The target for `player_damage_base` is the registry constant's `value`, 100, not the GDD's range
-3. 125 differs from the registry value 100, so `player_damage_base` appears in the Outliers Detected table with Expected Range 100 (the registry value) and Actual 125 — although it sits inside the stale GDD range
-4. The GDD is still read for any value the registry does not list
-5. Data Sources Analyzed lists the registry, the GDD and the data file
+1. 技能在读取 GDD 之前 grep `design/registry/entities.yaml`（带上下文的 `^  - name:`）
+2. `player_damage_base` 的目标是注册表常量的 `value`，即 100，而不是 GDD 的范围
+3. 125 与注册表值 100 不同，因此 `player_damage_base` 出现在 Outliers Detected 表中，Expected Range 100（注册表值）、Actual 125——尽管它落在过期的 GDD 范围内
+4. 对于注册表未列出的任何值，仍会读取 GDD
+5. Data Sources Analyzed 列出注册表、GDD 与数据文件
 
 **Assertions:**
-- [ ] The registry is read before the GDD
-- [ ] `player_damage_base` is judged against the registry value (100), not the GDD range (100–130)
-- [ ] `player_damage_base: 125` is reported as an outlier
-- [ ] Data Sources Analyzed includes `design/registry/entities.yaml`
+- [ ] 在 GDD 之前读取注册表
+- [ ] `player_damage_base` 依据注册表值（100）判定，而非 GDD 范围（100–130）
+- [ ] `player_damage_base: 125` 被报告为离群值
+- [ ] Data Sources Analyzed 包含 `design/registry/entities.yaml`
 
 ---
 
-### Case 5: No Argument, Gate Compliance and the Save Path
+### Case 5: No Argument, Gate Compliance and the Save Path — 无参数、闸门合规与保存路径
 
 **Fixture:**
-- Combat data, registry and GDD exist; 1 stat is slightly outside its range
-- `project.yaml`: `modes.review_mode: full`
-- `modes.automation` resolves to `collaborative`
+- Combat 数据、注册表与 GDD 存在；1 个属性略微超出其范围
+- `project.yaml`：`modes.review_mode: full`
+- `modes.automation` 解析为 `collaborative`
 
-**Input:** `/balance-check` (no argument)
+**Input:** `/balance-check`（无参数）
 
 **Expected behavior:**
-1. Skill asks the user which system to check; user answers "combat"
-2. Skill reads data and design targets and prints the report
-3. No director gate is invoked
-4. After the report, `AskUserQuestion` offers [A] fix now, [B] save to `design/balance/balance-check-combat-[date].md`, [C] stop
-5. On [B]: the report is written to `design/balance/balance-check-combat-[YYYY-MM-DD].md` (directory created if needed), the write is confirmed, and the skill ends with "Re-run `/balance-check` after fixes to verify."
-6. On [C]: nothing is written; open issues are summarized and the same re-run line ends the output
+1. 技能询问用户要检查哪个系统；用户回答 "combat"
+2. 技能读取数据与设计目标并打印报告
+3. 不调用任何总监闸门
+4. 报告之后，`AskUserQuestion` 提供 [A] 立即修复、[B] 保存到 `design/balance/balance-check-combat-[date].md`、[C] 停止
+5. 选 [B]：报告写入 `design/balance/balance-check-combat-[YYYY-MM-DD].md`（按需创建目录），确认写入，技能以 "Re-run `/balance-check` after fixes to verify." 结束
+6. 选 [C]：不写入任何内容；总结未关闭的问题，输出以同一行重运行提示结束
 
 **Assertions:**
-- [ ] With no argument, the skill asks which system to check before reading data
-- [ ] No director gate is invoked in any review mode
-- [ ] The report is presented before the save option, and the save option names `design/balance/balance-check-[system]-[date].md`
-- [ ] Option [B] writes to that path with the date in YYYY-MM-DD form; option [C] writes nothing
-- [ ] Both [B] and [C] end with "Re-run `/balance-check` after fixes to verify."
+- [ ] 没有参数时，技能在读取数据前询问要检查哪个系统
+- [ ] 在任何评审模式下都不调用总监闸门
+- [ ] 报告在保存选项之前展示，且保存选项指明 `design/balance/balance-check-[system]-[date].md`
+- [ ] 选项 [B] 以 YYYY-MM-DD 形式的日期写入该路径；选项 [C] 不写入任何内容
+- [ ] [B] 与 [C] 都以 "Re-run `/balance-check` after fixes to verify." 结束
 
 ---
 
-### Case 6: Orphan Stat — A data value no GDD or registry defines
+### Case 6: Orphan Stat — 无 GDD 或注册表定义的孤立数据值
 
 **Fixture:**
-- `assets/data/combat-balance.json` holds 6 stats plus `legacy_armor_mult: 1.5`
-- `design/registry/entities.yaml` has no entries
-- `design/gdd/combat-system.md` gives a range for the 6 stats and nothing for `legacy_armor_mult`
-- The 6 stats are inside their ranges; no degenerate strategy exists
+- `assets/data/combat-balance.json` 含 6 个属性加 `legacy_armor_mult: 1.5`
+- `design/registry/entities.yaml` 没有条目
+- `design/gdd/combat-system.md` 为这 6 个属性给出范围，对 `legacy_armor_mult` 没有给出任何内容
+- 这 6 个属性都在其范围内；不存在退化策略
 
 **Input:** `/balance-check combat`
 
 **Expected behavior:**
-1. Every value is compared with its target; the 6 stats are in range
-2. No target exists for `legacy_armor_mult`, so it is listed under Values That Need Attention as `no stated range — not judged`
-3. It is not an Outliers Detected row, and it is not dropped from the report
-4. Health Summary is NOT ASSESSED, naming `legacy_armor_mult` as the value that could not be judged
+1. 每个值都与其目标比较；这 6 个属性都在范围内
+2. `legacy_armor_mult` 不存在目标，因此列在 Values That Need Attention 下为 `no stated range — not judged`
+3. 它不是 Outliers Detected 行，也不会从报告中丢弃
+4. Health Summary 为 NOT ASSESSED，并指明 `legacy_armor_mult` 是无法判定的值
 
 **Assertions:**
-- [ ] `legacy_armor_mult` is reported as `no stated range — not judged`, apart from any outlier
-- [ ] The orphan stat is not skipped silently and not judged against a range inferred from the data
-- [ ] Health Summary is NOT ASSESSED, not HEALTHY, naming the unjudged value
+- [ ] `legacy_armor_mult` 被报告为 `no stated range — not judged`，与任何离群值分开
+- [ ] 孤立属性不会被静默跳过，也不会依据从数据推断的范围判定
+- [ ] Health Summary 为 NOT ASSESSED，而非 HEALTHY，并指明未判定的值
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Reads the domain's data files (Phase 2) and the registry then GDD (Phase 3) before analysis
-- [ ] Compares every data value with its target (registry constant `value`, registry formula `output_range`, or GDD range); a value outside it is an Outliers Detected row, a value with none is `no stated range — not judged`
-- [ ] Outliers Detected table uses the columns Item/Value, Expected Range, Actual, Issue; Recommendations uses Priority, Issue, Suggested Fix, Impact
-- [ ] A section whose inputs are absent is `NOT ASSESSED — NO DATA`, never estimated, and names the missing source and `/design-system`
-- [ ] Writes only when the user picks the save option, and only to `design/balance/balance-check-[system]-[date].md`
-- [ ] No director gates are invoked
-- [ ] Health Summary, first match: CRITICAL ISSUES, CONCERNS, NOT ASSESSED, HEALTHY — HEALTHY only when every value was judged against a stated target
+- [ ] 在分析之前读取该领域的数据文件（Phase 2）以及注册表、然后是 GDD（Phase 3）
+- [ ] 将每个数据值与其目标比较（注册表常量 `value`、注册表公式 `output_range`，或 GDD 范围）；越界值成为 Outliers Detected 行，没有目标的值记为 `no stated range — not judged`
+- [ ] Outliers Detected 表使用列 Item/Value、Expected Range、Actual、Issue；Recommendations 使用 Priority、Issue、Suggested Fix、Impact
+- [ ] 输入缺失的章节为 `NOT ASSESSED — NO DATA`，绝不估算，并指明缺失的来源与 `/design-system`
+- [ ] 仅在用户选择保存选项时写入，且只写入 `design/balance/balance-check-[system]-[date].md`
+- [ ] 不调用任何总监闸门
+- [ ] Health Summary 首个匹配：CRITICAL ISSUES、CONCERNS、NOT ASSESSED、HEALTHY——仅当每个值都已对照明示目标判定时才为 HEALTHY
 
 ---
 
 ## Coverage Notes
 
-- The case where every input is absent (no data files, no registry entries, no
-  GDD) is not tested separately; the skill then stops and reports
-  `NOT ASSESSED — NO DATA` as the whole verdict, naming what was missing and
-  which skill produces it.
-- CRITICAL ISSUES (a degenerate strategy, a stalled progression, a loop with no
-  sink) is not given its own case; Case 2 pins that an outlier alone is CONCERNS.
-- A data-file path argument (Phase 1 "File path given") is not tested; the
-  domain is then inferred from the file's content.
+- 所有输入都缺失的情况（无数据文件、无注册表条目、无
+  GDD）未单独测试；此时技能会停止，并报告
+  `NOT ASSESSED — NO DATA` 作为整体结论，指明缺失了什么以及
+  哪个技能产出它。
+- CRITICAL ISSUES（退化策略、成长停滞、没有出口的循环）没有
+  单独用例；Case 2 固定了单独一个离群值即为 CONCERNS。
+- 数据文件路径参数（Phase 1 的 "File path given"）未测试；此时
+  领域从文件内容推断。

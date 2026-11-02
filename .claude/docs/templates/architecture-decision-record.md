@@ -4,38 +4,34 @@
 
 [Proposed | Accepted | Deprecated | Superseded by ADR-XXXX]
 
-> **Who may move this to `Accepted`: the user, or `technical-director` on the
-> user's explicit confirmation. No other agent, and no skill on its own.**
-> Why this is stated here: stories referencing a `Proposed` ADR are set `Blocked`,
-> and epics require `Accepted`, so the field needs a named owner.
-> `technical-director` is the role `coordination-rules.md` already escalates
-> technical conflicts to, and an ADR is that decision made durable.
+> **谁可以将状态改为 `Accepted`：用户本人，或在用户明确确认后的 `technical-director`。
+> 其他任何代理都不可以，任何技能也不得自行修改。**
+> 在此写明的原因：引用 `Proposed` 状态 ADR 的用户故事会被置为 `Blocked`，
+> 而史诗要求 ADR 为 `Accepted`，因此该字段需要有明确的责任人。
+> `coordination-rules.md` 本就把技术冲突上报给 `technical-director`，
+> 而 ADR 正是把该决策固化下来的形式。
 >
-> This does **not** relax the existing rule that `Status: Accepted` is never set
-> without explicit user confirmation — it narrows *which agent* may set it once
-> that confirmation exists. An agent that believes an ADR is ready says so and
-> escalates; it does not edit this field.
+> 这并**不**放松既有规则——没有用户明确确认，绝不设置 `Status: Accepted`；
+> 它只是收窄了"确认之后由哪个代理来设置"。代理若认为某个 ADR 已就绪，
+> 应当说明并上报，而不是直接编辑该字段。
 
 ## Date
 
-[Date of decision]
+[决策日期]
 
 ## Last Verified
 
-[YYYY-MM-DD — when this ADR was last confirmed accurate against the current
-engine version and design. Update this date when you re-read and confirm it is
-still correct, even if nothing changed.]
+[YYYY-MM-DD —— 本 ADR 最后一次确认与当前引擎版本和设计一致的时间。
+当你重新阅读并确认它仍然正确时更新此日期，即使内容没有任何变化。]
 
 ## Decision Makers
 
-[Who was involved in this decision]
+[参与该决策的人员]
 
 ## Summary
 
-[2 sentences: what problem this ADR solves, and what was decided. Written for
-tiered context loading — a skill scanning 20 ADRs uses this to decide whether to
-read the full decision. Be specific: name the system, the problem, and the
-chosen approach.]
+[2 句话：本 ADR 解决了什么问题，以及最终决定了什么。为分层上下文加载而写——
+扫描 20 份 ADR 的技能会用它判断是否需要读完整决策。要具体：点名系统、问题和所选方案。]
 
 ## Engine Compatibility
 
@@ -45,132 +41,125 @@ chosen approach.]
 | **Domain** | [Physics / Rendering / UI / Audio / Navigation / Animation / Networking / Core / Input] |
 | **Layer** | [Foundation / Core / Feature / Presentation] |
 | **Knowledge Risk** | [LOW / MEDIUM / HIGH — from VERSION.md] |
-| **References Consulted** | [List engine-reference docs read, e.g. `docs/engine-reference/godot/modules/physics.md`] |
-| **Post-Cutoff APIs Used** | [Any APIs from post-LLM-cutoff versions this decision depends on, or "None"] |
-| **Verification Required** | [Specific behaviours to test before shipping, or "None"] |
+| **References Consulted** | [列出已阅读的引擎参考资料文档，例如 `docs/engine-reference/godot/modules/physics.md`] |
+| **Post-Cutoff APIs Used** | [本决策依赖的、出自 LLM 训练截止后版本的 API；没有则写 "None"] |
+| **Verification Required** | [上线前需要测试的具体行为；没有则写 "None"] |
 
-> **Note**: If Knowledge Risk is MEDIUM or HIGH, this ADR must be re-validated if the
-> project upgrades engine versions. Flag it as "Superseded" and write a new ADR.
+> **Note**：若 Knowledge Risk 为 MEDIUM 或 HIGH，项目升级引擎版本时必须重新验证本 ADR。
+> 将其标记为 "Superseded"，并编写新的 ADR。
 
-> **`Layer` is the ADR's own layer, not the referencing epic's — and it is a
-> different taxonomy from `Domain`.** Several sites branch on whether an ADR is
-> *critical (Foundation-layer)*: `/create-stories`, `/create-epics`,
-> `/architecture-decision`, `/story-readiness`, `/propagate-design-change` and
-> `gate-pre-production.md`; a missing row counts as critical. At `standard`,
-> `/create-stories` **stops** for a missing critical ADR and only **warns** for a
-> non-critical one, so this row decides whether a run halts. Do not infer the
-> layer from the referencing epic: a Foundation-layer ADR is commonly referenced
-> by a Core-layer epic, which would give the wrong answer.
+> **`Layer` 指的是 ADR 自身的层级，而不是引用它的史诗的层级——它与 `Domain`
+> 是两套不同的分类。** 多个位置会依据 ADR 是否为*关键（Foundation 层）*来分支：
+> `/create-stories`、`/create-epics`、`/architecture-decision`、`/story-readiness`、
+> `/propagate-design-change` 以及 `gate-pre-production.md`；缺失该行会被视为关键。
+> 在 `standard` 档位下，`/create-stories` 遇到缺失的关键 ADR 会**停止**，
+> 对非关键 ADR 只**警告**，因此这一行决定了运行是否中断。不要从引用它的史诗
+> 推断层级：Foundation 层的 ADR 常被 Core 层的史诗引用，那样会得出错误答案。
 >
-> The vocabulary is the same `Foundation / Core / Feature / Presentation` that
-> epics and stories already carry — do not invent a fifth value, and do not
-> reuse a `Domain` value here. `Domain` says *what part of the engine this
-> touches*; `Layer` says *how early in the build it must exist*.
+> 这套词汇就是史诗和用户故事已经在用的 `Foundation / Core / Feature / Presentation`——
+> 不要发明第五个值，也不要在此复用 `Domain` 的值。`Domain` 表示*它触及引擎的哪个部分*；
+> `Layer` 表示*它必须在构建的哪个阶段早期存在*。
 
 ## ADR Dependencies
 
 | Field | Value |
 |-------|-------|
-| **Depends On** | [ADR-NNNN (must be Accepted before this can be implemented), or "None"] |
-| **Enables** | [ADR-NNNN (this ADR unlocks that decision), or "None"] |
-| **Blocks** | [Epic/Story name — cannot start until this ADR is Accepted, or "None"] |
-| **Ordering Note** | [Any sequencing constraint that isn't captured above] |
+| **Depends On** | [ADR-NNNN（必须先为 Accepted 才能实现本 ADR），或 "None"] |
+| **Enables** | [ADR-NNNN（本 ADR 解锁了该决策），或 "None"] |
+| **Blocks** | [史诗/用户故事名称——在本 ADR 为 Accepted 之前无法开始，或 "None"] |
+| **Ordering Note** | [上面未涵盖的任何排序约束] |
 
 ## Context
 
 ### Problem Statement
-[What problem are we solving? Why does this decision need to be made now?]
+[我们要解决什么问题？为什么这个决策必须现在做出？]
 
 ### Current State
-[How does the system work today? What is wrong with the current approach?]
+[系统目前如何运作？当前做法有什么问题？]
 
 ### Constraints
-- [Technical constraints]
-- [Timeline constraints]
-- [Resource constraints]
-- [Compatibility requirements]
+- [技术约束]
+- [时间约束]
+- [资源约束]
+- [兼容性要求]
 
 ### Requirements
-- [Must support X]
-- [Must perform within Y budget]
-- [Must integrate with Z]
+- [必须支持 X]
+- [必须在 Y 预算内运行]
+- [必须与 Z 集成]
 
 ## Decision
 
-[The specific technical decision made, described in enough detail for someone
-to implement it.]
+[所做出的具体技术决策，描述详细到他人可以据此实现。]
 
 ### Architecture Diagram
-[ASCII diagram or description of the system architecture this creates]
+[本决策所产生的系统架构的 ASCII 图或描述]
 
 ### Key Interfaces
-[API contracts or interface definitions this decision creates]
+[本决策产生的 API 契约或接口定义]
 
 ### Implementation Guidelines
-[Specific guidance for the programmer implementing this decision — the rules a
-`/create-control-manifest` or `/dev-story` run should follow. State mandates as
-"must / must never" so they extract cleanly.]
+[给实现该决策的程序员的具体指导——`/create-control-manifest` 或 `/dev-story`
+运行时应遵循的规则。用"必须 / 绝不可"陈述强制要求，以便能被清晰提取。]
 
 ## Alternatives Considered
 
 ### Alternative 1: [Name]
-- **Description**: [How this would work]
-- **Pros**: [Advantages]
-- **Cons**: [Disadvantages]
-- **Estimated Effort**: [Relative effort compared to the chosen approach]
-- **Rejection Reason**: [Why this was not chosen]
+- **Description**: [该方案会如何运作]
+- **Pros**: [优点]
+- **Cons**: [缺点]
+- **Estimated Effort**: [与所选方案相比的相对工作量]
+- **Rejection Reason**: [为何未被选中]
 
 ### Alternative 2: [Name]
-- **Description**: [How this would work]
-- **Pros**: [Advantages]
-- **Cons**: [Disadvantages]
-- **Estimated Effort**: [Relative effort compared to the chosen approach]
-- **Rejection Reason**: [Why this was not chosen]
+- **Description**: [该方案会如何运作]
+- **Pros**: [优点]
+- **Cons**: [缺点]
+- **Estimated Effort**: [与所选方案相比的相对工作量]
+- **Rejection Reason**: [为何未被选中]
 
 ## Consequences
 
 ### Positive
-- [Good outcomes of this decision]
+- [该决策带来的良好结果]
 
 ### Negative
-- [Trade-offs and costs accepted]
+- [已接受的取舍与代价]
 
 ### Neutral
-- [Changes that are neither good nor bad, just different]
+- [无所谓好坏、只是有所不同的变化]
 
 ## Risks
-- [Things that could go wrong]
-- [Mitigation for each risk]
+- [可能出错的地方]
+- [每个风险的缓解措施]
 
 ## GDD Requirements Addressed
 
-<!-- This section is MANDATORY. Every ADR must trace back to at least one GDD
-     requirement, or explicitly state it is a foundational decision with no GDD
-     dependency. Traceability is audited by /architecture-review. -->
+<!-- 本节为必填。每份 ADR 都必须追溯到至少一条 GDD 需求，
+     或明确说明它是无 GDD 依赖的基础性决策。可追溯性由 /architecture-review 审计。 -->
 
 | GDD System | Requirement | How This ADR Addresses It |
 |------------|-------------|--------------------------|
-| [system-name].md | [specific rule, formula, or performance constraint from that GDD] | [how this decision satisfies it] |
+| [system-name].md | [该 GDD 中的具体规则、公式或性能约束] | [本决策如何满足它] |
 
-> If this is a foundational decision with no direct GDD dependency, write:
-> "Foundational — no GDD requirement. Enables: [list what GDD systems this
-> decision unlocks or constrains]"
+> 如果这是一项没有直接 GDD 依赖的基础性决策，请写：
+> "Foundational — no GDD requirement. Enables: [列出本决策解锁或约束的 GDD 系统]"
 
 ## Performance Implications
-- **CPU**: [Expected impact]
-- **Memory**: [Expected impact]
-- **Load Time**: [Expected impact]
-- **Network**: [Expected impact, if applicable]
+- **CPU**: [预期影响]
+- **Memory**: [预期影响]
+- **Load Time**: [预期影响]
+- **Network**: [预期影响（如适用）]
 
 ## Migration Plan
-[If this changes existing code, how do we get from here to there?]
+[如果这会改动现有代码，我们如何从现状走到目标状态？]
 
-**Rollback plan**: [How to revert if this decision proves wrong]
+**Rollback plan**: [如果该决策被证明是错的，如何回滚]
 
 ## Validation Criteria
-[How will we know this decision was correct? What metrics or tests?]
+[我们如何知道这个决策是正确的？用哪些指标或测试？]
 
 ## Related
-- [Links to related ADRs — note if supersedes, contradicts, or depends on]
-- [Links to related design documents]
-- [Links to relevant code files once implemented]
+- [相关 ADR 的链接——注明是取代、冲突还是依赖]
+- [相关设计文档的链接]
+- [实现后相关代码文件的链接]

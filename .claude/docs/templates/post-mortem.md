@@ -3,11 +3,11 @@
 ## Document Status
 - **Date**: [Date]
 - **Facilitator**: producer
-- **Participants**: [List of agents/people involved]
-- **Period Covered**: [Start date] to [End date]
+- **Participants**: [参与的 agent/人员列表]
+- **Period Covered**: [开始日期] 至 [结束日期]
 
 ## Summary
-[2-3 sentence summary of what this milestone/project accomplished]
+[用 2-3 句话总结此里程碑/项目达成了什么]
 
 ## Goals vs Results
 
@@ -19,30 +19,30 @@
 
 | Date | Event | Impact |
 | ---- | ----- | ------ |
-| [Date] | [What happened] | [How it affected the project] |
+| [Date] | [发生了什么] | [如何影响项目] |
 
 ## What Went Well
 
 ### [Category 1: e.g., Technical Execution]
-**What**: [Description]
-**Why it worked**: [Root cause of success]
-**How to repeat**: [What to keep doing]
+**What**: [描述]
+**Why it worked**: [成功的根因]
+**How to repeat**: [应继续做什么]
 
 ### [Category 2: e.g., Team Coordination]
-**What**: [Description]
-**Why it worked**: [Root cause]
-**How to repeat**: [Action]
+**What**: [描述]
+**Why it worked**: [根因]
+**How to repeat**: [行动]
 
 ## What Went Poorly
 
 ### [Category 1: e.g., Scope Management]
-**What**: [Description]
-**Root cause**: [Why this happened]
-**Impact**: [Time/quality/morale cost]
-**Prevention**: [How to avoid next time]
+**What**: [描述]
+**Root cause**: [为何发生]
+**Impact**: [时间/质量/士气代价]
+**Prevention**: [下次如何避免]
 
 ### [Category 2]
-[Same structure]
+[相同结构]
 
 ## Key Metrics
 
@@ -56,8 +56,8 @@
 
 ## Lessons Learned
 
-1. **[Lesson]**: [Explanation and how it changes future work]
-2. **[Lesson]**: [Explanation]
+1. **[Lesson]**: [解释以及它如何改变未来的工作]
+2. **[Lesson]**: [解释]
 
 ## Action Items
 
@@ -66,4 +66,4 @@
 | 1 | [Action] | [Who] | [When] | [Open/Done] |
 
 ## Acknowledgments
-[Call out exceptional contributions]
+[点名表扬杰出贡献]

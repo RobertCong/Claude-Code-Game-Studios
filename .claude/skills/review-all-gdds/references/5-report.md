@@ -1,14 +1,13 @@
-# /review-all-gdds — Phase 5: Output the Review Report
+# /review-all-gdds — Phase 5: 输出评审报告
 
-> Part of `/review-all-gdds`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> 属于 `/review-all-gdds`。`SKILL.md` 指明何时读取本文件；它解析出的设置以及其后各标题下的规则在此同样适用。
 
-## Phase 5: Output the Review Report
+## Phase 5: 输出评审报告
 
-**In this file:**
+**本文件包含：**
 
-- The report template
-- `NOT ASSESSED` and where it ranks
+- 报告模板
+- `NOT ASSESSED` 及其排序位置
 
 ```
 ## Cross-GDD Review Report
@@ -88,35 +87,13 @@ FAIL: One or more blocking issues must be resolved before architecture begins.
 [Specific list of what must change in which GDD]
 ```
 
-**`NOT ASSESSED` — a cross-review is only as wide as what it could read.** Rank:
-**above PASS**, **below CONCERNS and FAIL**. This skill's whole value is
-comparing systems *against each other*, so it is unusually easy for it to look
-thorough while covering a fraction of the surface. Emit it when any of:
+**`NOT ASSESSED` — 交叉评审的广度只等于它能读取到的范围。** 排序：**高于 PASS**，**低于 CONCERNS 和 FAIL**。本技能的全部价值在于把各系统*相互比较*，因此它极易看似详尽，实际只覆盖了一小部分范围。在出现以下任一情况时输出它：
 
-- **Fewer than two GDDs were readable.** Contradiction-hunting across one document
-  is not a cross-review; a clean result there means only that nothing was
-  compared. This is the single most important trigger in this skill.
-- **A whole review phase did not run** — consistency, design theory, economy,
-  pillar drift — when it should have. A pass the focus argument left out is not
-  this trigger: the user asked for it. Give the verdict for the pass that ran,
-  labelled — `PASS (consistency only — design theory not run)` — and fill the
-  `Focus:` line. A parallel phase that returned nothing has to be distinguished
-  from one that returned no findings; if a spawned agent produced no report, that
-  phase is NOT ASSESSED, not clean — an agent can return a fluent sentence,
-  write nothing, and consume a phase.
-- **The design pillars are undefined**, so pillar-drift has no reference to drift
-  from — the same shape as an accessibility gate with no committed tier.
-- **A GDD is present but empty** (headings only, or all placeholders), **or
-  could not be read**. Present is not the same as reviewable, and a stub
-  contradicts nothing.
+- **可读取的 GDD 少于两个。** 在单个文档内找矛盾不是交叉评审；那里得到干净结果只说明没有比较过任何东西。这是本技能中最重要的单一触发条件。
+- **某个完整的评审阶段没有运行** — 一致性、设计理论、经济、支柱漂移 — 而它本应运行。聚焦参数省去的某一轮不属于此触发条件：那是用户要求的。此时给出已运行那一轮的结论并加上标注 — `PASS (consistency only — design theory not run)` — 并填写 `Focus:` 行。返回空内容的并行阶段必须与返回无发现的阶段区分开；如果某个被启动的代理没有产出报告，该阶段是 NOT ASSESSED，而不是干净 — 代理可能返回一句流畅的话、什么都没写，却消耗了一个阶段。
+- **设计支柱未定义**，因此支柱漂移没有可漂移的参照 — 这与没有提交层级设定的无障碍闸门情形相同。
+- **某个 GDD 存在但为空**（只有标题，或全是占位符），**或无法读取**。存在不等于可评审，而一个存根不会与任何东西矛盾。
 
-Report the covered set explicitly either way: `GDDs reviewed: [N] of [M] present`
-(`[M]` counts the system GDDs present — the Phase 1c set, not `game-concept.md`,
-`game-pillars.md`, `systems-index.md` or an earlier `gdd-cross-review-*.md`),
-and the `Not read:` line naming every GDD that could not be read or is present but empty, whatever the
-verdict — a FAIL found in the GDDs that were read does not make the unread ones
-reviewed.
-A cross-review that silently skipped half the systems is indistinguishable from
-one that found them consistent.
+无论哪种情况都要明确报告覆盖集合：`GDDs reviewed: [N] of [M] present`（`[M]` 统计存在的系统 GDD — 即 Phase 1c 的集合，而非 `game-concept.md`、`game-pillars.md`、`systems-index.md` 或更早的 `gdd-cross-review-*.md`），以及 `Not read:` 行，按文件名列出每一个无法读取或存在但为空的 GDD，无论结论是什么 — 在已读取的 GDD 中发现 FAIL 并不会让未读取的 GDD 变成已评审。一个悄悄跳过一半系统的交叉评审，与一个发现它们彼此一致的交叉评审无法区分。
 
 ---

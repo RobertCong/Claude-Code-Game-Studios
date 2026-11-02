@@ -1,82 +1,82 @@
 # Agent Test Spec: godot-csharp-specialist
 
 ## Agent Summary
-Domain: C# patterns in Godot 4, .NET idioms applied to Godot, [Export] attribute usage, signal delegates, and async/await patterns.
-Does NOT own: GDScript code (gdscript-specialist), GDExtension C/C++ bindings (gdextension-specialist).
-No gate IDs assigned.
+领域：Godot 4 中的 C# 模式、应用于 Godot 的 .NET 惯用法、`[Export]` 特性用法、信号委托以及 async/await 模式。
+不负责：GDScript 代码（gdscript-specialist）、GDExtension C/C++ 绑定（gdextension-specialist）。
+未分配质量闸门（gate）ID。
 
 ---
 
 ## Static Assertions (Structural)
 
-- [ ] `description:` field is present and domain-specific (references C# in Godot 4 / .NET patterns / signal delegates)
-- [ ] `tools:` list includes Read, Write, Edit, Bash, Glob, Grep
-- [ ] Model tier is `sonnet` — frontmatter `model:` reads exactly `sonnet` (tiers: `.claude/docs/model-tiers.md`)
-- [ ] Agent definition does not claim authority over GDScript or GDExtension code
+- [ ] `description:` 字段存在且与领域相关（提及 Godot 4 中的 C# / .NET 模式 / 信号委托）
+- [ ] `tools:` 列表包含 Read、Write、Edit、Bash、Glob、Grep
+- [ ] 模型层级为 `sonnet` — frontmatter `model:` 的内容恰好为 `sonnet`（层级说明：`.claude/docs/model-tiers.md`）
+- [ ] 代理定义未声明对 GDScript 或 GDExtension 代码的权限
 
 ---
 
 ## Test Cases
 
-### Case 1: In-domain request — appropriate output
-**Input:** "Create an export property for enemy health with validation that clamps it between 1 and 1000."
+### Case 1: 领域内请求 — 输出得当
+**Input:** "为敌人生命值创建一个导出属性，并带校验，将其钳制在 1 到 1000 之间。"
 **Expected behavior:**
-- Produces a C# property with `[Export]` attribute
-- Uses a backing field with a property getter/setter that clamps the value in the setter
-- Does NOT use a raw `[Export]` public field without validation
-- Follows Godot 4 C# naming conventions (PascalCase for properties, fields private with underscore prefix)
-- Includes XML doc comment on the property per coding standards
+- 生成带 `[Export]` 特性的 C# 属性
+- 使用后备字段配合属性 getter/setter，在 setter 中对取值进行钳制
+- 不使用未经校验的裸 `[Export]` 公共字段
+- 遵循 Godot 4 C# 命名约定（属性用 PascalCase，字段为私有并带下划线前缀）
+- 按编码规范为属性添加 XML 文档注释
 
-### Case 2: Out-of-domain request — redirects correctly
-**Input:** "Rewrite this enemy health system in GDScript."
+### Case 2: 领域外请求 — 正确重定向
+**Input:** "用 GDScript 重写这套敌人生命值系统。"
 **Expected behavior:**
-- Does NOT produce GDScript code
-- Explicitly states that GDScript authoring belongs to `godot-gdscript-specialist`
-- Redirects the request to `godot-gdscript-specialist`
-- Any hand-off it offers describes the existing C# system's API (its signals and public methods) for godot-gdscript-specialist to port — it contains no GDScript
+- 不生成 GDScript 代码
+- 明确说明 GDScript 编写属于 `godot-gdscript-specialist`
+- 将请求重定向到 `godot-gdscript-specialist`
+- 它提供的任何交接内容只描述现有 C# 系统的 API（其信号与公共方法），供 godot-gdscript-specialist 移植 — 其中不含任何 GDScript
 
-### Case 3: Async signal awaiting
-**Input:** "Wait for an animation to finish before transitioning game state using C# async."
+### Case 3: 异步信号等待
+**Input:** "使用 C# async 等待动画播放完毕，再切换游戏状态。"
 **Expected behavior:**
-- Produces a proper `async Task` pattern using `ToSignal()` to await a Godot signal
-- Uses `await ToSignal(animationPlayer, AnimationPlayer.SignalName.AnimationFinished)`
-- Does NOT use `Thread.Sleep()` or `Task.Delay()` as a polling substitute
-- Notes that the calling method must be `async` and that fire-and-forget `async void` is only acceptable for event handlers
-- Checks `IsInstanceValid(this)` after the `await` before transitioning state — the node may have been freed while waiting
-- If the animation might never finish (interrupted, replaced), raises that as an unspecified edge case for the user to decide; any timeout it adds uses `GetTree().CreateTimer()`, never `Task.Delay()`
+- 生成正确的 `async Task` 模式，使用 `ToSignal()` 等待 Godot 信号
+- 使用 `await ToSignal(animationPlayer, AnimationPlayer.SignalName.AnimationFinished)`
+- 不使用 `Thread.Sleep()` 或 `Task.Delay()` 作为轮询替代方案
+- 说明调用方法必须为 `async`，并且即发即忘的 `async void` 仅在事件处理器中可接受
+- 在 `await` 之后、切换状态之前检查 `IsInstanceValid(this)` — 节点可能在等待期间已被释放
+- 若动画可能永远不结束（被中断、被替换），将其作为未明确的边界情况提出交由用户决定；它添加的任何超时都使用 `GetTree().CreateTimer()`，绝不使用 `Task.Delay()`
 
-### Case 4: Threading model conflict
-**Input:** "This C# code accesses a Godot Node from a background Task thread to update its position."
+### Case 4: 线程模型冲突
+**Input:** "这段 C# 代码从后台 Task 线程访问 Godot Node 来更新其位置。"
 **Expected behavior:**
-- Flags this as a race condition risk: Godot nodes are not thread-safe and must only be accessed from the main thread
-- Does NOT approve or implement the multi-threaded node access pattern
-- Provides the correct pattern: use `CallDeferred()`, `Callable.From().CallDeferred()`, or marshal back to the main thread via a thread-safe queue
-- Explains why the code compiles yet is unsafe: the `Task` body runs on a .NET thread-pool thread and nothing in C# stops it touching a Node — the main-thread rule belongs to Godot's scene tree
+- 将其标记为竞态条件风险：Godot 节点不是线程安全的，只能从主线程访问
+- 不批准也不实现多线程访问节点的模式
+- 提供正确模式：使用 `CallDeferred()`、`Callable.From().CallDeferred()`，或通过线程安全队列编组回主线程
+- 解释为何代码能编译却不安全：`Task` 主体运行在 .NET 线程池线程上，C# 中没有任何机制阻止它触碰 Node — 主线程规则属于 Godot 的场景树
 
-### Case 5: Context pass — Godot 4.7 API correctness
-**Input:** Engine version context: Godot 4.7. Request: "Connect a signal using the new typed signal delegate pattern."
+### Case 5: 上下文校验 — Godot 4.7 API 正确性
+**Input:** 引擎版本上下文：Godot 4.7。请求："使用新的类型化信号委托模式连接一个信号。"
 **Expected behavior:**
-- Produces C# signal connection using the typed delegate pattern introduced in Godot 4 C# (`+=` operator on typed signal)
-- Checks the 4.7 context to confirm no breaking changes to the signal delegate API in 4.4, 4.5, 4.6 or 4.7
-- Does NOT use the old string-based `Connect("signal_name", callable)` pattern (deprecated in Godot 4 C#)
-- Produces code compatible with the project's pinned 4.7 version as documented in VERSION.md
+- 使用 Godot 4 C# 引入的类型化委托模式生成 C# 信号连接（对类型化信号使用 `+=` 运算符）
+- 检查 4.7 上下文，确认信号委托 API 在 4.4、4.5、4.6 或 4.7 中无破坏性变更
+- 不使用旧的基于字符串的 `Connect("signal_name", callable)` 模式（在 Godot 4 C# 中已弃用）
+- 生成的代码与 VERSION.md 中记录的项目锁定版本 4.7 兼容
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Stays within declared domain (C# in Godot 4 — patterns, exports, signals, async)
-- [ ] Redirects GDScript requests to godot-gdscript-specialist
-- [ ] Redirects GDExtension requests to godot-gdextension-specialist
-- [ ] Returns C# code following Godot 4 conventions (not Unity MonoBehaviour patterns)
-- [ ] Flags multi-threaded Godot node access as unsafe and provides the correct pattern
-- [ ] Uses typed signal delegates — not deprecated string-based Connect() calls
-- [ ] Checks engine version reference for API changes before producing code
-- [ ] Asks "May I write this to [filepath]?" naming the file before writing
+- [ ] 保持在声明的领域内（Godot 4 中的 C# — 模式、导出、信号、async）
+- [ ] 将 GDScript 请求重定向到 godot-gdscript-specialist
+- [ ] 将 GDExtension 请求重定向到 godot-gdextension-specialist
+- [ ] 返回遵循 Godot 4 约定的 C# 代码（而非 Unity MonoBehaviour 模式）
+- [ ] 将多线程访问 Godot 节点标记为不安全，并提供正确模式
+- [ ] 使用类型化信号委托 — 而非已弃用的基于字符串的 Connect() 调用
+- [ ] 在生成代码前检查引擎版本参考资料中的 API 变更
+- [ ] 写入前询问 "May I write this to [filepath]?" 并指明文件名
 
 ---
 
 ## Coverage Notes
-- Export property with validation (Case 1) should have a unit test verifying the clamp behavior
-- Threading conflict (Case 4) is safety-critical: the agent must identify and fix this without prompting
-- Async signal (Case 3) verifies the agent applies .NET idioms correctly within Godot's single-thread constraint
+- 带校验的导出属性（Case 1）应有单元测试验证钳制行为
+- 线程冲突（Case 4）属于安全关键项：代理必须无需提示即可识别并修复
+- 异步信号（Case 3）验证代理在 Godot 单线程约束下正确应用 .NET 惯用法

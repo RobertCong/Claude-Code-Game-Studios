@@ -1,33 +1,33 @@
 # Platform Requirements
 
-One block per device the release checklist's platform argument names (`pc`,
-`console`, `mobile`; `all` is all three). Copy only the blocks named. They hold
-no certification or store-SDK rows: those are in the `certification-<tier>.md`
-templates, chosen by `platform.cert_tier`, not by the device.
+每个设备一个区块，区块名即发布检查清单的平台参数（`pc`、
+`console`、`mobile`；`all` 表示三者全部）。只复制被点名的区块。这些区块
+不含认证或商店 SDK 相关行：它们位于 `certification-<tier>.md`
+模板中，由 `platform.cert_tier` 选择，而非由设备决定。
 
 ### Platform Requirements: PC
-- [ ] Minimum and recommended specs verified and documented
-- [ ] Keyboard+mouse controls fully functional
-- [ ] Controller support tested (Xbox, PlayStation, generic)
-- [ ] Resolution scaling tested (1080p, 1440p, 4K, ultrawide)
-- [ ] Windowed, borderless, and fullscreen modes working
-- [ ] Graphics settings save and load correctly
+- [ ] 最低与推荐配置已验证并记录
+- [ ] 键盘+鼠标控制完全可用
+- [ ] 控制器支持已测试（Xbox、PlayStation、通用）
+- [ ] 分辨率缩放已测试（1080p、1440p、4K、超宽屏）
+- [ ] 窗口、无边框和全屏模式均正常
+- [ ] 图形设置可正确保存与加载
 
 ### Platform Requirements: Console
-- [ ] Platform-specific controller prompts display correctly
-- [ ] Suspend/resume works correctly
-- [ ] User switching handled properly
-- [ ] Network connectivity loss handled gracefully
-- [ ] Storage full scenario handled
+- [ ] 平台专属按键提示显示正确
+- [ ] 挂起/恢复工作正常
+- [ ] 用户切换处理正确
+- [ ] 网络连接中断得到妥善处理
+- [ ] 存储已满场景得到处理
 
 ### Platform Requirements: Mobile
-- [ ] App store guidelines compliance verified
-- [ ] All required device permissions justified and documented
-- [ ] Privacy policy linked and accurate
-- [ ] Data safety/nutrition labels completed
-- [ ] Touch controls tested on multiple screen sizes
-- [ ] Battery usage within acceptable range
-- [ ] Background behavior correct (pause, resume, terminate)
-- [ ] Push notification permissions handled correctly
-- [ ] In-app purchase flow tested (if applicable)
-- [ ] App size within store limits
+- [ ] 应用商店指南合规性已验证
+- [ ] 所有必需的设备权限均已说明理由并记录
+- [ ] 隐私政策已链接且内容准确
+- [ ] 数据安全/营养标签已填写
+- [ ] 触摸控制已在多种屏幕尺寸上测试
+- [ ] 电量消耗在可接受范围内
+- [ ] 后台行为正确（暂停、恢复、终止）
+- [ ] 推送通知权限处理正确
+- [ ] 应用内购买流程已测试（若适用）
+- [ ] 应用大小在商店限制内

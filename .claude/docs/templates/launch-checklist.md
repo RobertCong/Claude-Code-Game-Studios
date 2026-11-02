@@ -7,160 +7,160 @@ Generated: [Date]
 ## 1. Code Readiness
 
 ### Build Health
-- [ ] Clean build on all target platforms
-- [ ] Zero compiler warnings
-- [ ] All unit tests passing
-- [ ] All integration tests passing
-- [ ] Performance benchmarks within targets
-- [ ] No memory leaks (verified via extended soak test)
-- [ ] Build size within platform limits
-- [ ] Build version correctly set and tagged in source control
+- [ ] 在所有目标平台上干净构建
+- [ ] 零编译器警告
+- [ ] 所有单元测试通过
+- [ ] 所有集成测试通过
+- [ ] 性能基准处于目标范围内
+- [ ] 无内存泄漏（通过延长浸泡测试验证）
+- [ ] 构建体积处于平台限制内
+- [ ] 构建版本号已正确设置并在源代码管理中打上标签
 
 ### Code Quality
-- [ ] TODO count: [N] (zero required for launch, or documented exceptions)
-- [ ] FIXME count: [N] (zero required)
-- [ ] HACK count: [N] (each must have documented justification)
-- [ ] No debug output in production code
-- [ ] No hardcoded dev/test values
-- [ ] All feature flags set to production values
-- [ ] Error handling covers all critical paths
-- [ ] Crash reporting integrated and verified
+- [ ] TODO 数量：[N]（上线要求为零，或有记录的例外）
+- [ ] FIXME 数量：[N]（要求为零）
+- [ ] HACK 数量：[N]（每一项都必须有记录在案的理由）
+- [ ] 生产代码中无调试输出
+- [ ] 无硬编码的开发/测试数值
+- [ ] 所有功能开关都设置为生产值
+- [ ] 错误处理覆盖所有关键路径
+- [ ] 崩溃报告已集成并验证
 
 ### Security
-- [ ] No exposed API keys or credentials in source
-- [ ] Save data encrypted
-- [ ] Network communication secured (TLS/DTLS)
-- [ ] Anti-cheat measures active (if multiplayer)
-- [ ] Input validation on all server endpoints (if multiplayer)
-- [ ] Privacy policy compliance verified
+- [ ] 源代码中无暴露的 API 密钥或凭据
+- [ ] 存档数据已加密
+- [ ] 网络通信已加固（TLS/DTLS）
+- [ ] 反作弊措施已启用（如为多人游戏）
+- [ ] 所有服务端端点都有输入校验（如为多人游戏）
+- [ ] 隐私政策合规性已验证
 
 ---
 
 ## 2. Content Readiness
 
 ### Assets
-- [ ] All placeholder art replaced with final assets
-- [ ] All placeholder audio replaced with final audio
-- [ ] Audio mix finalized and approved by audio director
-- [ ] All VFX polished and performance-verified
-- [ ] No missing or broken asset references
-- [ ] Asset naming conventions enforced
+- [ ] 所有占位美术已替换为最终资源
+- [ ] 所有占位音频已替换为最终音频
+- [ ] 音频混音已定稿并经音频总监批准
+- [ ] 所有视觉特效已打磨并验证性能
+- [ ] 无缺失或损坏的资源引用
+- [ ] 已强制遵循资源命名规范
 
 ### Text and Localization
-- [ ] All player-facing text proofread
-- [ ] No hardcoded strings (all externalized for localization)
-- [ ] All supported languages translated and verified
-- [ ] Text fits UI in all languages (text fitting pass complete)
-- [ ] Font coverage verified for all supported languages
-- [ ] Credits complete, accurate, and up to date
+- [ ] 所有面向玩家的文本已校对
+- [ ] 无硬编码字符串（已全部外置以便本地化）
+- [ ] 所有支持语言均已翻译并验证
+- [ ] 文本在所有语言下都能适配用户界面（文本适配检查已完成）
+- [ ] 已验证所有支持语言的字体覆盖
+- [ ] 制作人员名单完整、准确且为最新
 
 ### Game Content
-- [ ] All levels/maps playable from start to finish
-- [ ] Tutorial flow complete and tested with new players
-- [ ] All achievements/trophies implemented and tested
-- [ ] Save/load works correctly for all game states
-- [ ] Difficulty settings balanced and tested
-- [ ] End-game/credits sequence complete
+- [ ] 所有关卡/地图均可从头到尾游玩
+- [ ] 教程流程完整，并已用新玩家测试
+- [ ] 所有成就/奖杯已实现并测试
+- [ ] 存档/读档在所有游戏状态下均正常工作
+- [ ] 难度设置已平衡并测试
+- [ ] 终局/制作人员名单序列已完成
 
 ---
 
 ## 3. Quality Assurance
 
 ### Testing
-- [ ] Full regression test suite passed
-- [ ] Zero S1 (Critical) bugs open
-- [ ] Zero S2 (High) bugs open (or documented exceptions) — at `workflow: full` instead: zero S2 (High) and S3 (Medium) bugs open, no exceptions
-- [ ] Soak test passed (the longest soak `/soak-test` runs, or longer by hand if a play session lasts longer)
-- [ ] Multiplayer stress test passed (if applicable)
-- [ ] All critical user paths tested on every platform
-- [ ] Edge cases tested (full storage, no network, suspend/resume)
+- [ ] 完整回归测试套件通过
+- [ ] 零个 S1（Critical）缺陷未关闭
+- [ ] 零个 S2（High）缺陷未关闭（或有记录的例外）——在 `workflow: full` 下改为：零个 S2（High）与 S3（Medium）缺陷未关闭，无例外
+- [ ] 浸泡测试通过（运行 `/soak-test` 能执行的最长浸泡，或若单次游玩时长更长，则手工运行更久）
+- [ ] 多人压力测试通过（如适用）
+- [ ] 所有关键用户路径在每个平台上均已测试
+- [ ] 边缘情况已测试（存储已满、无网络、挂起/恢复）
 
-[Certification: the one block for this project's `platform.cert_tier`, copied from `certification-none.md`, `certification-itch.md`, `certification-steam.md` or `certification-console.md`; `certification-unknown.md` when the tier cannot be determined]
+[Certification: 本项目 `platform.cert_tier` 对应的唯一条目块，从 `certification-none.md`、`certification-itch.md`、`certification-steam.md` 或 `certification-console.md` 复制；无法确定层级时使用 `certification-unknown.md`]
 
-**Every tier**, because these are not certification-gated:
-- [ ] Accessibility: minimum standards met (remapping, text scaling, colorblind)
+**所有层级**，因为这些不受认证闸门约束：
+- [ ] 无障碍：满足最低标准（按键重映射、文本缩放、色盲支持）
 
 ### Performance
-- [ ] Target FPS met on minimum spec hardware
-- [ ] Load times within budget on all platforms
-- [ ] Memory usage within budget on all platforms
-- [ ] Network bandwidth within targets (if multiplayer)
-- [ ] No frame hitches in critical gameplay moments
+- [ ] 在最低配置硬件上达到目标帧率
+- [ ] 所有平台的加载时间处于预算内
+- [ ] 所有平台的内存占用处于预算内
+- [ ] 网络带宽处于目标范围内（如为多人游戏）
+- [ ] 关键玩法时刻无帧卡顿
 
 ---
 
 ## 4. Store and Distribution
 
 ### Store Pages
-- [ ] Store page copy finalized and proofread
-- [ ] Screenshots current and per-platform resolution
-- [ ] Trailers current and approved
-- [ ] Key art and capsule images finalized
-- [ ] System requirements accurate (PC)
-- [ ] Pricing configured for all regions
-- [ ] Pre-purchase/wishlist campaigns active (if applicable)
+- [ ] 商店页面文案已定稿并校对
+- [ ] 截图是最新的且符合各平台分辨率
+- [ ] 预告片是最新的且已获批准
+- [ ] 主视觉和胶囊图已定稿
+- [ ] 系统需求准确（PC）
+- [ ] 已为所有区域配置定价
+- [ ] 预购/愿望单活动已上线（如适用）
 
 ### Legal
-- [ ] EULA finalized and approved by legal
-- [ ] Privacy policy published and linked
-- [ ] Third-party license attributions complete
-- [ ] Music/audio licensing verified
-- [ ] Trademark/IP clearance confirmed
-- [ ] GDPR/CCPA compliance verified (data collection, consent, deletion)
+- [ ] 最终用户许可协议（EULA）已定稿并经法务批准
+- [ ] 隐私政策已发布并已链接
+- [ ] 第三方许可署名完整
+- [ ] 音乐/音频授权已验证
+- [ ] 商标/知识产权清查已确认
+- [ ] GDPR/CCPA 合规性已验证（数据收集、同意、删除）
 
 ---
 
 ## 5. Infrastructure
 
 ### Servers (if multiplayer/online)
-- [ ] Production servers provisioned and load-tested
-- [ ] Auto-scaling configured and tested
-- [ ] Database backups configured
-- [ ] CDN configured for content delivery
-- [ ] DDoS protection active
-- [ ] Monitoring and alerting configured
+- [ ] 生产服务器已配置并完成负载测试
+- [ ] 自动扩缩容已配置并测试
+- [ ] 数据库备份已配置
+- [ ] 已配置用于内容分发的 CDN
+- [ ] DDoS 防护已启用
+- [ ] 监控与告警已配置
 
 ### Analytics and Monitoring
-- [ ] Analytics pipeline verified and receiving data
-- [ ] Crash reporting active and dashboard accessible
-- [ ] Server monitoring dashboards live
-- [ ] Key metrics tracked: DAU, session length, retention, crashes
-- [ ] Alerts configured for critical thresholds
+- [ ] 分析流水线已验证并能接收数据
+- [ ] 崩溃报告已启用且仪表盘可访问
+- [ ] 服务器监控仪表盘已上线
+- [ ] 已跟踪关键指标：DAU、会话时长、留存、崩溃
+- [ ] 已为关键阈值配置告警
 
 ---
 
 ## 6. Community and Marketing
 
 ### Community Readiness
-- [ ] Community guidelines published
-- [ ] Moderation team briefed and tools ready
-- [ ] Discord/forum/social channels set up
-- [ ] FAQ and known issues page prepared
-- [ ] Support email/ticketing system active
+- [ ] 社区准则已发布
+- [ ] 审核团队已通报情况且工具就绪
+- [ ] Discord/论坛/社交媒体渠道已建立
+- [ ] FAQ 和已知问题页面已准备
+- [ ] 支持邮箱/工单系统已启用
 
 ### Marketing
-- [ ] Launch trailer published
-- [ ] Press/influencer review keys distributed
-- [ ] Social media launch posts scheduled
-- [ ] Launch day blog post/dev update drafted
-- [ ] Patch notes for launch version published
+- [ ] 上线预告片已发布
+- [ ] 媒体/意见领袖评测密钥已分发
+- [ ] 社交媒体上线帖已排期
+- [ ] 上线日博客文章/开发更新已起草
+- [ ] 上线版本的补丁说明已发布
 
 ---
 
 ## 7. Operations
 
 ### Team Readiness
-- [ ] On-call schedule set for first 72 hours post-launch
-- [ ] Incident response playbook reviewed by team
-- [ ] Rollback plan documented and tested
-- [ ] Hotfix pipeline tested (can ship emergency fix within 4 hours)
-- [ ] Communication plan for launch issues (who posts, where, how fast)
+- [ ] 已排定上线后前 72 小时的值班表
+- [ ] 团队已审阅事件响应手册
+- [ ] 回滚方案已记录并测试
+- [ ] 热修复流水线已测试（可在 4 小时内发布紧急修复）
+- [ ] 上线问题的沟通方案（谁发布、在哪发布、多快发布）
 
 ### Day-One Plan
-- [ ] Day-one patch prepared (if needed)
-- [ ] Server unlock/go-live procedure documented
-- [ ] Launch monitoring dashboard bookmarked by all leads
-- [ ] War room/channel established for launch day
+- [ ] 首日补丁已准备（如需要）
+- [ ] 服务器解锁/上线程序已记录
+- [ ] 所有主管都已收藏上线监控仪表盘
+- [ ] 已为上线日设立作战室/频道
 
 ---
 
@@ -168,29 +168,27 @@ Generated: [Date]
 
 **Overall Status**: [READY / CONDITIONAL / NOT ASSESSED / NOT READY]
 
-First match wins: **NOT READY** if Blocking Items is not empty; else **NOT
-ASSESSED** if any item is `- [?]`, any section came out `NOT ASSESSED`, or any
-item is still unconfirmed — neither ticked on evidence or on a Phase 4b answer,
-nor marked N/A, nor listed below (name each; group by section when there are
-many); else **CONDITIONAL** if Conditional
-Items is not empty; else **READY**. NOT ASSESSED outranks CONDITIONAL and READY —
-an item nobody could check is not a passed one — and ranks below NOT READY, so a
-known blocker is never buried behind it.
+首个匹配项生效：若 Blocking Items 非空则为 **NOT READY**；否则若任何条目为
+`- [?]`、任何章节结果为 `NOT ASSESSED`，或任何条目仍未确认——既未依据证据、
+也未依据 Phase 4b 的回答打勾，也未标记为 N/A，也未列在下方（逐一列出；条目
+多时按章节分组）——则为 **NOT ASSESSED**；否则若 Conditional Items 非空则为
+**CONDITIONAL**；否则为 **READY**。NOT ASSESSED 的优先级高于 CONDITIONAL 和
+READY——没人能检查的条目不算通过的条目——且低于 NOT READY，因此已知的阻塞项
+绝不会被它掩盖。
 
 ### Blocking Items
-[Every FAIL or unresolved finding: a check that found a problem — FIXMEs, debug
-output, placeholder assets, hardcoded dev values, an open S1 bug, a failing
-build or test — with no documented workaround and no explicitly accepted risk]
+[每一项 FAIL 或未解决的发现：任何发现问题的检查——FIXME、调试输出、占位资源、
+硬编码的开发数值、未关闭的 S1 缺陷、失败的构建或测试——且没有记录的变通方案，
+也没有明确接受的风险]
 
 ### Conditional Items
-[Every shortfall with a documented workaround or an explicitly accepted risk —
-e.g. a HACK with its documented justification, an S2 with a documented
-exception (below `workflow: full`, which allows none). Name the workaround, or
-who accepted the risk]
+[每一项带有已记录变通方案或明确接受风险的不足——例如带有记录理由的 HACK、
+带有记录例外的 S2（在 `workflow: full` 以下不允许任何例外）。注明变通方案，
+或由谁接受了该风险]
 
 ### Sign-Offs Required
-- [ ] Creative Director — Content and experience quality
-- [ ] Technical Director — Technical health and stability
-- [ ] QA Lead — Quality and test coverage
-- [ ] Producer — Schedule and overall readiness
-- [ ] Release Manager — Build and deployment readiness
+- [ ] Creative Director — 内容与体验质量
+- [ ] Technical Director — 技术健康度与稳定性
+- [ ] QA Lead — 质量与测试覆盖率
+- [ ] Producer — 进度与整体就绪度
+- [ ] Release Manager — 构建与部署就绪度

@@ -1,31 +1,31 @@
-# Godot Physics — Quick Reference
+# Godot 物理 — 快速参考
 
-Last verified: 2026-10-17 (4.7 changes); 2026-02-12 (rest) | Engine: Godot 4.7
+最后核对：2026-10-17（4.7 变更）；2026-02-12（其余部分） | Engine: Godot 4.7
 
-## What Changed Since ~4.3 (LLM Cutoff)
+## 自 ~4.3（LLM 知识截止）以来的变更
 
-### 4.7 Changes
-- **Jolt `WorldBoundaryShape3D`**: `plane.d` sign now matches Godot Physics,
-  flipped from 4.6; negate it to keep 4.6 behavior
-- **Jolt `SoftBody3D`**: mass defaults to 1 kg for the whole body (was 1 kg per
-  point) and `linear_stiffness` is applied differently; re-tune
-  `linear_stiffness` and `damping_coefficient`
-- **Jolt `Area3D`** reports overlaps with `SoftBody3D`; filter with layers/masks
-- **`PhysicsServer2D.body_set_shape_as_one_way_collision()`**: optional
-  `direction` parameter (required in `PhysicsServer2DExtension`) (4.7 migration guide: https://docs.godotengine.org/en/stable/tutorials/migrating/upgrading_to_godot_4.7.html)
+### 4.7 变更
+- **Jolt `WorldBoundaryShape3D`**：`plane.d` 的符号现在与 Godot Physics 一致，
+  与 4.6 相比是翻转的；将其取负以保持 4.6 行为
+- **Jolt `SoftBody3D`**：整个软体的质量默认 1 kg（原为每个点 1 kg），且
+  `linear_stiffness` 的应用方式不同；请重新调整
+  `linear_stiffness` 和 `damping_coefficient`
+- **Jolt `Area3D`** 会报告与 `SoftBody3D` 的重叠；使用层/掩码进行过滤
+- **`PhysicsServer2D.body_set_shape_as_one_way_collision()`**：可选
+  `direction` 参数（在 `PhysicsServer2DExtension` 中为必需）（4.7 迁移指南：https://docs.godotengine.org/en/stable/tutorials/migrating/upgrading_to_godot_4.7.html）
 
-### 4.6 Changes
-- **Jolt Physics is the DEFAULT 3D engine** for new projects
-  - Existing projects keep their current physics engine setting
-  - Better determinism, stability, and performance than GodotPhysics3D
-  - Some HingeJoint3D properties (`damp`) only work with GodotPhysics3D
-  - 2D physics UNCHANGED (still Godot Physics 2D)
+### 4.6 变更
+- **Jolt Physics 是新项目的默认 3D 引擎**
+  - 现有项目保留其当前物理引擎设置
+  - 相比 GodotPhysics3D 具有更好的确定性、稳定性和性能
+  - 部分 HingeJoint3D 属性（`damp`）只在 GodotPhysics3D 下有效
+  - 2D 物理不变（仍为 Godot Physics 2D）
 
-### 4.5 Changes
-- **3D physics interpolation rearchitected**: Moved from RenderingServer to SceneTree
-  - User-facing API unchanged, but internal behavior may differ in edge cases
+### 4.5 变更
+- **3D 物理插值重新架构**：从 RenderingServer 移至 SceneTree
+  - 面向用户的 API 未变，但在边缘情况下内部行为可能不同
 
-## Physics Engine Selection (4.6)
+## 物理引擎选择（4.6）
 
 ```
 Project Settings → Physics → 3D → Physics Engine:
@@ -33,20 +33,20 @@ Project Settings → Physics → 3D → Physics Engine:
 - GodotPhysics3D (legacy, still available)
 ```
 
-### Jolt vs GodotPhysics3D
+### Jolt 与 GodotPhysics3D
 
-| Feature | Jolt (default) | GodotPhysics3D |
+| 特性 | Jolt（默认） | GodotPhysics3D |
 |---------|---------------|----------------|
-| Determinism | Better | Inconsistent |
-| Stability | Better | Adequate |
-| Performance | Better for complex scenes | Adequate |
-| HingeJoint3D `damp` | NOT supported | Supported |
-| Runtime warnings | Yes, for unsupported properties | No |
-| Collision margins | May behave differently | Original behavior |
+| 确定性 | 更好 | 不一致 |
+| 稳定性 | 更好 | 足够 |
+| 性能 | 复杂场景下更好 | 足够 |
+| HingeJoint3D `damp` | 不支持 | 支持 |
+| 运行时警告 | 有，针对不支持的属性 | 无 |
+| 碰撞边距 | 行为可能不同 | 原始行为 |
 
-## Current API Patterns
+## 当前 API 模式
 
-### Basic Physics Setup (unchanged)
+### 基础物理设置（未变）
 ```gdscript
 # CharacterBody3D movement — API unchanged across engines
 extends CharacterBody3D
@@ -69,7 +69,7 @@ func _physics_process(delta: float) -> void:
     move_and_slide()
 ```
 
-### Raycasting (unchanged)
+### 射线检测（未变）
 ```gdscript
 var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
 var query := PhysicsRayQueryParameters3D.create(from, to)
@@ -80,7 +80,7 @@ if result:
     var hit_normal: Vector3 = result.normal
 ```
 
-## Common Mistakes
-- Assuming GodotPhysics3D is the default (Jolt since 4.6)
-- Using HingeJoint3D `damp` property without checking physics engine (Jolt ignores it)
-- Not testing collision edge cases when switching between physics engines
+## 常见错误
+- 假设 GodotPhysics3D 是默认引擎（自 4.6 起为 Jolt）
+- 不检查物理引擎就使用 HingeJoint3D 的 `damp` 属性（Jolt 会忽略它）
+- 在物理引擎之间切换时不测试碰撞边缘情况

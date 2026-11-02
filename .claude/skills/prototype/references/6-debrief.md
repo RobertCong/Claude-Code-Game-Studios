@@ -1,59 +1,54 @@
-# /prototype — Phase 6: Playtest Debrief
+# /prototype — Phase 6: 试玩测试复盘
 
-> Part of `/prototype`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> `/prototype` 的一部分。`SKILL.md` 规定了何时阅读本文件；它已解析的设置以及
+> 其后续标题下的规则在这里同样适用。
 
-## Phase 6: Playtest Debrief
+## Phase 6: 试玩测试复盘
 
-The prototype is built. Now hand it to the user and capture what they actually
-experienced. Do NOT skip to report generation — the report is only as good as the
-observations you collect here.
+原型已构建完成。现在把它交给用户，并记录他们实际体验到的内容。不要
+直接跳到报告生成——报告的好坏完全取决于你在这里收集的观察。
 
-**For HTML path:** Say exactly this:
-> "The prototype is ready. Open `prototypes/[name]-concept/prototype.html` in your
-> browser and play it. Take as long as you need. Don't rush through it — try to
-> approach it the way a new player would. Come back here when you're done."
+**HTML 路径：** 原样说出：
+> “原型已就绪。在你的浏览器中打开 `prototypes/[name]-concept/prototype.html`
+> 并游玩。需要多久都可以。不要匆忙带过——试着像新玩家一样去接触它。
+> 完成后回到这里。”
 
-**For Engine path:** The multi-turn iteration loop already captured errors and
-behavior. Now ask for the overall assessment:
-> "Now that it's running — play through it a few times as if you're the player,
-> not the developer. Come back when you have a feel for it."
+**引擎路径：** 多轮迭代循环已经记录了错误和行为。现在询问整体评估：
+> “现在它能运行了——像玩家而不是开发者那样，多玩几遍。
+> 当你对它有了感觉后回来。”
 
-**For Paper path:** Say exactly this:
-> "Read through `prototypes/[name]-concept/rules.md` and walk through the
-> `play-log.md` as if you're playing it for the first time. If you have someone
-> nearby, try running the rules with them. Come back when you've seen at least one
-> full play cycle."
+**纸面路径：** 原样说出：
+> “阅读 `prototypes/[name]-concept/rules.md`，并像第一次玩那样走一遍
+> `play-log.md`。如果身边有人，试着和他们一起跑一遍规则。当你至少看过一个
+> 完整游玩循环后回来。”
 
-**If nobody can play it this session**, do not ask for a verdict and do not infer
-one from how the build looks: the recommendation is **NOT ASSESSED — built, not
-played**. Write the report with that verdict (Phase 7, asking first) and name the
-next step — play it, then re-run this debrief.
+**如果本次会话中没人能游玩它**，不要询问结论，也不要根据构建看起来如何来推断
+结论：结论是 **NOT ASSESSED——已构建，未游玩**。用该结论撰写报告（Phase 7，先询问），
+并指出下一步——去玩它，然后重新运行本次复盘。
 
-Once the user returns, ask these questions **one at a time** — wait for each answer
-before asking the next:
+用户回来后，**一次一个**地询问以下问题——每个答案都等到回答后再问下一个：
 
-1. **Hypothesis check:**
-   > "The hypothesis was: [restate the hypothesis from Phase 1]. Did it hold up —
-   > CONFIRMED, PARTIALLY CONFIRMED, or REFUTED? Tell me what you saw."
+1. **假设校验：**
+   > “假设是：[重述 Phase 1 中的假设]。它成立了吗——
+   > CONFIRMED、PARTIALLY CONFIRMED，还是 REFUTED？告诉我你看到了什么。”
 
-2. **Best moment:**
-   > "What was the moment — if any — where it felt like it was working? Be specific."
+2. **最佳时刻：**
+   > “如果有的话，哪个时刻让你觉得它起作用了？请具体。”
 
-3. **Worst moment:**
-   > "What was the most frustrating, confusing, or broken moment? Be specific —
-   > not 'it felt slow' but 'the jump took about half a second to respond and it
-   > felt like I was fighting the controls'."
+3. **最差时刻：**
+   > “最令人沮丧、困惑或故障的时刻是什么？请具体——
+   > 不是‘感觉慢’，而是‘跳跃大约半秒才有响应，
+   > 感觉像在跟操作较劲’。”
 
-4. **Surprise:**
-   > "Did anything happen that you didn't expect — good or bad?"
+4. **意外：**
+   > “有没有发生任何你没预料到的事——好的或坏的？”
 
-5. **Verdict:**
-   > "PROCEED, PIVOT, or KILL — and one sentence why."
+5. **结论：**
+   > “PROCEED、PIVOT 还是 KILL——并用一句话说明原因。”
 
-Collect all answers before moving to report generation. If any answer is vague
-("it felt fine", "pretty good"), ask a follow-up: "Can you be more specific?
-What exactly felt fine about it?" Precise observations make the report useful.
-Vague ones make it useless.
+在进入报告生成之前收集所有答案。如果任何答案含糊
+（“感觉还行”、“挺不错的”），追问：“能更具体吗？
+到底是什么让你觉得还行？” 精确的观察让报告有用。
+含糊的观察让它毫无价值。
 
 ---

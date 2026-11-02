@@ -1,3 +1,3 @@
 ### Certification: NOT ASSESSED — cert tier unknown
 
-[Why the tier could not be determined — `platform.cert_tier` is unset and the platforms in scope are not known — and what would settle it.]
+[为何无法确定该等级——`platform.cert_tier` 未设置且范围内的平台未知——以及什么能确定它。]

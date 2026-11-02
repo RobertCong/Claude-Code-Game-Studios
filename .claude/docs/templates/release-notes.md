@@ -2,36 +2,36 @@
 *[Date]*
 
 ## Highlights
-[1-2 sentence summary of the most exciting changes]
+[用 1-2 句话概括最令人兴奋的改动]
 
 ## New Content
 ### [Feature Name]
-[2-3 sentences describing the feature and why players should be excited]
+[用 2-3 句话描述该功能以及为何玩家应感到兴奋]
 
 ## Gameplay Changes
 ### Balance
 | Change | Before | After | Reason |
 | ---- | ---- | ---- | ---- |
-| [Item/ability] | [old value] | [new value] | [brief rationale] |
+| [Item/ability] | [old value] | [new value] | [简要理由] |
 
 ### Mechanics
-- **[Change]**: [explanation of what changed and why]
+- **[Change]**: [说明改了什么以及为什么]
 
 ## Quality of Life
-- [Improvement with context]
+- [带背景说明的改进]
 
 ## Bug Fixes
 ### Combat
-- Fixed [description of what players experienced]
+- 修复了 [玩家所经历问题的描述]
 
 ### UI
-- Fixed [description]
+- 修复了 [描述]
 
 ### Networking
-- Fixed [description]
+- 修复了 [描述]
 
 ## Performance
-- [Improvement players will notice]
+- [玩家会注意到的改进]
 
 ## Known Issues
-- [Issue and workaround if available]
+- [问题及可用的规避方法]

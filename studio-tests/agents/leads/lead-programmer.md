@@ -1,93 +1,93 @@
 # Agent Test Spec: lead-programmer
 
 ## Agent Summary
-**Domain owned:** Code architecture decisions, LP-FEASIBILITY gate, LP-CODE-REVIEW gate, coding standards enforcement, tech stack decisions within the approved engine.
-**Does NOT own:** Game design decisions (game-designer), creative direction (creative-director), production scheduling (producer), visual art direction (art-director).
+**Domain owned:** 代码架构决策、LP-FEASIBILITY 闸门、LP-CODE-REVIEW 闸门、编码标准执行、已批准引擎内的技术栈决策。
+**Does NOT own:** 游戏设计决策（game-designer）、创意方向（creative-director）、制作排期（producer）、视觉美术方向（art-director）。
 **Gate IDs handled:** LP-FEASIBILITY, LP-CODE-REVIEW.
 
 ---
 
 ## Static Assertions (Structural)
 
-Verified by reading the agent's `.claude/agents/lead-programmer.md` frontmatter:
+通过读取该代理的 `.claude/agents/lead-programmer.md` frontmatter 进行验证：
 
-- [ ] `description:` field is present and domain-specific (references code architecture, feasibility, code review, coding standards — not generic)
-- [ ] `tools:` includes Read for source files and Bash for static analysis or test runs; Write/Edit are gated in the body — every write waits for the user's "yes", and the orchestrated-run exception covers only new artifacts under `production/`, `docs/` or `tests/`
-- [ ] Model tier is `sonnet` — frontmatter `model:` reads exactly `sonnet` (tiers: `.claude/docs/model-tiers.md`)
-- [ ] Agent definition does not claim authority over game design, creative direction, or production scheduling
+- [ ] `description:` 字段存在且针对具体领域（提及代码架构、可行性、代码评审、编码标准——而非泛泛而谈）
+- [ ] `tools:` 包含用于源文件的 Read 以及用于静态分析或测试运行的 Bash；Write/Edit 在正文中受限——每次写入都等待用户的「yes」，编排运行的例外仅涵盖 `production/`、`docs/` 或 `tests/` 下的新产出物
+- [ ] 模型档位为 `sonnet`——frontmatter `model:` 恰为 `sonnet`（档位：`.claude/docs/model-tiers.md`）
+- [ ] 代理定义未声称对游戏设计、创意方向或制作排期拥有决定权
 
 ---
 
 ## Test Cases
 
-### Case 1: In-domain request — appropriate output format
-**Scenario:** A new `CombatSystem` implementation is submitted for code review with every input LP-CODE-REVIEW names: its implementation files, its story's acceptance criteria, the relevant GDD section (the combat rules) and its governing ADR. The system stays inside the ADR's boundary, implements the GDD's combat rules as written, uses dependency injection for all external references, has doc comments on all public APIs, loads its tuning values from data files, and includes unit tests for all public methods. Request is tagged LP-CODE-REVIEW.
-**Expected:** Returns the verdict APPROVE with rationale confirming the ADR boundary match, correctness against the GDD rules, dependency injection usage, doc comment coverage, data-driven configuration, and a testable public API.
+### Case 1: 领域内请求——适当的输出格式
+**Scenario:** 一个新的 `CombatSystem` 实现被提交代码评审，并附有 LP-CODE-REVIEW 指定的每一项输入：其实现文件、其故事的验收标准、相关 GDD 章节（战斗规则）及其治理 ADR。该系统处于 ADR 边界之内，按原文实现 GDD 的战斗规则，对所有外部引用使用依赖注入，所有公共 API 都有文档注释，从数据文件加载其调参数值，并为所有公共方法包含单元测试。请求标记为 LP-CODE-REVIEW。
+**Expected:** 返回结论 APPROVE，理由确认符合 ADR 边界、相对 GDD 规则的正确性、依赖注入的使用、文档注释覆盖、数据驱动配置以及可测试的公共 API。
 **Assertions:**
-- [ ] Verdict is exactly one of APPROVE / CONCERNS / REJECT (the LP-CODE-REVIEW verdicts)
-- [ ] States the verdict word `APPROVE` explicitly — `/story-done` branches on the gate's verdict words, so a verdict left implicit in prose cannot be acted on
-- [ ] Rationale references specific criteria from its Coding Standards Enforcement list and the gate prompt (ADR boundary, GDD rules, DI, doc comments, data-driven values, testable API)
-- [ ] Output stays within code quality scope — does not comment on whether the mechanic is fun or fits creative vision
+- [ ] 结论恰为 APPROVE / CONCERNS / REJECT 之一（LP-CODE-REVIEW 的结论词汇）
+- [ ] 明确陈述结论词 `APPROVE`——`/story-done` 依据闸门的结论词分支，因此仅隐含在行文中的结论无法被采用
+- [ ] 理由引用其 Coding Standards Enforcement 列表和闸门提示中的具体标准（ADR 边界、GDD 规则、DI、文档注释、数据驱动数值、可测试 API）
+- [ ] 输出保持在代码质量范围内——不对该机制是否有趣或是否符合创意愿景发表评论
 
-### Case 2: Out-of-domain request — redirects or escalates
-**Scenario:** Team member asks lead-programmer to review and approve the balance formula for player damage scaling across levels, checking whether the numbers "feel right."
-**Expected:** Agent declines to evaluate design balance and redirects to game-designer, its stated contact for design concerns.
+### Case 2: 领域外请求——转交或上报
+**Scenario:** 团队成员请 lead-programmer 评审并批准玩家跨关卡伤害缩放的平衡公式，检查这些数字是否「感觉对」。
+**Expected:** 代理拒绝评估设计平衡，并转交给 game-designer——其声明的设计事务联系人。
 **Assertions:**
-- [ ] Does not make any binding assessment of formula balance or game feel
-- [ ] Explicitly names `game-designer` as the correct handler (its "What This Agent Must NOT Do" target for design concerns); naming `systems-designer` as the formula owner as well is fine
-- [ ] Any comment it makes on the formula is about implementation (e.g., integer overflow risk at max level); all balance evaluation is deferred to the design team
+- [ ] 不对公式平衡或游戏手感做出任何有约束力的评估
+- [ ] 明确指出 `game-designer` 是正确处理者（其「What This Agent Must NOT Do」中设计事务的目标）；同时将 `systems-designer` 列为公式所有者也是可以的
+- [ ] 它对公式的任何评论都关于实现（例如满级时的整数溢出风险）；所有平衡评估都交给设计团队
 
-### Case 3: Gate verdict — correct vocabulary
-**Scenario:** The architecture document under review (passed with its technical requirements baseline and ADR list) specifies enemy AI that runs a brute-force nearest-neighbor search against all other entities every frame. With expected enemy counts of 2,000+, this is O(n²) — about 4 million distance checks per frame — against the document's 2 ms AI budget at 60fps. Request is tagged LP-FEASIBILITY.
-**Expected:** Returns the verdict INFEASIBLE with specific citation of the O(n²) complexity, the entity count threshold, and the resulting per-frame cost against the 2 ms AI budget.
+### Case 3: 闸门结论——正确的词汇
+**Scenario:** 被评审的架构文档（随其技术需求基线和 ADR 列表传入）规定敌人 AI 每帧对所有其他实体执行暴力最近邻搜索。在预期敌人数量 2,000+ 时，这是 O(n²)——每帧约 400 万次距离检查——相对该文档在 60fps 下 2 ms 的 AI 预算。请求标记为 LP-FEASIBILITY。
+**Expected:** 返回结论 INFEASIBLE，具体引用 O(n²) 复杂度、实体数量阈值，以及由此产生的每帧开销相对于 2 ms AI 预算的情况。
 **Assertions:**
-- [ ] Verdict is exactly one of FEASIBLE / CONCERNS / INFEASIBLE — not freeform text
-- [ ] States the verdict word `INFEASIBLE` explicitly, not a verdict implied by prose
-- [ ] Rationale includes the specific algorithmic complexity and entity count numbers
-- [ ] Suggests at least one alternative approach (e.g., spatial hashing, KD-tree) without mandating a choice
+- [ ] 结论恰为 FEASIBLE / CONCERNS / INFEASIBLE 之一——不是自由文本
+- [ ] 明确陈述结论词 `INFEASIBLE`，而非由行文暗示的结论
+- [ ] 理由包含具体的算法复杂度和实体数量数字
+- [ ] 至少提出一种替代方案（例如空间哈希、KD-tree），但不强制选择
 
-### Case 4: Conflict escalation — correct parent
-**Scenario:** game-designer wants a mechanic where every NPC maintains a full simulation of needs, schedule, and memory (similar to a full life-sim AI). lead-programmer calculates this will exceed the frame budget by 3x at target NPC counts. game-designer insists the mechanic is core to the game vision.
-**Expected:** lead-programmer states the specific frame budget violation with numbers, proposes alternative approaches (e.g., LOD-based simulation, simplified need model), but explicitly defers the "is this worth the cost or should the design change" decision to creative-director as the creative arbiter.
+### Case 4: 冲突上报——正确的上级
+**Scenario:** game-designer 想要一个机制，其中每个 NPC 都维护需求、日程和记忆的完整模拟（类似完整的人生模拟 AI）。lead-programmer 计算出在目标 NPC 数量下这将超出帧预算 3 倍。game-designer 坚称该机制是游戏愿景的核心。
+**Expected:** lead-programmer 用数字陈述具体的帧预算超支，提出替代方案（例如基于 LOD 的模拟、简化的需求模型），但明确将「这值得付出成本吗，还是设计应更改」的决策交给 creative-director 作为创意裁决者。
 **Assertions:**
-- [ ] States the specific frame budget violation (e.g., 3x over budget at N entities)
-- [ ] Proposes at least one technically viable alternative
-- [ ] Explicitly defers the design priority decision to `creative-director`
-- [ ] Does not unilaterally cut or modify the mechanic design
+- [ ] 陈述具体的帧预算超支（例如在 N 个实体时超出预算 3 倍）
+- [ ] 至少提出一种技术上可行的替代方案
+- [ ] 明确将设计优先级决策交给 `creative-director`
+- [ ] 不单方面砍掉或修改该机制设计
 
-### Case 5: Context pass — uses provided context
-**Scenario:** Agent receives a gate context block for an architecture document (with its technical requirements baseline and ADR list) that includes the project's frame budget: 16.67ms total per frame, with 4ms allocated to AI systems. The document adopts a new AI behavior system that prototype profiling estimates will consume 7ms per frame under normal conditions. Request is tagged LP-FEASIBILITY.
-**Expected:** Assessment references the specific frame budget allocation from context (4ms AI budget), identifies the 7ms estimate as exceeding the allocation by 3ms, and returns CONCERNS or INFEASIBLE with those specific numbers cited.
+### Case 5: 上下文传递——使用提供的上下文
+**Scenario:** 代理收到一份架构文档（随其技术需求基线和 ADR 列表）的闸门上下文块，其中包含项目的帧预算：每帧总共 16.67ms，其中 4ms 分配给 AI 系统。该文档采用一套新的 AI 行为系统，原型性能分析估计它正常条件下每帧将消耗 7ms。请求标记为 LP-FEASIBILITY。
+**Expected:** 评估引用上下文中的具体帧预算分配（4ms AI 预算），指出 7ms 的估算超出分配 3ms，并引用这些具体数字返回 CONCERNS 或 INFEASIBLE。
 **Assertions:**
-- [ ] References the specific frame budget figures from the provided context (16.67ms total, 4ms AI allocation)
-- [ ] Uses the specific 7ms estimate from the submission in the comparison
-- [ ] Does not give generic "this might be slow" advice — cites concrete numbers
-- [ ] Verdict rationale is traceable to the provided budget constraints
+- [ ] 引用所提供上下文中的具体帧预算数值（总共 16.67ms，AI 分配 4ms）
+- [ ] 在比较中使用提交内容中具体的 7ms 估算
+- [ ] 不给出泛泛的「这可能很慢」建议——引用具体数字
+- [ ] 结论理由可追溯到所提供的预算约束
 
-### Case 6: Missing gate input — NOT ASSESSED
-**Scenario:** An `InventorySystem` implementation is submitted for code review with its implementation files, its story's acceptance criteria and its governing ADR; everything the agent can check is sound. The relevant GDD section the gate names was not passed: the context gives neither its text nor a path, the story file names none, and the calling skill does not report it absent. Request is tagged LP-CODE-REVIEW.
-**Expected:** Returns NOT ASSESSED for LP-CODE-REVIEW, naming the GDD section as the input it was not given — without it, the gate's check for correctness issues against the GDD rules cannot be made, so APPROVE is out of reach.
+### Case 6: 缺少闸门输入——NOT ASSESSED
+**Scenario:** 一个 `InventorySystem` 实现被提交代码评审，附其实现文件、其故事的验收标准及其治理 ADR；代理能检查的一切都健全。闸门指定的相关 GDD 章节未被传入：上下文既未给出其文本也未给出路径，故事文件未提及，调用技能也未报告其缺失。请求标记为 LP-CODE-REVIEW。
+**Expected:** 对 LP-CODE-REVIEW 返回 NOT ASSESSED，将 GDD 章节列为它未获提供的输入——没有它，闸门关于相对 GDD 规则的正确性问题的检查就无法进行，因此 APPROVE 无从谈起。
 **Assertions:**
-- [ ] States the verdict `NOT ASSESSED` explicitly for LP-CODE-REVIEW — not APPROVE, although everything it could check is sound
-- [ ] Names the relevant GDD section as the missing input
-- [ ] Does not infer the GDD rules from the code or the story and judge correctness against them
-- [ ] Variant — had the calling skill reported that no inventory GDD exists, that is a finding, not a missing input: the verdict is CONCERNS or REJECT, not NOT ASSESSED
+- [ ] 明确对 LP-CODE-REVIEW 陈述结论 `NOT ASSESSED`——不是 APPROVE，尽管它能检查的一切都健全
+- [ ] 将相关 GDD 章节列为缺失的输入
+- [ ] 不从代码或故事中推断 GDD 规则并据此评判正确性
+- [ ] Variant——若调用技能报告不存在背包 GDD，那是一项发现，而非缺失输入：结论为 CONCERNS 或 REJECT，而非 NOT ASSESSED
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Returns LP-CODE-REVIEW verdicts using APPROVE / CONCERNS / REJECT vocabulary only — or `NOT ASSESSED`, naming the input, when an input the gate names was not given or could not be read; an artifact the calling skill reports absent is a finding, in the gate's own words
-- [ ] Returns LP-FEASIBILITY verdicts using FEASIBLE / CONCERNS / INFEASIBLE vocabulary only — or `NOT ASSESSED`, naming the input, when an input the gate names was not given or could not be read; an artifact the calling skill reports absent is a finding, in the gate's own words
-- [ ] Stays within declared code architecture domain
-- [ ] Defers design priority conflicts to creative-director
-- [ ] States each gate verdict as an explicit verdict word from that gate's definition, not a verdict implied by inline prose
-- [ ] Does not make binding game design or creative direction decisions
+- [ ] LP-CODE-REVIEW 结论仅使用 APPROVE / CONCERNS / REJECT 词汇——或当闸门指定的输入未被提供或无法读取时，返回 `NOT ASSESSED` 并说明该输入；调用技能报告缺失的产出物是一项发现，用闸门自身的措辞表述
+- [ ] LP-FEASIBILITY 结论仅使用 FEASIBLE / CONCERNS / INFEASIBLE 词汇——或当闸门指定的输入未被提供或无法读取时，返回 `NOT ASSESSED` 并说明该输入；调用技能报告缺失的产出物是一项发现，用闸门自身的措辞表述
+- [ ] 保持在声明的代码架构领域内
+- [ ] 将设计优先级冲突交给 creative-director
+- [ ] 将每个闸门结论陈述为该闸门定义中的明确结论词，而非由行文暗示的结论
+- [ ] 不做出有约束力的游戏设计或创意方向决定
 
 ---
 
 ## Coverage Notes
-- Multi-file code review spanning several interdependent systems is not covered — deferred to integration tests.
-- Tech debt assessment and prioritization are not covered here — deferred to /tech-debt skill integration.
-- Coding standards document updates (adding a new forbidden pattern) are not covered.
-- Interaction with qa-lead on what constitutes a testable unit (LP vs QL boundary) is not covered.
+- 未覆盖跨多个相互依赖系统的多文件代码评审——推迟到集成测试。
+- 此处未覆盖技术债评估与优先级排序——推迟到 /tech-debt 技能集成。
+- 未覆盖编码标准文档更新（新增一条禁止模式）。
+- 未覆盖与 qa-lead 就可测试单元构成（LP 与 QL 边界）的交互。

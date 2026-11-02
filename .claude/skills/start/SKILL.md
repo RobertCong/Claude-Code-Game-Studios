@@ -1,120 +1,119 @@
 ---
 name: start
-description: "Guides a first-time user through onboarding and picks the right workflow. Use when the user is new, just cloned or installed the studio, has no idea or engine yet, asks where to begin, or wants to bring in an existing game."
+description: "引导首次使用的用户完成上手，并为其选择合适的工作流。当用户是新手、刚克隆或安装本工作室、还没有想法或引擎、询问从何处开始，或想引入现有游戏时使用。"
 argument-hint: "[no arguments]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, AskUserQuestion, Bash(bash .claude/scripts/project-state.sh*), Bash(bash .claude/scripts/set-stage.sh *), Bash(bash .claude/scripts/config-set.sh *)
 model: sonnet
 ---
 
-# Guided Onboarding
+# 引导式上手
 
-The entry point for a new user. It assumes no game idea, no engine and no experience: it reads
-the project, asks where the user is starting from, shows what it assumes about the project, and
-names the one next step. It never runs that step itself.
+新用户的入口。它假定用户没有游戏想法、没有引擎、也没有经验：它读取
+项目，询问用户从何处开始，展示它对项目的假设，并
+指出唯一的下一个步骤。它自己从不执行该步骤。
 
-It writes these settings to `project.yaml`, all through helpers, and only after an explicit yes:
-`project.stage` (with its legacy mirror `production/stage.txt`), `modes.rigor` and
-`modes.automation`. It never writes `modes.review_mode` or `production/review-mode.txt`, and none
-of the other knobs rigor fronts (`modes.workflow`, `docs.density`, `qa.level`,
-`modes.story_granularity`, `team.size`): a written value pins that knob over the rigor expansion,
-and a mirror file outranks it.
+它把这些设置写入 `project.yaml`，全部通过辅助脚本完成，且仅在用户明确同意之后：
+`project.stage`（及其旧版镜像 `production/stage.txt`）、`modes.rigor` 和
+`modes.automation`。它从不写入 `modes.review_mode` 或 `production/review-mode.txt`，也不写
+严谨度所前置的其他任何开关（`modes.workflow`、`docs.density`、`qa.level`、
+`modes.story_granularity`、`team.size`）：写入的值会固定该开关，覆盖严谨度展开的结果，
+而镜像文件的优先级更高。
 
-Ask with the question tool. Without one, list the options numbered and end your turn to wait. The
-question is the last thing in the reply: no path, note or advice after it. A skipped or dismissed
-question is not an answer: ask again in plain text.
+用提问工具提问。若没有该工具，把选项编号列出并结束你的回合等待。问题
+是回复中的最后一项：其后不跟任何路径、说明或建议。被跳过或关闭的
+问题不算回答：用纯文本再问一次。
 
-The questions in Phases 2, 4 and 5 shape the project, so they are asked in every automation mode.
-The engine is not one of them: `/setup-engine` chooses it. Phase 6's last question follows a
-`modes.automation` already in `project.yaml`, per `.claude/docs/automation-modes.md`; with none
-set, ask it.
+Phase 2、4 和 5 中的问题会塑造项目，因此在所有自动化模式下都会提问。
+引擎不属于其中之一：它由 `/setup-engine` 选择。Phase 6 的最后一个问题遵循
+`project.yaml` 中已有的 `modes.automation`，依据 `.claude/docs/automation-modes.md`；
+若未设置，则直接询问。
 
-## Phase 1: Read the project
+## Phase 1: 读取项目
 
-Run `bash .claude/scripts/project-state.sh` and keep its rows. Do not show them yet; they check
-the user's answer in Phase 2.
+运行 `bash .claude/scripts/project-state.sh` 并保留其各行。暂时不要展示；它们用于在
+Phase 2 中核对用户的回答。
 
-| Row | Use |
+| 行 | 用途 |
 |---|---|
-| `engine`, `code_root`, `source_files` | Is an engine set, and how much code is there. `source_files` of `unknown` means the code root could not be found: say that, never "no code" |
-| `concept` | `design/gdd/game-concept.md` or `design/game-brief.md` exists |
-| `gdd_files`, `adr` | Design documents and architecture decisions on disk (they set the stage in Phase 4) |
-| `prototype`, `sprint`, `milestone`, `story` | Other existing work |
-| `origin_url` | Contains `donchitos/claude-code-game-studios`, matched case-insensitively: the clone still points at the template repo, so a push or pull request would go there. A fork under another owner is the user's own |
-| `stage` | The stage already recorded, if any |
+| `engine`、`code_root`、`source_files` | 是否已设置引擎，以及有多少代码。`source_files` 为 `unknown` 意味着找不到代码根：要说明这一点，绝不要说"没有代码" |
+| `concept` | `design/gdd/game-concept.md` 或 `design/game-brief.md` 是否存在 |
+| `gdd_files`、`adr` | 磁盘上的设计文档和架构决策（它们决定 Phase 4 中的阶段） |
+| `prototype`、`sprint`、`milestone`、`story` | 其他现有工作 |
+| `origin_url` | 包含 `donchitos/claude-code-game-studios`，不区分大小写匹配：克隆仍指向模板仓库，因此推送或拉取请求会发到那里。位于其他所有者名下的 fork 属于用户自己 |
+| `stage` | 已记录的阶段（如果有） |
 
-Ignore `phase_inferred`: it guesses from file counts, and a project with code but no design
-documents is not in Production. If the helper fails, say so and read the same facts by hand
-(engine in `project.yaml`, the two concept files, the code root's files, `design/gdd/`).
+忽略 `phase_inferred`：它根据文件数量猜测，而有代码但没有设计
+文档的项目并不处于 Production。如果辅助脚本失败，说明这一点，并手工读取同样的
+事实（`project.yaml` 中的引擎、两个概念文件、代码根中的文件、`design/gdd/`）。
 
-The helper does not report rigor or automation. Read `project.yaml`, if it exists, and note
-whether `modes.rigor` and `modes.automation` are set: a set value is kept, and its question is
-not asked (Phases 4 and 5).
+辅助脚本不报告严谨度或自动化。如果 `project.yaml` 存在，读取它，并记下
+`modes.rigor` 和 `modes.automation` 是否已设置：已设置的值保留，其对应问题
+不再询问（Phase 4 和 5）。
 
-**Returning user** (an engine is set and `concept` is present): ask nothing. Say the engine, the
-concept or brief found, and the review mode: `modes.review_mode` if set, otherwise the one
-`modes.rigor` implies (`minimal` → `solo`, `standard` → `lean`, `full` → `full`). Suggest `/help` for the next step, add the
-template-remote note if it applies, and stop.
+**回访用户**（已设置引擎且 `concept` 存在）：不要问任何问题。说明引擎、找到的
+概念或简报，以及评审模式：如果设置了 `modes.review_mode` 就用它，否则用
+`modes.rigor` 所隐含的那个（`minimal` → `solo`，`standard` → `lean`，`full` → `full`）。建议用 `/help` 了解下一步，
+如果适用就加上模板远程仓库的提示，然后停止。
 
-## Phase 2: Ask where the user is
+## Phase 2: 询问用户处于什么起点
 
-Ask with the question tool: "Welcome! Where are you starting from with your game?" Options:
-- `A) No idea yet`: no game concept; explore and find what to make.
-- `B) Vague idea`: a theme, feeling or genre ("something with space", "a cozy farming game").
-- `C) Clear concept`: the core idea and genre are known, nothing is written down yet.
-- `D) Existing work`: design documents, prototypes, code or plans already exist.
+用提问工具询问："欢迎！你的游戏目前处于什么起点？"选项：
+- `A) No idea yet`：还没有游戏概念；先探索并找到要做的东西。
+- `B) Vague idea`：一个主题、感觉或类型（"带点太空元素的"、"一款温馨的种田游戏"）。
+- `C) Clear concept`：核心想法和类型已知，但还没有写下来。
+- `D) Existing work`：设计文档、原型、代码或计划已经存在。
 
-Wait for the answer. If it contradicts Phase 1, say what you found once and ask again: D on an
-empty project ("this looks like a fresh template; would A or B fit better?"), or A with code on
-disk ("I found code in `[code_root]`; did you mean D?"). If no option fits, let the user describe
-their situation and route from that.
+等待回答。如果回答与 Phase 1 矛盾，说明一次你的发现并再次询问：在
+空项目上选 D（"这看起来像是一个全新的模板；A 或 B 是否更合适？"），或者在磁盘上已有代码时选 A（"我在 `[code_root]` 中发现了代码；你是指 D 吗？"）。
+如果没有选项合适，让用户描述其情况并据此路由。
 
-## Phase 3: Route
+## Phase 3: 路由
 
-Name the immediate next step only. The full path waits for Phase 6, after the rigor is known.
+只指出紧接着的下一步。完整路径要等到 Phase 6、严谨度确定之后。
 
-- **A, no idea:** starting from zero is fine. `/brainstorm open` explores freely; `/brainstorm
-  [hint]` starts from a word or theme. Next step: `/brainstorm open`, or a hint if one comes to
-  mind. Describe it as "turns no idea into a written design the next step builds from"; how long
-  that design is depends on the rigor, so leave that for Phase 6.
-- **B, vague idea:** ask for the idea in a few words, take it as it is, and name
-  `/brainstorm [their words]`.
-- **C, clear concept:** ask for the concept in one sentence (genre and core mechanic), as plain
-  text. Then ask: "How would you like to proceed?" Options: `Formalize it first` (`/brainstorm
-  [concept]` writes it down) / `Jump straight in` (`/setup-engine` now, write the design after).
-  The next step is their pick.
-- **D, existing work:** say what Phase 1 found ("N source files under `[code_root]`, N design
-  documents, engine [X / not set]"). Next step: `/setup-engine` when no engine is set and there is
-  no more than a concept; otherwise `/project-stage-detect`.
+- **A，没有想法：** 从零开始完全没问题。`/brainstorm open` 自由探索；`/brainstorm
+  [hint]` 从某个词或主题开始。下一步：`/brainstorm open`，或者如果你想到了
+  提示词就用它。把它描述为"把没有想法变成一份成文的设计，下一步据此展开"；这份设计
+  有多长取决于严谨度，所以留到 Phase 6 再说。
+- **B，模糊想法：** 请用户用几句话说明想法，照原样接受，并指出
+  `/brainstorm [their words]`。
+- **C，清晰概念：** 请用户用一句话给出概念（类型和核心机制），以纯
+  文本形式。然后询问："你希望如何推进？"选项：`Formalize it first`（`/brainstorm
+  [concept]` 把它写下来）/ `Jump straight in`（现在运行 `/setup-engine`，之后再写设计）。
+  下一步由他们选择。
+- **D，现有工作：** 说明 Phase 1 的发现（"`[code_root]` 下有 N 个源文件，N 份设计
+  文档，引擎 [X / 未设置]"）。下一步：若未设置引擎且仅有
+  一个概念，则运行 `/setup-engine`；否则运行 `/project-stage-detect`。
 
-Then say: "I'll lay out the full path in a moment."
+然后说："我马上就会把完整路径列出来。"
 
-## Phase 4: Show what you assume, then save it
+## Phase 4: 展示你的假设，然后保存
 
-Work out two values.
+计算两个值。
 
-**Stage.** Paths A, B and C: `Concept`. Path D, from the Phase 1 rows:
+**阶段（Stage）。** 路径 A、B 和 C：`Concept`。路径 D，依据 Phase 1 的各行：
 
-| On disk | Stage |
+| 磁盘上的情况 | 阶段 |
 |---|---|
-| no engine, or nothing beyond a concept (`gdd_files` 0) | `Concept` |
-| `gdd_files` 1 or more, `adr` 0 | `Systems Design` |
-| `adr` 1 or more | `Technical Setup` |
+| 没有引擎，或除了一个概念之外别无他物（`gdd_files` 为 0） | `Concept` |
+| `gdd_files` 为 1 或更多，`adr` 为 0 | `Systems Design` |
+| `adr` 为 1 或更多 | `Technical Setup` |
 
-**Rigor.** If `modes.rigor` is already set in `project.yaml`, keep it and say so. Otherwise infer
-it from what the user said in Phases 2 and 3, using the signals in
-`.claude/docs/settings-guidance.md` §3:
+**严谨度（Rigor）。** 如果 `project.yaml` 中已设置 `modes.rigor`，保留它并说明。否则根据
+用户在 Phase 2 和 3 中的表述，使用
+`.claude/docs/settings-guidance.md` §3 中的信号来推断：
 
-| The user's words mention | Rigor |
+| 用户的表述中提到 | 严谨度 |
 |---|---|
-| open world, RPG, sim, sandbox, factions, crafting, economy, MMO, multiplayer, many systems | `full` |
-| release, commercial, Steam, one clear core loop | `standard` |
-| jam, weekend, prototype, first game, small, just trying | `minimal` |
-| nothing above, or no idea yet | `minimal` (the default) |
+| 开放世界、RPG、模拟、沙盒、派系、制作、经济、MMO、多人、大量系统 | `full` |
+| 发布、商业、Steam、一个清晰的核心循环 | `standard` |
+| game jam、周末、原型、第一款游戏、小型、只是试试 | `minimal` |
+| 以上都不是，或还没有想法 | `minimal`（默认） |
 
-A path B hint is still a description: "some kind of open-world survival sim" is `full`.
+路径 B 的提示词也是一种描述："某种开放世界生存模拟"属于 `full`。
 
-Show the card:
+展示卡片：
 
 ```
 What I'll set up
@@ -126,94 +125,93 @@ What I'll set up
   /settings changes either of these any time.
 ```
 
-Then ask with the question tool: "Save these to `project.yaml` (and the stage to
-`production/stage.txt`)?" Options: `Save them` / `Don't save`. Ask no question about the rigor
-itself: the card shows it, and `/settings` changes it.
+然后用提问工具询问："要把这些保存到 `project.yaml`（并把阶段保存到
+`production/stage.txt`）吗？"选项：`Save them` / `Don't save`。不要就严谨度
+本身提问：卡片已展示它，`/settings` 可以更改它。
 
-- **Save them:** run `bash .claude/scripts/set-stage.sh "[stage]"`, then, only when rigor was not
-  already set, `bash .claude/scripts/config-set.sh modes.rigor [value]`. Check the read-back rows
-  match. Say: "Saved. Rigor `[value]` sets six other settings; `/settings` shows them and changes
-  any of them."
-- **Don't save**, or anything other than an explicit yes: write nothing, keep the values for this
-  run, and say they were not saved.
+- **保存：** 运行 `bash .claude/scripts/set-stage.sh "[stage]"`，然后，仅当严谨度此前
+  未设置时，运行 `bash .claude/scripts/config-set.sh modes.rigor [value]`。检查回读的行
+  是否匹配。说："已保存。严谨度 `[value]` 会设定另外六项设置；`/settings` 会显示它们并更改
+  其中任意一项。"
+- **不保存**，或任何不是明确同意的回答：什么都不写，本次运行保留这些值，
+  并说明它们未被保存。
 
-If a helper exits non-zero, show its output, say which setting was not written, and go on with the
-value for this run.
+如果辅助脚本以非零状态退出，展示其输出，说明哪项设置未被写入，并继续使用
+本次运行的值。
 
-## Phase 5: Ask how much to confirm
+## Phase 5: 询问确认的程度
 
-If `modes.automation` is already set, say "Automation is `[value]`" and go on. Otherwise ask:
-"Last one: how much should I confirm with you as we work?" Options:
-- `Guided (Recommended)`: I decide small things and still stop for big ones (scope changes,
-  deletions, schema changes).
-- `Collaborative`: I ask before each significant step and show drafts before writing.
-- `Autonomous`: I proceed and log decisions, stopping only for the always-ask categories. Fastest,
-  most tokens.
+如果 `modes.automation` 已设置，说"自动化为 `[value]`"并继续。否则询问：
+"最后一个问题：在工作过程中，我应该在多大程度上向你确认？"选项：
+- `Guided (Recommended)`：我决定小事，遇到大事仍会停下来（范围变更、
+  删除、schema 变更）。
+- `Collaborative`：每个重要步骤之前我都会询问，写入之前会展示草稿。
+- `Autonomous`：我继续推进并记录决策，只在始终询问的类别上停下。最快，
+  消耗 token 最多。
 
-Mapping: `Guided` → `guided`, `Collaborative` → `collaborative`, `Autonomous` → `autonomous`. The
-pick is the consent to write it: run `bash .claude/scripts/config-set.sh modes.automation [value]`,
-unless the Phase 4 save was declined (then say it was not saved).
+映射：`Guided` → `guided`，`Collaborative` → `collaborative`，`Autonomous` → `autonomous`。
+选择即是写入的同意：除非 Phase 4 的保存被拒绝（那就说明未保存），
+否则运行 `bash .claude/scripts/config-set.sh modes.automation [value]`。
 
-## Phase 6: Show the path
+## Phase 6: 展示路径
 
-Say: "Here's your path at rigor `[value]`. Every skill still runs at any rigor; rigor changes
-what's required, not what's allowed."
+说："以下是你在严谨度 `[value]` 下的路径。任何技能在任何严谨度下仍然可以运行；严谨度改变的是
+要求，而不是允许的范围。"
 
-The path starts with the step Phase 3 named. When that was `/brainstorm` (paths A and B, and C's
-`Formalize it first`), list `/brainstorm` first and `/setup-engine` second: each runs without the
-other.
+路径从 Phase 3 指出的步骤开始。当那是 `/brainstorm` 时（路径 A 和 B，以及 C 的
+`Formalize it first`），先列 `/brainstorm`，再列 `/setup-engine`：两者各自独立运行。
 
-**`minimal`: 4 steps to running code**
-1. `/setup-engine`: choose and configure the engine
-2. `/brainstorm`: write the one-page `design/game-brief.md`
-3. `/create-stories`: turn the brief's MVP list into stories (no epics or sprint plan needed)
-4. `/dev-story`: the first line of game code
+**`minimal`：4 步到可运行代码**
+1. `/setup-engine`：选择并配置引擎
+2. `/brainstorm`：编写单页的 `design/game-brief.md`
+3. `/create-stories`：把简报中的 MVP 列表转成用户故事（无需史诗或冲刺计划）
+4. `/dev-story`：第一行游戏代码
 
 **`standard`**
-- Concept: `/setup-engine` → `/brainstorm` → `/prototype` → `/art-bible` → `/gate-check`
-- Systems Design: `/map-systems` → `/design-system` (once per system) → `/review-all-gdds` →
+- 概念：`/setup-engine` → `/brainstorm` → `/prototype` → `/art-bible` → `/gate-check`
+- 系统设计：`/map-systems` → `/design-system`（每个系统一次）→ `/review-all-gdds` →
   `/gate-check`
-- Architecture: `/create-architecture` → `/architecture-decision` (once per decision) →
+- 架构：`/create-architecture` → `/architecture-decision`（每个决策一次）→
   `/create-control-manifest` → `/architecture-review` → `/test-setup` → `/ux-design`
-  (accessibility and interaction patterns) → `/gate-check`
-- Pre-Production: `/ux-design` (HUD and key screens) → `/create-epics` → `/create-stories` →
+  （无障碍与交互模式）→ `/gate-check`
+- 预制作：`/ux-design`（HUD 和关键界面）→ `/create-epics` → `/create-stories` →
   `/sprint-plan` → `/gate-check`
-- Production: `/dev-story`
+- 制作：`/dev-story`
 
-Each `/gate-check` moves the project one stage, and only when it passes.
+每次 `/gate-check` 会把项目推进一个阶段，且只有通过时才会推进。
 
-**`full`:** everything in `standard`, plus `/vertical-slice` and `/playtest-report` in
-Pre-Production and `/design-review` after each GDD.
+**`full`：** `standard` 中的所有内容，外加预制作中的 `/vertical-slice` 和 `/playtest-report`，
+以及每份 GDD 之后的 `/design-review`。
 
-**Path D with existing work** (stage `Systems Design` or later, or code on disk) gets this instead.
-Print only the steps that apply, and for the brief only the one source that applies. At `minimal`:
-1. `/project-stage-detect`: what stage the project is at and what is missing
-2. `/adopt`: whether the existing files are in the format the skills read
-3. `/setup-engine`: only when no engine is set; leave it out when `engine` names one
-4. The brief, only if `concept` is absent: `/reverse-document design [code_root]` when the code
-   root holds 10 or more source files (it writes the brief from the game), and then do not mention
-   `/brainstorm` at all; `/brainstorm` only when it holds fewer
+**带现有工作的路径 D**（阶段为 `Systems Design` 或更晚，或磁盘上已有代码）改为使用以下内容。
+只打印适用的步骤，简报部分只打印适用的那一个来源。在 `minimal` 下：
+1. `/project-stage-detect`：项目处于什么阶段以及缺少什么
+2. `/adopt`：现有文件是否为技能所读取的格式
+3. `/setup-engine`：仅在未设置引擎时；如果 `engine` 已指定引擎则省略
+4. 简报，仅在 `concept` 缺失时：当代码根中有 10 个或更多源文件时用
+   `/reverse-document design [code_root]`（它从游戏本身写出简报），然后就完全不要提及
+   `/brainstorm`；仅在少于 10 个文件时使用 `/brainstorm`
 
-At `standard` and `full`, steps 1 to 3, then `/design-system retrofit [path]`,
-`/architecture-decision retrofit [path]`, `/architecture-review` and `/gate-check`.
+在 `standard` 和 `full` 下，执行步骤 1 到 3，然后是 `/design-system retrofit [path]`、
+`/architecture-decision retrofit [path]`、`/architecture-review` 和 `/gate-check`。
 
-Present `minimal` as the documented floor, not a lesser mode, and name its trade once: no GDDs, so
-design problems show up in code.
+把 `minimal` 呈现为有文档记载的基线，而不是次要模式，并只说明一次它的取舍：没有 GDD，
+因此设计问题会在代码中显现出来。
 
-If `origin_url` pointed at the template repo, add: "Your clone's `origin` still points at the
-CCGS template repo, so a push or pull request would go there. When you're ready, run
-`git remote rename origin template`, then `git remote add origin <your repo URL>`. `UPGRADING.md`
-pulls updates from `template`; skip its own `git remote add template` step, since that remote now
-exists." Suggest it; do not run it.
+如果 `origin_url` 指向模板仓库，补充："你克隆的 `origin` 仍指向
+CCGS 模板仓库，因此推送或拉取请求会发到那里。准备好后，运行
+`git remote rename origin template`，然后运行 `git remote add origin <your repo URL>`。`UPGRADING.md`
+会从 `template` 拉取更新；跳过它自己的 `git remote add template` 步骤，因为该远程现在
+已存在。"建议它；不要运行它。
 
-Ask: "Would you like to start with [first step]?" Options: `Yes, start with [first step]` /
-`Something else first`. Either answer leads to Phase 7, never to running the step.
+询问："你想从 [第一步] 开始吗？"选项：`Yes, start with [first step]` /
+`Something else first`。无论哪个回答都进入 Phase 7，绝不执行该步骤。
 
-## Phase 7: Hand off
+## Phase 7: 交接
 
-Respond with exactly one line: "Type `[skill]` to begin." Do not start that skill or call the
-skill tool for it, even after a yes: the user types it. If they picked something else, name the skill for that instead, the same
-way.
+只用一行回复："Type `[skill]` to begin." 不要启动该技能，也不要为此调用
+技能工具，即使已经得到同意：由用户自己输入。如果他们选择了其他内容，就以同样
+方式指出对应的技能。
 
-Verdict: **COMPLETE**, the user is oriented and handed off. If the user stopped before Phase 7,
-say which settings were saved and which were not.
+结论：**COMPLETE**，用户已完成上手引导并交接。如果用户在 Phase 7 之前停止，
+说明哪些设置已保存、哪些未保存。

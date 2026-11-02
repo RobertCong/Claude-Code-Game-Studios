@@ -1,243 +1,235 @@
 ---
 name: team-narrative
-description: "Orchestrate the narrative team — narrative-director, writer, world-builder, level-designer — for story, world lore, narrative-driven levels."
+description: "编排叙事团队——narrative-director、writer、world-builder、level-designer——负责故事、世界传说、叙事驱动的关卡。"
 argument-hint: "[narrative content description] [--review full|lean|solo]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, TaskCreate, TaskGet, TaskList, TaskUpdate, Bash(bash "*/.claude/skills/team-narrative/../../hooks/yaml-helper.sh" resolve_config *)
 model: sonnet
 ---
-# Team Narrative
+# 叙事团队（Team Narrative）
 
-If no argument is provided, output usage guidance and exit without spawning any agents:
-> Usage: `/team-narrative [narrative content description] [--review full|lean|solo]` — describe the story content, scene, or narrative area to work on (e.g., `boss encounter cutscene`, `faction intro dialogue`, `tutorial narrative`). Do not use `AskUserQuestion` here; output the guidance directly.
+如果未提供参数，输出用法说明并退出，不生成任何代理：
+> 用法：`/team-narrative [narrative content description] [--review full|lean|solo]` —— 描述要处理的故事内容、场景或叙事区域（例如 `boss encounter cutscene`、`faction intro dialogue`、`tutorial narrative`）。此处不要使用 `AskUserQuestion`；直接输出说明。
 
-When this skill is invoked with an argument, orchestrate the narrative team through a structured pipeline.
+当本技能带参数被调用时，通过结构化流水线编排叙事团队。
 
-**Decision Points:** At each phase transition, use `AskUserQuestion` to present
-the user with the subagent's proposals as selectable options. Write the agent's
-full analysis in conversation, then capture the decision with concise labels.
-In `collaborative` mode, the user must approve before moving to the next phase.
-In `guided` mode the pipeline advances automatically unless a phase is BLOCKED;
-in `autonomous` mode it runs end to end, recording each phase outcome via
-`log_decision`. Decisions in `automation_always_ask` categories
-(`is_always_ask_category` helper) always prompt regardless of mode. See
-`.claude/docs/automation-modes.md`.
+**决策点：** 在每个阶段切换处，使用 `AskUserQuestion`
+把子代理的提案作为可选项呈现给用户。在对话中写出该代理的
+完整分析，然后用简洁标签记录决定。
+在 `collaborative` 模式下，用户必须先批准才能进入下一阶段。
+在 `guided` 模式下，除非某阶段为 BLOCKED，流水线会自动推进；
+在 `autonomous` 模式下，它端到端运行，并通过
+`log_decision` 记录每个阶段的结果。`automation_always_ask` 类别中的决策
+（`is_always_ask_category` 辅助函数）无论何种模式都会始终提示。参见
+`.claude/docs/automation-modes.md`。
 
-## Phase 0: Resolve Config
+## Phase 0: 解析配置
 
 !`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,team.size`
 
-Resolved above — use as-is; `--review` overrides `review_mode`. No block →
-defaults in `.claude/docs/config-resolution.md`.
+以上已解析——直接使用；`--review` 覆盖 `review_mode`。无配置块 →
+使用 `.claude/docs/config-resolution.md` 中的默认值。
 
-`review_mode` sets director-gate depth, and this pipeline has no director gate:
-no phase below spawns CD-, TD-, PR- or AD-PHASE-GATE, at any `review_mode`. Its
-phase gates are the pipeline's own decision points (defined under `team.size`
-below), and the agents that work at them are team members, not director gates.
+`review_mode` 设定总监闸门（director gate）的深度，而本流水线没有总监闸门：
+无论 `review_mode` 为何，下面的任何阶段都不会生成 CD-、TD-、PR- 或 AD-PHASE-GATE。
+它的阶段闸门是流水线自身的决策点（定义在下面的 `team.size` 之下），
+而在这些点上工作的代理是团队成员，不是总监闸门。
 
-Phase 4's ND-CONSISTENCY is the exception in every mode: it is this pipeline's own
-review, not an optional director gate, so `review_mode` never skips it (`team.size`
-still decides who runs it — see Phase 4).
+Phase 4 的 ND-CONSISTENCY 在每种模式下都是例外：它是本流水线自身的
+评审，而不是可选的总监闸门，因此 `review_mode` 永远不会跳过它（`team.size`
+仍然决定由谁来执行——见 Phase 4）。
 
-`automation` drives the Decision Points note above. See the Decision Points note above and
-`.claude/docs/automation-modes.md` for how each mode changes pipeline behavior.
+`automation` 驱动上面的决策点说明。关于每种模式如何改变流水线行为，参见上面的决策点说明和
+`.claude/docs/automation-modes.md`。
 
-**`team.size`**: which agents are active (orthogonal to review_mode gate-depth and workflow docs).
-- **`individual`** (default): `writer` only; `narrative-director` invoked only on an explicit pillar conflict. Other agents consulted via the writer, not spawned separately.
-- **`small`**: `narrative-director` + `writer`, plus `localization-lead` and `world-builder` when `review_mode` is `full` (at `lean` and `solo` they are consulted through the writer).
-- **`studio`**: all six Team Composition agents, whatever the `review_mode` (the full pipeline as documented).
-A non-core agent needed at `individual` routes through the nearest active core agent with an informational note. **"Phase gate" means any phase that ends in an `AskUserQuestion` decision point this pipeline itself lists** — a transition under Decision Points above, or a **Gate** step written into the pipeline below — **whatever the `automation` mode.** `guided` and `autonomous` change how a gate is passed (it auto-advances, or is recorded with `log_decision`), not whether it is one, so bounded-exception condition (3) below holds at it in every mode. An agent restricted to "phase gates only" is spawned at those points and no others. This active-set scoping applies throughout the pipeline below: any phase that names an agent outside the active set routes through the nearest core agent rather than spawning it.
+**`team.size`**：哪些代理处于活动状态（与 review_mode 的闸门深度和工作流文档相互正交）。
+- **`individual`**（默认）：仅 `writer`；`narrative-director` 仅在明确出现游戏支柱冲突时被调用。其他代理通过 writer 咨询，不单独生成。
+- **`small`**：`narrative-director` + `writer`，当 `review_mode` 为 `full` 时再加 `localization-lead` 与 `world-builder`（在 `lean` 和 `solo` 下它们通过 writer 咨询）。
+- **`studio`**：全部六个团队组成代理，无论 `review_mode` 为何（即文档中的完整流水线）。
+在 `individual` 下需要非核心代理时，通过最近的活动核心代理转达并附上说明性备注。**"阶段闸门"指任何以本流水线自身列出的 `AskUserQuestion` 决策点结尾的阶段**——上面决策点所述的切换，或下面流水线中写明的 **Gate** 步骤——**无论 `automation` 模式为何。** `guided` 和 `autonomous` 改变的是闸门如何通过（自动推进，或用 `log_decision` 记录），而不是它是否算闸门，因此下面的受限例外条件（3）在每种模式下都成立。被限定为"仅在阶段闸门"的代理只在那些点被生成。此活动集限定贯穿下面的整条流水线：任何点名了活动集之外代理的阶段，都通过最近的核心代理转达，而不是生成该代理。
 
-**Announce the active set before Phase 1 — never let the collapse be silent.**
-Before spawning anything, state in one line which agents this run will actually
-spawn, and which the pipeline below names but will **not** spawn at the resolved
-`team.size`. For example:
+**在 Phase 1 之前宣告活动集——绝不要让收缩悄无声息。**
+在生成任何东西之前，用一行说明本次运行实际会生成哪些代理，以及下面流水线点名、
+但在解析出的 `team.size` 下**不会**生成的代理。例如：
 
 > `Active set (team.size: <resolved>): <the agents listed for that size above>.`
 > `Not spawned this run: <every other agent this pipeline names> — consulted`
 > `through <nearest active core agent>. Raise team.size (or modes.rigor) to widen.`
 
-Fill it from the `team.size` list directly above and the agents this file's own
-pipeline names — not from an example. Both sets differ per orchestrator.
+从正上方的 `team.size` 列表和本文件自身流水线点名的代理来填写它——不要照抄示例。
+两个集合因编排器而异。
 
-The pipeline below reads as a multi-agent fan-out and at the shipped default it
-is one or two agents — `team-release` names ten and runs one, `team-narrative`
-names six across five phases and runs `writer` alone. **The collapse is correct**:
-`team.size` is rigor-fronted and the narrow default is the token lever.
-Without saying so, a reader cannot
-distinguish a correctly-collapsed run from a broken pipeline, and the per-agent
-"routes through the nearest core agent with an informational note" rule above
-fires at routing time and never states the shape of the run as a whole.
+下面的流水线读起来像是多代理扇出，但在出厂默认值下它只有
+一两个代理——`team-release` 点名十个却只运行一个，`team-narrative`
+在五个阶段中点名六个却只运行 `writer`。**收缩是正确的**：
+`team.size` 以严谨度打头，而狭窄的默认值是节省 token 的杠杆。
+如果不说明这一点，读者就无法
+区分一次正确收缩的运行和一条损坏的流水线，而上面那条逐代理的
+"通过最近的核心代理转达并附上说明性备注"规则只在路由时触发，从不说明整次运行的形状。
 
-This is the same rule as the skipped-check reporting elsewhere in this file: **a constraint that is enforced but never surfaced is
-indistinguishable, to the person reading the output, from one that was never
-enforced.**
+这与本文件他处跳过检查的上报规则相同：**一条被强制执行但从未呈现的约束，
+在阅读输出的人看来，与一条从未被执行的约束无从区分。**
 
-## Team Composition
-- **narrative-director** — Story arcs, character design, dialogue strategy, narrative vision
-- **writer** — Dialogue writing, lore entries, item descriptions, in-game text
-- **world-builder** — World rules, faction design, history, geography, environmental storytelling
-- **art-director** — Character visual design, environmental visual storytelling, cutscene/cinematic tone
-- **level-designer** — Level layouts that serve the narrative, pacing, environmental storytelling beats
-- **localization-lead** — Localization readiness — flags non-localizable strings, cultural assumptions, and i18n gaps
+## 团队组成
+- **narrative-director** —— 故事弧线、角色设计、对话策略、叙事愿景
+- **writer** —— 对话撰写、传说条目、物品描述、游戏内文本
+- **world-builder** —— 世界规则、阵营设计、历史、地理、环境叙事
+- **art-director** —— 角色视觉设计、环境视觉叙事、过场动画/影片基调
+- **level-designer** —— 服务于叙事的关卡布局、节奏、环境叙事节点
+- **localization-lead** —— 本地化就绪度——标记不可本地化的字符串、文化假设和 i18n 缺口
 
-## How to Delegate
+## 如何委派
 
-Use the `Agent` tool to spawn each team member as a subagent:
-- `subagent_type: narrative-director` — Story arcs, character design, narrative vision
-- `subagent_type: writer` — Dialogue writing, lore entries, in-game text
-- `subagent_type: world-builder` — World rules, faction design, history, geography
-- `subagent_type: art-director` — Character visual profiles, environmental visual storytelling, cinematic tone
-- `subagent_type: level-designer` — Level layouts that serve the narrative, pacing
-- `subagent_type: localization-lead` — Localization readiness — flags non-localizable strings, cultural assumptions, and i18n gaps
+使用 `Agent` 工具把每位团队成员生成为子代理：
+- `subagent_type: narrative-director` —— 故事弧线、角色设计、叙事愿景
+- `subagent_type: writer` —— 对话撰写、传说条目、游戏内文本
+- `subagent_type: world-builder` —— 世界规则、阵营设计、历史、地理
+- `subagent_type: art-director` —— 角色视觉设定、环境视觉叙事、影片基调
+- `subagent_type: level-designer` —— 服务于叙事的关卡布局、节奏
+- `subagent_type: localization-lead` —— 本地化就绪度——标记不可本地化的字符串、文化假设和 i18n 缺口
 
-**Read the canon first.** Before Phase 1, read the shared inputs that exist — the narrative bible or tone guide, the character and faction files under `design/narrative/`, and the world rules. Never tell an agent to invent canon: if none exists, say so and ask the user before any drafting.
+**先读正典（canon）。** 在 Phase 1 之前，读取存在的共享输入——叙事圣经或基调指南、
+`design/narrative/` 下的角色与阵营文件，以及世界规则。绝不要让代理凭空发明正典：
+如果不存在正典，就说明这一点，并在任何起草之前询问用户。
 
-**Brief each agent — do not dump context.** Read the shared inputs **once** and pass a distilled brief inline: the lines each agent actually needs, never a file path for a document you have already read (an agent handed a path re-reads the whole file). Pass a path only for a document you have not read and only that agent needs.
+**为每个代理写简报——不要倾倒上下文。** 把共享输入**只读一次**，并以内联方式传递提炼后的简报：只给每个代理真正需要的那些行，绝不要把你已经读过的文档以文件路径形式发给它（拿到路径的代理会重新读取整个文件）。只有当你未读过、且只有该代理需要的文档，才传路径。
 
-**End every agent prompt with a return contract:** "Write your full output to `[path]` — that named path is your write authorisation under the bounded exception below, so write it without a separate approval prompt. Return **only** (1) the path written, (2) a ≤5-bullet summary of decisions, (3) any BLOCKED/CONCERNS items, one line each. Do not restate the documents you read." Without it, an agent returns everything it read back into this session.
+**为每个代理提示词加上返回契约：** "Write your full output to `[path]` — that named path is your write authorisation under the bounded exception below, so write it without a separate approval prompt. Return **only** (1) the path written, (2) a ≤5-bullet summary of decisions, (3) any BLOCKED/CONCERNS items, one line each. Do not restate the documents you read." 没有它，代理会把读到的所有内容都返回本会话。
 
-**Substitute a real path for `[path]`.** Agents write drafts under
-`production/narrative/[content-slug]/` — inside the bounded exception below. The
-finished documents belong in `design/narrative/`, which the exception does **not**
-cover, so **you** write those after one approval (see "Write the finals"):
+**用真实路径替换 `[path]`。** 代理把草稿写到
+`production/narrative/[content-slug]/` 下——在下面的受限例外之内。成品文档
+属于 `design/narrative/`，例外**不**覆盖那里，
+所以由**你**在一次批准之后写入这些文件（见"写入成品"）：
 
-| Agent | Drafts to (`[path]`) | Final document (you write it) |
+| 代理 | 草稿写入（`[path]`） | 最终文档（由你写入） |
 |---|---|---|
 | narrative-director | `production/narrative/[content-slug]/brief.md` | `design/narrative/[content-slug]-brief.md` |
 | world-builder | `production/narrative/[content-slug]/lore-[topic].md` | `design/narrative/lore/[topic].md` |
 | writer | `production/narrative/[content-slug]/dialogue-[scene-slug].md` | `design/narrative/dialogue/[scene-slug].md` |
 | art-director | `production/narrative/[content-slug]/visual-direction.md` | `design/narrative/[content-slug]-visual-direction.md` |
 | level-designer | `production/narrative/[content-slug]/level-integration.md` | `design/narrative/[content-slug]-level-integration.md` |
-| localization-lead | `production/narrative/[content-slug]/i18n-review.md` | stays in `production/` — a review, not a design document |
+| localization-lead | `production/narrative/[content-slug]/i18n-review.md` | 留在 `production/` —— 这是一份评审，不是设计文档 |
 
-> **The final destination is not a free choice.** `design/narrative/` is read by
-> `/asset-spec`, `/design-review`, `/localize`, `/onboard`,
-> `/project-stage-detect`, `/team-level` and the `cd-narrative` director gate.
-> An artifact written anywhere else is invisible to all seven.
+> **最终去向不是可以随意选择的。** `design/narrative/` 会被
+> `/asset-spec`、`/design-review`、`/localize`、`/onboard`、
+> `/project-stage-detect`、`/team-level` 和 `cd-narrative` 总监闸门读取。
+> 写在其他任何地方的产出物对这七者都不可见。
 >
-> The `[path]` contract above has a precondition: the path is one *you* named. A
-> skill that states the contract but names no concrete destination leaves every
-> run to invent one, which defeats it. `/team-qa` Phase 4 carries the same
-> requirement for the same reason.
+> 上面的 `[path]` 契约有一个前提：路径是*你*点名的。一个只声明契约却不点名
+> 具体去向的技能，会让每次运行都去自行发明一个，从而使契约失效。`/team-qa` Phase 4 出于同样的原因
+> 也有同样的要求。
 
-> **Why this does not violate the Collaboration Protocol.** `CLAUDE.md` requires an agent to ask "May I write this to [filepath]?" before Write/Edit. A subagent spawned here writes **without** asking, and that is a deliberate, bounded exception rather than an oversight — the same call already made for `consistency-check` appending to `active.md`. The exception holds only when all three are true: (1) the path is one **you** named in the prompt, so the user approved the destination when they approved the phase; (2) it is a new artifact under `production/`, `docs/` or `tests/`, never an edit to existing source or config; (3) the phase that produced it is itself gated by an `AskUserQuestion` before the pipeline advances. Outside those three, the agent must ask. **Do not "fix" this by asking per subagent** — a prompt per agent per phase makes an orchestrator unusable, which is why the exception exists.
+> **为什么这不算违反协作协议。** `CLAUDE.md` 要求代理在 Write/Edit 之前询问"我可以把它写入 [filepath] 吗？"。在这里生成的子代理写入时**不**询问，这是有意为之的受限例外，而不是疏忽——与 `consistency-check` 追加到 `active.md` 时已有的处理相同。该例外仅在以下三者同时成立时才适用：（1）路径是**你**在提示词中点名的，因此用户在批准该阶段时已批准了目标位置；（2）它是位于 `production/`、`docs/` 或 `tests/` 下的新产出物，绝不是对现有源码或配置的修改；（3）产生它的阶段本身在流水线推进之前由 `AskUserQuestion` 把关。超出这三条，代理必须询问。**不要通过逐个子代理询问来"修复"这件事**——每个代理每个阶段都提示一次会让编排器无法使用，这正是该例外存在的原因。
 
-Launch independent agents in parallel where the pipeline allows it (e.g., Phase 2 agents can run simultaneously).
+在流水线允许的地方并行启动相互独立的代理（例如 Phase 2 的代理可以同时运行）。
 
-## Pipeline
+## 流水线
 
-### Phase 1: Narrative Direction
-Delegate to **narrative-director**:
-- Define the narrative purpose of this content: what story beat does it serve?
-- Identify characters involved, their motivations, and how this fits the overall arc
-- Set the emotional tone and pacing targets
-- Specify any lore dependencies or new lore this introduces
-- Output: narrative brief with story requirements
+### Phase 1: 叙事方向
+委派给 **narrative-director**：
+- 定义本内容的叙事目的：它服务于哪个故事节点？
+- 识别涉及的角色、他们的动机，以及这如何契合整体弧线
+- 设定情感基调与节奏目标
+- 指明任何传说依赖，或本内容引入的新传说
+- 输出：带故事需求的叙事简报
 
-### Phase 2: World Foundation (parallel)
-Delegate in parallel — issue all three `Agent` calls simultaneously before waiting for any result:
-- **world-builder**: Create or update lore entries for factions, locations, and history relevant to this content. Cross-reference against existing lore for contradictions. Set canon level for new entries.
-- **writer**: Draft character dialogue using voice profiles. Ensure all lines are under 120 characters, use named placeholders for variables, and are localization-ready.
-- **art-director**: Define character visual design direction for key characters appearing in this content (silhouette, visual archetype, distinguishing features). Specify environmental visual storytelling elements for each key space (prop composition, lighting notes, spatial arrangement). Define tone palette and cinematic direction for any cutscenes or scripted sequences.
+### Phase 2: 世界基础（并行）
+并行委派——在等待任何结果之前同时发出全部三个 `Agent` 调用：
+- **world-builder**：为本内容相关的阵营、地点和历史创建或更新传说条目。对照现有传说交叉检查矛盾。为新条目设定正典级别。
+- **writer**：使用声音档案起草角色对话。确保所有台词不超过 120 个字符、变量使用具名占位符，并且可本地化。
+- **art-director**：为本内容中出现的核心角色定义角色视觉设计方向（剪影、视觉原型、辨识特征）。为每个关键空间指定环境视觉叙事元素（道具构图、灯光说明、空间布置）。为任何过场动画或脚本化序列定义基调色板与影片化方向。
 
-**Phase gate:** collect all three Phase 2 outputs, then apply the Decision Points
-rule before starting Phase 3 — present the lore, dialogue, and visual direction
-summaries and capture approval via `AskUserQuestion` in `collaborative` mode
-(auto-advance in `guided` unless a result is BLOCKED; `log_decision` in
-`autonomous`).
+**阶段闸门：** 收集全部三个 Phase 2 输出，然后在开始 Phase 3 之前应用决策点
+规则——呈现传说、对话和视觉方向的摘要，并在 `collaborative` 模式下通过 `AskUserQuestion` 获取批准
+（在 `guided` 下自动推进，除非某结果为 BLOCKED；在
+`autonomous` 下使用 `log_decision`）。
 
-### Phase 3: Level Narrative Integration
-Delegate to **level-designer**:
-- Review the narrative brief and lore foundation
-- Design environmental storytelling elements in the level
-- Place narrative triggers, dialogue zones, and discovery points
-- Ensure pacing serves both gameplay and story
+### Phase 3: 关卡叙事整合
+委派给 **level-designer**：
+- 评审叙事简报与传说基础
+- 在关卡中设计环境叙事元素
+- 放置叙事触发器、对话区域和发现点
+- 确保节奏同时服务于玩法与故事
 
-### Phase 4: Review and Consistency
-Spawn `narrative-director` via `Agent` using gate **ND-CONSISTENCY**
-(`.claude/docs/director-gates/nd-consistency.md`). This phase runs in every review
-mode — it is this pipeline's own review, not an optional director gate. Pass the
-context that gate lists (the Phase 2–3 draft paths, the narrative bible or tone
-guide, the world rules, the affected character and faction profiles) — named
-here, so do not read the gate file in this session — and add:
-- Confirm narrative pacing aligns with level design
-- Check that all mysteries have documented "true answers"
+### Phase 4: 评审与一致性
+使用闸门 **ND-CONSISTENCY** 通过 `Agent` 生成 `narrative-director`
+（`.claude/docs/director-gates/nd-consistency.md`）。本阶段在每种评审
+模式下都会运行——它是本流水线自身的评审，而不是可选的总监闸门。传入该闸门列出的
+上下文（Phase 2–3 草稿路径、叙事圣经或基调
+指南、世界规则、受影响的角色与阵营档案）——此处已点名，
+所以不要在本会话中读取该闸门文件——并补充：
+- 确认叙事节奏与关卡设计一致
+- 检查所有谜团都有写入文档的"真实答案"
 
-Act on the verdict: **APPROVE** → Phase 5. **CONCERNS** → show the listed
-inconsistencies and ask via `AskUserQuestion` whether to revise them (re-spawn the
-agent that owns each) or accept them. **REJECT** → do not start Phase 5; the
-contradictions are fixed first. **NOT ASSESSED [missing input]** → name the
-missing input, then supply it and re-run the gate, or carry
-`ND-CONSISTENCY: NOT ASSESSED — [input]` into the report's consistency review
-results; it is never read as APPROVE (`.claude/docs/director-gates.md`).
+按结论行动：**APPROVE** → Phase 5。**CONCERNS** → 展示所列出的
+不一致之处，并通过 `AskUserQuestion` 询问是修改它们（重新生成各自负责的
+代理）还是接受。**REJECT** → 不要开始 Phase 5；先修复矛盾。
+**NOT ASSESSED [missing input]** → 指出缺失的输入，补齐后重新运行该闸门，
+或把 `ND-CONSISTENCY: NOT ASSESSED — [input]` 带入报告的
+一致性评审结果；它绝不能被读作 APPROVE（`.claude/docs/director-gates.md`）。
 
-**At `team.size: individual`** narrative-director is not in the active set, so the
-gate is not spawned. The writer checks the drafts against the same criteria, and
-the output says so by name: "ND-CONSISTENCY not run — narrative-director is not
-active at `team.size: individual`; consistency self-checked by writer." A
-self-check is not the gate's verdict, and the report must not present it as one.
+**在 `team.size: individual` 下**，narrative-director 不在活动集中，因此不会生成该
+闸门。writer 按同样的标准检查草稿，
+输出要按名称说明这一点："未运行 ND-CONSISTENCY——在 `team.size: individual` 下 narrative-director 不
+活动；一致性由 writer 自检。"自检不是该闸门的结论，
+报告不得把它当作结论呈现。
 
-### Phase 5: Polish (parallel)
-Delegate in parallel — issue every `Agent` call before waiting for any result:
-- **writer**: Final self-review — verify no line exceeds dialogue box constraints, all text uses string keys (not raw strings), placeholder variable names are consistent
-- **localization-lead**: Validate i18n compliance — check string key naming conventions, flag any strings with hardcoded formatting that won't survive translation, verify character limit headroom for languages that expand (German/Finnish typically +30%), confirm no cultural assumptions in text that would need locale-specific variants
-- **world-builder**: Finalize canon levels for all new lore entries
+### Phase 5: 打磨（并行）
+并行委派——在等待任何结果之前发出每一个 `Agent` 调用：
+- **writer**：最终自检——确认没有台词超出对话框限制、所有文本都使用字符串键（而非原始字符串）、占位变量名保持一致
+- **localization-lead**：验证 i18n 合规性——检查字符串键命名约定，标记任何带有硬编码格式、无法在翻译中存活的字符串，验证文本长度余量足以容纳会变长的语言（德语/芬兰语通常 +30%），确认文本中没有需要地区特定变体的文化假设
+- **world-builder**：为所有新传说条目最终确定正典级别
 
-### Write the finals
-You hold every draft. List the final documents from the table above, then ask once
-via `AskUserQuestion` — "May I write these [N] narrative documents to
-`design/narrative/`?" — and write them on approval. The drafts under
-`production/narrative/[content-slug]/` stay as the working record.
+### 写入成品
+你持有每一份草稿。从上面的表格列出最终文档，然后通过 `AskUserQuestion`
+一次性询问——"我可以把这 [N] 份叙事文档写入
+`design/narrative/` 吗？"——并在批准后写入。`production/narrative/[content-slug]/` 下的草稿
+保留为工作记录。
 
-## Error Recovery Protocol
+## 错误恢复协议
 
-**First, verify the artifact.** If the return contract named a path, check the
-path exists before treating the phase as done — **a named artifact that is not
-on disk is a failed phase, however fluent the response reads.** An agent can
-burn a full phase and return a plausible preamble having written nothing, which
-is neither BLOCKED nor an error nor "cannot complete", so the trigger below
-never fires. Resume it naming the unmet contract; the context is
-usually still there.
+**首先，验证产出物。** 如果返回契约点名了一个路径，在将该阶段视为完成之前检查该
+路径是否存在——**一个不在磁盘上的具名产出物就是失败的阶段，无论响应读起来多么流畅。** 代理可能
+耗尽整个阶段、什么都没写却返回一段看似合理的前言，这
+既不是 BLOCKED，也不是错误，也不是"无法完成"，所以下面的触发器
+永远不会触发。带着未满足的契约重新恢复它；上下文
+通常还在。
 
-If any spawned agent returns BLOCKED, errors, or cannot complete: **surface it
-immediately, don't proceed past a dependency it blocks, and always produce a
-partial report.** A skipped agent's section stays a named gap — never fill it with content of your own. Full procedure: `.claude/docs/error-recovery-protocol.md`.
+如果任何生成的代理返回 BLOCKED、报错或无法完成：**立即呈现出来，不要越过它阻塞的依赖继续推进，并始终产出
+部分报告。** 被跳过代理的章节保持为具名缺口——绝不要用自己的内容填充。完整流程：`.claude/docs/error-recovery-protocol.md`。
 
-Common blockers:
-- Input file missing (story not found, GDD absent) → redirect to the skill that creates it
-- ADR status is Proposed → do not implement; once it is decided, accept it with `/architecture-decision accept ADR-NNNN`
-- Scope too large → split into two stories via `/create-stories`
-- Conflicting instructions between ADR and story → surface the conflict, do not guess
+常见阻塞项：
+- 输入文件缺失（找不到用户故事、缺少 GDD）→ 引导到创建它的技能
+- ADR 状态为 Proposed → 不要实现；一旦决定，用 `/architecture-decision accept ADR-NNNN` 接受它
+- 范围过大 → 通过 `/create-stories` 拆成两个用户故事
+- ADR 与用户故事之间的指示冲突 → 呈现冲突，不要猜测
 
-## File Write Protocol
+## 文件写入协议
 
-Sub-agents write their drafts to the `production/narrative/[content-slug]/` paths
-you name, under the **bounded exception** documented above under "Why this does
-not violate the Collaboration Protocol" — the path is one you named, the artifact
-is new under `production/`, `docs/` or `tests/`, and the phase is gated by an
-`AskUserQuestion`. A sub-agent does **not** prompt per write inside those bounds;
-outside them it must ask. The **one exception is the final documents under
-`design/narrative/`**: you hold every draft, so you write those yourself after
-the single "May I write …?" in "Write the finals".
+子代理把它们各自的草稿写到你点名的 `production/narrative/[content-slug]/` 路径下，
+适用上面"Why this does not violate the Collaboration Protocol"中记录的**受限例外**——路径是你点名的，产出物
+是 `production/`、`docs/` 或 `tests/` 下的新文件，且该阶段由
+`AskUserQuestion` 把关。在这些边界内，子代理**不会**每次写入都提示；
+超出边界则必须询问。**唯一的例外是 `design/narrative/` 下的最终文档**：
+你持有每一份草稿，所以在"写入成品"中那一次"我可以写入……吗？"之后由你自己写入。
 
-## Output
+## 输出
 
-A summary report covering: narrative brief status, lore entries created/updated, dialogue lines written, level narrative integration points, consistency review results, and any unresolved contradictions — including any localization issue the user chose to leave unfixed, by string key.
+一份摘要报告，涵盖：叙事简报状态、创建/更新的传说条目、撰写的对话台词数、关卡叙事整合点、一致性评审结果，以及任何未解决的矛盾——包括用户选择不修复的任何本地化问题（按字符串键指明）。
 
-Verdict: **COMPLETE** — narrative content delivered.
+结论：**COMPLETE** —— 已交付叙事内容。
 
-If ND-CONSISTENCY answered NOT ASSESSED and that was carried into the report
-(Phase 4), the verdict says so — never a plain COMPLETE:
+如果 ND-CONSISTENCY 回答 NOT ASSESSED 且该结果被带入报告
+（Phase 4），结论要说明这一点——绝不给出朴素的 COMPLETE：
 
-Verdict: **COMPLETE — consistency NOT ASSESSED ([input])** — narrative content delivered; the consistency review could not run for want of [input].
+结论：**COMPLETE — consistency NOT ASSESSED ([input])** —— 已交付叙事内容；由于缺少 [input]，一致性评审无法运行。
 
-If the pipeline stops because a dependency is unresolved (e.g., lore contradiction or missing prerequisite not resolved by the user):
+如果流水线因依赖未解决而停止（例如用户未解决传说矛盾或缺失的前置条件）：
 
-Verdict: **BLOCKED** — [reason]
+结论：**BLOCKED** —— [reason]
 
-## Next Steps
+## 后续步骤
 
-- Run `/design-review` on the narrative documents for consistency validation.
-- Run `/localize extract` to extract new strings for translation after dialogue is finalized.
-- Run `/dev-story` to implement dialogue triggers and narrative events in-engine.
+- 对叙事文档运行 `/design-review`，进行一致性校验。
+- 对话定稿后运行 `/localize extract`，提取新字符串用于翻译。
+- 运行 `/dev-story`，在引擎内实现对话触发器与叙事事件。

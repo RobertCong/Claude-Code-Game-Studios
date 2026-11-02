@@ -2,300 +2,271 @@
 
 ## Skill Summary
 
-`/architecture-decision` authors one Architecture Decision Record (ADR). It has
-three entry modes: normal authoring (`/architecture-decision [title]`),
-`retrofit <path>` (adds missing sections to an existing ADR without touching the
-rest), and `accept <ADR-id>` (the only path that moves an ADR from `Proposed` to
-`Accepted`). When retrofit asks for a missing Status and the user answers
-`Accepted`, it writes `Proposed` and hands the ADR to acceptance mode.
+`/architecture-decision` 负责编写一份架构决策记录（ADR）。它有三种入口模式：常规编写（`/architecture-decision [title]`）、`retrofit <path>`（在现有 ADR 中补充缺失的小节，不改动其余内容），以及 `accept <ADR-id>`（唯一能将 ADR 从 `Proposed` 变为 `Accepted` 的路径）。当 retrofit 询问缺失的 Status 而用户回答 `Accepted` 时，它会写入 `Proposed`，并把该 ADR 交给验收模式处理。
 
-Normal authoring loads engine context first (`docs/engine-reference/[engine]/VERSION.md`,
-plus a knowledge-gap warning for MEDIUM/HIGH-risk domains), picks the next ADR
-number, checks `docs/registry/architecture.yaml` for binding stances, then
-presents its assumptions as a confirm/adjust `AskUserQuestion` (Status is always
-`Proposed` and is never asked). It then drafts the whole ADR from its template in
-one pass, has the primary engine specialist validate it (Step 5.5), runs the
-TD-ADR gate in `full` review mode only (Step 5.6), runs a GDD sync check that
-always reports, and asks once — "May I write it?" — before writing
-`docs/architecture/adr-[NNNN]-[slug].md`. A separate approval covers the registry
-update. The closing output tells the user to run `/architecture-review` in a
-fresh session and `/architecture-decision accept ADR-NNNN` when the decision is
-settled. Authoring never sets `Accepted` and never unblocks stories.
+常规编写会先加载引擎上下文（`docs/engine-reference/[engine]/VERSION.md`，并对 MEDIUM/HIGH 风险领域给出知识缺口警告），选取下一个 ADR 编号，检查 `docs/registry/architecture.yaml` 中的约束立场，然后以确认/调整式的 `AskUserQuestion` 呈现其假设（Status 始终为 `Proposed`，从不询问）。随后它一次性按模板起草整份 ADR，交由主引擎专家验证（Step 5.5），仅在 `full` 评审模式下运行 TD-ADR 质量闸门（gate）（Step 5.6），运行一个始终会报告结果的 GDD 同步检查，并在写入 `docs/architecture/adr-[NNNN]-[slug].md` 之前只询问一次——“May I write it?”。更新注册表需要单独审批。收尾输出会提示用户在新会话中运行 `/architecture-review`，并在决策确定后运行 `/architecture-decision accept ADR-NNNN`。编写模式从不设置 `Accepted`，也从不解除用户故事的阻塞。
 
 ---
 
 ## Static Assertions (Structural)
 
-Checked against the SKILL.md by `/skill-test spec` — no fixture needed.
+由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] Has required frontmatter fields: `name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`
-- [ ] Has ≥2 phase headings
-- [ ] Contains status/verdict keywords: `Proposed`, `Accepted`, and the TD-ADR outcomes `CONCERNS` / `REJECT`
-- [ ] Contains "May I write" collaborative protocol language (whole-ADR write approval and registry approval)
-- [ ] Has a next-step handoff at the end (`/architecture-review`, `accept ADR-NNNN`)
-- [ ] Documents gate behavior: engine specialist validation, then TD-ADR in full mode; TD-ADR skipped in lean/solo with a named note
-- [ ] Documents that authoring always produces `Proposed` and only acceptance mode sets `Accepted` — retrofit's `Accepted` answer is routed through it
-- [ ] Mentions the engine version stamp from `docs/engine-reference/` (Engine Compatibility table)
+- [ ] 具有必填的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 至少包含 2 个阶段标题
+- [ ] 包含状态/结论关键词：`Proposed`、`Accepted`，以及 TD-ADR 结果 `CONCERNS` / `REJECT`
+- [ ] 包含 “May I write” 协作协议用语（整份 ADR 的写入审批与注册表审批）
+- [ ] 结尾包含下一步交接（`/architecture-review`、`accept ADR-NNNN`）
+- [ ] 记录质量闸门（gate）行为：先由引擎专家验证，再在 full 模式下运行 TD-ADR；lean/solo 模式下跳过 TD-ADR 并给出明确说明
+- [ ] 记录编写模式始终产出 `Proposed`，只有验收模式才会设置 `Accepted`——retrofit 的 `Accepted` 回答会转由验收模式处理
+- [ ] 提及来自 `docs/engine-reference/` 的引擎版本标记（Engine Compatibility 表）
 
 ---
 
 ## Director Gate Checks
 
-Review mode comes from the resolved `review_mode` (`modes.review_mode` in
-`project.yaml`); `--review full|lean|solo` overrides it for one run.
+评审模式取自解析后的 `review_mode`（`project.yaml` 中的 `modes.review_mode`）；`--review full|lean|solo` 可对单次运行进行覆盖。
 
-In `full` mode: after the draft is generated, the primary engine specialist
-validates it (Step 5.5), then `technical-director` spawns with gate TD-ADR
-(Step 5.6). The two run in that order, not in parallel. On CONCERNS the
-concerns are shown verbatim and the user picks `Revise flagged items` /
-`Accept and proceed` / `Discuss further`; on REJECT the draft is revised before
-the write approval. No verdict changes the ADR's Status.
+在 `full` 模式下：草稿生成后，先由主引擎专家验证（Step 5.5），然后由 `technical-director` 携带质量闸门（gate）TD-ADR 启动（Step 5.6）。两者按此顺序运行，不并行。出现 CONCERNS 时，会原样展示关注项，用户可选择 `Revise flagged items` / `Accept and proceed` / `Discuss further`；出现 REJECT 时，草稿会在写入审批之前修订。任何结论都不会改变 ADR 的 Status。
 
-In `lean` mode: TD-ADR is skipped (it is not a PHASE-GATE). Output notes
-"TD-ADR skipped — Lean mode." The engine specialist validation still runs.
+在 `lean` 模式下：跳过 TD-ADR（它不是 PHASE-GATE）。输出会注明 “TD-ADR skipped — Lean mode.”。引擎专家验证仍会运行。
 
-In `solo` mode: TD-ADR is skipped. Output notes "TD-ADR skipped — Solo mode."
-The engine specialist validation still runs.
+在 `solo` 模式下：跳过 TD-ADR。输出会注明 “TD-ADR skipped — Solo mode.”。引擎专家验证仍会运行。
 
-In every mode the written ADR has `Status: Proposed`.
+无论哪种模式，写入的 ADR 均为 `Status: Proposed`。
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非某个案例自身的 Fixture 另有说明，每个案例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见 `studio-tests/CLAUDE.md` § Fixture defaults。
 
 ---
 
 ## Test Cases
 
-### Case 1: Happy Path — New rendering ADR, full mode, TD-ADR approves
+### Case 1: 正常路径 — 新建渲染 ADR，full 模式，TD-ADR 通过
 
 **Fixture:**
-- `project.yaml` has `engine.name: Godot` and `modes.review_mode: full`
-- `docs/engine-reference/godot/VERSION.md` exists and marks the pinned version HIGH risk; `breaking-changes.md` lists a Rendering change
-- `docs/architecture/` contains `adr-0001-*.md` and `adr-0002-*.md`; none covers rendering
-- `docs/registry/architecture.yaml` exists with no stance touching rendering
-- `design/gdd/visual-effects.md` exists; the user confirms it as the GDD driving the decision, and its names match the ADR's Key Interfaces
-- The engine specialist finds only minor notes; TD-ADR returns APPROVE
+- `project.yaml` 中 `engine.name: Godot`，`modes.review_mode: full`
+- `docs/engine-reference/godot/VERSION.md` 存在，并将锁定版本标记为 HIGH 风险；`breaking-changes.md` 列出的变更中包含一项 Rendering 变更
+- `docs/architecture/` 包含 `adr-0001-*.md` 和 `adr-0002-*.md`；均未涉及渲染
+- `docs/registry/architecture.yaml` 存在，且没有涉及渲染的立场
+- `design/gdd/visual-effects.md` 存在；用户确认它是驱动该决策的 GDD，且其中名称与 ADR 的 Key Interfaces 一致
+- 引擎专家只发现次要问题；TD-ADR 返回 APPROVE
 
 **Input:** `/architecture-decision rendering-approach`
 
 **Expected behavior:**
-1. Step 1 reads `VERSION.md` first and displays the ENGINE KNOWLEDGE GAP WARNING for the Rendering domain
-2. Step 2 scans `docs/architecture/` and assigns ADR-0003
-3. Step 3a reads the registry before any existing ADR
-4. Step 4 presents assumptions (problem, 2–3 alternatives, GDD linkage, dependencies, `Status: Proposed`) as a confirm/adjust `AskUserQuestion`; no ADR is generated until the user confirms
-5. Step 5 drafts the full template, including the Engine Compatibility table (engine, domain, knowledge risk, references consulted)
-6. `godot-specialist` validates the draft; minor notes go into the Risks section
-7. `technical-director` then spawns with gate TD-ADR and returns APPROVE
-8. GDD sync check prints `GDD sync: checked 1 referenced GDD(s), no naming inconsistencies.` — never silent
-9. "ADR draft is complete. May I write it?" — on yes, writes `docs/architecture/adr-0003-rendering-approach.md` with `Status: Proposed`
-10. Registry candidates are shown and "May I update `docs/registry/architecture.yaml` with these [N] new stances?" is asked separately
-11. Closing output includes the fixed notice to run `/architecture-review` in a fresh session, and "Run `/architecture-decision accept ADR-0003` when the decision is settled"
+1. Step 1 首先读取 `VERSION.md`，并针对 Rendering 领域显示 ENGINE KNOWLEDGE GAP WARNING
+2. Step 2 扫描 `docs/architecture/` 并分配 ADR-0003
+3. Step 3a 在读取任何现有 ADR 之前先读取注册表
+4. Step 4 以确认/调整式 `AskUserQuestion` 呈现假设（问题、2–3 个备选方案、GDD 关联、依赖、`Status: Proposed`）；在用户确认之前不生成任何 ADR
+5. Step 5 起草完整模板，包括 Engine Compatibility 表（引擎、领域、知识风险、参考来源）
+6. `godot-specialist` 验证草稿；次要问题写入 Risks 小节
+7. 随后 `technical-director` 携带质量闸门（gate）TD-ADR 启动，并返回 APPROVE
+8. GDD 同步检查打印 `GDD sync: checked 1 referenced GDD(s), no naming inconsistencies.`——绝不静默
+9. “ADR draft is complete. May I write it?”——用户同意后，写入 `docs/architecture/adr-0003-rendering-approach.md`，其 `Status: Proposed`
+10. 展示注册表候选条目，并单独询问 “May I update `docs/registry/architecture.yaml` with these [N] new stances?”
+11. 收尾输出包含固定提示：在新会话中运行 `/architecture-review`，以及 “Run `/architecture-decision accept ADR-0003` when the decision is settled”
 
 **Assertions:**
-- [ ] `VERSION.md` is read before any other step, and the knowledge-gap warning is shown for the HIGH-risk domain
-- [ ] Assumptions are confirmed via `AskUserQuestion` before the ADR is generated; Status is shown as `Proposed`, never asked
-- [ ] The engine specialist validation runs before TD-ADR (sequential, not parallel)
-- [ ] One "May I write" approval covers the whole ADR; the file is `docs/architecture/adr-0003-rendering-approach.md`
-- [ ] The written ADR has `Status: Proposed` even though TD-ADR returned APPROVE
-- [ ] The GDD sync check reports the clean result for `visual-effects.md` in one line
-- [ ] The registry update has its own approval prompt, separate from the ADR write
-- [ ] Closing output contains the fresh-session `/architecture-review` notice and the `accept ADR-0003` command
+- [ ] `VERSION.md` 在任何其他步骤之前读取，且针对 HIGH 风险领域显示知识缺口警告
+- [ ] 在生成 ADR 之前通过 `AskUserQuestion` 确认假设；Status 显示为 `Proposed`，从不询问
+- [ ] 引擎专家验证在 TD-ADR 之前运行（顺序执行，非并行）
+- [ ] 一次 “May I write” 审批覆盖整份 ADR；文件为 `docs/architecture/adr-0003-rendering-approach.md`
+- [ ] 即使 TD-ADR 返回 APPROVE，写入的 ADR 仍为 `Status: Proposed`
+- [ ] GDD 同步检查以一行报告 `visual-effects.md` 的干净结果
+- [ ] 注册表更新有独立的审批提示，与 ADR 写入分开
+- [ ] 收尾输出包含新会话中运行 `/architecture-review` 的提示以及 `accept ADR-0003` 命令
 
 ---
 
-### Case 2: Failure Path — TD-ADR returns CONCERNS
+### Case 2: 失败路径 — TD-ADR 返回 CONCERNS
 
 **Fixture:**
-- Same as Case 1, but TD-ADR returns CONCERNS: "Alternatives do not address the mobile renderer"
-- One point stays unresolved after revision (which renderer to target on mobile)
+- 与 Case 1 相同，但 TD-ADR 返回 CONCERNS：“Alternatives do not address the mobile renderer”
+- 修订后仍有一点未解决（移动端应针对哪个渲染器）
 
 **Input:** `/architecture-decision rendering-approach`
 
 **Expected behavior:**
-1. TD-ADR spawns with the draft, engine version, domain and related ADRs
-2. The CONCERNS are shown to the user verbatim with the standard options from `director-gates.md`: `Revise flagged items` / `Accept and proceed` / `Discuss further`
-3. The user picks `Revise flagged items`; only then are the Decision or Alternatives sections revised (Step 5.6)
-4. The unresolved point is presented as its own `AskUserQuestion` with options from the review plus "Different approach — I'll describe it"
-5. The write approval is still asked; nothing is written before it
-6. The ADR is written with `Status: Proposed`
+1. TD-ADR 携带草稿、引擎版本、领域和相关 ADR 启动
+2. CONCERNS 会原样展示给用户，并附上 `director-gates.md` 中的标准选项：`Revise flagged items` / `Accept and proceed` / `Discuss further`
+3. 用户选择 `Revise flagged items`；只有在这之后才会修订 Decision 或 Alternatives 小节（Step 5.6）
+4. 未解决的点会作为独立的 `AskUserQuestion` 呈现，选项来自评审内容外加 “Different approach — I'll describe it”
+5. 仍会询问写入审批；在此之前不写入任何内容
+6. ADR 以 `Status: Proposed` 写入
 
 **Assertions:**
-- [ ] TD-ADR receives the ADR draft/path, engine version and domain as context
-- [ ] The CONCERNS are shown verbatim and the user chooses Revise / Accept / Discuss — the draft is not revised before that choice
-- [ ] Each unresolved decision is a separate `AskUserQuestion` with a free-text escape option
-- [ ] The ADR is written only after the "May I write" approval, with `Status: Proposed`
+- [ ] TD-ADR 接收 ADR 草稿/路径、引擎版本和领域作为上下文
+- [ ] CONCERNS 原样展示，由用户选择 Revise / Accept / Discuss——在该选择之前不修订草稿
+- [ ] 每个未解决的决策都是一个独立的 `AskUserQuestion`，并提供自由文本兜底选项
+- [ ] 只有在 “May I write” 审批之后才写入 ADR，且为 `Status: Proposed`
 
 ---
 
-### Case 3: Lean and Solo Modes — TD-ADR skipped; checks that cannot run say so
+### Case 3: Lean 与 Solo 模式 — 跳过 TD-ADR；无法运行的检查会明确说明
 
 **Fixture:**
-- Scenario (a): `project.yaml` has `modes.review_mode: lean` and `engine.name: Godot`
-- Scenario (b): same project, invoked with `--review solo`
-- Scenario (c): invoked with `--review solo` on a project with no engine configured — `engine.name` unset and `.claude/docs/technical-preferences.md` still `[TO BE CONFIGURED]`; at Step 1's prompt the user carries on without running `/setup-engine`
-- `design/gdd/` holds no GDD, so the ADR's GDD Requirements Addressed names none
+- Scenario (a)：`project.yaml` 中 `modes.review_mode: lean`，`engine.name: Godot`
+- Scenario (b)：同一项目，以 `--review solo` 调用
+- Scenario (c)：在未配置引擎的项目上以 `--review solo` 调用——`engine.name` 未设置，`.claude/docs/technical-preferences.md` 仍为 `[TO BE CONFIGURED]`；在 Step 1 的提示处，用户不运行 `/setup-engine` 而继续
+- `design/gdd/` 中没有 GDD，因此 ADR 的 GDD Requirements Addressed 不指定任何 GDD
 
-**Input:** (a) `/architecture-decision save-format` (b) and (c) `/architecture-decision save-format --review solo`
+**Input:** (a) `/architecture-decision save-format` (b) 和 (c) `/architecture-decision save-format --review solo`
 
 **Expected behavior:**
-1. (a) and (b): the engine specialist validation (Step 5.5) runs
-2. (a) Output notes "TD-ADR skipped — Lean mode." and proceeds to the GDD sync check
-3. (b) and (c): Output notes "TD-ADR skipped — Solo mode." and proceeds to the GDD sync check
-4. (c) No engine specialist is spawned, and the output records `Engine validation: NOT ASSESSED — no engine configured (engine.name unset in project.yaml)`
-5. The GDD sync check prints `GDD sync: NOT ASSESSED — [the ADR names no GDDs]`, not the clean one-line result
-6. "May I write it?" is still asked before the file is written
-7. The ADR is written with `Status: Proposed`
+1. (a) 和 (b)：运行引擎专家验证（Step 5.5）
+2. (a) 输出注明 “TD-ADR skipped — Lean mode.”，并继续执行 GDD 同步检查
+3. (b) 和 (c)：输出注明 “TD-ADR skipped — Solo mode.”，并继续执行 GDD 同步检查
+4. (c) 不启动引擎专家，输出记录 `Engine validation: NOT ASSESSED — no engine configured (engine.name unset in project.yaml)`
+5. GDD 同步检查打印 `GDD sync: NOT ASSESSED — [the ADR names no GDDs]`，而不是干净的一行结果
+6. 在写入文件之前仍会询问 “May I write it?”
+7. ADR 以 `Status: Proposed` 写入
 
 **Assertions:**
-- [ ] `technical-director` is not spawned in lean or solo mode
-- [ ] The skip note names the gate and the mode ("TD-ADR skipped — Lean mode." / "— Solo mode.")
-- [ ] The `--review solo` argument overrides the resolved `review_mode` for the run
-- [ ] (a) and (b): the engine specialist validation still runs
-- [ ] (c) With no engine configured, the output says engine validation was NOT ASSESSED instead of passing silently
-- [ ] With no GDD named, the GDD sync check reports NOT ASSESSED, not a clean result
-- [ ] "May I write" is asked before the file is written, and Status is `Proposed`
+- [ ] 在 lean 或 solo 模式下不启动 `technical-director`
+- [ ] 跳过说明明确指出闸门和模式（“TD-ADR skipped — Lean mode.” / “— Solo mode.”）
+- [ ] `--review solo` 参数会覆盖本次运行解析出的 `review_mode`
+- [ ] (a) 和 (b)：引擎专家验证仍会运行
+- [ ] (c) 未配置引擎时，输出会说明引擎验证为 NOT ASSESSED，而不是静默通过
+- [ ] 未指定 GDD 时，GDD 同步检查报告 NOT ASSESSED，而非干净结果
+- [ ] 在写入文件之前询问 “May I write”，且 Status 为 `Proposed`
 
 ---
 
-### Case 4: Edge Case — Proposed decision contradicts a registered stance
+### Case 4: 边界情况 — 拟议决策与已登记的立场冲突
 
 **Fixture:**
-- `docs/registry/architecture.yaml` records an interface contract: `damage_delivery → signal pattern (ADR-0003)`
-- ADR-0003 is Accepted
-- The user states the proposal when invoking the skill, before Step 1: the decision is to deliver damage by direct method calls
+- `docs/registry/architecture.yaml` 记录了一项接口契约（contract）：`damage_delivery → signal pattern (ADR-0003)`
+- ADR-0003 为 Accepted
+- 用户在调用技能时、Step 1 之前就陈述了提案：决定采用直接方法调用传递伤害
 
-**Input:** `/architecture-decision damage-pipeline`, with that description in the same message
+**Input:** `/architecture-decision damage-pipeline`，并在同一消息中附上该描述
 
 **Expected behavior:**
-1. Step 3a reads the registry before opening any existing ADR, and presents the relevant stances as locked constraints under "Existing Architectural Stances (must not contradict)"
-2. Still in Step 3a — right after the stances, before Step 4's assumptions prompt — the skill surfaces the conflict: "⚠️ Conflict: This ADR proposes [X], but ADR-0003 established that [Y]…"
-3. It offers three options: (1) align with the existing stance, (2) supersede ADR-0003 with an explicit replacement, (3) explain why this case is an exception
-4. It does not proceed to Step 4 until the conflict is resolved or accepted as an intentional exception
-5. If the user chooses to supersede: at the registry step the old entry is set to `status: "superseded_by: ADR-[NNNN]"` (quoted) and the new entry is added — the existing entry is not otherwise modified
+1. Step 3a 在打开任何现有 ADR 之前读取注册表，并在 “Existing Architectural Stances (must not contradict)” 下将相关立场作为锁定约束（constraint）呈现
+2. 仍在 Step 3a 中——就在立场之后、Step 4 的假设提示之前——技能会指出冲突：“⚠️ Conflict: This ADR proposes [X], but ADR-0003 established that [Y]…”
+3. 它提供三个选项：(1) 与现有立场保持一致，(2) 以明确的替代方案取代 ADR-0003，(3) 说明为何本案例属于例外
+4. 在冲突解决或被接受为有意的例外之前，不会进入 Step 4
+5. 如果用户选择取代：在注册表步骤中，旧条目会被设置为 `status: "superseded_by: ADR-[NNNN]"`（带引号），并添加新条目——除此之外不修改现有条目
 
 **Assertions:**
-- [ ] The registry is read before any existing ADR file
-- [ ] The conflict warning names ADR-0003 and offers exactly the three options above
-- [ ] The confirm/adjust assumptions prompt (Step 4) does not appear until the conflict is resolved
-- [ ] On supersede, the old registry entry is marked `superseded_by`, not edited or deleted
+- [ ] 注册表在读取任何现有 ADR 文件之前读取
+- [ ] 冲突警告明确指出 ADR-0003，并恰好提供上述三个选项
+- [ ] 在冲突解决之前，不出现确认/调整假设提示（Step 4）
+- [ ] 取代时，旧注册表条目被标记为 `superseded_by`，而不是被编辑或删除
 
 ---
 
-### Case 5: Acceptance Mode — Status moves to Accepted only through `accept`
+### Case 5: 验收模式 — 状态只能通过 `accept` 变为 Accepted
 
 **Fixture:**
-- `docs/architecture/adr-0005-physics-layers.md` exists with `Status: Proposed`
-- Scenario (a): its `## ADR Dependencies` lists `Depends On: ADR-0002`, and ADR-0002 is `Proposed`
-- Scenario (b): its only dependency is ADR-0001, which is `Accepted`; three files under `production/epics/*/story-*.md` name `ADR-0005` and are Blocked — two in the header form `/create-stories` writes (`> **Status**: Blocked`), one as `**Status:** Blocked`
-- `modes.automation` is `autonomous`
+- `docs/architecture/adr-0005-physics-layers.md` 存在，`Status: Proposed`
+- Scenario (a)：其 `## ADR Dependencies` 列出 `Depends On: ADR-0002`，而 ADR-0002 为 `Proposed`
+- Scenario (b)：其唯一依赖是 ADR-0001，且为 `Accepted`；`production/epics/*/story-*.md` 下的三个文件提及 `ADR-0005` 且为 Blocked——其中两个使用 `/create-stories` 写入的表头形式（`> **Status**: Blocked`），一个使用 `**Status:** Blocked`
+- `modes.automation` 为 `autonomous`
 
 **Input:** `/architecture-decision accept ADR-0005`
 
 **Expected behavior:**
-1. The skill globs `docs/architecture/adr-0005-*.md` and reads the single match
-2. (a) It refuses and names the blocker: ADR-0005 depends on ADR-0002, which is still Proposed; no file is edited
-3. (b) It finds the stories to unblock before asking, then asks "Accept ADR-0005 — [title]? …" with the count ("3 stories become Ready"), options `[A] Yes — accept it` / `[B] Not yet — leave it Proposed`
-4. (b) The prompt fires even though automation is `autonomous`
-5. (b) On yes: edits `## Status` to `Accepted`, leaves an existing `## Date` unchanged (adding one only if absent), moves the three stories from `Blocked` to `Ready`, and reports the ADR and each story that moved
+1. 技能用 glob 匹配 `docs/architecture/adr-0005-*.md` 并读取唯一匹配项
+2. (a) 它拒绝执行并指出阻塞项：ADR-0005 依赖 ADR-0002，而后者仍为 Proposed；不编辑任何文件
+3. (b) 它在询问前先找到待解除阻塞的用户故事，然后询问 “Accept ADR-0005 — [title]? …”，并附上数量（“3 stories become Ready”），选项为 `[A] Yes — accept it` / `[B] Not yet — leave it Proposed`
+4. (b) 即使自动化为 `autonomous`，该提示仍会出现
+5. (b) 用户同意后：将 `## Status` 编辑为 `Accepted`，保持现有 `## Date` 不变（仅在缺失时添加），把三个用户故事从 `Blocked` 移到 `Ready`，并报告该 ADR 及每个被移动的用户故事
 
 **Assertions:**
-- [ ] (a) Acceptance is refused when a dependency is not `Accepted`, naming ADR-0002; nothing is written
-- [ ] (b) The confirmation prompt states how many stories will become Ready
-- [ ] (b) The confirmation prompt appears in `autonomous` automation mode
-- [ ] (b) Status becomes `Accepted` and the three stories move to `Ready` only after the user confirms
-- [ ] Stories are matched only under `production/epics/`
-- [ ] (b) All three stories are found — the Blocked grep matches `> **Status**: Blocked` and `**Status:** Blocked`, not only the literal `Status: Blocked`
+- [ ] (a) 当某个依赖不是 `Accepted` 时拒绝验收，并指出 ADR-0002；不写入任何内容
+- [ ] (b) 确认提示说明将有多少个用户故事变为 Ready
+- [ ] (b) 在 `autonomous` 自动化模式下仍会出现确认提示
+- [ ] (b) 只有在用户确认后，Status 才变为 `Accepted`，三个用户故事才移到 `Ready`
+- [ ] 仅在 `production/epics/` 下匹配用户故事
+- [ ] (b) 三个用户故事都能找到——Blocked 的 grep 能匹配 `> **Status**: Blocked` 和 `**Status:** Blocked`，而不只是字面量 `Status: Blocked`
 
 ---
 
-### Case 5b: Acceptance Mode — a story that names the ADR only as a successor is left out
+### Case 5b: 验收模式 — 仅将 ADR 作为后继提及的用户故事被排除
 
 **Fixture:**
-- `docs/architecture/adr-0005-physics-layers.md` exists with `Status: Proposed`
-  and a `## ADR Dependencies` section whose only dependency, ADR-0001, is `Accepted`
-- Three stories under `production/epics/` are `> **Status**: Blocked`:
-  - `story-001.md`: blocked because ADR-0005 is Proposed
-  - `story-002.md`: blocked with "BLOCKED: ADR-0003 is Superseded — point the
-    story at ADR-0005 (edit its ADR field …) before implementing"; ADR-0005 is
-    named only as the successor of ADR-0003
-  - `story-003.md`: blocked for an unrelated reason that names no ADR-0005
-- The user answers `[A] Yes — accept it`
+- `docs/architecture/adr-0005-physics-layers.md` 存在，`Status: Proposed`，
+  且 `## ADR Dependencies` 小节的唯一依赖 ADR-0001 为 `Accepted`
+- `production/epics/` 下的三个用户故事为 `> **Status**: Blocked`：
+  - `story-001.md`：因 ADR-0005 为 Proposed 而被阻塞
+  - `story-002.md`：阻塞原因为 “BLOCKED: ADR-0003 is Superseded — point the
+    story at ADR-0005 (edit its ADR field …) before implementing”；ADR-0005
+    仅作为 ADR-0003 的后继者被提及
+  - `story-003.md`：因无关原因被阻塞，未提及 ADR-0005
+- 用户回答 `[A] Yes — accept it`
 
 **Input:** `/architecture-decision accept ADR-0005`
 
 **Expected behavior:**
-1. The dependency check passes
-2. The Blocked-story grep returns all three files; only `story-001.md` names
-   ADR-0005 as the reason it is blocked. `story-002.md` is left out because it
-   names ADR-0005 only as the successor to point at: it is still governed by
-   ADR-0003, and accepting ADR-0005 does not re-point it
-3. The confirmation prompt says "1 story becomes Ready", not 2 or 3
-4. On yes: `## Status` becomes `Accepted`; only `story-001.md` moves from
-   `Blocked` to `Ready`; the report lists the ADR and that one story
+1. 依赖检查通过
+2. Blocked 用户故事的 grep 返回全部三个文件；只有 `story-001.md` 将
+   ADR-0005 作为其被阻塞的原因。`story-002.md` 被排除，因为它仅将
+   ADR-0005 作为要指向的后继者提及：它仍受 ADR-0003 约束，接受 ADR-0005
+   并不会重新指向它
+3. 确认提示显示 “1 story becomes Ready”，而不是 2 或 3
+4. 用户同意后：`## Status` 变为 `Accepted`；只有 `story-001.md` 从
+   `Blocked` 移到 `Ready`；报告列出该 ADR 和那一个用户故事
 
 **Assertions:**
-- [ ] The stories-to-unblock count in the prompt is 1
-- [ ] `story-002.md` stays `Blocked`, unedited, and is not in the report of what moved
-- [ ] `story-003.md` stays `Blocked`, unedited
-- [ ] `story-001.md` becomes `Ready` only after the user confirms
+- [ ] 提示中的待解除阻塞故事数为 1
+- [ ] `story-002.md` 保持 `Blocked`、未被编辑，且不在移动报告中
+- [ ] `story-003.md` 保持 `Blocked`、未被编辑
+- [ ] 只有在用户确认后 `story-001.md` 才变为 `Ready`
 
 ---
 
-### Case 6: Retrofit — Missing Status answered `Accepted`
+### Case 6: Retrofit — 缺失的 Status 回答为 `Accepted`
 
 **Fixture:**
-- `docs/architecture/adr-0004-input-mapping.md` exists with Context, Decision, Consequences, Engine Compatibility and GDD Requirements Addressed, but no `## Status` and no `## ADR Dependencies`
-- ADR-0001 is `Accepted`
-- One file under `production/epics/*/story-*.md` names `ADR-0004` and has `> **Status**: Blocked`
+- `docs/architecture/adr-0004-input-mapping.md` 存在，包含 Context、Decision、Consequences、Engine Compatibility 和 GDD Requirements Addressed，但没有 `## Status` 和 `## ADR Dependencies`
+- ADR-0001 为 `Accepted`
+- `production/epics/*/story-*.md` 下的一个文件提及 `ADR-0004`，且包含 `> **Status**: Blocked`
 
 **Input:** `/architecture-decision retrofit docs/architecture/adr-0004-input-mapping.md`
 
 **Expected behavior:**
-1. The retrofit block lists Status (BLOCKING), ADR Dependencies (HIGH) and Date (MEDIUM — the fixture has no `## Date` and no `## Last Verified`) as missing, then asks "Shall I add the 3 missing sections? I will not modify any existing content."
-2. Asked for the current status, the user answers "Accepted" — the decision is already in force; asked for dependencies, the user answers "Depends On: ADR-0001"
-3. The skill appends `## Status` as `Proposed`, the ADR Dependencies section and `## Date` (today, noted as the retrofit date); no existing section changes
-4. It then runs acceptance mode on ADR-0004: the dependency check passes (ADR-0001 is Accepted), the blocked story is found, and "Accept ADR-0004 — [title]? …" is asked with "1 story becomes Ready"
-5. On yes: `## Status` becomes `Accepted`, the `## Date` the retrofit added is kept, and the story moves from `Blocked` to `Ready`
+1. retrofit 块会列出缺失的小节：Status（BLOCKING）、ADR Dependencies（HIGH）和 Date（MEDIUM——fixture 中没有 `## Date`，也没有 `## Last Verified`），然后询问 “Shall I add the 3 missing sections? I will not modify any existing content.”
+2. 询问当前状态时，用户回答 “Accepted”——该决策已生效；询问依赖时，用户回答 “Depends On: ADR-0001”
+3. 技能追加 `## Status` 为 `Proposed`、ADR Dependencies 小节和 `## Date`（当天日期，注明为 retrofit 日期）；现有小节不变
+4. 随后对 ADR-0004 运行验收模式：依赖检查通过（ADR-0001 为 Accepted），找到被阻塞的用户故事，并询问 “Accept ADR-0004 — [title]? …”，附带 “1 story becomes Ready”
+5. 用户同意后：`## Status` 变为 `Accepted`，保留 retrofit 添加的 `## Date`，该用户故事从 `Blocked` 移到 `Ready`
 
 **Assertions:**
-- [ ] Only the missing sections are appended; existing sections are untouched
-- [ ] The retrofit answer `Accepted` is never written straight into `## Status`; `Accepted` appears only after acceptance mode's dependency check and confirmation
-- [ ] The confirmation prompt names the story count, as in Case 5
-- [ ] Variant — the user declines "Shall I add the 3 missing sections?": no section is written, `## Date` included
+- [ ] 只追加缺失的小节；现有小节不受影响
+- [ ] retrofit 回答的 `Accepted` 绝不会直接写入 `## Status`；`Accepted` 只有在验收模式的依赖检查和确认之后才会出现
+- [ ] 确认提示明确故事数量，与 Case 5 相同
+- [ ] 变体——用户拒绝 “Shall I add the 3 missing sections?”：不写入任何小节，包括 `## Date`
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Engine context (`VERSION.md`) is loaded first and stamped into the Engine Compatibility table
-- [ ] Assumptions are confirmed via `AskUserQuestion` before the ADR is generated
-- [ ] "May I write" is asked once for the whole ADR before writing; the registry update has its own approval
-- [ ] TD-ADR runs only in full mode; lean/solo print a skip note naming the gate and mode
-- [ ] TD-ADR CONCERNS are shown verbatim with `Revise flagged items` / `Accept and proceed` / `Discuss further`, never revised without the user's choice
-- [ ] A TD-ADR `NOT ASSESSED` answer names the missing input and is never presented as an approval
-- [ ] Authoring always writes `Status: Proposed`; `Accepted` is set only by acceptance mode after its dependency check and explicit user confirmation — directly through `accept`, or when retrofit hands it an `Accepted` answer
-- [ ] Engine validation and the GDD sync check each report `NOT ASSESSED` when they cannot run, never a silent pass
-- [ ] Authoring does not unblock stories; it lists the stories still waiting on the ADR
-- [ ] Ends with next-step handoff: `/architecture-review` in a fresh session, and `/architecture-decision accept ADR-NNNN`
+- [ ] 首先加载引擎上下文（`VERSION.md`），并将其标记写入 Engine Compatibility 表
+- [ ] 在生成 ADR 之前通过 `AskUserQuestion` 确认假设
+- [ ] 写入前对整份 ADR 只询问一次 “May I write”；注册表更新有独立的审批
+- [ ] TD-ADR 仅在 full 模式下运行；lean/solo 会打印跳过说明，指出闸门和模式
+- [ ] TD-ADR 的 CONCERNS 原样展示，并附上 `Revise flagged items` / `Accept and proceed` / `Discuss further`，未经用户选择绝不修订
+- [ ] TD-ADR 的 `NOT ASSESSED` 回答会指出缺失的输入，绝不作为批准呈现
+- [ ] 编写模式始终写入 `Status: Proposed`；`Accepted` 只由验收模式在其依赖检查和用户明确确认之后设置——可直接通过 `accept`，或在 retrofit 传入 `Accepted` 回答时设置
+- [ ] 引擎验证和 GDD 同步检查在无法运行时各自报告 `NOT ASSESSED`，绝不静默通过
+- [ ] 编写模式不解除用户故事的阻塞；它会列出仍在等待该 ADR 的用户故事
+- [ ] 以下一步交接结尾：在新会话中运行 `/architecture-review`，以及 `/architecture-decision accept ADR-NNNN`
 
 ---
 
 ## Coverage Notes
 
-- Retrofit is fixture-tested only for a missing Status answered `Accepted`
-  (Case 6); the other answers (`Proposed`, `Deprecated`, `Superseded`) and the
-  retrofit of Engine Compatibility and GDD Requirements Addressed are not.
-- The acceptance-mode refusals for a missing `## Status`, an absent or `UNKNOWN`
-  dependency section, and an already-Accepted or Superseded ADR are not
-  individually fixture-tested.
-- Of the GDD sync check's three outcomes, the one-line clean result (Case 1)
-  and `NOT ASSESSED` (Case 3) are tested; the warning block and its
-  three-option write approval are not.
-- `team.size` and `docs.density` variations are not tested.
-- ADR numbering is not independently fixture-tested beyond Case 1.
+- retrofit 仅针对缺失 Status 回答 `Accepted` 的情况做了 fixture 测试
+  （Case 6）；其他回答（`Proposed`、`Deprecated`、`Superseded`）以及对
+  Engine Compatibility 和 GDD Requirements Addressed 的 retrofit 未测试。
+- 验收模式对缺失 `## Status`、依赖小节缺失或为 `UNKNOWN`、以及 ADR
+  已为 Accepted 或 Superseded 的拒绝情况，未逐一做 fixture 测试。
+- 在 GDD 同步检查的三种结果中，单行干净结果（Case 1）和 `NOT ASSESSED`
+  （Case 3）已测试；警告块及其三选项写入审批未测试。
+- `team.size` 和 `docs.density` 的各种变化未测试。
+- ADR 编号除 Case 1 外未单独做 fixture 测试。

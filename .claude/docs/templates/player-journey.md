@@ -9,342 +9,313 @@
 
 ## Journey Overview
 
-[One paragraph capturing the full emotional arc from first launch to long-term
-play. This is the player's story, not the game's feature list. Describe the
-journey in emotional terms: where do they start (curious, skeptical, cautious),
-how does the relationship with the game deepen, what is the peak emotional
-experience, and what sustains them afterward?
+[用一个段落捕捉从首次启动到长期游玩的完整情感弧线。
+这是玩家的故事，不是游戏的功能清单。用情感语言描述这段旅程：
+他们从哪里开始（好奇、怀疑、谨慎），
+与游戏的关系如何加深，情感的峰值体验是什么，
+以及在之后是什么支撑他们继续？
 
-Example: "The player arrives skeptical and slightly overwhelmed, is quickly
-disarmed by an early moment of unexpected delight, spends the middle hours
-discovering that the systems run deeper than they first appeared, and eventually
-reaches a state of confident mastery where they generate their own challenges and
-share their discoveries with others."
+示例："玩家带着怀疑和些许不知所措到来，很快被早期一个意想不到的愉悦时刻卸下防备，
+在中间数小时里发现这些系统比最初看起来更深，
+最终达到自信的精通状态，自己生成挑战，并与他人分享自己的发现。"
 
-If this arc cannot be described in one paragraph, the emotional design is not
-yet clear enough — resolve that ambiguity before filling in the phases below.]
+如果无法用一个段落描述这条弧线，说明情感设计还不够清晰——
+在填写下面的阶段之前先解决这个模糊之处。]
 
 ---
 
 ## Target Player Archetype
 
-[3-4 lines describing the player's MINDSET and gaming literacy, not their
-demographics. Demographics answer "who are they" — this answers "how do they
-approach games."
+[用 3-4 行描述玩家的心态和游戏素养，而不是人口统计特征。
+人口统计回答"他们是谁"——这里回答"他们如何对待游戏"。
 
-Describe: What expectations do they carry from other games? How patient are
-they with systems that don't explain themselves? Do they read tooltips or ignore
-them? Do they lean into challenge or route around it? Are they here for a story,
-a power trip, a creative outlet, or a test of skill?
+描述：他们从其他游戏带来了什么预期？对不自我解释的系统有多耐心？
+他们会读工具提示还是忽略？他们迎向挑战还是绕开它？
+他们是为了故事、力量幻想、创作出口，还是技巧检验而来？
 
-Example: "A player who has finished at least one other game in this genre and
-arrived with a specific hypothesis about what to expect. They are willing to
-invest 30+ minutes before judging the game, they read item descriptions, and they
-find emergent mastery more satisfying than scripted victories. They feel respected
-when the game trusts them to figure things out."]
+示例："一位至少完成过本类型另一款游戏的玩家，带着对将要发生什么的明确假设而来。
+他们愿意在判定游戏前投入 30 分钟以上，会阅读物品描述，
+并且认为涌现式精通比脚本化的胜利更令人满足。
+当游戏信任他们自行摸索时，他们会感到被尊重。"]
 
 ---
 
 ## Journey Phases
 
-> **Guidance**: The six phases below are the standard template. Not all phases
-> apply to all games. A short narrative game may not have Habitual Play or
-> Long-Term Engagement. A puzzle game may compress Orientation into First Contact.
-> Delete or merge phases that genuinely do not apply — do not fill them with
-> placeholder values to make the template look complete.
+> **Guidance**: 下面的六个阶段是标准模板。并非所有阶段
+> 都适用于所有游戏。短篇叙事游戏可能没有 Habitual Play 或
+> Long-Term Engagement。解谜游戏可能把 Orientation 压缩进 First Contact。
+> 删除或合并确实不适用的阶段——不要用占位值填充它们，
+> 只为让模板看起来完整。
 
 ---
 
 ### Phase 1: First Contact (0-5 minutes)
 
-**Emotional state on arrival**: [What is the player feeling before they touch
-the game? They may be skeptical (purchased on impulse), curious (followed
-recommendations), or expectant (been waiting for it). This state is your
-starting condition — your design must meet them there.]
+**Emotional state on arrival**: [玩家在接触游戏之前感受如何？
+他们可能怀疑（冲动购买）、好奇（跟随推荐），或期待（已等待多时）。
+这个状态是你的起始条件——你的设计必须在那里迎接他们。]
 
-**Primary question the player is asking**: [e.g., "Is this worth my time?",
-"Will this be too hard?", "Do I understand what I'm supposed to do?"]
+**Primary question the player is asking**: [例如："这值得我花时间吗？"
+"这会不会太难？""我明白自己该做什么吗？"]
 
 **Key experience the game must deliver**:
-[What MUST happen in these five minutes for the player to stay? Not a tutorial
-beat — an emotional beat. The first contact experience should answer the player's
-primary question with a confident "yes." It may be a moment of beauty, a
-satisfying mechanical click, a surprising twist on a familiar genre pattern, or
-an early win that feels earned.]
+[在这五分钟内必须发生什么，玩家才会留下？不是教程节拍——
+而是情感节拍。首次接触体验应以一个有信心的"是"回答玩家的首要问题。
+它可能是一个美的瞬间、一次满足的机制咔哒感、对熟悉类型套路的意外反转，
+或一次让人觉得应得的早期胜利。]
 
-**Emotional state on exit**: [What does success look like? e.g., "Curious
-about the next layer", "Surprised that this feels different from similar games",
-"Already thinking about a decision they made and whether it was right."]
+**Emotional state on exit**: [成功是什么样子？例如："对下一层感到好奇"、
+"惊讶于这与其他同类游戏如此不同"、
+"已经在思考自己做过的某个决定是否正确。"]
 
-**Risk if this phase fails**: [What does the player do? e.g., "Refund within
-the 2-hour Steam window", "Put it down and never return", "Post a negative
-first impression", "Recommend it to no one."]
+**Risk if this phase fails**: [玩家会怎么做？例如："在 Steam 2 小时窗口内退款"、
+"放下再也不回来"、"发布负面第一印象"、"不推荐给任何人。"]
 
 ---
 
 ### Phase 2: Orientation (5-30 minutes)
 
-**Emotional state on arrival**: [Player is intrigued but not yet committed.
-They are forming their first mental model of what this game is.]
+**Emotional state on arrival**: [玩家被吸引，但尚未投入。
+他们正在形成关于这款游戏是什么的最初心智模型。]
 
-**Primary question the player is asking**: [e.g., "How does this actually work?",
-"What am I building toward?", "Am I going to be good at this?"]
+**Primary question the player is asking**: [例如："这究竟怎么运作？"
+"我在朝着什么目标建设？""我会擅长这个吗？"]
 
 **Key experience the game must deliver**:
-[This is the window where the player builds their foundational mental model.
-Describe the one or two "aha" moments that crystallize the game's identity.
-The player should feel competence growing — their predictions about the game
-should start coming true. They should also catch their first glimpse of depth:
-a system or interaction that hints "this goes further than I thought."]
+[这是玩家建立基础心智模型的窗口。
+描述一到两个让游戏身份清晰化的"啊哈"时刻。
+玩家应感到胜任感在增长——他们对游戏的预测应开始成真。
+他们还应该第一次瞥见深度：
+某个系统或交互暗示"这比我想的要走得更远。"]
 
-**Emotional state on exit**: [e.g., "Has a working model of the core loop",
-"Has made at least one meaningful decision they care about the outcome of",
-"Feels the skill ceiling is higher than it first appeared."]
+**Emotional state on exit**: [例如："对核心循环有可用的模型"、
+"至少做出过一个他们在意结果的有意义决定"、
+"感觉技能上限比最初看起来更高。"]
 
-**Risk if this phase fails**: [e.g., "Player concludes the game is shallow",
-"Player feels lost and stops trying", "Player never forms a goal."]
+**Risk if this phase fails**: [例如："玩家认定游戏很浅"、
+"玩家感到迷失并停止尝试"、"玩家始终没有形成目标。"]
 
 ---
 
 ### Phase 3: First Mastery (30 minutes - 2 hours)
 
-**Emotional state on arrival**: [Player understands the basics and is testing
-the edges. They are actively trying to get better rather than just trying to
-understand.]
+**Emotional state on arrival**: [玩家理解了基础，正在试探边界。
+他们正主动尝试变得更好，而不只是尝试理解。]
 
-**Primary question the player is asking**: [e.g., "What's the right strategy?",
-"What's possible if I get good at this?", "What am I missing?"]
+**Primary question the player is asking**: [例如："正确的策略是什么？"
+"如果我玩得好，能做到什么？""我漏掉了什么？"]
 
 **Key experience the game must deliver**:
-[This is the phase where the player earns their first genuine skill victory —
-a moment where something that was hard becomes easy through their own growth,
-not through the game getting easier. It should feel like crossing a threshold.
-They should also discover their first piece of emergent depth: a system
-interaction, a build synergy, or a hidden mechanic that rewards curiosity.
-According to Csikszentmihalyi's flow model, challenge must scale here — introduce
-the first real test of the skills they've been building.]
+[这是玩家获得第一次真正技能胜利的阶段——
+某个曾经困难的事情通过他们自身的成长变得容易，
+而不是因为游戏变简单了。它应感觉像跨过一道门槛。
+他们还应该发现第一处涌现式深度：一个系统交互、一个构筑协同，
+或一个奖励好奇心的隐藏机制。
+根据契克森米哈赖的心流模型，挑战必须在此升级——
+引入对他们一直在构建的技能的一次真正考验。]
 
-**Emotional state on exit**: [e.g., "Proud of a specific decision or victory",
-"Has an opinion about what the 'right' way to play is (even if wrong)",
-"Has questions they want to answer in their next session."]
+**Emotional state on exit**: [例如："为某个具体决定或胜利感到自豪"、
+"对'正确'玩法有自己的看法（即使错误）"、
+"带着想在下次游玩中回答的问题。"]
 
-**Risk if this phase fails**: [e.g., "Player never reaches flow state and stops
-before the game gets interesting", "Player forms wrong mental model and blames
-the game when it breaks."]
+**Risk if this phase fails**: [例如："玩家从未进入心流状态，在游戏变得有趣之前就停止"、
+"玩家形成错误的心智模型，并在它崩溃时归咎于游戏。"]
 
 ---
 
 ### Phase 4: Depth Discovery (2-10 hours)
 
-**Emotional state on arrival**: [Player has a working strategy and is starting
-to see its limits. They are ready to discover that there is more.]
+**Emotional state on arrival**: [玩家有一套可用的策略，并开始看到它的局限。
+他们已经准备好发现还有更多内容。]
 
-**Primary question the player is asking**: [e.g., "Is there a better way?",
-"What am I missing that other players know?", "How deep does this actually go?"]
+**Primary question the player is asking**: [例如："有没有更好的方法？"
+"其他玩家知道而我漏掉了什么？""这实际上有多深？"]
 
 **Key experience the game must deliver**:
-[This is where the game's true depth must reveal itself. Players who reach this
-phase are your core audience — they have cleared the onboarding and proven their
-commitment. They should discover systems, combinations, or strategies that
-recontextualize everything they have done so far. The world should feel larger
-than the tutorial implied. This is also the phase where Bartle's Explorers find
-their reward: content and knowledge that only the curious find.
+[游戏真正的深度必须在这里显露。到达这个阶段的玩家是你的核心受众——
+他们已通过上手引导，并证明了投入。
+他们应发现能重新诠释此前一切的系统、组合或策略。
+世界应感觉比教程暗示的更大。
+这也是 Bartle 的探索者获得回报的阶段：只有好奇者才能发现的内容与知识。
 
-Design note: Depth Discovery is where many indie games fail silently. Players
-exhaust the visible content without ever finding the hidden depth. Audit every
-layer of depth in this window and confirm it is discoverable without a guide.]
+设计注记：Depth Discovery 是许多独立游戏悄然失败的阶段。玩家
+耗尽了可见内容，却从未发现隐藏深度。审计这个窗口中的每一层深度，
+确认它无需攻略即可被发现。]
 
-**Emotional state on exit**: [e.g., "Has rebuilt their strategy from scratch
-at least once", "Can imagine multiple viable approaches to the same problem",
-"Has discovered at least one thing that surprised them."]
+**Emotional state on exit**: [例如："至少从头重建过一次自己的策略"、
+"能想象对同一问题的多种可行方法"、
+"至少发现了一件让他们惊讶的事。"]
 
-**Risk if this phase fails**: [e.g., "Player concludes they have 'finished'
-the game and feels mild disappointment", "Player recommends the game but says
-'it's a bit short.'"]
+**Risk if this phase fails**: [例如："玩家认定自己已经'通关'游戏，感到轻微失望"、
+"玩家会推荐这款游戏，但说'有点短。'"]
 
 ---
 
 ### Phase 5: Habitual Play (10-50 hours)
 
-> *Note: Not applicable to short-form games (visual novels, short narrative
-> games, puzzle games with fixed content). Delete this phase if the game's
-> intended experience concludes before this timeframe.*
+> *注：不适用于短篇游戏（视觉小说、短篇叙事游戏、
+> 固定内容的解谜游戏）。如果游戏的预期体验在此时间范围之前结束，删除此阶段。*
 
-**Emotional state on arrival**: [Player considers themselves competent. The
-game has become part of their routine. They have a playstyle identity.]
+**Emotional state on arrival**: [玩家认为自己已经胜任。游戏已成为他们日常的一部分。
+他们拥有自己的玩法风格身份。]
 
-**Primary question the player is asking**: [e.g., "What's my next goal?",
-"Can I beat my previous record?", "What haven't I tried yet?"]
+**Primary question the player is asking**: [例如："我的下一个目标是什么？"
+"我能打破之前的记录吗？""我还有什么没试过？"]
 
 **Key experience the game must deliver**:
-[Habitual play requires the game to offer goals beyond the tutorial narrative.
-The player generates their own challenges, pursues optional content, or begins
-competing (against the game, other players, or their own records). This phase
-sustains through Bartle's Achiever motivations: collection completion, mastery
-benchmarks, visible milestones. It also requires natural session endings that
-leave forward tension — the player should always stop with something unfinished
-that they want to return to.]
+[Habitual Play 要求游戏提供教程叙事之外的目标。
+玩家生成自己的挑战、追求可选内容，或开始竞争
+（对抗游戏、其他玩家或自己的记录）。这一阶段通过 Bartle 的成就者动机
+维持：收集完成度、精通基准、可见里程碑。它还需要自然的会话结束点，
+留下前进的张力——玩家应总是在有未完成之事时停下，
+并想回来继续。]
 
-**Emotional state on exit**: [e.g., "Has a specific goal they are working toward
-across multiple sessions", "Considers themselves part of a community of people
-who play this game."]
+**Emotional state on exit**: [例如："有一个跨多次游玩持续追求的具体目标"、
+"认为自己属于一个玩这款游戏的社区。"]
 
-**Risk if this phase fails**: [e.g., "Player churns after completing main content
-and never returns", "Game fails word-of-mouth because players don't develop
-strong opinions about it."]
+**Risk if this phase fails**: [例如："玩家在完成主线内容后流失，再也不回来"、
+"游戏口碑传播失败，因为玩家没有形成强烈看法。"]
 
 ---
 
 ### Phase 6: Long-Term Engagement (50+ hours)
 
-> *Note: Only applies to games designed for extended play — live service games,
-> deeply systemic games, competitive games, and games with community-driven
-> content. Delete this phase if it does not fit the game's design intent.*
+> *注：仅适用于为长期游玩设计的游戏——长线运营游戏、
+> 深度系统化游戏、竞技游戏，以及拥有社区驱动内容的游戏。
+> 如果它不符合游戏的设计意图，删除此阶段。*
 
-**Emotional state on arrival**: [Player is a veteran. The game is part of their
-identity to some degree. They are invested in the community and the ecosystem.]
+**Emotional state on arrival**: [玩家是老手。游戏在某种程度上已成为他们身份的一部分。
+他们投入于社区和生态。]
 
-**Primary question the player is asking**: [e.g., "What's new?", "Can I reach
-the top?", "Can I find something no one has found before?"]
+**Primary question the player is asking**: [例如："有什么新内容？"
+"我能登顶吗？""我能发现无人发现过的东西吗？"]
 
 **Key experience the game must deliver**:
-[Long-term engagement is sustained by different mechanisms than initial fun:
-social status, creative expression, competitive standing, or the role of expert
-and guide. Design for this phase by asking what role a veteran player wants to
-play in the ecosystem — not just what content they want to consume. Systems
-that enable knowledge transfer (guides, community sharing, mentorship) dramatically
-extend this phase.]
+[长期参与由不同于最初乐趣的机制维持：
+社会地位、创意表达、竞技排名，或专家与引导者的角色。
+为此阶段做设计时，要问老手玩家想在生态中扮演什么角色——
+而不只是他们想消费什么内容。支持知识传递的系统
+（攻略、社区分享、指导）会显著延长这一阶段。]
 
-**Emotional state on exit**: [e.g., "Part of a community", "Considered an
-expert by newer players", "Invested in the game's ongoing development and direction."]
+**Emotional state on exit**: [例如："属于一个社区"、
+"被新玩家视为专家"、
+"投入于游戏的持续开发与方向。"]
 
-**Risk if this phase fails**: [e.g., "Veteran players leave and take their
-social influence with them, accelerating churn in the broader player base."]
+**Risk if this phase fails**: [例如："老手玩家离开并带走他们的社交影响力，
+加速更广泛玩家群体的流失。"]
 
 ---
 
 ## Critical Moments
 
-> **Guidance**: These are specific, individual events — not phases — that
-> must land with precision. A critical moment is a single interaction, scene,
-> or beat that carries outsized emotional weight. Missing it (through bad UX,
-> poor timing, or weak feedback) can derail the entire journey. Identify 8-15
-> such moments across the game.
+> **Guidance**: 这些是具体的、单独的事件——不是阶段——必须精确落地。
+> 关键瞬间是承载超大情感重量的单次交互、场景或节拍。
+> 错过它（通过糟糕的 UX、糟糕的时机或薄弱的反馈）可能使整个旅程脱轨。
+> 在整款游戏中识别 8-15 个这样的时刻。
 
 | Moment | Phase | Emotional Target | If It Fails |
 |--------|-------|-----------------|-------------|
-| [The first death] | [First Contact] | [Surprise followed by understanding — "I see what I did wrong"] | [Player feels the death was unfair and loses trust in the game's fairness] |
-| [The first big win] | [Orientation] | [Earned pride — "I figured that out myself"] | [Player feels the win was handed to them and undervalues it] |
-| [The first system discovery] | [First Mastery] | [Delight — "I didn't know you could do that"] | [Player misses it entirely and never discovers the depth] |
-| [The moment the world opens up] | [Depth Discovery] | [Awe followed by hunger — "How much more is there?"] | [Player feels underwhelmed and concludes they have seen everything] |
-| [The first endgame goal] | [Habitual Play] | [Renewed purpose — "Now I have something to work toward"] | [Player completes the main content and feels finished] |
-| [Add moment] | [Phase] | [Emotional target] | [Failure consequence] |
+| [第一次死亡] | [First Contact] | [惊讶随后理解——"我明白我做错了什么"] | [玩家觉得死亡不公平，失去对游戏公平性的信任] |
+| [第一次重大胜利] | [Orientation] | [应得的自豪——"这是我自己想出来的"] | [玩家觉得胜利是白送的，因而低估它] |
+| [第一次系统发现] | [First Mastery] | [愉悦——"我不知道还能这样"] | [玩家完全错过，永远发现不了深度] |
+| [世界豁然开朗的时刻] | [Depth Discovery] | [敬畏随后渴望——"还有多少？"] | [玩家感到失望，认定自己已经看尽一切] |
+| [第一个终局目标] | [Habitual Play] | [重获目标——"现在我有可努力的方向了"] | [玩家完成主线内容后觉得已经结束] |
+| [添加时刻] | [Phase] | [情感目标] | [失败后果] |
 
 ---
 
 ## Retention Hooks
 
-> **Guidance**: Retention hooks are the specific mechanisms that pull the player
-> back to the next session. They operate at different time scales. A game with
-> only one hook type has a fragile retention loop. Strong games layer multiple
-> hook types, so players with different motivations all have a reason to return.
+> **Guidance**: 留存钩子是拉玩家回到下一次游玩的特定机制。
+> 它们在不同时间尺度上运作。只有一种钩子的游戏，其留存循环是脆弱的。
+> 强游戏会叠加多种钩子类型，让不同动机的玩家都有回来的理由。
 >
-> Map each hook to the systems that deliver it — if a hook has no system behind
-> it, it is an aspiration, not a design.
+> 将每个钩子映射到实现它的系统——如果某个钩子背后没有系统，
+> 它只是愿望，而不是设计。
 
 | Hook Type | Hook Description | Systems That Deliver It |
 |-----------|-----------------|------------------------|
-| **Session Start** | [What draws the player in when they launch? e.g., "Unresolved choices from last session", "World state changed while they were away", "Daily reward waiting"] | [System names, e.g., "Persistent world state, save system, daily login reward"] |
-| **Session End** | [What feeling do they have as they close the game? e.g., "A goal just out of reach", "A question unanswered", "An upgrade ready to use next time"] | [e.g., "Progress bar at 90%, next-session unlock notification"] |
-| **Daily Return** | [What reason exists to play today vs. skipping a day? e.g., "Daily challenge", "Time-gated resource replenishment", "Limited-time event"] | [e.g., "Daily quest system, resource regen timers, event calendar"] |
-| **Long-Term** | [What provides purpose across weeks? e.g., "Season pass milestones", "Competitive ranking reset", "Community challenge goals"] | [e.g., "Ranked system, seasonal content, community events"] |
+| **Session Start** | [玩家启动游戏时是什么吸引他们？例如："上次游玩未解决的选择"、"他们离开时世界状态发生了变化"、"等待中的每日奖励"] | [系统名称，例如："持久世界状态、存档系统、每日登录奖励"] |
+| **Session End** | [他们关闭游戏时带着什么感受？例如："一个伸手可及的目标"、"一个未回答的问题"、"下次就能使用的升级"] | [例如："进度条到 90%、下次游玩解锁通知"] |
+| **Daily Return** | [今天游玩而不跳过的理由是什么？例如："每日挑战"、"时间门控的资源补充"、"限时活动"] | [例如："每日任务系统、资源恢复计时器、活动日历"] |
+| **Long-Term** | [什么提供跨越数周的目标感？例如："赛季通行证里程碑"、"竞技排名重置"、"社区挑战目标"] | [例如："排位系统、赛季内容、社区活动"] |
 
 ---
 
 ## Player Progression Feel
 
-[Describe HOW the player should experience their progression — not the mechanical
-system (that belongs in GDDs), but the FEELING of growing.
+[描述玩家应如何体验自己的成长——不是机械系统
+（那属于 GDD），而是成长的感觉。
 
-Choose the primary progression feeling and describe what it should feel like in
-concrete emotional terms. Examples of distinct progression feelings:
+选择主要成长感受，并用具体情感语言描述它应有的感觉。
+不同成长感受的示例：
 
-- **Power growth**: "The player should feel increasingly dangerous. Early game
-  combat should feel tense and measured; late game combat should feel effortless
-  against common enemies, reserving challenge for elite encounters."
-- **World expansion**: "The player's sense of the world should grow outward.
-  Each new area should make the map feel larger, not just longer."
-- **Story revelation**: "The player should feel like they are slowly assembling
-  a picture. Early revelations should recontextualize what they have already seen."
-- **Skill improvement**: "The player should feel themselves getting sharper.
-  Encounters they struggled with early should feel controlled by mid-game,
-  not because they got more powerful, but because their decisions improved."
-- **Community status**: "The player should feel a growing sense of belonging and
-  recognition within the player community as their knowledge deepens."
+- **力量成长**："玩家应感到自己越来越危险。前期战斗应感觉紧张而有分寸；
+  后期战斗面对普通敌人应感觉轻松，把挑战留给精英遭遇。"
+- **世界扩展**："玩家对世界的感知应向外生长。
+  每个新区域都应让地图感觉更大，而不只是更长。"
+- **故事揭示**："玩家应感觉自己正在慢慢拼出一幅图。
+  早期揭示应重新诠释他们已经看到的内容。"
+- **技能提升**："玩家应感到自己变得越来越敏锐。
+  早期苦苦挣扎的遭遇在中期应感觉可控，
+  不是因为他们变得更强，而是因为他们的决策变好了。"
+- **社区地位**："随着知识加深，玩家应感到在玩家社区中的归属感和认可度不断增长。"
 
-Answer: what is the primary progression feeling in this game, and what does it
-concretely look and feel like at the beginning, middle, and end of the journey?]
+回答：本游戏的主要成长感受是什么，它在旅程的开始、中段和结尾
+具体看起来和感觉起来如何？]
 
 ---
 
 ## Anti-Patterns to Avoid
 
-> **Guidance**: Anti-patterns are recurring design mistakes that reliably
-> break the player journey. List the ones most relevant to this specific game
-> and how the design actively guards against them. Be specific — "avoid bad UX"
-> is not an anti-pattern, it is a platitude.
+> **Guidance**: 反模式是反复出现、稳定破坏玩家旅程的设计错误。
+> 列出与本游戏最相关的那些，以及设计如何主动防范它们。
+> 要具体——"避免糟糕的 UX"不是反模式，而是空话。
 
-- **[Player feels punished for experimenting]**: [e.g., "The crafting system
-  should never consume irreplaceable resources. All experiment costs must be
-  recoverable within one session."]
-- **[Player loses progress with no explanation]**: [e.g., "All save points are
-  visible before risky encounters. Progress loss must always be preceded by a
-  warning the player could have noticed."]
-- **[Difficulty spike creates a wall, not a gate]**: [e.g., "When a player
-  fails an encounter three times, the game surfaces a contextual hint. A wall
-  stops progress; a gate requires the right key — make sure players know what
-  key they need."]
-- **[Player reaches the content ceiling before the emotional arc completes]**:
-  [e.g., "The game should never run out of content while the player still has
-  unanswered questions about the world or their build."]
-- **[Mandatory systems are introduced too late to feel meaningful]**: [e.g.,
-  "Any system the player must engage with in the late game must be introduced
-  in an optional or low-stakes context earlier."]
-- **[Add anti-pattern specific to this game's design risks]**: [Description]
+- **[玩家因尝试而受惩罚]**：[例如："制作系统绝不应消耗不可替代的资源。
+  所有试验成本都必须能在一次游玩内收回。"]
+- **[玩家失去进度却毫无解释]**：[例如："所有存档点都在高风险遭遇之前可见。
+  进度丢失之前必须始终有玩家本可注意到的警告。"]
+- **[难度峰值变成一堵墙，而不是一道门]**：[例如："当玩家在某个遭遇中失败三次时，
+  游戏显示情境提示。墙阻止前进；门需要正确的钥匙——确保玩家知道需要什么钥匙。"]
+- **[玩家在情感弧线完成之前就触及内容上限]**：
+  [例如："游戏绝不应在玩家对世界或构筑仍有未解答问题时耗尽内容。"]
+- **[强制系统引入得太晚，显得没有意义]**：[例如：
+  "玩家在后期必须接触的任何系统，都必须在更早的可选或低风险情境中引入。"]
+- **[添加与本游戏设计风险相关的反模式]**：[描述]
 
 ---
 
 ## Validation Questions
 
-> **Guidance**: These are questions a playtester session facilitator asks
-> during or after a session to verify the journey is working as intended.
-> They are not yes/no questions — they probe the player's emotional experience
-> and surface gaps between design intent and player reality.
+> **Guidance**: 这些是试玩测试会主持人会在会话中或之后提出的问题，
+> 用于验证旅程是否按预期运作。它们不是是/否问题——
+> 而是探查玩家的情感体验，并揭示设计意图与玩家现实之间的差距。
 
 **First Contact (0-5 min)**
-- [ ] "Without looking at any menus or tooltips, what do you think this game is about?"
-- [ ] "What's the first thing you want to do next?"
+- [ ] "在不看任何菜单或工具提示的情况下，你觉得这款游戏是关于什么的？"
+- [ ] "你接下来最想做的第一件事是什么？"
 
 **Orientation (5-30 min)**
-- [ ] "What does winning or succeeding look like to you right now?"
-- [ ] "Is there anything you feel like you should understand but don't?"
+- [ ] "就现在而言，赢或成功对你来说意味着什么？"
+- [ ] "有没有什么你觉得应该理解、但实际上并不理解的东西？"
 
 **First Mastery (30 min - 2 hrs)**
-- [ ] "What's the best decision you've made so far? Why did you make it?"
-- [ ] "What would you do differently if you started over?"
+- [ ] "到目前为止你做过的最好决定是什么？为什么做这个决定？"
+- [ ] "如果能重来，你会怎么做？"
 
 **Depth Discovery (2-10 hrs)**
-- [ ] "Has the game surprised you? When? How did it feel?"
-- [ ] "What questions do you have about systems you haven't fully explored?"
+- [ ] "游戏让你惊讶过吗？什么时候？感觉如何？"
+- [ ] "对于你尚未充分探索的系统，你有什么问题？"
 
 **Habitual Play (10-50 hrs)**
-- [ ] "What's your current goal? How long have you been working toward it?"
-- [ ] "Have you told anyone about this game? What did you say?"
+- [ ] "你当前的目标是什么？你为此努力了多久？"
+- [ ] "你有没有向别人提起过这款游戏？你怎么说的？"
 
 **General (any phase)**
-- [ ] "If you had to stop playing right now, what would you be most eager to
-  come back for?"
-- [ ] "Is there anything you feel the game is not letting you do that you want to do?"
+- [ ] "如果你现在必须停止游玩，你最想为了什么回来？"
+- [ ] "有没有什么你想做、但觉得游戏不让你做的事？"
 
 ---
 
@@ -352,6 +323,6 @@ concretely look and feel like at the beginning, middle, and end of the journey?]
 
 | Question | Owner | Deadline | Resolution |
 |----------|-------|----------|-----------|
-| [Does the Phase 1 hook work for players without prior genre experience?] | [game-designer] | [Date] | [Unresolved] |
-| [Is Phase 4 depth discoverable without external guides?] | [game-designer, ux-designer] | [Date] | [Unresolved] |
-| [Add question] | [Owner] | [Date] | [Resolution] |
+| [Phase 1 的钩子对没有类型经验的玩家有效吗？] | [game-designer] | [Date] | [Unresolved] |
+| [Phase 4 的深度在没有外部攻略时能被发现吗？] | [game-designer, ux-designer] | [Date] | [Unresolved] |
+| [添加问题] | [Owner] | [Date] | [Resolution] |

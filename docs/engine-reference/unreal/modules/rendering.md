@@ -1,43 +1,43 @@
-# Unreal Engine 5.8 — Rendering Module Reference
+# Unreal Engine 5.8 — 渲染模块参考
 
-**Last verified:** 2026-10-18 (MegaLights tooltip against the 5.8 notes and source); 2026-10-17 (UE 5.8 changes block); 2026-02-13 (rest of file, written against 5.7)
-**Knowledge Gap:** UE 5.8 has production-ready MegaLights, production-ready Substrate (5.7), Lumen Lite, and Lumen improvements
+**Last verified:** 2026-10-18（对照 5.8 发布说明与源码核对 MegaLights 工具提示）；2026-10-17（UE 5.8 变更区块）；2026-02-13（文件其余部分，针对 5.7 编写）
+**Knowledge Gap:** UE 5.8 拥有可用于生产的 MegaLights、可用于生产的 Substrate（5.7）、Lumen Lite，以及 Lumen 改进
 
-> **UE 5.8 changes:** MegaLights is production-ready (enable it in Project
-> Settings > Engine > Rendering > Direct Lighting > MegaLights,
-> `r.MegaLights.EnableForProject`, default 0). Lumen Lite (Beta) is a
-> medium-quality GI setting, about twice as fast as Lumen high quality and the
-> default for current-generation handheld consoles. Mobile: multi-pass deferred
-> is the default path (forward is opt-in), with SSAO, SSR, deferred decals and
-> contact shadows. Lumen applies height fog to reflection ray hits by default
-> (`r.Lumen.HeightFog 1`). Substrate has been on for new projects since 5.7
-> (`r.Substrate`); Substrate NPR (toon) shading and Fog Screen Space Scattering
-> are Experimental. Sources: UE 5.8 release notes, https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-5-8-release-notes?application_version=5.8 ;
-> `Engine/Source/Runtime/Engine/Classes/Engine/RendererSettings.h` and
-> `Engine/Source/Runtime/RenderCore/Private/RenderUtils.cpp` (5.8.1 install).
-
----
-
-## Overview
-
-UE 5.8 rendering stack:
-- **Lumen**: Real-time global illumination (default)
-- **Nanite**: Virtualized geometry for millions of triangles
-- **MegaLights**: Many shadow-casting dynamic lights (NEW in 5.5+, production-ready in 5.8)
-- **Substrate**: Production-ready modular material system (NEW in 5.7)
+> **UE 5.8 变更：** MegaLights 已可用于生产（在 Project
+> Settings > Engine > Rendering > Direct Lighting > MegaLights 中启用，
+> `r.MegaLights.EnableForProject`，默认 0）。Lumen Lite（Beta）是一个
+> 中等质量的 GI 设置，速度约为 Lumen 高质量的两倍，并且是
+> 当代掌机的默认设置。移动端：多 pass 延迟渲染
+> 是默认路径（前向渲染需主动启用），支持 SSAO、SSR、延迟贴花与
+> 接触阴影。Lumen 默认对反射光线命中应用高度雾
+> （`r.Lumen.HeightFog 1`）。Substrate 自 5.7 起对新项目默认开启
+> （`r.Substrate`）；Substrate NPR（卡通）着色与 Fog Screen Space Scattering
+> 为 Experimental。来源：UE 5.8 发布说明，https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-5-8-release-notes?application_version=5.8 ；
+> `Engine/Source/Runtime/Engine/Classes/Engine/RendererSettings.h` 与
+> `Engine/Source/Runtime/RenderCore/Private/RenderUtils.cpp`（5.8.1 安装）。
 
 ---
 
-## Lumen (Global Illumination)
+## 概述
 
-### Enable Lumen
+UE 5.8 渲染栈：
+- **Lumen**：实时全局光照（默认）
+- **Nanite**：面向数百万三角形的虚拟化几何体
+- **MegaLights**：大量投射阴影的动态光源（5.5+ 新增，5.8 中可用于生产）
+- **Substrate**：可用于生产的模块化材质系统（5.7 新增）
+
+---
+
+## Lumen（全局光照）
+
+### 启用 Lumen
 
 ```cpp
 // Project Settings > Engine > Rendering > Dynamic Global Illumination Method = Lumen
 // Real-time GI, no lightmap baking needed
 ```
 
-### Lumen Quality Settings
+### Lumen 质量设置
 
 ```ini
 ; DefaultEngine.ini
@@ -46,7 +46,7 @@ r.Lumen.DiffuseColorBoost=1.0
 r.Lumen.ScreenProbeGather.RadianceCache.NumFramesToKeepCached=2
 ```
 
-### Lumen in C++
+### 在 C++ 中使用 Lumen
 
 ```cpp
 // Check if Lumen is enabled
@@ -55,15 +55,15 @@ bool bIsLumenEnabled = IConsoleManager::Get().FindConsoleVariable(TEXT("r.Dynami
 
 ---
 
-## Nanite (Virtualized Geometry)
+## Nanite（虚拟化几何体）
 
-### Enable Nanite on Static Mesh
+### 在静态网格上启用 Nanite
 
 1. Static Mesh Editor
 2. Details > Nanite Settings > Enable Nanite Support
-3. Save mesh (auto-builds Nanite data)
+3. 保存网格（自动构建 Nanite 数据）
 
-### Nanite in C++
+### 在 C++ 中使用 Nanite
 
 ```cpp
 // Spawn Nanite mesh
@@ -71,16 +71,16 @@ UStaticMeshComponent* MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TE
 MeshComp->SetStaticMesh(NaniteMesh); // Automatically uses Nanite if enabled
 ```
 
-### Nanite Limitations
-- No vertex animation (skeletal meshes)
-- No world position offset (WPO) in materials
-- Best for static, high-poly geometry
+### Nanite 限制
+- 不支持顶点动画（骨骼网格）
+- 材质中不支持世界位置偏移（WPO）
+- 最适合静态高面数几何体
 
 ---
 
-## MegaLights (UE 5.5+, production-ready in 5.8)
+## MegaLights（UE 5.5+，5.8 中可用于生产）
 
-### Enable MegaLights
+### 启用 MegaLights
 
 ```cpp
 // Project Settings > Engine > Rendering > Direct Lighting > MegaLights
@@ -89,30 +89,30 @@ MeshComp->SetStaticMesh(NaniteMesh); // Automatically uses Nanite if enabled
 // Many shadow-casting lights at a consistent, low GPU cost
 ```
 
-### The editor tooltip is older than the 5.8 release notes
+### 编辑器工具提示比 5.8 发布说明更旧
 
-In a 5.8.1 install, this setting's tooltip (`RendererSettings.h`) and the
-`r.MegaLights.EnableForProject` help text (`MegaLights.cpp`) still end
-"Experimental feature." and say MegaLights "requires Hardware Ray Tracing, and
-does not support Directional Lights". Follow the release notes and the engine
-code instead:
+在 5.8.1 安装中，该设置的工具提示（`RendererSettings.h`）与
+`r.MegaLights.EnableForProject` 的帮助文本（`MegaLights.cpp`）仍以
+"Experimental feature." 结尾，并称 MegaLights "requires Hardware Ray Tracing, and
+does not support Directional Lights"。请以发布说明和引擎
+代码为准：
 
 - **Status:** "Megalights is now entering Production Ready status with Unreal
-  Engine 5.8" (5.8 release notes, Rendering > Megalights).
-- **Ray tracing:** the renderer accepts hardware or software ray tracing support
-  (`HasRequiredTracingData` in `MegaLights.cpp`). Shadow rays use hardware ray
-  tracing while `r.MegaLights.HardwareRayTracing` is 1, the default. Shadows
-  come from ray tracing (the default) or Virtual Shadow Maps:
-  `r.MegaLights.DefaultShadowMethod` 0 or 1.
-- **Directional lights:** supported behind `r.MegaLights.DirectionalLights`,
-  default 0 (off). The 5.7 release notes list Directional Light support.
+  Engine 5.8"（5.8 发布说明，Rendering > Megalights）。
+- **Ray tracing:** 渲染器接受硬件或软件光线追踪支持
+  （`MegaLights.cpp` 中的 `HasRequiredTracingData`）。当
+  `r.MegaLights.HardwareRayTracing` 为 1（默认值）时，阴影光线使用硬件光线
+  追踪。阴影来自光线追踪（默认）或 Virtual Shadow Maps：
+  `r.MegaLights.DefaultShadowMethod` 为 0 或 1。
+- **Directional lights:** 由 `r.MegaLights.DirectionalLights`
+  控制，默认 0（关闭）。5.7 发布说明列出了 Directional Light 支持。
 
-Sources, read 2026-10-18: the 5.8 and 5.7 release notes (§ Sources); in a UE
-5.8.1 install (CL 56057345), `Engine/Source/Runtime/Engine/Classes/Engine/RendererSettings.h`,
-`Engine/Source/Runtime/Renderer/Private/MegaLights/MegaLights.cpp` and
-`MegaLightsRayTracing.cpp`.
+来源，读取于 2026-10-18：5.8 与 5.7 发布说明（§ 来源）；在 UE
+5.8.1 安装（CL 56057345）中，`Engine/Source/Runtime/Engine/Classes/Engine/RendererSettings.h`、
+`Engine/Source/Runtime/Renderer/Private/MegaLights/MegaLights.cpp` 与
+`MegaLightsRayTracing.cpp`。
 
-### MegaLights Usage
+### MegaLights 用法
 
 ```cpp
 // Add point lights as usual
@@ -125,9 +125,9 @@ Light->SetAttenuationRadius(500.0f);
 
 ---
 
-## Substrate Materials (Production-Ready in 5.7)
+## Substrate 材质（5.7 中可用于生产）
 
-### Enable Substrate
+### 启用 Substrate
 
 ```cpp
 // On by default for new projects created in 5.7+.
@@ -135,13 +135,13 @@ Light->SetAttenuationRadius(500.0f);
 //   Substrate materials (r.Substrate), then restart the editor
 ```
 
-### Substrate Material Nodes
-- **Substrate Slab**: Physical material layer (diffuse, specular, etc.)
-- **Substrate Blend**: Blend multiple layers
-- **Substrate Thin Film**: Iridescence, soap bubbles
-- **Substrate Hair**: Hair-specific shading
+### Substrate 材质节点
+- **Substrate Slab**：物理材质层（漫反射、高光等）
+- **Substrate Blend**：混合多个层
+- **Substrate Thin Film**：虹彩、肥皂泡
+- **Substrate Hair**：面向头发的专用着色
 
-### Example Substrate Material Graph
+### Substrate 材质图示例
 
 ```
 Substrate Slab (Diffuse)
@@ -153,9 +153,9 @@ Substrate Slab (Diffuse)
 
 ---
 
-## Materials (C++ API)
+## 材质（C++ API）
 
-### Dynamic Material Instances
+### 动态材质实例
 
 ```cpp
 // Create dynamic material instance
@@ -172,7 +172,7 @@ MeshComp->SetMaterial(0, DynMat);
 
 ---
 
-## Post-Processing
+## 后处理
 
 ### Post-Process Volume
 
@@ -189,7 +189,7 @@ PPV->Settings.bOverride_BloomIntensity = true;
 PPV->Settings.BloomIntensity = 1.0f;
 ```
 
-### Post-Process in C++
+### 在 C++ 中使用后处理
 
 ```cpp
 // Access camera post-process settings
@@ -202,9 +202,9 @@ if (APlayerCameraManager* CamManager = PC->PlayerCameraManager) {
 
 ---
 
-## Lighting
+## 光照
 
-### Directional Light (Sun)
+### Directional Light（太阳）
 
 ```cpp
 ADirectionalLight* Sun = GetWorld()->SpawnActor<ADirectionalLight>();
@@ -213,7 +213,7 @@ Sun->GetLightComponent()->SetIntensity(10.0f);
 Sun->GetLightComponent()->bCastShadows = true;
 ```
 
-### Point Light
+### 点光源
 
 ```cpp
 APointLight* Light = GetWorld()->SpawnActor<APointLight>();
@@ -223,7 +223,7 @@ Light->GetPointLightComponent()->SetAttenuationRadius(1000.0f);
 Light->GetPointLightComponent()->SetLightColor(FLinearColor::Red);
 ```
 
-### Spot Light
+### 聚光源
 
 ```cpp
 ASpotLight* Spotlight = GetWorld()->SpawnActor<ASpotLight>();
@@ -233,9 +233,9 @@ Spotlight->GetSpotLightComponent()->SetOuterConeAngle(40.0f);
 
 ---
 
-## Render Targets (Render to Texture)
+## 渲染目标（渲染到纹理）
 
-### Create Render Target
+### 创建 Render Target
 
 ```cpp
 // Create render target asset (2D texture)
@@ -253,9 +253,9 @@ UKismetRenderingLibrary::DrawMaterialToRenderTarget(
 
 ---
 
-## Custom Render Passes (Advanced)
+## 自定义渲染 Pass（高级）
 
-### Render Dependency Graph (RDG)
+### Render Dependency Graph（RDG）
 
 ```cpp
 // UE5 uses Render Dependency Graph for custom rendering
@@ -288,9 +288,9 @@ void RenderCustomPass(FRDGBuilder& GraphBuilder, const FViewInfo& View) {
 
 ---
 
-## Performance
+## 性能
 
-### Render Stats
+### 渲染统计
 
 ```cpp
 // Console commands for profiling:
@@ -300,7 +300,7 @@ void RenderCustomPass(FRDGBuilder& GraphBuilder, const FViewInfo& View) {
 // profilegpu - Detailed GPU profile
 ```
 
-### Scalability Settings
+### 可扩展性设置
 
 ```cpp
 // Get current scalability settings
@@ -315,9 +315,9 @@ Settings->ApplySettings(false);
 
 ---
 
-## Debugging
+## 调试
 
-### Visualize Render Features
+### 可视化渲染特性
 
 ```
 Console commands:
@@ -330,9 +330,9 @@ Console commands:
 
 ---
 
-## Sources
-- UE 5.8 release notes: https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-5-8-release-notes?application_version=5.8
-- UE 5.7 release notes: https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-5-7-release-notes?application_version=5.7
+## 来源
+- UE 5.8 发布说明：https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-5-8-release-notes?application_version=5.8
+- UE 5.7 发布说明：https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-5-7-release-notes?application_version=5.7
 - https://docs.unrealengine.com/5.7/en-US/lumen-global-illumination-and-reflections-in-unreal-engine/
 - https://docs.unrealengine.com/5.7/en-US/nanite-virtualized-geometry-in-unreal-engine/
 - https://docs.unrealengine.com/5.7/en-US/substrate-materials-in-unreal-engine/

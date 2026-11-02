@@ -2,316 +2,310 @@
 
 ## Skill Summary
 
-`/create-epics` reads in-scope GDDs, the architecture document, Accepted ADRs and
-the TR registry, and turns each system into one epic mapped to an architectural
-module. Systems are processed in layer order (Foundation → Core → Feature →
-Presentation), and within a layer in `systems-index.md` order. Each epic is
-presented (layer, GDD, architecture module, governing ADRs, engine risk, ADR
-coverage, untraced requirements) and the user is asked "Shall I create Epic:
-[name]?" before anything is written.
+`/create-epics` 读取范围内的 GDD、架构文档、Accepted ADR 和 TR 注册表，
+并把每个系统转换为一个映射到架构模块的史诗（epic）。系统按层顺序处理
+（Foundation → Core → Feature → Presentation），同一层内按
+`systems-index.md` 的顺序处理。每个史诗都会被呈现（层、GDD、架构模块、
+主导 ADR、引擎风险、ADR 覆盖率、未追溯需求），并在写入任何内容之前询问用户
+"Shall I create Epic: [name]?"。
 
-Epics are written to `production/epics/[epic-slug]/EPIC.md`, each after its own
+史诗写入 `production/epics/[epic-slug]/EPIC.md`，每个史诗都在完成自身的
 "May I write `production/epics/[epic-slug]/EPIC.md` and add its row to
-`production/epics/index.md` (creating it if absent)?" ask, which names the index
-it then creates or updates. An EPIC.md that already exists
-is never overwritten: the user chooses update-in-place (its Stories table kept) or
-skip. In `full` review mode the
-PR-EPIC gate (producer) runs after all epics for the layer are defined and before
-any file is written; in `lean` and `solo` it is skipped with a note. Review mode
-comes from `resolve_config` (`review_mode`), overridable per run with `--review`.
-Verdicts: COMPLETE (N epics written) or BLOCKED (user declined all epics, stopped
-at the gate, or no eligible systems found).
+`production/epics/index.md` (creating it if absent)?" 询问之后写入，该询问
+点明了随后要创建或更新的索引。已存在的 EPIC.md 绝不会被覆盖：用户可选择
+原地更新（保留其 Stories 表）或跳过。在 `full` 评审模式下，PR-EPIC 质量闸门
+（producer）在该层的所有史诗定义完成之后、写入任何文件之前运行；在 `lean`
+和 `solo` 下则跳过并附注说明。评审模式来自 `resolve_config`
+（`review_mode`），可通过 `--review` 按次覆盖。
+结论：COMPLETE（已写入 N 个史诗）或 BLOCKED（用户拒绝了所有史诗、在质量闸门
+处停止，或未找到符合条件的系统）。
 
 ---
 
 ## Static Assertions (Structural)
 
-Checked against the SKILL.md by `/skill-test spec` — no fixture needed.
+由 `/skill-test spec` 针对 SKILL.md 检查 —— 无需 fixture。
 
-- [ ] Has required frontmatter fields: `name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`
-- [ ] Has ≥2 phase headings
-- [ ] Contains verdict keywords: COMPLETE, BLOCKED
-- [ ] Contains "May I write" collaborative protocol language (per-epic approval)
-- [ ] Has a next-step handoff at the end (`/create-stories [epic-slug]`)
-- [ ] Documents PR-EPIC gate behavior: runs in full mode; skipped in lean/solo
+- [ ] 具有必需的前置元数据字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 至少有 2 个阶段标题
+- [ ] 包含结论关键词：COMPLETE、BLOCKED
+- [ ] 包含 "May I write" 协作协议用语（逐史诗批准）
+- [ ] 结尾有下一步交接（`/create-stories [epic-slug]`）
+- [ ] 说明 PR-EPIC 质量闸门行为：在 full 模式下运行；在 lean/solo 下跳过
 
 ---
 
 ## Director Gate Checks
 
-In `full` mode: PR-EPIC (`producer`, `.claude/docs/director-gates/pr-epic.md`)
-runs once all epics for the current layer are defined and before any epic file is
-written. Verdicts: REALISTIC → proceed to the write asks; CONCERNS →
-`AskUserQuestion` with `[A] Proceed as planned` / `[B] Revise epic boundaries` /
-`[C] Stop`; UNREALISTIC → offer to split or merge epics, revise, present the
-revised epics again, and re-run the gate before writing. CONCERNS `[B]` likewise
-re-presents the revised epics before the gate re-runs. NOT ASSESSED [missing
-input] → never read as REALISTIC: the input is supplied and the gate re-run, or
-the run goes on with `PR-EPIC: NOT ASSESSED — [input]` stated in the output and
-the Verdict line.
+在 `full` 模式下：当前层的所有史诗定义完成后、写入任何史诗文件之前，
+运行 PR-EPIC（`producer`，`.claude/docs/director-gates/pr-epic.md`）。
+结论：REALISTIC → 进入写入询问；CONCERNS →
+`AskUserQuestion` 提供 `[A] Proceed as planned` / `[B] Revise epic boundaries` /
+`[C] Stop`；UNREALISTIC → 提出拆分或合并史诗，修订，再次呈现修订后的史诗，
+并在写入前重新运行质量闸门。CONCERNS 的 `[B]` 同样会在质量闸门重新运行之前
+再次呈现修订后的史诗。NOT ASSESSED [missing input] → 绝不当作 REALISTIC
+读取：补齐输入并重新运行质量闸门，或者继续运行并在输出和结论行中注明
+`PR-EPIC: NOT ASSESSED — [input]`。
 
-In `lean` mode: PR-EPIC is skipped. Output notes: "PR-EPIC skipped — Lean mode."
+在 `lean` 模式下：跳过 PR-EPIC。输出注明："PR-EPIC skipped — Lean mode."
 
-In `solo` mode: PR-EPIC is skipped. Output notes: "PR-EPIC skipped — Solo mode."
+在 `solo` 模式下：跳过 PR-EPIC。输出注明："PR-EPIC skipped — Solo mode."
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非某个用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置
+`modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有
+`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
 
 ---
 
 ## Test Cases
 
-### Case 1: Happy Path — Two approved GDDs create two epics
+### Case 1: 正常路径 —— 两份已批准的 GDD 生成两个史诗
 
 **Fixture:**
-- `project.yaml`: `engine.name: Godot`, `modes.workflow: full`, `modes.review_mode: lean`
-- `design/gdd/systems-index.md` lists 2 Foundation systems
-- Both systems have Approved GDDs in `design/gdd/`, each with a `## Summary`
-- `docs/architecture/architecture.md` has a module for each system
-- Accepted ADRs cover every TR-ID for both systems in `docs/architecture/tr-registry.yaml`;
-  the first system has two governing ADRs whose Engine Compatibility rates
-  Knowledge Risk LOW and HIGH
-- `docs/architecture/control-manifest.md` exists
-- No `production/epics/` directory
+- `project.yaml`：`engine.name: Godot`、`modes.workflow: full`、`modes.review_mode: lean`
+- `design/gdd/systems-index.md` 列出 2 个 Foundation 系统
+- 两个系统在 `design/gdd/` 中都有已批准的 GDD，每份都含 `## Summary`
+- `docs/architecture/architecture.md` 为每个系统都有一个模块
+- Accepted ADR 在 `docs/architecture/tr-registry.yaml` 中覆盖两个系统的所有 TR-ID；
+  第一个系统有两个主导 ADR，其 Engine Compatibility 分别评定 Knowledge Risk
+  为 LOW 和 HIGH
+- `docs/architecture/control-manifest.md` 存在
+- 不存在 `production/epics/` 目录
 
 **Input:** `/create-epics layer: foundation`
 
 **Expected behavior:**
-1. Globs `design/gdd/*.md` (excluding systems-index and other non-system docs)
-   to establish N, then Greps `^## Summary` to scope the Foundation systems
-2. Reads the 2 in-scope GDDs, `architecture.md`, the Decision / GDD Requirements
-   Addressed / Engine Compatibility sections of the in-scope ADRs, the TR
-   registry and the manifest header; reports "Loaded 2 GDDs, [M] ADRs, engine: …"
-3. For each system: presents the epic block and asks "Shall I create Epic: [name]?"
-4. Notes "PR-EPIC skipped — Lean mode."
-5. For each epic: asks "May I write `production/epics/[epic-slug]/EPIC.md` and
-   add its row to `production/epics/index.md` (creating it if absent)?" and writes
-   both after approval
-6. Creates or updates `production/epics/index.md`
-7. Verdict: COMPLETE — 2 epic(s) written; next step `/create-stories [epic-slug]`
+1. Glob `design/gdd/*.md`（排除 systems-index 及其他非系统文档）以确定 N，
+   然后 Grep `^## Summary` 以界定 Foundation 系统范围
+2. 读取 2 份范围内 GDD、`architecture.md`、范围内 ADR 的 Decision / GDD
+   Requirements Addressed / Engine Compatibility 小节、TR 注册表和清单头部；
+   报告 "Loaded 2 GDDs, [M] ADRs, engine: …"
+3. 对每个系统：呈现史诗块并询问 "Shall I create Epic: [name]?"
+4. 注明 "PR-EPIC skipped — Lean mode."
+5. 对每个史诗：询问 "May I write `production/epics/[epic-slug]/EPIC.md` and
+   add its row to `production/epics/index.md` (creating it if absent)?"，
+   并在批准后写入两者
+6. 创建或更新 `production/epics/index.md`
+7. 结论：COMPLETE —— 已写入 2 个史诗；下一步 `/create-stories [epic-slug]`
 
 **Assertions:**
-- [ ] Each epic block is shown and "Shall I create Epic: [name]?" asked before any write ask
-- [ ] "May I write" is asked per epic (not once for both)
-- [ ] Files land at `production/epics/[epic-slug]/EPIC.md`
-- [ ] Each EPIC.md contains Layer, GDD path, Architecture Module, Governing ADRs table, GDD Requirements table, Definition of Done
-- [ ] The first epic's Engine Risk is HIGH — the highest among its governing ADRs, not the first or the average
-- [ ] The Definition of Done asks Logic and Integration stories for passing tests under `tests/` (the Godot test root) and Visual/Feel and UI stories for retained screenshots in `production/qa/evidence/` — each screen touched for UI, plus a lead sign-off for Visual/Feel
-- [ ] "PR-EPIC skipped — Lean mode." appears; no producer is spawned
-- [ ] `production/epics/index.md` is created or updated after writing, and only after an ask that named it
-- [ ] Verdict is COMPLETE and names `/create-stories [epic-slug]`
+- [ ] 在任何写入询问之前，显示每个史诗块并询问 "Shall I create Epic: [name]?"
+- [ ] 逐史诗询问 "May I write"（不是两个史诗只问一次）
+- [ ] 文件落在 `production/epics/[epic-slug]/EPIC.md`
+- [ ] 每份 EPIC.md 都包含 Layer、GDD path、Architecture Module、Governing ADRs 表、GDD Requirements 表、Definition of Done
+- [ ] 第一个史诗的 Engine Risk 为 HIGH —— 取其主导 ADR 中的最高值，而不是第一个值或平均值
+- [ ] Definition of Done 要求 Logic 和 Integration 用户故事在 `tests/`（Godot 测试根目录）下通过测试，要求 Visual/Feel 和 UI 用户故事在 `production/qa/evidence/` 中保留截图 —— UI 每个涉及的界面各一张，Visual/Feel 另需主管签核
+- [ ] 出现 "PR-EPIC skipped — Lean mode."；未派发 producer
+- [ ] 写入后创建或更新 `production/epics/index.md`，且仅在此前已点名该索引的询问之后
+- [ ] 结论为 COMPLETE，并指明 `/create-stories [epic-slug]`
 
 ---
 
-### Case 2: Failure Path — No system GDDs found
+### Case 2: 失败路径 —— 未找到系统 GDD
 
 **Fixture:**
-- `project.yaml`: `modes.workflow: full`
-- `design/gdd/` contains only `game-concept.md` and `systems-index.md` (no
-  system GDDs)
+- `project.yaml`：`modes.workflow: full`
+- `design/gdd/` 只包含 `game-concept.md` 和 `systems-index.md`（没有
+  系统 GDD）
 
 **Input:** `/create-epics all`
 
 **Expected behavior:**
-1. Globs `design/gdd/*.md` excluding the non-system docs — N = 0
-2. Reports "No system GDDs found in `design/gdd/` — run `/design-system` first"
-   and stops
-3. No epic is presented, no gate runs, no file is written
+1. Glob `design/gdd/*.md` 并排除非系统文档 —— N = 0
+2. 报告 "No system GDDs found in `design/gdd/` — run `/design-system` first"
+   并停止
+3. 不呈现任何史诗、不运行质量闸门、不写文件
 
 **Assertions:**
-- [ ] `game-concept.md` and `systems-index.md` are not counted as system GDDs
-- [ ] The "No system GDDs found … run `/design-system` first" message is printed
-- [ ] No "Shall I create Epic" or "May I write" ask is shown and no EPIC.md or index.md is written
-- [ ] Verdict is BLOCKED (no eligible systems found), not COMPLETE
+- [ ] `game-concept.md` 和 `systems-index.md` 不被计为系统 GDD
+- [ ] 打印出 "No system GDDs found … run `/design-system` first" 消息
+- [ ] 不显示任何 "Shall I create Epic" 或 "May I write" 询问，也不写入任何 EPIC.md 或 index.md
+- [ ] 结论为 BLOCKED（未找到符合条件的系统），而不是 COMPLETE
 
 ---
 
-### Case 3: Director Gate — Full mode spawns PR-EPIC before writing
+### Case 3: 总监质量闸门 —— full 模式在写入前派发 PR-EPIC
 
 **Fixture:**
-- 2 Approved GDDs, architecture, ADRs, TR registry and control manifest as in Case 1
-- `project.yaml`: `modes.workflow: full`, `modes.review_mode: full` — the workflow
-  is pinned because an unset one resolves to `minimal`, where the skill reads the
-  brief instead of the GDDs and the gate never comes into play
-- PR-EPIC returns REALISTIC
+- 2 份已批准 GDD、架构、ADR、TR 注册表和清单同 Case 1
+- `project.yaml`：`modes.workflow: full`、`modes.review_mode: full` —— 固定
+  工作流，因为未设置时会解析为 `minimal`，此时技能读取简报而非 GDD，质量闸门
+  根本不会介入
+- PR-EPIC 返回 REALISTIC
 
 **Input:** `/create-epics layer: foundation`
 
 **Full mode expected behavior:**
-1. Both epics are presented and accepted via "Shall I create Epic: [name]?"
-2. `producer` is spawned via `Agent` with gate PR-EPIC, receiving the epic
-   structure summary, the layer, milestone timeline and team capacity
-3. On REALISTIC: the per-epic "May I write" asks proceed
-4. Epic files are written after approval
+1. 两个史诗都通过 "Shall I create Epic: [name]?" 呈现并被接受
+2. 通过 `Agent` 派发 `producer`，质量闸门为 PR-EPIC，接收史诗结构摘要、
+   层、里程碑时间线和团队产能
+3. 收到 REALISTIC 时：继续执行逐史诗的 "May I write" 询问
+4. 获得批准后写入史诗文件
 
 **Assertions (full mode):**
-- [ ] PR-EPIC is spawned once, after both epics are defined
-- [ ] PR-EPIC runs before any "May I write" ask
-- [ ] No EPIC.md is written before PR-EPIC resolves
+- [ ] PR-EPIC 只派发一次，且在两个史诗都定义完成之后
+- [ ] PR-EPIC 在任何 "May I write" 询问之前运行
+- [ ] 在 PR-EPIC 给出结论之前不写入任何 EPIC.md
 
 **Fixture (per-run override):**
-- Same project, `modes.workflow: full`, `modes.review_mode: full`
+- 同一项目，`modes.workflow: full`、`modes.review_mode: full`
 - Input: `/create-epics layer: foundation --review lean`
 
 **Override expected behavior:**
-1. `--review lean` overrides the resolved `full`
-2. PR-EPIC is skipped — noted in output
-3. "May I write" asks proceed directly
+1. `--review lean` 覆盖解析得到的 `full`
+2. 跳过 PR-EPIC —— 在输出中注明
+3. 直接继续执行 "May I write" 询问
 
 **Assertions (override):**
-- [ ] "PR-EPIC skipped — Lean mode." appears in output
-- [ ] No producer agent is spawned and the write asks follow the epic definitions directly
+- [ ] 输出中出现 "PR-EPIC skipped — Lean mode."
+- [ ] 不派发 producer 代理，写入询问直接紧跟史诗定义之后
 
 ---
 
-### Case 4: Edge Case — Untraced requirements at full workflow
+### Case 4: 边界情况 —— full 工作流下存在未追溯需求
 
 **Fixture:**
-- `project.yaml`: `modes.workflow: full`, `modes.review_mode: solo`
-- One Approved Foundation GDD whose system has 5 TR-IDs in `tr-registry.yaml`;
-  Accepted ADRs cover 3 of them (2 untraced)
+- `project.yaml`：`modes.workflow: full`、`modes.review_mode: solo`
+- 一份已批准的 Foundation GDD，其系统在 `tr-registry.yaml` 中有 5 个 TR-ID；
+  Accepted ADR 覆盖其中 3 个（2 个未追溯）
 
 **Input:** `/create-epics [system-name]`
 
 **Expected behavior:**
-1. Epic block shows "GDD Requirements Covered by ADRs: 3 / 5" and lists the 2
-   untraced TR-IDs under "Untraced Requirements"
-2. Warns: "⚠️ 2 requirements in [system] have no ADR. The epic can be created, but
+1. 史诗块显示 "GDD Requirements Covered by ADRs: 3 / 5"，并在
+   "Untraced Requirements" 下列出这 2 个未追溯的 TR-ID
+2. 警告："⚠️ 2 requirements in [system] have no ADR. The epic can be created, but
    `/create-stories` will write their stories with no governing ADR (`ADR: N/A`)
    and `Status: Ready` — nothing downstream blocks them, so they would be
    implemented without architectural guidance. Run `/architecture-decision` first
    if they need a decision, or proceed and accept the gap."
-3. Asks "Shall I create Epic: [name]?" with `[A] Yes, create it` /
+3. 询问 "Shall I create Epic: [name]?"，选项为 `[A] Yes, create it` /
    `[B] Skip this epic` / `[C] Pause — I need to write ADRs first`
-4. On [A]: notes "PR-EPIC skipped — Solo mode.", asks "May I write", and the
-   EPIC.md GDD Requirements table marks the 2 rows `❌ No ADR`
+4. 选择 [A] 时：注明 "PR-EPIC skipped — Solo mode."，询问 "May I write"，
+   且 EPIC.md 的 GDD Requirements 表将这两行标记为 `❌ No ADR`
 
 **Assertions:**
-- [ ] Coverage count and the 2 untraced TR-IDs are shown before the create ask
-- [ ] The untraced-requirements warning names `/architecture-decision` and says what actually happens downstream: the stories are written `Ready` with no governing ADR — it does not claim they will be Blocked
-- [ ] Option `[C] Pause — I need to write ADRs first` is offered
-- [ ] The written EPIC.md marks the untraced rows `❌ No ADR` (not silently dropped)
+- [ ] 在创建询问之前显示覆盖率计数和 2 个未追溯 TR-ID
+- [ ] 未追溯需求警告指名 `/architecture-decision`，并说明下游实际会发生什么：用户故事以 `Ready` 状态写入且没有主导 ADR —— 不得声称它们会被 Blocked
+- [ ] 提供选项 `[C] Pause — I need to write ADRs first`
+- [ ] 写出的 EPIC.md 将未追溯行标记为 `❌ No ADR`（不静默丢弃）
 
 ---
 
-### Case 5: Director Gate — PR-EPIC returns CONCERNS
+### Case 5: 总监质量闸门 —— PR-EPIC 返回 CONCERNS
 
 **Fixture:**
-- 2 Approved GDDs, architecture, ADRs, TR registry and control manifest as in Case 1
-- `project.yaml`: `modes.workflow: full`, `modes.review_mode: full`
-- PR-EPIC returns CONCERNS (one epic's scope is too large)
+- 2 份已批准 GDD、架构、ADR、TR 注册表和清单同 Case 1
+- `project.yaml`：`modes.workflow: full`、`modes.review_mode: full`
+- PR-EPIC 返回 CONCERNS（某个史诗的范围过大）
 
 **Input:** `/create-epics layer: foundation`
 
 **Expected behavior:**
-1. PR-EPIC is spawned and returns CONCERNS with specific feedback
-2. Skill presents the producer's assessment before any write ask
-3. `AskUserQuestion`: "Producer raised concerns about the epic structure. How do
-   you want to proceed?" with `[A] Proceed as planned — I accept the producer's
+1. 派发 PR-EPIC，其返回 CONCERNS 并附具体反馈
+2. 技能在任何写入询问之前呈现制作人的评估
+3. `AskUserQuestion`："Producer raised concerns about the epic structure. How do
+   you want to proceed?"，选项为 `[A] Proceed as planned — I accept the producer's
    concerns` / `[B] Revise epic boundaries — split or merge as recommended` /
    `[C] Stop — I want to reconsider the scope`
-4. [B]: epic definitions are revised from Step 4 and PR-EPIC is re-run
-5. [C]: stops with Verdict: BLOCKED — user wants to reconsider epic scope
+4. 选择 [B]：从 Step 4 起修订史诗定义并重新运行 PR-EPIC
+5. 选择 [C]：停止，结论：BLOCKED —— 用户希望重新考虑史诗范围
 
 **Assertions:**
-- [ ] The producer's CONCERNS are shown to the user before any "May I write" ask
-- [ ] Skill does NOT write epics while the gate is unresolved
-- [ ] All three options ([A] proceed / [B] revise / [C] stop) are offered
-- [ ] Choosing [B] re-presents the revised epics and re-runs PR-EPIC before any write ask
-- [ ] Choosing [C] ends with Verdict: BLOCKED and no files written
+- [ ] 在任何 "May I write" 询问之前，向用户显示制作人的 CONCERNS
+- [ ] 质量闸门结论未定时，技能不写入史诗
+- [ ] 提供全部三个选项（[A] 继续 / [B] 修订 / [C] 停止）
+- [ ] 选择 [B] 时，在任何写入询问之前再次呈现修订后的史诗并重新运行 PR-EPIC
+- [ ] 选择 [C] 时，以结论 BLOCKED 结束且不写入任何文件
 
 ---
 
-### Case 6: Edge Case — An EPIC.md already exists for one system
+### Case 6: 边界情况 —— 某个系统已存在 EPIC.md
 
 **Fixture:**
-- As Case 1 (`modes.workflow: full`, `modes.review_mode: lean`)
-- `production/epics/[first-slug]/EPIC.md` already exists, with
-  `**Stories**: 3 stories` in its header and a 3-row `## Stories` table;
-  `production/epics/index.md` has its row with `3 stories`
-- The second system has no EPIC.md
+- 同 Case 1（`modes.workflow: full`、`modes.review_mode: lean`）
+- `production/epics/[first-slug]/EPIC.md` 已存在，其头部有
+  `**Stories**: 3 stories`，并有 3 行的 `## Stories` 表；
+  `production/epics/index.md` 中已有其行，内容为 `3 stories`
+- 第二个系统没有 EPIC.md
 
 **Input:** `/create-epics layer: foundation`
 
 **Expected behavior:**
-1. Both epics are presented and accepted via "Shall I create Epic: [name]?"
-2. For the first system the skill does not overwrite: it asks "An EPIC.md already
-   exists for [name]. Update it in place, or skip it?" with `[A] Update in place —
-   keep its Stories table` / `[B] Skip this epic`; the user picks [A]
-3. The update rewrites the header fields other than `Stories`, the Overview,
-   Governing ADRs, GDD Requirements and Definition of Done, and leaves the
-   `**Stories**` line and the `## Stories` table as they were
-4. For the second system the normal "May I write `…/EPIC.md` and add its row to
-   `production/epics/index.md`…?" ask follows
-5. `production/epics/index.md` keeps one row for the first epic, still `3 stories`,
-   and gains a row for the second
+1. 两个史诗都通过 "Shall I create Epic: [name]?" 呈现并被接受
+2. 对第一个系统，技能不覆盖：它询问 "An EPIC.md already exists for [name].
+   Update it in place, or skip it?"，选项为 `[A] Update in place —
+   keep its Stories table` / `[B] Skip this epic`；用户选择 [A]
+3. 更新会重写除 `Stories` 之外的头部字段、Overview、Governing ADRs、
+   GDD Requirements 和 Definition of Done，并保持 `**Stories**` 行和
+   `## Stories` 表原样不变
+4. 对第二个系统，随后执行正常的 "May I write `…/EPIC.md` and add its row to
+   `production/epics/index.md`…?" 询问
+5. `production/epics/index.md` 保留第一个史诗的一行，仍为 `3 stories`，
+   并为第二个史诗新增一行
 
 **Assertions:**
-- [ ] The existing file is detected before any write, and update / skip is offered — it is not overwritten
-- [ ] After the update, the `**Stories**` header line and all 3 `## Stories` rows are unchanged
-- [ ] The index has no duplicate row for the first epic and does not reset it to `Not yet created`
-- [ ] The second system's EPIC.md is written only after its own "May I write" ask
+- [ ] 在任何写入之前检测到已存在的文件，并提供更新 / 跳过 —— 不覆盖它
+- [ ] 更新后，`**Stories**` 头部行和全部 3 行 `## Stories` 均保持不变
+- [ ] 索引中没有第一个史诗的重复行，也不会把它重置为 `Not yet created`
+- [ ] 第二个系统的 EPIC.md 仅在其自身的 "May I write" 询问之后写入
 
 ---
 
-### Case 7: Standard tier — GDDs without `## Summary`, one untraced non-critical requirement
+### Case 7: standard 层级 —— GDD 缺少 `## Summary`，一项未追溯的非关键需求
 
 **Fixture:**
-- `project.yaml`: `modes.workflow: standard`, `modes.review_mode: solo`
-- `design/gdd/systems-index.md` lists one Foundation and one Core system; both
-  GDDs predate `## Summary` (the Summary scan matches none of them)
-- `docs/architecture/architecture.md` has a module for each system, and
-  `docs/architecture/tr-registry.yaml` holds both systems' TR-IDs
-- The Foundation system's TR-IDs are covered by an Accepted Foundation-layer ADR;
-  one of the Core system's TR-IDs has no ADR
-- `docs/architecture/control-manifest.md` does not exist
+- `project.yaml`：`modes.workflow: standard`、`modes.review_mode: solo`
+- `design/gdd/systems-index.md` 列出一个 Foundation 系统和一个 Core 系统；
+  两份 GDD 都早于 `## Summary` 的引入（Summary 扫描一个也匹配不到）
+- `docs/architecture/architecture.md` 为每个系统都有一个模块，
+  `docs/architecture/tr-registry.yaml` 保存两个系统的 TR-ID
+- Foundation 系统的 TR-ID 由一份 Accepted 的 Foundation 层 ADR 覆盖；
+  Core 系统的其中一个 TR-ID 没有 ADR
+- `docs/architecture/control-manifest.md` 不存在
 
 **Input:** `/create-epics all`
 
 **Expected behavior:**
-1. Globs `design/gdd/*.md` for N = 2; the `^## Summary` scan returns 0 matches
-2. Notes once: "No `## Summary` sections found across 2 GDDs — scoping from
-   `systems-index.md` instead of Summary." and full-reads both in-scope GDDs
-3. Proceeds without the control manifest (read if present, not required at
-   `standard`)
-4. The Core epic lists its untraced TR-ID under "Untraced Requirements" as
-   information only — no ⚠️ untraced-requirements warning, nothing blocked
-5. Notes "PR-EPIC skipped — Solo mode."; each epic is written after its own ask
+1. Glob `design/gdd/*.md` 得到 N = 2；`^## Summary` 扫描返回 0 个匹配
+2. 注明一次："No `## Summary` sections found across 2 GDDs — scoping from
+   `systems-index.md` instead of Summary."，并完整读取两份范围内的 GDD
+3. 在没有控制清单的情况下继续（存在则读取，`standard` 下并非必需）
+4. Core 史诗在 "Untraced Requirements" 下列出其未追溯 TR-ID，仅作信息 ——
+   不发出 ⚠️ 未追溯需求警告，也不阻塞任何内容
+5. 注明 "PR-EPIC skipped — Solo mode."；每个史诗都在其自身询问之后写入
 
 **Assertions:**
-- [ ] A zero-match Summary scan is reported as such and both systems stay in scope — it is not read as "nothing in scope"
-- [ ] The missing control manifest does not stop the run at `standard`
-- [ ] The untraced non-critical requirement is listed, but the ⚠️ warning is not emitted
-- [ ] Both epics are written, each after its own "May I write" ask
+- [ ] 零匹配的 Summary 扫描按原样报告，两个系统仍在范围内 —— 不被解读为“范围内没有内容”
+- [ ] 缺失的控制清单不会在 `standard` 下中止运行
+- [ ] 列出未追溯的非关键需求，但不发出 ⚠️ 警告
+- [ ] 两个史诗都被写入，各自在其自身的 "May I write" 询问之后
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Epic definitions shown to user before any "May I write" ask
-- [ ] "May I write" asked per epic, not once for the entire batch
-- [ ] An existing EPIC.md is updated in place or skipped by the user's choice — never overwritten
-- [ ] PR-EPIC gate (if active) runs before write asks — not after
-- [ ] Skipped gates noted by name and mode in output
-- [ ] EPIC.md content sourced only from GDDs, ADRs, and architecture docs — nothing invented
-- [ ] Never creates stories; ends with next-step handoff `/create-stories [epic-slug]` per created epic
+- [ ] 在任何 "May I write" 询问之前向用户显示史诗定义
+- [ ] 逐史诗询问 "May I write"，不是整批只问一次
+- [ ] 已存在的 EPIC.md 由用户选择原地更新或跳过 —— 绝不覆盖
+- [ ] PR-EPIC 质量闸门（若启用）在写入询问之前运行 —— 而非之后
+- [ ] 跳过的质量闸门在输出中以名称和模式注明
+- [ ] EPIC.md 内容只来源于 GDD、ADR 和架构文档 —— 不虚构任何内容
+- [ ] 从不创建用户故事；为每个已创建的史诗以下一步交接 `/create-stories [epic-slug]` 结尾
 
 ---
 
 ## Coverage Notes
 
-- Feature and Presentation layers follow the same per-epic pattern as Foundation
-  and Core — layer-specific ordering is not independently tested.
-- The `minimal` tier (optional; decomposes from `design/game-brief.md`, stops
-  without one) is not given a fixture.
-- The `## Summary` partial-adoption row (0 < M < N) is not separately tested; the
-  zero-match row is Case 7.
-- PR-EPIC UNREALISTIC handling (revise, present the revised epics again, re-run
-  the gate), a NOT ASSESSED gate answer, and the no-argument "Which layer or
-  system…" ask are not separately tested.
+- Feature 和 Presentation 层遵循与 Foundation 和 Core 相同的逐史诗模式 ——
+  层特定的顺序未单独测试。
+- `minimal` 层级（可选；从 `design/game-brief.md` 分解，无简报则停止）
+  未提供 fixture。
+- `## Summary` 部分采用行（0 < M < N）未单独测试；零匹配行为 Case 7。
+- PR-EPIC 的 UNREALISTIC 处理（修订、再次呈现修订后的史诗、重新运行质量闸门）、
+  NOT ASSESSED 的闸门答复，以及无参数的 "Which layer or system…" 询问
+  未单独测试。

@@ -1,24 +1,23 @@
-> Gate definition. The spawning skill passes this file's path to the director agent; the AGENT reads it — the parent session should not.
+> 质量闸门定义。发起调用的技能会把本文件路径传给总监代理；由该 AGENT 读取——父会话不应读取。
 
-# PR-MILESTONE — Milestone Risk Assessment
+# PR-MILESTONE — 里程碑风险评估
 
-Agent: `producer` | Model tier: Opus | Domain: Scope, timeline, dependencies, production risk
+Agent：`producer` | 模型层级：session（继承） | 领域：范围、时间线、依赖、制作风险
 
-**Trigger**: At milestone review (`/milestone-review`), or when a scope change is
-proposed that affects the milestone
+**触发时机**：里程碑评审时（`/milestone-review`），或提出会影响该里程碑的范围
+变更时
 
-**Context to pass**:
-- Milestone definition and target date
-- Current completion percentage
-- Blocked stories count
-- Sprint velocity data (if available)
+**需传入的上下文**：
+- 里程碑定义与目标日期
+- 当前完成百分比
+- 被阻塞的用户故事数量
+- 冲刺速率数据（如可用）
 
-**Prompt**:
-> "Review this milestone status. Based on current velocity and blocked story count,
-> will this milestone hit its target date? What are the top 3 production risks
-> between now and the milestone? Are there scope items that should be cut to protect
-> the milestone date vs. items that are non-negotiable? Return ON TRACK, AT RISK
-> [specific mitigations], or OFF TRACK [date must slip or scope must cut — provide
-> both options]."
+**提示词**：
+> "审查这个里程碑的状态。基于当前速率与被阻塞用户故事数量，本里程碑能否按期
+> 达成？从现在到里程碑之间排名前三的制作风险是什么？是否存在应当削减以保住
+> 里程碑日期的范围项，与之相对哪些是绝不能动的项？返回 ON TRACK、
+> AT RISK [具体缓解措施]，或 OFF TRACK [必须延期或必须削减范围——两种方案都要
+> 给出]。"
 
-**Verdicts**: ON TRACK / AT RISK / OFF TRACK
+**结论**：ON TRACK / AT RISK / OFF TRACK

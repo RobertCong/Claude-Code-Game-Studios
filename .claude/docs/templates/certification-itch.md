@@ -1,6 +1,6 @@
 ### Certification: itch.io
-- [ ] Build size within itch.io upload limits
-- [ ] itch.io page complete (cover art, screenshots, description, tags)
-- [ ] Age/content tags set honestly
-- [ ] Downloadable vs browser build decided and tested
-- [ ] Butler channel names correct for each platform uploaded
+- [ ] 构建大小在 itch.io 上传限制内
+- [ ] itch.io 页面完整（封面图、截图、描述、标签）
+- [ ] 年龄/内容标签如实设置
+- [ ] 已决定并测试可下载版与浏览器版
+- [ ] Butler 频道名称对每个已上传平台均正确

@@ -1,39 +1,39 @@
 # Internal Changelog: [Version]
 Date: [Date]
-Sprint(s): [Sprint numbers covered]
-Commits: [Count] ([first-hash]..[last-hash])
+Sprint(s): [覆盖的冲刺编号]
+Commits: [Count]（[first-hash]..[last-hash]）
 
 ## New Features
-- [Feature Name] -- [Technical description, affected systems]
+- [Feature Name] -- [技术描述、受影响的系统]
   - Commits: [hash1], [hash2]
-  - Owner: [who implemented it]
-  - Design doc: [link if applicable]
+  - Owner: [由谁实现]
+  - Design doc: [若适用，链接]
 
 ## Improvements
-- [Improvement] -- [What changed technically and why]
+- [Improvement] -- [技术上改了什么以及为什么]
   - Commits: [hashes]
-  - Owner: [who]
+  - Owner: [由谁]
 
 ## Bug Fixes
-- [BUG-ID] [Description of bug and root cause]
-  - Fix: [What was changed]
+- [BUG-ID] [缺陷描述与根因]
+  - Fix: [改动了什么]
   - Commits: [hashes]
-  - Owner: [who]
+  - Owner: [由谁]
 
 ## Balance Changes
-- [What was tuned] -- [Old value -> New value] -- [Design intent]
-  - Owner: [who]
+- [调整了什么] -- [旧值 -> 新值] -- [设计意图]
+  - Owner: [由谁]
 
 ## Technical Debt / Refactoring
-- [What was cleaned up and why]
+- [清理了什么以及为什么]
   - Commits: [hashes]
 
 ## Miscellaneous
-- [Change that didn't fit other categories, or vague commit message]
+- [不属于其他类别的改动，或含糊的提交信息]
   - Commits: [hashes]
 
 ## Known Issues
-- [Issue description] -- [Severity] -- [ETA for fix if known]
+- [问题描述] -- [严重程度] -- [若已知，修复的预计时间]
 
 ## Metrics
 - Total commits: [N]

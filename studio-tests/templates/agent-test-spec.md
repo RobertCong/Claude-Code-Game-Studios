@@ -2,23 +2,23 @@
 
 ## Agent Summary
 
-[One paragraph describing this agent's domain, what decisions it owns, and what it
-delegates vs. handles directly. Include which gates it triggers (if any).]
+[用一段话描述该代理的负责域、它拥有哪些决策权，以及哪些工作委托出去、哪些直接处理。
+注明它会触发哪些闸门（如有）。]
 
-**Domain**: [files/directories this agent owns]
-**Escalates to**: [parent agent — e.g., creative-director for design conflicts]
-**Delegates to**: [sub-agents this agent typically spawns]
+**Domain**: [该代理负责的文件/目录]
+**Escalates to**: [父级代理——例如设计冲突时上报给 creative-director]
+**Delegates to**: [该代理通常派生的子代理]
 
 ---
 
 ## Static Assertions (Structural)
 
-- [ ] Agent file exists at `.claude/agents/[name].md`
-- [ ] Frontmatter has `name`, `description`, `model`, `tools` fields
-- [ ] Model tier is `[opus | sonnet | haiku | inherit]` — frontmatter `model:` reads exactly that alias (tiers: `.claude/docs/model-tiers.md`)
-- [ ] Domain clearly stated
-- [ ] Escalation path documented
-- [ ] Does not make decisions outside its domain
+- [ ] 代理文件存在于 `.claude/agents/[name].md`
+- [ ] Frontmatter 包含 `name`、`description`、`model`、`tools` 字段
+- [ ] 模型层级为 `[opus | sonnet | haiku | inherit]`——frontmatter 的 `model:` 必须精确写为该别名（层级说明：`.claude/docs/model-tiers.md`）
+- [ ] 清晰声明负责域
+- [ ] 记录上报路径
+- [ ] 不在其负责域之外做决策
 
 ---
 
@@ -26,21 +26,21 @@ delegates vs. handles directly. Include which gates it triggers (if any).]
 
 ### Case 1: In-Domain Request — [brief name]
 
-**Scenario**: A request that is clearly within this agent's domain.
+**Scenario**：明显属于该代理负责域的请求。
 
-**Fixture**:
-- [relevant project state]
-- [input provided to agent]
+**Fixture**：
+- [相关项目状态]
+- [提供给代理的输入]
 
-**Expected behavior**:
-1. Agent accepts the request
-2. Agent produces [specific output type]
-3. Agent asks before writing files (if applicable)
+**Expected behavior**：
+1. 代理接受请求
+2. 代理产出[特定输出类型]
+3. 代理在写入文件前征询同意（如适用）
 
-**Assertions**:
-- [ ] Agent handles request within its domain without escalating
-- [ ] Output format matches expected structure
-- [ ] Collaborative protocol followed (ask → draft → approve)
+**Assertions**：
+- [ ] 代理在其负责域内处理请求，不上报
+- [ ] 输出格式符合预期结构
+- [ ] 遵循协作协议（征询 → 起草 → 批准）
 
 **Case Verdict**: PASS / FAIL / PARTIAL / NOT ASSESSED
 
@@ -48,19 +48,19 @@ delegates vs. handles directly. Include which gates it triggers (if any).]
 
 ### Case 2: Out-of-Domain Redirect — [brief name]
 
-**Scenario**: A request that falls outside this agent's domain.
+**Scenario**：落在该代理负责域之外的请求。
 
-**Fixture**:
-- [request that belongs to a different agent]
+**Fixture**：
+- [属于其他代理的请求]
 
-**Expected behavior**:
-1. Agent identifies the request is out of domain
-2. Agent redirects to the correct agent
-3. Agent does NOT attempt to handle it
+**Expected behavior**：
+1. 代理识别出该请求超出负责域
+2. 代理将其转交给正确的代理
+3. 代理不尝试处理该请求
 
-**Assertions**:
-- [ ] Agent declines and redirects (does not silently handle cross-domain work)
-- [ ] Correct agent named in redirect
+**Assertions**：
+- [ ] 代理拒绝并转交（不静默处理跨域工作）
+- [ ] 转交时指明正确的代理
 
 **Case Verdict**: PASS / FAIL / PARTIAL / NOT ASSESSED
 
@@ -68,21 +68,21 @@ delegates vs. handles directly. Include which gates it triggers (if any).]
 
 ### Case 3: Gate Verdict — [brief name]
 
-**Scenario**: Agent is invoked as part of a director gate check.
+**Scenario**：代理作为总监闸门检查的一部分被调用。
 
-**Fixture**:
-- [project state presented for review]
-- [gate ID: e.g., CD-PHASE-GATE]
+**Fixture**：
+- [提交评审的项目状态]
+- [闸门 ID：例如 CD-PHASE-GATE]
 
-**Expected behavior**:
-1. Agent reads the gate's definition file, then the documents it names
-2. Agent opens with `[GATE-ID]: [word]`, the word taken from that gate's **Verdicts** line
-3. Agent returns the verdict to the calling skill and does not act on it itself
+**Expected behavior**：
+1. 代理先读取闸门的定义文件，再读取其中点名的文档
+2. 代理以 `[GATE-ID]: [word]` 开头，其中 `[word]` 取自该闸门的 **Verdicts** 行
+3. 代理将结论返回给调用方技能，自身不据此采取行动
 
-**Assertions**:
-- [ ] First line is `[GATE-ID]: [word]` with a word from the invoked gate's Verdicts line — or `NOT ASSESSED`, naming the input, when an input the gate names was not given
-- [ ] Reasoning provided for verdict
-- [ ] Agent does not carry on with the reviewed work past its own verdict — the calling skill, not the agent, blocks on the gate's failure word (CONCERNS is not blocking; the skill takes it to the user)
+**Assertions**：
+- [ ] 第一行为 `[GATE-ID]: [word]`，word 取自被调用闸门的 Verdicts 行——或在闸门点名的某项输入未提供时，为 `NOT ASSESSED` 并指明该输入
+- [ ] 为结论提供理由
+- [ ] 代理在给出自身结论后不再继续推进被评审的工作——阻断取决于闸门失败词的调用方技能而非代理本身（CONCERNS 不构成阻断；技能会将其提交给用户）
 
 **Case Verdict**: PASS / FAIL / PARTIAL / NOT ASSESSED
 
@@ -90,20 +90,20 @@ delegates vs. handles directly. Include which gates it triggers (if any).]
 
 ### Case 4: Conflict Escalation — [brief name]
 
-**Scenario**: This agent's domain conflicts with another agent's decision.
+**Scenario**：该代理的负责域与其他代理的决策发生冲突。
 
-**Fixture**:
-- [conflicting decisions from two agents at same tier]
+**Fixture**：
+- [两个同级代理给出的相互冲突的决策]
 
-**Expected behavior**:
-1. Agent identifies the conflict
-2. Agent escalates to the shared parent (or creative-director / technical-director)
-3. Agent does NOT unilaterally resolve cross-domain conflicts
+**Expected behavior**：
+1. 代理识别冲突
+2. 代理上报给共同的父级（或 creative-director / technical-director）
+3. 代理不单方面解决跨域冲突
 
-**Assertions**:
-- [ ] Conflict surfaced explicitly
-- [ ] Correct escalation path followed
-- [ ] No unilateral cross-domain changes made
+**Assertions**：
+- [ ] 冲突被显式呈现
+- [ ] 遵循正确的上报路径
+- [ ] 未进行单方面的跨域改动
 
 **Case Verdict**: PASS / FAIL / PARTIAL / NOT ASSESSED
 
@@ -111,21 +111,21 @@ delegates vs. handles directly. Include which gates it triggers (if any).]
 
 ### Case 5: Context Pass-Through — [brief name]
 
-**Scenario**: Agent receives a task with full context from a parent agent.
+**Scenario**：代理收到来自父级代理、带有完整上下文的任务。
 
-**Fixture**:
-- [context block passed from parent]
-- [specific sub-task to execute]
+**Fixture**：
+- [从父级传入的上下文块]
+- [要执行的具体子任务]
 
-**Expected behavior**:
-1. Agent reads and uses the provided context
-2. Agent completes the sub-task
-3. Agent returns result to parent (does not prompt user unnecessarily)
+**Expected behavior**：
+1. 代理读取并使用所提供的上下文
+2. 代理完成子任务
+3. 代理将结果返回给父级（不必要地询问用户）
 
-**Assertions**:
-- [ ] Agent uses provided context rather than re-asking for it
-- [ ] Result is scoped to the sub-task, not expanded beyond it
-- [ ] Output format suitable for parent agent consumption
+**Assertions**：
+- [ ] 代理使用所提供的上下文，而非重复询问
+- [ ] 结果限定在子任务范围内，不向外扩展
+- [ ] 输出格式适合父级代理消费
 
 **Case Verdict**: PASS / FAIL / PARTIAL / NOT ASSESSED
 
@@ -133,15 +133,15 @@ delegates vs. handles directly. Include which gates it triggers (if any).]
 
 ## Protocol Compliance
 
-- [ ] Stays within declared domain — no unilateral cross-domain changes
-- [ ] Escalates conflicts to correct parent
-- [ ] Uses `"May I write"` before file writes (or is read-only)
-- [ ] Presents findings before requesting approval
-- [ ] Does not skip tiers in the delegation hierarchy
+- [ ] 保持在声明的负责域内——不做单方面的跨域改动
+- [ ] 将冲突上报给正确的父级
+- [ ] 在文件写入前使用 `"May I write"`（或本身为只读）
+- [ ] 在请求批准前呈现发现
+- [ ] 不在委托层级中跳级
 
 ---
 
 ## Coverage Notes
 
-[Any gaps in coverage, known edge cases not tested, or behaviors that require
-a live agent invocation to verify.]
+[覆盖率方面的任何缺口、已知但未测试的边缘情况，或需要实际调用代理才能验证的
+行为。]

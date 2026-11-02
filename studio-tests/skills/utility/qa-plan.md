@@ -2,210 +2,187 @@
 
 ## Skill Summary
 
-`/qa-plan [sprint | feature: system-name | story: path]` generates a QA plan
-before implementation. `sprint` reads the most recent file in
-`production/sprints/` (or `production/sprint-status.yaml` when present) for its
-story list; `feature:` globs `production/epics/*/story-*.md` by system name;
-`story:` loads one file; no argument asks for the scope with `AskUserQuestion`.
-A referenced story file that does not exist is noted as MISSING and the plan
-continues; a scope with zero stories stops with `NOT ASSESSED — no stories in
-scope` and a route (e.g. "No sprint plan found. Run `/sprint-plan new`.").
+`/qa-plan [sprint | feature: system-name | story: path]` 在实现之前生成 QA 计划。`sprint` 读取 `production/sprints/` 中最新的文件（若存在 `production/sprint-status.yaml` 则读取它）以获取用户故事列表；`feature:` 按系统名 glob `production/epics/*/story-*.md`；`story:` 加载单个文件；无参数时通过 `AskUserQuestion` 询问范围。被引用但不存在的用户故事文件会被标记为 MISSING，计划继续；范围中零个用户故事时停止，输出 `NOT ASSESSED — no stories in scope` 并给出路径（例如 "No sprint plan found. Run `/sprint-plan new`."）。
 
-Story fields are collected with targeted greps. A declared `Type:` is accepted
-as-is; a missing one is inferred from the acceptance criteria and flagged as a
-gap. A story with no `## Acceptance Criteria` is full-read and reported as a QA
-finding, never skipped. After a classification summary table, the plan
-(Test Summary, Automated Tests Required, Manual QA Checklist, Smoke Test Scope,
-Playtest Requirements, Definition of Done) is shown, then one `AskUserQuestion`
-(multiSelect) asks whether to write `production/qa/qa-plan-[sprint-slug]-[date].md`
-and whether to back-fill `## QA Test Cases` in the story files. `qa.level`
-changes the plan's depth, but no level drops the Visual/Feel and UI screenshot
-rows. No director gates apply.
+用户故事字段通过有针对性的 grep 收集。已声明的 `Type:` 按原样接受；缺失的类型从验收标准推断并标记为缺口。没有 `## Acceptance Criteria` 的用户故事会被完整读取并作为 QA 发现项报告，绝不跳过。在展示分类摘要表之后，展示计划（Test Summary、Automated Tests Required、Manual QA Checklist、Smoke Test Scope、Playtest Requirements、Definition of Done），然后通过一次 `AskUserQuestion`（multiSelect）询问是否写入 `production/qa/qa-plan-[sprint-slug]-[date].md`，以及是否回填用户故事文件中的 `## QA Test Cases`。`qa.level` 会改变计划的深度，但任何级别都不会删掉 Visual/Feel 和 UI 截图行。不适用任何总监闸门。
 
 ---
 
 ## Static Assertions (Structural)
 
-Checked against the SKILL.md by `/skill-test spec` — no fixture needed.
+由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] Has required frontmatter fields: `name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`
-- [ ] Has ≥2 phase headings
-- [ ] Contains the verdict keyword `NOT ASSESSED` for an empty scope
-- [ ] Asks for approval before writing: an `AskUserQuestion` option naming `production/qa/qa-plan-[sprint-slug]-[date].md`, and the rule "Never write the plan without asking"
-- [ ] Has a next-step handoff (`/smoke-check sprint` after implementation, `/story-done` checks for the test files)
+- [ ] 具备必需的前置元数据字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 至少有 ≥2 个阶段标题
+- [ ] 包含空范围用的结论关键词 `NOT ASSESSED`
+- [ ] 写入前请求批准：一个 `AskUserQuestion` 选项指明 `production/qa/qa-plan-[sprint-slug]-[date].md`，以及规则 "Never write the plan without asking"
+- [ ] 具备下一步交接（实现后用 `/smoke-check sprint`，`/story-done` 检查测试文件）
 
 ---
 
 ## Director Gate Checks
 
-None. `/qa-plan` is a planning utility. It spawns no agents (`Agent` is not in
-its allowed tools) and no director gates apply.
+无。`/qa-plan` 是一个规划工具。它不生成任何代理（`Agent` 不在其允许工具中），且不适用任何总监闸门。
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非某个用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且不存在 `project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
 
 ---
 
 ## Test Cases
 
-### Case 1: Happy Path — Sprint With Four Typed Stories
+### Case 1: 正常路径 — 含四个已分类用户故事的冲刺
 
 **Fixture:**
-- `production/sprints/sprint-003.md` is the most recent sprint and references 4
-  story files, each with acceptance criteria and a declared Type: Logic,
-  Integration, Visual/Feel, UI
-- The stories reference GDDs in `design/gdd/`; `engine.name: Godot`
-- `qa.level: standard`; `modes.automation: collaborative`
+- `production/sprints/sprint-003.md` 是最新的冲刺，引用 4 个
+  用户故事文件，每个都有验收标准以及已声明的 Type：Logic、
+  Integration、Visual/Feel、UI
+- 这些用户故事引用 `design/gdd/` 中的 GDD；`engine.name: Godot`
+- `qa.level: standard`；`modes.automation: collaborative`
 
 **Input:** `/qa-plan sprint`
 
 **Expected behavior:**
-1. Skill reads the most recent sprint file and reports "Building QA plan for 4
+1. 技能读取最新的冲刺文件并报告 "Building QA plan for 4
    stories in [scope]."
-2. Story fields are collected with section greps; each declared Type is accepted
-   without re-classification
-3. A classification summary table is shown before the plan is generated
-4. The plan's Test Summary maps Logic → unit test under `tests/unit/[system]/`,
-   Integration → integration test under `tests/integration/[system]/`,
-   Visual/Feel → screenshot + lead sign-off, UI → retained screenshot of each
-   screen touched
-5. The plan is shown, then one multiSelect `AskUserQuestion` offers "Write QA
-   plan to production/qa/qa-plan-[sprint-slug]-[date].md" and the story
-   back-fill option
-6. After writing, next steps name `/smoke-check sprint` (after implementation)
-   and `/story-done`
+2. 通过分节 grep 收集用户故事字段；每个已声明的 Type 都被接受，
+   不重新分类
+3. 在生成计划之前展示分类摘要表
+4. 计划的 Test Summary 映射：Logic → `tests/unit/[system]/` 下的单元测试，
+   Integration → `tests/integration/[system]/` 下的集成测试，
+   Visual/Feel → 截图 + lead 签核，UI → 保留每个涉及界面的截图
+5. 展示计划，然后一次 multiSelect `AskUserQuestion` 提供 "Write QA
+   plan to production/qa/qa-plan-[sprint-slug]-[date].md" 以及用户故事
+   回填选项
+6. 写入后，下一步指明 `/smoke-check sprint`（实现后）
+   和 `/story-done`
 
 **Assertions:**
-- [ ] All 4 stories appear in the plan, each with its declared Type unchanged
-- [ ] The classification summary table appears before the plan
-- [ ] Logic and Integration rows name test paths under `tests/unit/` and `tests/integration/`
-- [ ] The UI row's manual verification is the retained screenshot of each screen touched, not a step-through
-- [ ] Nothing is written before the multiSelect approval, and the written path is `production/qa/qa-plan-[sprint-slug]-[date].md`
-- [ ] Next steps name `/smoke-check sprint` and `/story-done`
+- [ ] 全部 4 个用户故事都出现在计划中，且各自的已声明 Type 保持不变
+- [ ] 分类摘要表出现在计划之前
+- [ ] Logic 和 Integration 行指明 `tests/unit/` 和 `tests/integration/` 下的测试路径
+- [ ] UI 行的人工验证是保留每个涉及界面的截图，而不是逐步走查
+- [ ] 在 multiSelect 批准前不写入任何内容，且写入路径为 `production/qa/qa-plan-[sprint-slug]-[date].md`
+- [ ] 下一步指明 `/smoke-check sprint` 和 `/story-done`
 
 ---
 
-### Case 2: Story Without Acceptance Criteria and a Missing Story File
+### Case 2: 用户故事缺少验收标准，以及一个用户故事文件缺失
 
 **Fixture:**
-- The most recent sprint file references 4 story paths
-- One story has no `## Acceptance Criteria` section
-- One referenced story path does not exist on disk
-- The other 2 stories are complete
+- 最新的冲刺文件引用 4 个用户故事路径
+- 一个用户故事没有 `## Acceptance Criteria` 小节
+- 一个被引用的用户故事路径在磁盘上不存在
+- 其余 2 个用户故事完整
 
 **Input:** `/qa-plan sprint`
 
 **Expected behavior:**
-1. The missing path is noted as MISSING and the plan continues
-2. The story whose AC grep matched nothing is full-read, and the plan says it
-   has no testable criteria — a QA finding, not a skipped story
-3. The 2 complete stories are classified and planned normally
-4. Approval is asked before writing
+1. 缺失路径被标记为 MISSING，计划继续
+2. AC grep 无匹配的用户故事被完整读取，计划说明它没有
+   可测试标准——这是 QA 发现项，而不是被跳过的用户故事
+3. 2 个完整的用户故事被正常分类和规划
+4. 写入前请求批准
 
 **Assertions:**
-- [ ] The missing file is reported as MISSING without failing the whole plan
-- [ ] The story with no acceptance criteria is full-read and reported as a QA finding
-- [ ] That story is not silently dropped from the plan
-- [ ] The two complete stories receive normal test assignments
+- [ ] 缺失文件被报告为 MISSING，且不会导致整个计划失败
+- [ ] 没有验收标准的用户故事被完整读取并作为 QA 发现项报告
+- [ ] 该用户故事不会被静默地从计划中丢弃
+- [ ] 两个完整的用户故事获得正常的测试分配
 
 ---
 
-### Case 3: Mode Variant — qa.level minimal
+### Case 3: 模式变体 — qa.level minimal
 
 **Fixture:**
-- Same 4-story sprint as Case 1
+- 与 Case 1 相同的 4 个用户故事冲刺
 - `qa.level: minimal`
 
 **Input:** `/qa-plan sprint`
 
 **Expected behavior:**
-1. Skill produces only a minimal smoke plan
-2. The "Automated Tests Required" section is omitted and the Test Summary's
-   "Automated Test Required" column is blanked
-3. The Definition of Done drops the test-file and smoke rows only; it still
-   requires a retained screenshot of each screen touched for the Visual/Feel
-   and UI stories, and a signed-off evidence doc for the Visual/Feel story —
-   `qa.level` waives tests, never the screenshot
-4. Approval is asked before writing
+1. 技能只生成最小冒烟计划
+2. 省略 "Automated Tests Required" 小节，Test Summary 的
+   "Automated Test Required" 列留空
+3. Definition of Done 只删除测试文件和冒烟行；它仍然
+   要求为 Visual/Feel 和 UI 用户故事保留每个涉及界面的截图，
+   并为 Visual/Feel 用户故事提供已签核的证据文档——
+   `qa.level` 可豁免测试，但绝不豁免截图
+4. 写入前请求批准
 
 **Assertions:**
-- [ ] No "Automated Tests Required" section appears
-- [ ] The Test Summary's automated-test column is blank
-- [ ] The Definition of Done has no test-file or smoke-check rows
-- [ ] The Definition of Done still requires the retained screenshot for the Visual/Feel and UI stories, and the signed-off evidence doc for the Visual/Feel story
-- [ ] Approval is still asked before the plan is written
+- [ ] 不出现 "Automated Tests Required" 小节
+- [ ] Test Summary 的自动化测试列为空
+- [ ] Definition of Done 没有测试文件或冒烟检查行
+- [ ] Definition of Done 仍要求为 Visual/Feel 和 UI 用户故事保留截图，并为 Visual/Feel 用户故事提供已签核的证据文档
+- [ ] 写入计划前仍请求批准
 
 ---
 
-### Case 4: No Sprint Plan — NOT ASSESSED
+### Case 4: 无冲刺计划 — NOT ASSESSED
 
 **Fixture:**
-- `production/sprints/` contains no files
-- No `production/sprint-status.yaml`
-- `modes.rigor: standard` (so sprints are expected)
+- `production/sprints/` 不包含任何文件
+- 没有 `production/sprint-status.yaml`
+- `modes.rigor: standard`（因此预期有冲刺）
 
 **Input:** `/qa-plan sprint`
 
 **Expected behavior:**
-1. The resolved scope contains zero stories
-2. Skill stops before Phase 2 and reports `NOT ASSESSED — no stories in scope`,
-   naming the scope searched and the empty path
-3. Skill routes: "No sprint plan found. Run `/sprint-plan new`."
-4. No plan is generated and no write approval is asked
+1. 解析出的范围包含零个用户故事
+2. 技能在 Phase 2 之前停止，并报告 `NOT ASSESSED — no stories in scope`，
+   指明所搜索的范围和空路径
+3. 技能给出路径："No sprint plan found. Run `/sprint-plan new`."
+4. 不生成计划，也不请求写入批准
 
 **Assertions:**
-- [ ] Verdict is `NOT ASSESSED — no stories in scope`
-- [ ] The empty path `production/sprints/` is named
-- [ ] `/sprint-plan new` is suggested
-- [ ] No plan document with empty tables is produced, and nothing is written
+- [ ] 结论为 `NOT ASSESSED — no stories in scope`
+- [ ] 指明空路径 `production/sprints/`
+- [ ] 建议使用 `/sprint-plan new`
+- [ ] 不生成带空表格的计划文档，也不写入任何内容
 
 ---
 
-### Case 5: Director Gate Check — None
+### Case 5: 总监闸门检查 — 无
 
 **Fixture:**
-- A sprint with typed stories and acceptance criteria
-- Any review mode
+- 一个含已分类用户故事和验收标准的冲刺
+- 任意评审模式
 
 **Input:** `/qa-plan sprint`
 
 **Expected behavior:**
-1. Skill classifies stories and generates the plan
-2. No director or other agent is spawned; no gate IDs appear
-3. The only interactive step after scope resolution is the single write approval
+1. 技能分类用户故事并生成计划
+2. 不生成任何总监或其他代理；不出现闸门 ID
+3. 范围解析之后唯一的交互步骤是单次写入批准
 
 **Assertions:**
-- [ ] No director gate is invoked and no gate skip message appears
-- [ ] No subagent is spawned
-- [ ] Phases 2–4 run without asking the user anything
-- [ ] Exactly one approval prompt precedes the write
+- [ ] 未调用任何总监闸门，也不出现闸门跳过消息
+- [ ] 不生成任何子代理
+- [ ] Phase 2–4 运行期间不向用户询问任何内容
+- [ ] 写入前恰好有一次批准提示
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Stops with `NOT ASSESSED — no stories in scope` when the scope is empty, and routes to the producing skill
-- [ ] Notes missing story files as MISSING and continues
-- [ ] Accepts declared `Type:` values; infers and flags a missing Type
-- [ ] Never skips a story because its acceptance-criteria section is absent
-- [ ] Shows the classification table and the plan before asking to write
-- [ ] Writes only after the `AskUserQuestion` approval; back-fills story files only when that option is selected
+- [ ] 当范围为空时以 `NOT ASSESSED — no stories in scope` 停止，并指向负责生成的技能
+- [ ] 将缺失的用户故事文件标记为 MISSING 并继续
+- [ ] 接受已声明的 `Type:` 值；推断并标记缺失的 Type
+- [ ] 绝不因缺少验收标准小节而跳过用户故事
+- [ ] 在请求写入之前展示分类表和计划
+- [ ] 仅在 `AskUserQuestion` 批准后写入；仅当选择该选项时才回填用户故事文件
 
 ---
 
 ## Coverage Notes
 
-- `feature: [system-name]` and `story: [path]` scopes, and the no-argument
-  scope question, are not separately tested.
-- A story with no `Type:` field (inferred from acceptance criteria and flagged
-  as a gap) is covered only by protocol compliance.
-- The back-fill option (editing `## QA Test Cases` in each story file) is not
-  tested in detail.
-- At `rigor: minimal`, the empty-sprint route points to `/qa-plan feature:` or
-  `/qa-plan story:` instead of `/sprint-plan new`; not separately tested.
+- `feature: [system-name]` 和 `story: [path]` 范围，以及无参数时的范围问题，
+  未单独测试。
+- 没有 `Type:` 字段的用户故事（从验收标准推断并标记为缺口）仅由协议合规性覆盖。
+- 回填选项（在每个用户故事文件中编辑 `## QA Test Cases`）未详细测试。
+- 在 `rigor: minimal` 下，空冲刺路径指向 `/qa-plan feature:` 或
+  `/qa-plan story:`，而不是 `/sprint-plan new`；未单独测试。

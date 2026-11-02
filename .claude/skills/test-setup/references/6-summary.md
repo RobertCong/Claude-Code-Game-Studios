@@ -1,11 +1,11 @@
-# /test-setup — Phase 6: Post-Setup Summary
+# /test-setup — Phase 6: 安装后摘要
 
-> Part of `/test-setup`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> `/test-setup` 的一部分。`SKILL.md` 说明何时读取本文件；它解析出的设置
+> 以及其后续标题下的规则在此仍然适用。
 
-## Phase 6: Post-Setup Summary
+## Phase 6: 安装后摘要
 
-After writing all files, report:
+写入所有文件后，报告：
 
 ```
 Test infrastructure created for [engine].

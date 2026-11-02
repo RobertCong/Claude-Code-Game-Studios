@@ -3,7 +3,7 @@
 ## Identification
 
 - **ID**: RISK-[NNNN]
-- **Identified By**: [Agent or person]
+- **Identified By**: [agent 或人员]
 - **Date Identified**: [Date]
 - **Category**: [Technical | Design | Schedule | Resource | External | Quality]
 
@@ -15,44 +15,44 @@
 
 ## Description
 
-[Detailed description of the risk. What could go wrong? Under what conditions?]
+[风险的详细描述。可能出什么问题？在什么条件下？]
 
 ## Trigger Conditions
 
-[What observable conditions would indicate this risk is materializing?]
+[哪些可观察的条件表明该风险正在发生？]
 
-- [Condition 1]
-- [Condition 2]
+- [条件 1]
+- [条件 2]
 
 ## Impact Analysis
 
 ### If This Risk Materializes
 
-- **Schedule Impact**: [How many days/weeks of delay]
-- **Quality Impact**: [What quality degradation]
-- **Scope Impact**: [What features affected]
-- **Cost Impact**: [Resource cost of dealing with it]
+- **Schedule Impact**: [延迟多少天/周]
+- **Quality Impact**: [何种质量下降]
+- **Scope Impact**: [哪些功能受影响]
+- **Cost Impact**: [应对该风险的资源成本]
 
 ### Affected Systems/Features
 
-- [System 1]
-- [System 2]
+- [系统 1]
+- [系统 2]
 
 ## Mitigation Strategy
 
 ### Prevention (reduce probability)
 
-- [Action to prevent this risk from occurring]
-- [Owner and deadline for prevention action]
+- [防止该风险发生的行动]
+- [预防行动的责任人与截止日期]
 
 ### Contingency (reduce impact if it occurs)
 
-- [Action to take if this risk materializes]
-- [Owner responsible for contingency execution]
+- [若风险发生应采取的行动]
+- [负责执行应急方案的人]
 
 ## Current Status
 
 - **Status**: [Open | Mitigating | Occurred | Closed]
 - **Last Reviewed**: [Date]
 - **Trend**: [Increasing | Stable | Decreasing]
-- **Notes**: [Any updates]
+- **Notes**: [任何更新]

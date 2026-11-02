@@ -2,247 +2,236 @@
 
 ## Skill Summary
 
-`/design-review` reviews one game design document (GDD) against the project's
-design standard (Overview, Player Fantasy, Detailed Rules, Formulas, Edge
-Cases, Dependencies, Tuning Knobs, Acceptance Criteria). Which sections are
-REQUIRED depends on the workflow tier resolved for that system: all 8 at
-`full`; 5 at `standard` (plus Formulas when the system defines numeric rules).
-It gathers section presence with `.claude/scripts/gdd-structure-check.sh`,
-validates the declared dependency graph, checks internal consistency,
-implementability and cross-system fit, and produces a verdict of APPROVED,
-NEEDS REVISION, MAJOR REVISION NEEDED, or NOT ASSESSED.
+`/design-review` 依据项目的设计标准（Overview、Player Fantasy、Detailed Rules、
+Formulas、Edge Cases、Dependencies、Tuning Knobs、Acceptance Criteria）评审一份
+游戏设计文档（GDD）。哪些小节是 REQUIRED 取决于为该系统的解析出的工作流层级：
+`full` 下全部 8 个；`standard` 下 5 个（当系统定义数值规则时再加 Formulas）。
+它通过 `.claude/scripts/gdd-structure-check.sh` 收集小节是否存在，校验声明的
+依赖图，检查内部一致性、可实现性和跨系统契合度，并产生 APPROVED、
+NEEDS REVISION、MAJOR REVISION NEEDED 或 NOT ASSESSED 的结论。
 
-The review mode sets its depth: `full` adds a parallel adversarial specialist
-review plus a `creative-director` senior synthesis (Phase 3b); `lean` runs all
-phases without agents; `solo` runs Phases 1–4 only with no next-step prompt.
-Phase 4 writes nothing. In Phase 5 it can update `design/gdd/systems-index.md`
-and append to `design/gdd/reviews/[doc-name]-review-log.md`, each only after the
-user approves via `AskUserQuestion`.
+评审模式设定其深度：`full` 增加一次并行的对抗性专家评审加一次
+`creative-director` 资深综合（Phase 3b）；`lean` 在无代理的情况下运行所有阶段；
+`solo` 只运行 Phase 1–4，且没有下一步提示。Phase 4 不写入任何内容。在 Phase 5
+中它可更新 `design/gdd/systems-index.md`，并向
+`design/gdd/reviews/[doc-name]-review-log.md` 追加内容，每次都要经由
+`AskUserQuestion` 获得用户批准。
 
 ---
 
 ## Static Assertions (Structural)
 
-Checked against the SKILL.md by `/skill-test spec` — no fixture needed.
+由 `/skill-test spec` 对照 SKILL.md 检查 —— 无需 fixture。
 
-- [ ] Has required frontmatter fields: `name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`
-- [ ] Has ≥2 phase headings or numbered steps
-- [ ] Contains verdict keywords: APPROVED, NEEDS REVISION, MAJOR REVISION NEEDED, NOT ASSESSED
-- [ ] `allowed-tools` includes Write/Edit, so "May I" write-approval language is present (systems-index update, review-log append)
-- [ ] Output format is documented (review template shown in skill body)
+- [ ] 具备必需的前置字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备 ≥2 个阶段标题或编号步骤
+- [ ] 包含结论关键词：APPROVED、NEEDS REVISION、MAJOR REVISION NEEDED、NOT ASSESSED
+- [ ] `allowed-tools` 包含 Write/Edit，因此存在 "May I" 写入批准措辞（systems-index 更新、review-log 追加）
+- [ ] 有文档化的输出格式（技能正文中展示了评审模板）
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置
+`modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有
+`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
 
 ---
 
 ## Test Cases
 
-### Case 1: Happy Path — Complete GDD, all 8 sections present
+### Case 1: 正常路径 — 完整 GDD，8 个小节齐备
 
-**Fixture:**
-- `project.yaml` sets `modes.workflow: full`
-- `design/gdd/light-manipulation.md` exists with all 8 sections populated with
-  substantive content (the Detailed Rules section is titled `## Detailed Design`)
-- Formulas section defines at least one formula with named variables
-- Acceptance Criteria section contains at least 3 testable criteria
-- Every system named in its Dependencies section has a GDD in `design/gdd/`
-- No prior review log exists for this document
+**测试夹具：**
+- `project.yaml` 设置 `modes.workflow: full`
+- `design/gdd/light-manipulation.md` 存在，全部 8 个小节都有实质内容
+  （Detailed Rules 小节的标题为 `## Detailed Design`）
+- Formulas 小节至少定义了一个含具名变量的公式
+- Acceptance Criteria 小节包含至少 3 条可测试的标准
+- 其 Dependencies 小节中命名的每个系统都在 `design/gdd/` 中有 GDD
+- 本文档没有此前的评审日志
 
-**Input:** `/design-review design/gdd/light-manipulation.md --review lean`
+**输入：** `/design-review design/gdd/light-manipulation.md --review lean`
 
-**Expected behavior:**
-1. Freshness check (`review-receipts.sh check …`) finds no receipt → full review
-2. Skill reads the target document in full and reads CLAUDE.md
-3. Skill runs `bash .claude/scripts/gdd-structure-check.sh design/gdd/light-manipulation.md`
-4. Skill Globs `design/gdd/` for each declared dependency
-5. Skill checks internal consistency, implementability and cross-system fit
-6. No agents are spawned (lean)
-7. Skill outputs the Phase 4 review, ending with the verdict
-8. On APPROVED, one multi-select `AskUserQuestion` offers the two tracking
-   updates; only the selected ones are written; then a final closing widget
+**预期行为：**
+1. 新鲜度检查（`review-receipts.sh check …`）未找到回执 → 完整评审
+2. 技能完整读取目标文档并读取 CLAUDE.md
+3. 技能运行 `bash .claude/scripts/gdd-structure-check.sh design/gdd/light-manipulation.md`
+4. 技能对每个声明的依赖在 `design/gdd/` 中执行 Glob
+5. 技能检查内部一致性、可实现性和跨系统契合度
+6. 不启动任何代理（lean）
+7. 技能输出 Phase 4 评审，以结论结尾
+8. 在 APPROVED 时，一个多选 `AskUserQuestion` 提供两项跟踪更新；只写入被选中的
+   那些；然后是最后的收尾部件
 
-**Assertions:**
-- [ ] Skill reads the target file before producing any output
-- [ ] Section presence comes from `gdd-structure-check.sh`, and `## Detailed Design` is accepted as the Detailed Rules section (not flagged missing)
-- [ ] Output includes "Completeness: 8/8" (N is 8 because the tier is `full`)
-- [ ] Output includes a "Dependency Graph" section listing each declared dependency with whether its GDD exists
-- [ ] Output includes "Required Before Implementation", "Recommended Revisions" and "Scope Signal" sections, and "Re-review: No — first review"
-- [ ] Output ends with `### Verdict:` APPROVED when all REQUIRED sections are present and no blocking issue is found
-- [ ] No file is written before the tracking-records widget, and only the options the user selects are written
-- [ ] If the review-log option is selected, the appended entry has a `Review mode:` line and the `review-receipts.sh hash` output for the document, the skill file and the related GDDs it read
-
----
-
-### Case 2: Failure Path — Incomplete GDD (4/8 sections at `full`)
-
-**Fixture:**
-- `project.yaml` sets `modes.workflow: full`
-- `design/gdd/light-manipulation.md` has Overview, Player Fantasy, Detailed
-  Rules and Dependencies only; Formulas, Edge Cases, Tuning Knobs and
-  Acceptance Criteria are absent
-
-**Input:** `/design-review design/gdd/light-manipulation.md --review lean`
-
-**Expected behavior:**
-1. `gdd-structure-check.sh` reports the 4 sections in its `ABSENT:` list
-2. All 4 are REQUIRED at `full`, so each blocks approval
-3. Skill outputs "Completeness: 4/8" and names each missing section
-4. Verdict is a revision verdict, never APPROVED
-5. Phase 5 offers `[A] Revise the GDD now` / `[B] Stop here`; "Accept as-is" is
-   offered only when all items are advisory, which they are not here
-
-**Assertions:**
-- [ ] Output shows "4/8" in the completeness section (not a higher number)
-- [ ] Output explicitly names each missing section (Formulas, Edge Cases, Tuning Knobs, Acceptance Criteria) as REQUIRED
-- [ ] Verdict is NEEDS REVISION or MAJOR REVISION NEEDED — never APPROVED while a REQUIRED section is missing, and not NOT ASSESSED (the document was read)
-- [ ] Output does not suggest the document is implementation-ready
-- [ ] "Accept as-is and move on" is not offered, because the missing sections are blocking
-- [ ] No file is written except after an explicit Phase 5 choice: `[A] Revise the GDD now`, "May I update `design/gdd/systems-index.md`…", or "May I append this review summary…"
-- [ ] The systems-index prompt offers `Needs Revision` or `In Review` — never `Approved` on this revision verdict — and the review-log entry records the revision verdict, not an approval
+**断言：**
+- [ ] 技能在产生任何输出前读取目标文件
+- [ ] 小节是否存在来自 `gdd-structure-check.sh`，且 `## Detailed Design` 被接受为 Detailed Rules 小节（不被标记为缺失）
+- [ ] 输出包含 "Completeness: 8/8"（N 为 8，因为层级是 `full`）
+- [ ] 输出包含 "Dependency Graph" 小节，列出每个声明的依赖及其 GDD 是否存在
+- [ ] 输出包含 "Required Before Implementation"、"Recommended Revisions" 和 "Scope Signal" 小节，以及 "Re-review: No — first review"
+- [ ] 当所有 REQUIRED 小节都存在且未发现阻塞问题时，输出以 `### Verdict:` APPROVED 结尾
+- [ ] 在跟踪记录部件之前不写入任何文件，且只写入用户选择的选项
+- [ ] 若选择了 review-log 选项，追加的条目包含 `Review mode:` 行，以及该文档、技能文件及其读取的相关 GDD 的 `review-receipts.sh hash` 输出
 
 ---
 
-### Case 3: Partial Path — `standard` tier, numeric rules with no Formulas section
+### Case 2: 失败路径 — 不完整的 GDD（`full` 下 4/8 小节）
 
-**Fixture:**
-- `project.yaml` sets `modes.workflow: standard`
-- GDD has Overview, Player Fantasy, `## Detailed Design`, Edge Cases,
-  Dependencies, Tuning Knobs and Acceptance Criteria; no Formulas section
-- Detailed Design states numeric rules ("drain 2 oxygen per second", "refill
-  costs 50 credits") but no formula defines them
-- Acceptance Criteria are vague ("feels good" rather than measurable)
+**测试夹具：**
+- `project.yaml` 设置 `modes.workflow: full`
+- `design/gdd/light-manipulation.md` 只有 Overview、Player Fantasy、Detailed
+  Rules 和 Dependencies；Formulas、Edge Cases、Tuning Knobs 和
+  Acceptance Criteria 缺失
 
-**Input:** `/design-review design/gdd/oxygen.md --review lean`
+**输入：** `/design-review design/gdd/light-manipulation.md --review lean`
 
-**Expected behavior:**
-1. Skill marks Formulas REQUIRED at `standard` because the system defines
-   numeric rules (the system's `Category` alone never clears it)
-2. N = 6 (5 standard sections + Formulas); Completeness shows 5/6, not a /8 count
-3. Skill flags the vague acceptance criteria as an implementability issue
-4. Verdict is a revision verdict
+**预期行为：**
+1. `gdd-structure-check.sh` 在其 `ABSENT:` 列表中报告这 4 个小节
+2. 在 `full` 下这 4 个都是 REQUIRED，因此每个都阻塞批准
+3. 技能输出 "Completeness: 4/8" 并点名每个缺失的小节
+4. 结论是修订类结论，绝不是 APPROVED
+5. Phase 5 提供 `[A] Revise the GDD now` / `[B] Stop here`；"Accept as-is"
+   仅在所有条目都是建议性时提供，而此处并非如此
 
-**Assertions:**
-- [ ] Output identifies the missing Formulas section as REQUIRED (not advisory) because numeric rules are present
-- [ ] Completeness is reported against the `standard` count ("5/6"), not "7/8"
-- [ ] Output flags the vague acceptance criteria as an implementability gap, quoting each one — the main review does this itself, since no `qa-lead` runs in `lean`
-- [ ] Verdict is NEEDS REVISION or MAJOR REVISION NEEDED, never APPROVED
-
----
-
-### Case 4: Edge Case — File not found
-
-**Fixture:**
-- The path provided does not exist in the project
-
-**Input:** `/design-review design/gdd/nonexistent.md --review lean`
-
-(`lean`, so Phase 5 runs. In `solo` — what the review mode resolves to when
-`project.yaml` sets neither `modes.review_mode` nor `modes.rigor` — Phase 5 never
-runs and the last assertion below would test nothing.)
-
-**Expected behavior:**
-1. Freshness check reports no receipt; skill attempts to read the file
-2. File not found
-3. Skill outputs `### Verdict: NOT ASSESSED`, naming the missing document and
-   the skill that produces it (`/design-system`)
-4. Skill does NOT produce a quality verdict or any tracking write
-5. Phase 5 skips the tracking widgets and goes to the final closing widget,
-   leading with `/design-system`
-
-**Assertions:**
-- [ ] Verdict is NOT ASSESSED — not APPROVED, NEEDS REVISION or MAJOR REVISION NEEDED
-- [ ] Output names the missing file and which skill produces it
-- [ ] Phase 5 runs, and offers neither a `systems-index.md` status update nor a review-log entry — in particular it never offers to mark the system Approved
+**断言：**
+- [ ] 完整性小节显示 "4/8"（而不是更高的数字）
+- [ ] 输出明确点名每个缺失的小节（Formulas、Edge Cases、Tuning Knobs、Acceptance Criteria）为 REQUIRED
+- [ ] 结论为 NEEDS REVISION 或 MAJOR REVISION NEEDED —— 在 REQUIRED 小节缺失时绝不 APPROVED，也不是 NOT ASSESSED（文档已被读取）
+- [ ] 输出不暗示该文档已具备实现条件
+- [ ] 不提供 "Accept as-is and move on"，因为缺失的小节是阻塞性的
+- [ ] 除经明确的 Phase 5 选择外不写入任何文件：`[A] Revise the GDD now`、"May I update `design/gdd/systems-index.md`…"，或 "May I append this review summary…"
+- [ ] systems-index 提示提供 `Needs Revision` 或 `In Review` —— 在此修订结论下绝不提供 `Approved` —— 且 review-log 条目记录该修订结论，而非批准
 
 ---
 
-### Case 5: Review mode — specialist delegation in `full`, none in `lean` / `solo`
+### Case 3: 部分路径 — `standard` 层级，有数值规则但无 Formulas 小节
 
-**Fixture (all sub-cases):**
-- `project.yaml` sets `modes.workflow: full`
-- `design/gdd/light-manipulation.md` exists with all 8 sections, including
-  formulas and combat stats
+**测试夹具：**
+- `project.yaml` 设置 `modes.workflow: standard`
+- GDD 有 Overview、Player Fantasy、`## Detailed Design`、Edge Cases、
+  Dependencies、Tuning Knobs 和 Acceptance Criteria；没有 Formulas 小节
+- Detailed Design 陈述了数值规则（"drain 2 oxygen per second"、"refill
+  costs 50 credits"），但没有公式定义它们
+- Acceptance Criteria 含糊（"feels good" 而不是可测量）
 
-**Case 5a — full:** `/design-review design/gdd/light-manipulation.md --review full`
+**输入：** `/design-review design/gdd/oxygen.md --review lean`
 
-**Expected behavior:**
-1. Before spawning, skill prints "Full review: spawning specialist agents in parallel…"
-2. Skill spawns the relevant specialists in parallel as real `Agent` calls —
-   `game-designer` (any gameplay system) and `systems-designer` (formulas) at minimum here
-3. After the specialists return, skill spawns `creative-director` as senior
-   reviewer; its synthesis becomes the final verdict
-4. Findings are source-tagged; disagreements are listed, not silently resolved
+**预期行为：**
+1. 技能在 `standard` 下将 Formulas 标记为 REQUIRED，因为该系统定义了数值规则
+   （仅系统的 `Category` 永远不能清除它）
+2. N = 6（5 个标准小节 + Formulas）；Completeness 显示 5/6，而不是 /8 计数
+3. 技能将含糊的验收标准标记为可实现性问题
+4. 结论是修订类结论
 
-**Assertions (5a):**
-- [ ] The notice is printed before any agent is spawned
-- [ ] Specialists are spawned in parallel via `Agent` (not simulated in-session)
-- [ ] `creative-director` is spawned only after the specialists respond, and output has a "Senior Verdict [creative-director]" section
-- [ ] "Specialists consulted:" lists the agents actually spawned, and every finding carries a source tag such as `[game-designer]`
-- [ ] Specialist disagreements appear under "Specialist Disagreements"
-- [ ] The `### Verdict:` line carries exactly one of this skill's words — APPROVED, NEEDS REVISION or MAJOR REVISION NEEDED — taken from the creative-director's synthesis; never a director-gate word such as READY, CONCERNS, NOT READY, APPROVE or REJECT
-- [ ] No director-gate IDs appear ("Gate: CD-…" etc.) — the senior review is a direct spawn, not a gate from `director-gates.md`
-
-**Case 5b — lean via the legacy flag:** `/design-review design/gdd/light-manipulation.md --depth lean`
-
-**Assertions (5b):**
-- [ ] `--depth lean` is treated as `--review lean`, and the skill says once that the flag was renamed
-- [ ] No `Agent` call is made; the review runs in-session
-- [ ] Phase 5's next-step widgets still run
-
-**Case 5c — solo:** `/design-review design/gdd/light-manipulation.md --review solo`
-
-**Assertions (5c):**
-- [ ] No `Agent` call is made
-- [ ] Only Phases 1–4 run: no Phase 5 next-step prompt, so no systems-index or review-log write is offered
+**断言：**
+- [ ] 由于存在数值规则，输出将缺失的 Formulas 小节识别为 REQUIRED（而非建议性）
+- [ ] 完整性按 `standard` 计数报告（"5/6"），而不是 "7/8"
+- [ ] 输出将含糊的验收标准标记为实现缺口，并逐条引用 —— 由主评审自行完成，因为 `lean` 下不运行 `qa-lead`
+- [ ] 结论为 NEEDS REVISION 或 MAJOR REVISION NEEDED，绝不 APPROVED
 
 ---
 
-### Case 6: Review mode from the resolved config — no flag
+### Case 4: 边界情况 — 文件未找到
 
-**Fixture:**
-- `project.yaml` sets `modes.workflow: full` and `modes.review_mode: lean`
-- `design/gdd/light-manipulation.md` exists with all 8 sections
+**测试夹具：**
+- 提供的路径在项目中不存在
 
-**Input:** `/design-review design/gdd/light-manipulation.md`
+**输入：** `/design-review design/gdd/nonexistent.md --review lean`
 
-**Expected behavior:**
-1. No `--review` flag, so the skill takes `review_mode: lean` from the resolved
-   config block at the top of the skill
-2. The review runs in-session with no `Agent` call
-3. Phase 5's widgets run — which `solo`, the `rigor: minimal` default, would have skipped
+（`lean`，因此 Phase 5 运行。在 `solo` 下 —— 当 `project.yaml` 既未设置
+`modes.review_mode` 也未设置 `modes.rigor` 时评审模式解析出的结果 —— Phase 5
+从不运行，下面的最后一条断言就什么也测不到。）
 
-**Assertions:**
-- [ ] The review mode comes from the resolved config block when no flag is given (`review_mode: lean (project.yaml)`)
-- [ ] No `Agent` call is made, and Phase 5's next-step widgets run — so the run is `lean`, not the `solo` default
-- [ ] Variant — the same fixture with `--review solo` on the input: the flag wins over the config, and no Phase 5 widget runs
+**预期行为：**
+1. 新鲜度检查报告无回执；技能尝试读取该文件
+2. 文件未找到
+3. 技能输出 `### Verdict: NOT ASSESSED`，点名缺失的文档和产生它的技能
+   （`/design-system`）
+4. 技能不产生质量结论，也不做任何跟踪写入
+5. Phase 5 跳过跟踪部件，进入最后的收尾部件，并以 `/design-system` 打头
+
+**断言：**
+- [ ] 结论为 NOT ASSESSED —— 不是 APPROVED、NEEDS REVISION 或 MAJOR REVISION NEEDED
+- [ ] 输出点名缺失的文件以及哪个技能会产出它
+- [ ] Phase 5 运行，既不为 `systems-index.md` 提供状态更新，也不提供 review-log 条目 —— 特别是绝不提议将该系统标记为 Approved
+
+---
+
+### Case 5: 评审模式 — `full` 下委派专家，`lean` / `solo` 下不委派
+
+**测试夹具（所有子用例）：**
+- `project.yaml` 设置 `modes.workflow: full`
+- `design/gdd/light-manipulation.md` 存在，8 个小节齐备，包括公式和战斗数值
+
+**Case 5a — full：** `/design-review design/gdd/light-manipulation.md --review full`
+
+**预期行为：**
+1. 启动前，技能打印 "Full review: spawning specialist agents in parallel…"
+2. 技能以真实 `Agent` 调用并行启动相关专家 —— 此处至少为 `game-designer`
+   （任何玩法系统）和 `systems-designer`（公式）
+3. 专家返回后，技能启动 `creative-director` 作为资深评审；其综合成为最终结论
+4. 发现带有来源标签；分歧被列出，而不是静默解决
+
+**断言（5a）：**
+- [ ] 在任何代理被启动前打印该通知
+- [ ] 专家通过 `Agent` 并行启动（不在会话内模拟）
+- [ ] `creative-director` 仅在专家响应后启动，且输出有 "Senior Verdict [creative-director]" 小节
+- [ ] "Specialists consulted:" 列出实际启动的代理，且每条发现带有来源标签，例如 `[game-designer]`
+- [ ] 专家分歧出现在 "Specialist Disagreements" 下
+- [ ] `### Verdict:` 行只承载本技能词汇之一 —— APPROVED、NEEDS REVISION 或 MAJOR REVISION NEEDED —— 取自 creative-director 的综合；绝不使用总监闸门词汇，如 READY、CONCERNS、NOT READY、APPROVE 或 REJECT
+- [ ] 不出现总监闸门 ID（"Gate: CD-…" 等）—— 资深评审是直接启动，而非来自 `director-gates.md` 的闸门
+
+**Case 5b — 通过遗留标志使用 lean：** `/design-review design/gdd/light-manipulation.md --depth lean`
+
+**断言（5b）：**
+- [ ] `--depth lean` 被当作 `--review lean` 处理，且技能说明一次该标志已更名
+- [ ] 不发起 `Agent` 调用；评审在会话内运行
+- [ ] Phase 5 的下一步部件仍然运行
+
+**Case 5c — solo：** `/design-review design/gdd/light-manipulation.md --review solo`
+
+**断言（5c）：**
+- [ ] 不发起 `Agent` 调用
+- [ ] 只运行 Phase 1–4：没有 Phase 5 下一步提示，因此不提供 systems-index 或 review-log 写入
+
+---
+
+### Case 6: 来自已解析配置的评审模式 —— 无标志
+
+**测试夹具：**
+- `project.yaml` 设置 `modes.workflow: full` 和 `modes.review_mode: lean`
+- `design/gdd/light-manipulation.md` 存在，8 个小节齐备
+
+**输入：** `/design-review design/gdd/light-manipulation.md`
+
+**预期行为：**
+1. 没有 `--review` 标志，因此技能从技能顶部的已解析配置块取得
+   `review_mode: lean`
+2. 评审在会话内运行，没有 `Agent` 调用
+3. Phase 5 的部件运行 —— 若是 `rigor: minimal` 默认值下的 `solo`，它们本会被跳过
+
+**断言：**
+- [ ] 未给出标志时，评审模式来自已解析的配置块（`review_mode: lean (project.yaml)`）
+- [ ] 不发起 `Agent` 调用，且 Phase 5 的下一步部件运行 —— 因此本次运行是 `lean`，而不是 `solo` 默认值
+- [ ] 变体 —— 同一夹具，输入加 `--review solo`：标志优先于配置，且不运行任何 Phase 5 部件
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Writes nothing during the review itself (Phase 4)
-- [ ] Every write (systems-index status, review-log append) happens only after an `AskUserQuestion` approval
-- [ ] Presents complete findings before the verdict line
-- [ ] Outside `solo`, closes with an `AskUserQuestion` next-step widget rather than plain text (collaborative/guided modes)
+- [ ] 评审本身（Phase 4）期间不写入任何内容
+- [ ] 每次写入（systems-index 状态、review-log 追加）都仅在 `AskUserQuestion` 批准后发生
+- [ ] 在结论行之前展示完整发现
+- [ ] 在 `solo` 之外，以 `AskUserQuestion` 下一步部件收尾，而不是纯文本（协作/引导模式）
 
 ---
 
 ## Coverage Notes
 
-- Cross-system consistency across many GDDs is covered by the `/review-all-gdds`
-  spec; this spec checks only one document's dependency references.
-- The freshness receipt paths (byte-identical re-review offering the prior
-  verdict; a shallower logged review when a deeper one is asked for;
-  cross-document change only) are not fixture-tested here.
-- The entity-registry grep path (registry lists this system) is not tested; the
-  fixtures above use the fallback of reading the GDDs named in Dependencies.
-- The `minimal` tier (no GDD expected; standard sections checked advisorily) is
-  not tested.
-- Performance and edge cases involving very large GDD files are not in scope.
+- 多个 GDD 之间的跨系统一致性由 `/review-all-gdds` 规格覆盖；本规格只检查单个文档的依赖引用。
+- 新鲜度回执路径（字节相同的重评审提供先前结论；要求更深评审时给出较浅的已记录评审；仅跨文档变更）未在此做 fixture 测试。
+- 实体注册表 grep 路径（注册表列出该系统）未测试；上述 fixture 使用读取 Dependencies 中命名的 GDD 的兜底方案。
+- `minimal` 层级（不期望 GDD；标准小节以建议方式检查）未测试。
+- 涉及超大 GDD 文件的性能和边界情况不在范围内。

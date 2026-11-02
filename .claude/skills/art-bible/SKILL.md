@@ -1,6 +1,6 @@
 ---
 name: art-bible
-description: "Author the Art Bible — visual identity gating asset production. Run before /map-systems."
+description: "撰写美术圣经（Art Bible）——视觉识别是资源生产的质量闸门。请在 /map-systems 之前运行。"
 argument-hint: "[--review full|lean|solo]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, Bash(bash "*/.claude/skills/art-bible/../../hooks/yaml-helper.sh" resolve_config *)
@@ -9,70 +9,48 @@ model: sonnet
 
 !`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,workflow,docs.density`
 
-Resolved above — use as-is; `--review` overrides `review_mode`. No block →
-defaults in `.claude/docs/config-resolution.md`.
+以上已解析完成——直接使用；`--review` 会覆盖 `review_mode`。若没有配置块 → 使用 `.claude/docs/config-resolution.md` 中的默认值。
 
-# Art Bible
-
-
-## Phase 0: Parse Arguments and Context Check
+# Art Bible（美术圣经）
 
 
-See `.claude/docs/director-gates.md` for the full check pattern. Individual gate definitions live in `.claude/docs/director-gates/[gate-id].md` — the spawned agent reads its own gate file; do not read it in the parent session.
+## Phase 0: 解析参数与上下文检查
 
 
-Every `AskUserQuestion` call follows `.claude/docs/automation-modes.md`
-(collaborative asks always · guided major-only · autonomous logs and proceeds;
-`automation_always_ask` categories always prompt).
+完整的检查模式见 `.claude/docs/director-gates.md`。各个质量闸门（gate）的定义位于 `.claude/docs/director-gates/[gate-id].md`——被生成的 agent 会读取自己的闸门文件；不要在父会话中读取它。
 
-**`docs.density`** — it controls per-section *depth*, where `workflow`
-controls which sections exist. `modes.rigor` sets both together; set
-`docs.density` explicitly to vary depth alone: `terse` (the default, via `rigor: minimal`) = each section a bulleted list of
-constraints + references; `balanced` = paragraphs explaining each visual choice
-(`rigor: standard`); `thorough` = full prose including style explorations, references, and
-rationale per choice. Apply it to every section you author.
 
-**`workflow`** (see `.claude/docs/workflow-modes.md`):
-- `full` — all 9 art bible sections required.
-- `standard` — required only if visual asset stories exist in the project;
-  sections 1–4 are the minimum when required. `workflow_overrides.art_bible_strict:
-  true` forces all 9 sections regardless of tier.
-- `minimal` — not required. Can still be run voluntarily.
+每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`（collaborative 总是询问 · guided 仅询问重大决策 · autonomous 记录并继续；`automation_always_ask` 类别始终提示）。
 
-Read `design/gdd/game-concept.md` — or `design/game-brief.md`, the one-page brief
-that replaces it at `rigor: minimal`. Read it by section: find the headings you need
-with the Grep tool (pattern `^#`, content mode) and Read those ranges with offset
-and limit. If neither exists, fail with:
-> "No game concept found. Run `/brainstorm` first — the art bible is authored after the game concept is approved."
+**`docs.density`**——它控制每个章节的*深度*，而 `workflow` 控制存在哪些章节。`modes.rigor` 会同时设置两者；若只想改变深度，请显式设置 `docs.density`：`terse`（默认值，经由 `rigor: minimal`）= 每个章节为约束 + 参考资料的项目符号列表；`balanced` = 用段落解释每项视觉选择（`rigor: standard`）；`thorough` = 完整行文，包含风格探索、参考资料以及每项选择的理由。请将其应用到你所撰写的每个章节。
 
-Extract from game-concept.md (from the brief: working title, pitch, "Who it's for /
-what they feel" line and "Art & audio direction" line — it has no pillars, Visual
-Identity Anchor or platform):
-- Game title (working title)
-- Core fantasy and elevator pitch
-- Game pillars (all of them)
-- **Visual Identity Anchor** section if present (from brainstorm Phase 4 art-director output)
-- Target platform (if noted)
+**`workflow`**（见 `.claude/docs/workflow-modes.md`）：
+- `full`——要求全部 9 个美术圣经章节。
+- `standard`——仅当项目中存在视觉资源用户故事时才为必需；为必需时，第 1–4 节即为最低要求。`workflow_overrides.art_bible_strict: true` 会强制要求全部 9 个章节，无论层级如何。
+- `minimal`——非必需。仍可自愿运行。
 
-**Retrofit mode detection**: Glob `design/art/art-bible.md`. If the file exists,
-build the status table **without reading the document** — you are about to author
-only the *incomplete* sections, so loading the complete ones is loading exactly
-what you will not touch:
+读取 `design/gdd/game-concept.md`——或在 `rigor: minimal` 下替代它的一页式简报 `design/game-brief.md`。按章节读取：用 Grep 工具查找所需标题（模式 `^#`，content 模式），再用 offset 和 limit 读取对应范围。如果两者都不存在，则以如下内容失败：
+> “未找到游戏概念。请先运行 `/brainstorm`——美术圣经在游戏概念获得批准之后撰写。”
+
+从 game-concept.md 中提取（若是简报：工作标题、提案、“面向谁 / 他们感受什么”一行以及“美术与音频方向”一行——简报没有游戏支柱、视觉识别锚点或平台信息）：
+- 游戏标题（工作标题）
+- 核心幻想与电梯陈述
+- 游戏支柱（全部）
+- **Visual Identity Anchor** 章节（若存在）（来自 brainstorm Phase 4 的 art-director 输出）
+- 目标平台（若有注明）
+
+**改造（retrofit）模式检测**：Glob `design/art/art-bible.md`。如果文件存在，构建状态表时**不要读取文档**——你即将只撰写*未完成*的章节，加载已完成的章节只会加载你完全不会改动的内容：
 
 ```
 Grep pattern="^## " path="design/art/art-bible.md" output_mode="content" -n
 Grep pattern="\[To be designed\]|\[TBD\]|\[To be written\]|^_?TODO" path="design/art/art-bible.md" output_mode="content" -n
 ```
 
-- The first grep gives the section headings and their line numbers — the gap
-  between consecutive headings is that section's size.
-- The second gives placeholder markers and where they fall.
-- A section is **Complete** if it has substantive distance to the next heading and
-  no placeholder marker inside it; **Placeholder** if a marker falls in its range;
-  **Empty** if consecutive headings sit adjacent.
-- Where the two greps leave a section genuinely ambiguous, read *that section's*
-  line range with `Read(offset, limit)` — never the whole file.
-- Build a section status table:
+- 第一个 grep 给出章节标题及其行号——相邻标题之间的间隔即为该章节的大小。
+- 第二个 grep 给出占位符标记及其位置。
+- 如果某个章节到下一个标题之间有实质距离，且内部没有占位符标记，则其为 **Complete**；若其范围内有标记，则为 **Placeholder**；若相邻标题紧挨着，则为 **Empty**。
+- 如果两个 grep 的结果确实让某个章节难以判断，用 `Read(offset, limit)` 读取*该章节的*行范围——绝不要读取整个文件。
+- 构建章节状态表：
 
 ```
 Section | Status
@@ -88,314 +66,244 @@ Section | Status
 9. Reference Direction | ...
 ```
 
-- Present this table to the user:
-  > "Found existing art bible at `design/art/art-bible.md`. [N] sections are complete, [M] need content. I'll work on the incomplete sections only — existing content will not be touched."
-- Only work on sections with Status: Empty or Placeholder. Do not re-author sections that are already complete.
+- 将此表呈现给用户：
+  > “在 `design/art/art-bible.md` 发现了现有的美术圣经。[N] 个章节已完成，[M] 个需要补充内容。我将只处理未完成的章节——现有内容不会被改动。”
+- 只处理 Status 为 Empty 或 Placeholder 的章节。不要重新撰写已完成的章节。
 
-If the file does not exist, this is a fresh authoring session. The first
-approved section creates the file from `.claude/docs/templates/art-bible.md`,
-whose nine `## N. Name` headings are the ones retrofit mode reads — ask first:
-"May I create `design/art/art-bible.md` from the art bible template?" Each
-approved section then replaces its own `[To be designed]` line with `Edit`;
-keep the headings as the template has them.
+如果文件不存在，这是一次全新的撰写会话。第一个获得批准的章节会从 `.claude/docs/templates/art-bible.md` 创建文件，该模板的九个 `## N. Name` 标题正是改造模式所读取的内容——先询问：“我可以基于美术圣经模板创建 `design/art/art-bible.md` 吗？”之后每个获得批准的章节用 `Edit` 替换其自身的 `[To be designed]` 行；保持标题与模板一致。
 
-**A section's approval names its write.** Every section is approved through an
-`AskUserQuestion` whose approving option is `[A] Lock this in and write it to
-design/art/art-bible.md` (Section 1's full option list is below). Choosing it is
-the approval to write that section; no section is written without it, fresh or
-retrofit.
+**章节的批准即代表其写入授权。** 每个章节都通过一次 `AskUserQuestion` 批准，其批准选项为 `[A] Lock this in and write it to design/art/art-bible.md`（第 1 节的完整选项列表见下文）。选择它即表示批准写入该章节；无论全新还是改造，没有它就不会写入任何章节。
 
-Extract performance budgets and the engine for asset standard constraints: read `performance.*` and `engine.name` from `project.yaml`; for any key absent or empty (including when `project.yaml` has no `performance` or `engine` block), fall back to `.claude/docs/technical-preferences.md`.
+提取性能预算与引擎信息以确定资源标准约束：从 `project.yaml` 读取 `performance.*` 和 `engine.name`；对于任何缺失或为空的键（包括 `project.yaml` 没有 `performance` 或 `engine` 块的情况），回退到 `.claude/docs/technical-preferences.md`。
 
 ---
 
-## Phase 1: Framing
+## Phase 1: 框定
 
-Present the session context and ask two questions before authoring anything:
+在撰写任何内容之前，先呈现会话上下文并提出两个问题：
 
-Use `AskUserQuestion` with two tabs:
-- Tab **"Scope"** — "Which sections need to be authored today?"
-  Options: `Full bible — all 9 sections` / `Visual identity core (sections 1–4 only)` / `Asset standards only (section 8)` / `Resume — fill in missing sections`
+使用 `AskUserQuestion`，包含两个标签页：
+- 标签 **“范围”**—— “今天需要撰写哪些章节？”
+  选项：`Full bible — all 9 sections` / `Visual identity core (sections 1–4 only)` / `Asset standards only (section 8)` / `Resume — fill in missing sections`
 
-  **Mark the option the resolved `workflow` tier actually requires as
-  (Recommended), and say why** — the tier already decides this and the user
-  should not have to know the tier table to answer:
-  - `full` → **Full bible** — all 9 sections are required at this tier.
-  - `standard` → **Visual identity core (sections 1–4 only)** — that is the
-    documented minimum when an art bible is required at all. Say: "Sections 1–4
-    are what `standard` requires; 5–9 are available if you want them."
-  - `minimal` → no art bible is required. Say so before asking, and offer
-    sections 1–4 as the useful-if-you-want-it option rather than defaulting to 9.
-  - `workflow_overrides.art_bible_strict: true` → **Full bible** regardless of tier.
+  **将已解析的 `workflow` 层级实际要求的选项标记为（推荐），并说明原因**——该层级已经决定了这一点，用户不应为了回答而必须了解层级表：
+  - `full` → **Full bible**——此层级要求全部 9 个章节。
+  - `standard` → **Visual identity core (sections 1–4 only)**——当美术圣经确实被要求时，这是文档规定的最低要求。说明：“第 1–4 节是 `standard` 所要求的；如果你需要，5–9 节也可用。”
+  - `minimal` → 不需要美术圣经。在提问之前说明这一点，并将第 1–4 节作为“需要时有用”的选项提供，而不是默认 9 节。
+  - `workflow_overrides.art_bible_strict: true` → 无论层级如何都选 **Full bible**。
 
-  This is the single biggest cost lever in this skill: every authored section
-  carries a specialist spawn, so authoring 9 sections where the tier requires 4
-  more than doubles the run for artifacts nothing downstream will check.
-- Tab **"References"** — "Do you have reference games, films, or art that define the visual direction?"
-  (Free text — let the user type specific titles. Do NOT preset options here.)
+  这是此技能中最大的成本杠杆：每个撰写的章节都会触发一次专家 agent 生成，因此在层级只要求 4 个章节时撰写 9 个，会使运行时间增加一倍以上，而产出物下游没有任何检查。
 
-If the game-concept.md has a Visual Identity Anchor section, note it:
-> "Found a visual identity anchor from brainstorm: '[anchor name] — [one-line rule]'. I'll use this as the foundation for the art bible."
+- 标签 **“参考资料”**—— “你是否有定义视觉方向的参考游戏、电影或美术作品？”
+  （自由文本——让用户输入具体名称。此处不要预设选项。）
 
-**Author only the sections in the chosen scope.** Phases 2–4 run only the
-sections inside it — for `Resume`, the Empty and Placeholder rows of the
-retrofit table — and skip every other section, and any phase left with none.
-Phase 6 names each section not authored this run and why.
+如果 game-concept.md 有 Visual Identity Anchor 章节，请注明：
+> “在 brainstorm 中发现了视觉识别锚点：‘[anchor name] — [one-line rule]’。我将以此作为美术圣经的基础。”
+
+**只撰写所选范围内的章节。** Phase 2–4 只运行该范围内的章节——对于 `Resume`，即改造表中 Empty 和 Placeholder 的行——跳过其他所有章节，以及任何因此没有剩余章节的阶段。Phase 6 会列出本次运行未撰写每个章节的原因。
 
 ---
 
-## Phase 2: Visual Identity Foundation (Sections 1–4)
+## Phase 2: 视觉识别基础（第 1–4 节）
 
-These four sections define the core visual language. **All other sections flow from them.** Author and write each to file before moving to the next.
+这四个章节定义了核心视觉语言。**所有其他章节都从它们衍生。** 在进入下一节之前，先撰写每一节并写入文件。
 
-> **Spawn policy for this phase.** Section 1 is delegated on its own — it is
-> foundational and the user chooses between anchor directions before anything
-> else can build on it. Sections 2–4 are then delegated in **one** `art-director`
-> call, not three: they are the same agent receiving the same inputs (Visual
-> Identity Statement + pillars), and mood, shape and colour are interdependent —
-> an art director defines them together, not in isolation. Separate calls would
-> ask the agent to reason about colour without knowing the shape language it
-> had just written.
+> **本阶段的生成策略。** 第 1 节单独委派——它是基础性的，用户需要在任何其他内容建立其上之前，先在锚点方向之间做出选择。随后第 2–4 节在**一次** `art-director` 调用中委派，而不是三次：它们是同一个 agent 接收相同的输入（视觉识别陈述 + 游戏支柱），并且氛围、形状和色彩相互依赖——美术总监会一起定义它们，而不是孤立定义。分开调用会要求 agent 在不知道它刚刚写下的形状语言的情况下推理色彩。
 >
-> **This is not reduced specialist involvement** — every section is still
-> authored by the specialist, which is the point `.claude/docs/effects-map.md`
-> makes about art-bible delegation being mandatory. It is one call instead of
-> three for the same three sections. Per-section user approval and
-> write-to-file-immediately are unchanged.
+> **这并不是减少专家参与**——每个章节仍由专家撰写，这正是 `.claude/docs/effects-map.md` 关于美术圣经委派必须执行的观点。只是对同样三个章节用一次调用代替三次。逐章节的用户批准和立即写入文件保持不变。
 
-### Section 1: Visual Identity Statement
+### Section 1: Visual Identity Statement（视觉识别陈述）
 
-**Goal**: A one-line visual rule plus 2–3 supporting principles that resolve visual ambiguity.
+**目标**：一条单行视觉规则，外加 2–3 条能解决视觉歧义的支撑原则。
 
-If a visual anchor exists from game-concept.md: present it and ask:
-- "Build directly from this anchor?"
-- "Revise it before expanding?"
-- "Start fresh with new options?"
+如果 game-concept.md 中存在视觉锚点：呈现它并询问：
+- “直接基于此锚点构建？”
+- “在扩展之前先修订它？”
+- “用新选项重新开始？”
 
-**Agent delegation (MANDATORY)**: Spawn `art-director` via `Agent`:
-- Provide: game concept (elevator pitch, core fantasy), full pillar set, platform target, any reference games/art from Phase 1 framing, the visual anchor if it exists
-- Ask: "Draft a Visual Identity Statement for this game. Provide: (1) a one-line visual rule that could resolve any visual decision ambiguity, (2) 2–3 supporting visual principles, each with a one-sentence design test ('when X is ambiguous, this principle says choose Y'). Anchor all principles directly in the stated pillars — each principle must serve a specific pillar. (From a one-page brief, which has no pillars, anchor them in its pitch and "what they feel" line.)"
+**Agent 委派（强制）**：通过 `Agent` 生成 `art-director`：
+- 提供：游戏概念（电梯陈述、核心幻想）、完整的游戏支柱集合、目标平台、Phase 1 框定中的任何参考游戏/美术作品、若存在的视觉锚点
+- 询问：“为这款游戏草拟一份视觉识别陈述。提供：(1) 一条能解决任何视觉决策歧义的单行视觉规则；(2) 2–3 条支撑性视觉原则，每条都附带一句话的设计测试（‘当 X 有歧义时，此原则要求选择 Y’）。将所有原则直接锚定在所述游戏支柱上——每条原则都必须服务于某个具体支柱。（若来源是一页式简报，因其没有游戏支柱，则将其锚定在简报的提案和‘他们感受什么’一行上。）”
 
-Present the art-director's draft to the user. Use `AskUserQuestion`:
-- Options: `[A] Lock this in and write it to design/art/art-bible.md` / `[B] Revise the one-liner` / `[C] Revise a supporting principle` / `[D] Describe my own direction`
+将 art-director 的草稿呈现给用户。使用 `AskUserQuestion`：
+- 选项：`[A] Lock this in and write it to design/art/art-bible.md` / `[B] Revise the one-liner` / `[C] Revise a supporting principle` / `[D] Describe my own direction`
 
-Write the approved section to file immediately.
+立即将获批准的章节写入文件。
 
-### Section 2: Mood & Atmosphere
+### Section 2: Mood & Atmosphere（氛围与气氛）
 
-**Goal**: Emotional targets by game state — specific enough for a lighting artist to work from.
+**目标**：按游戏状态定义情绪目标——具体到灯光美术师可以直接据此工作。
 
-For each major game state (e.g., exploration, combat, victory, defeat, menus — adapt to this game's states), define:
-- Primary emotion/mood target
-- Lighting character (time of day, color temperature, contrast level)
-- Atmospheric descriptors (3–5 adjectives)
-- Energy level (frenetic / measured / contemplative / etc.)
+对于每个主要游戏状态（例如探索、战斗、胜利、失败、菜单——根据本游戏的实际状态调整），定义：
+- 主要情绪/氛围目标
+- 灯光特征（一天中的时段、色温、对比度水平）
+- 气氛描述词（3–5 个形容词）
+- 能量水平（狂热 / 节制 / 沉思 / 等等）
 
-**Agent delegation for Sections 2–4 — one call, issued here.** Spawn
-`art-director` via `Agent` with the locked Visual Identity Statement and pillar set,
-and ask for all three sections in a single brief:
+**第 2–4 节的 Agent 委派——一次调用，在此处发起。** 使用已锁定的视觉识别陈述和游戏支柱集合，通过 `Agent` 生成 `art-director`，并在同一份简报中要求全部三个章节：
 
-1. **Mood & atmosphere** — "Define mood and atmosphere targets for each major game state in this game. Be specific — 'dark and foreboding' is not enough. Name the exact emotional target, the lighting character (warm/cool, high/low contrast, time of day direction), and at least one visual element that carries the mood. Each game state must feel visually distinct from the others."
-2. **Shape language** — "Define the shape language for this game. Connect each shape principle back to the visual identity statement and a specific game pillar. Explain what these shape choices communicate to the player emotionally."
-3. **Colour system** — "Design the color system for this game. Every semantic color assignment must be explained — why does this color mean danger/safety/reward in this world? Identify which color pairs might fail colorblind players and specify what backup cues are needed."
+1. **氛围与气氛**—— “为本游戏的每个主要游戏状态定义氛围和气氛目标。要具体——‘黑暗而压抑’并不够。指明确切的情绪目标、灯光特征（暖/冷、高/低对比度、时段方向），以及至少一个承载该氛围的视觉元素。每个游戏状态在视觉上都必须与其他状态有明显区别。”
+2. **形状语言**—— “为这款游戏定义形状语言。将每条形状原则与视觉识别陈述以及某个具体的游戏支柱联系起来。解释这些形状选择在情感上向玩家传达了什么。”
+3. **色彩系统**—— “为这款游戏设计色彩系统。每个语义颜色分配都必须有解释——为什么这种颜色在这个世界中意味着危险/安全/奖励？找出哪些颜色组合可能会让色盲玩家无法分辨，并说明需要哪些备用提示线索。”
 
-Require the three to be **mutually consistent** — the palette must serve the mood
-targets and the shape hierarchy — and returned as three separately labelled
-blocks so each can be approved and written on its own.
+要求这三者**相互一致**——调色板必须服务于氛围目标和形状层级——并以三个分别标注的块返回，以便每个章节都能被单独批准和写入。
 
-Then present **Section 2** to the user, approve it, and write it to file
-immediately before moving to Section 3. Do not present all three at once: the
-batching is in the delegation, not in the review.
+然后向用户呈现**第 2 节**，批准它，并在进入第 3 节之前立即写入文件。不要一次性呈现全部三节：批量处理在于委派，而不在于评审。
 
-### Section 3: Shape Language
+### Section 3: Shape Language（形状语言）
 
-**Goal**: The geometric vocabulary that makes this game's world visually coherent and distinguishable.
+**目标**：使这款游戏的世界在视觉上连贯且可区分的几何词汇。
 
-Cover:
-- Character silhouette philosophy (how readable at thumbnail size? Distinguishing trait per archetype?)
-- Environment geometry (angular/curved/organic/geometric — which dominates and why?)
-- UI shape grammar (does UI echo the world aesthetic, or is it a distinct HUD language?)
-- Hero shapes vs. supporting shapes (what draws the eye, what recedes?)
+涵盖：
+- 角色剪影理念（缩略图尺寸下的可读性如何？每个原型的区分特征是什么？）
+- 环境几何（棱角/曲线/有机/几何——哪种占主导，为什么？）
+- UI 形状语法（UI 是呼应世界美学，还是采用独立的 HUD 语言？）
+- 主体形状与辅助形状（什么吸引视线，什么后退？）
 
-**Draft source**: the Sections 2–4 delegation issued under Section 2 — use the
-shape-language block it returned. Do not spawn again.
+**草稿来源**：第 2 节下发起的第 2–4 节委派——使用其返回的形状语言块。不要再次生成。
 
-Write the approved section to file immediately.
+立即将获批准的章节写入文件。
 
-### Section 4: Color System
+### Section 4: Color System（色彩系统）
 
-**Goal**: A complete, producible palette system that serves both aesthetic and communication needs.
+**目标**：一套完整、可生产的调色板系统，同时服务于美学和传达需求。
 
-Cover:
-- Primary palette (5–7 colors with roles — not just hex codes, but what each color means in this world)
-- Semantic color usage (what does red communicate? Gold? Blue? White? Establish the color vocabulary)
-- Per-biome or per-area color temperature rules (if the game has distinct areas)
-- UI palette (may differ from world palette — define the divergence explicitly)
-- Colorblind safety: which semantic colors need shape/icon/sound backup
+涵盖：
+- 主调色板（5–7 种颜色及其角色——不只是十六进制代码，而是每种颜色在这个世界中的含义）
+- 语义颜色用法（红色传达什么？金色？蓝色？白色？建立颜色词汇）
+- 按生物群系或区域的色温规则（如果游戏有不同区域）
+- UI 调色板（可以与世界调色板不同——请明确说明差异）
+- 色盲安全：哪些语义颜色需要形状/图标/声音作为备用线索
 
-**Draft source**: the Sections 2–4 delegation issued under Section 2 — use the
-colour-system block it returned. Do not spawn again.
+**草稿来源**：第 2 节下发起的第 2–4 节委派——使用其返回的色彩系统块。不要再次生成。
 
-Write the approved section to file immediately.
+立即将获批准的章节写入文件。
 
 ---
 
-## Phase 3: Production Guides (Sections 5–8)
+## Phase 3: 生产指南（第 5–8 节）
 
-These sections translate the visual identity into concrete production rules. They should be specific enough that an outsourcing team can follow them without additional briefing.
+这些章节将视觉识别转化为具体的生产规则。它们应当足够具体，使外包团队无需额外简报即可遵循。
 
-### Section 5: Character Design Direction
+### Section 5: Character Design Direction（角色设计方向）
 
-**Agent delegation for Sections 5–6 — one call, issued here.** Both sections
-need the **same agent with the same input** (`sections 1–4`), so a second call
-would only re-send the whole visual identity. Spawn `art-director` once with
-sections 1–4 and ask for both:
+**第 5–6 节的 Agent 委派——一次调用，在此处发起。** 两个章节都需要**相同的 agent 和相同的输入**（`sections 1–4`），因此第二次调用只会重新发送整个视觉识别。用第 1–4 节生成一次 `art-director`，并要求两者：
 
-1. **Character design direction** — "Cover: visual archetype for the player character (if any), distinguishing feature rules per character type (how do players tell enemies/NPCs/allies apart at a glance?), expression/pose style targets (stiff/expressive/realistic/exaggerated), and LOD philosophy (how much detail is preserved at game camera distance?)."
-2. **Environment design language** — "Cover: architectural style and its relationship to the world's culture/history, texture philosophy (painted vs. PBR vs. stylized — why this choice for this game?), prop density rules (sparse/dense — what drives the choice per area type?), and environmental storytelling guidelines (what visual details should tell the story without text?)."
+1. **角色设计方向**—— “涵盖：玩家角色（如果有）的视觉原型、每种角色类型的区分特征规则（玩家如何在游戏镜头距离下一眼区分敌人/非玩家角色（NPC）/盟友？）、表情/姿态风格目标（僵硬/富有表现力/写实/夸张），以及 LOD 理念（在游戏相机距离下保留多少细节？）。”
+2. **环境设计语言**—— “涵盖：建筑风格及其与世界文化/历史的关系、纹理理念（手绘 vs. PBR vs. 风格化——为什么为这款游戏做此选择？）、道具密度规则（稀疏/密集——每种区域类型的依据是什么？），以及环境叙事准则（哪些视觉细节应在没有文字的情况下讲述故事？）。”
 
-Require characters and environments to be **legible against each other** — a
-character silhouette must read against the environment texture density the same
-brief defines. Return two separately labelled blocks.
+要求角色与环境彼此**可辨识**——角色剪影必须能在同一份简报定义的环境纹理密度背景下清晰读出。返回两个分别标注的块。
 
-Present **Section 5** first, approve, write to file, then Section 6.
+先呈现**第 5 节**，批准、写入文件，然后第 6 节。
 
-### Section 6: Environment Design Language
+### Section 6: Environment Design Language（环境设计语言）
 
-**Draft source**: the Sections 5–6 delegation issued under Section 5 — use the
-environment block it returned. Do not spawn again.
+**草稿来源**：第 5 节下发起的第 5–6 节委派——使用其返回的环境块。不要再次生成。
 
-Write the approved section to file.
+将获批准的章节写入文件。
 
-### Section 7: UI/HUD Visual Direction
+### Section 7: UI/HUD Visual Direction（UI/HUD 视觉方向）
 
-**Agent delegation**: Spawn in parallel:
-- **`art-director`**: Visual style for UI — diegetic vs. screen-space HUD, typography direction (font personality, weight, size hierarchy), iconography style (flat/outlined/illustrated/photorealistic), animation feel for UI elements
-- **`ux-designer`**: UX alignment check — does the visual direction support the interaction patterns this game requires? Flag any conflicts between art direction and readability/accessibility needs.
+**Agent 委派**：并行生成：
+- **`art-director`**：UI 的视觉风格——叙事内（diegetic）vs. 屏幕空间 HUD、字体方向（字体个性、字重、大小层级）、图标风格（扁平/描边/插画/照片写实）、UI 元素的动画手感
+- **`ux-designer`**：UX 一致性检查——视觉方向是否支持本游戏所需的交互模式？标记美术方向与可读性/无障碍需求之间的任何冲突。
 
-Collect both. If they conflict (e.g., art-director wants elaborate diegetic UI but ux-designer flags it would reduce combat readability), surface the conflict explicitly with both positions. Do NOT silently resolve — use `AskUserQuestion` to let the user decide.
+收集两者。如果它们冲突（例如，art-director 想要精致的叙事内 UI，但 ux-designer 指出这会降低战斗可读性），请明确呈现冲突及双方立场。**不要**静默解决——使用 `AskUserQuestion` 让用户决定。
 
-Write the approved section to file.
+将获批准的章节写入文件。
 
-### Section 8: Asset Standards
+### Section 8: Asset Standards（资源标准）
 
-**Agent delegation**: Spawn in parallel:
-- **`art-director`**: File format preferences, naming convention direction, texture resolution tiers, LOD level expectations, export settings philosophy
-- **`technical-artist`**: Engine-specific hard constraints — poly count budgets per asset category, texture memory limits, material slot counts, importer constraints, anything from the performance budgets (`performance.*` in `project.yaml`, falling back to `.claude/docs/technical-preferences.md`)
+**Agent 委派**：并行生成：
+- **`art-director`**：文件格式偏好、命名规范方向、纹理分辨率层级、LOD 级别预期、导出设置理念
+- **`technical-artist`**：引擎特定的硬性约束——每种资源类别的多边形预算、纹理内存限制、材质槽数量、导入器约束、来自性能预算的任何内容（`project.yaml` 中的 `performance.*`，回退到 `.claude/docs/technical-preferences.md`）
 
-If any art preference conflicts with a technical constraint (e.g., art-director wants 4K textures but performance budget requires 2K for mobile), surface the conflict explicitly with both positions — the ideal and the constrained standard, and the tradeoff. Do NOT silently resolve it — use `AskUserQuestion` to let the user pick (options: the ideal standard, the constrained standard, or document both and let per-asset judgment apply). Ambiguity in asset standards is where production costs are born.
+如果任何美术偏好与技术约束冲突（例如，art-director 想要 4K 纹理，但性能预算要求移动端使用 2K），请明确呈现冲突及双方立场——理想标准和受约束标准，以及取舍。**不要**静默解决——使用 `AskUserQuestion` 让用户选择（选项：理想标准、受约束标准，或两者都记录并由逐个资源判断）。资源标准中的模糊性正是生产成本滋生的地方。
 
-Write the approved section to file.
+将获批准的章节写入文件。
 
 ---
 
-## Phase 4: Reference Direction (Section 9)
+## Phase 4: Reference Direction（参考资料方向，第 9 节）
 
-**Goal**: A curated reference set that is specific about what to take and what to avoid from each source.
+**目标**：一套精心策划的参考资料集，明确每个来源要借鉴什么、要避免什么。
 
-**Agent delegation**: Spawn `art-director` via `Agent` with the completed sections 1–8. Ask: "Compile a reference direction for this game. Provide 3–5 reference sources (games, films, art styles, or specific artists). For each: name it, specify exactly what visual element to draw from it (not 'the general aesthetic' — a specific technique, color choice, or compositional rule), and specify what to explicitly avoid or diverge from (to prevent the 'trying to copy X' reading). References should be additive — no two references should be pointing in exactly the same direction."
+**Agent 委派**：使用已完成的第 1–8 节通过 `Agent` 生成 `art-director`。询问：“为本游戏编制一份参考资料方向。提供 3–5 个参考来源（游戏、电影、艺术风格或具体艺术家）。对每一个：命名它，明确说明要从中借鉴的具体视觉元素（不是‘整体美学’——而是具体技术、颜色选择或构图规则），并明确说明要避免或背离的内容（以防止出现‘试图复制 X’的观感）。参考资料应当是互补的——不应有两个参考指向完全相同的方向。”
 
-Write the approved section to file.
+将获批准的章节写入文件。
 
 ---
 
-## Phase 5: Art Director Sign-Off
+## Phase 5: 美术总监签核
 
-**Review mode check** — apply before spawning AD-ART-BIBLE:
-- `solo` → skip. Note: "AD-ART-BIBLE skipped — Solo mode." Then record the skip
-  (below) and proceed to Phase 6.
-- `lean` → skip (not a PHASE-GATE). Note: "AD-ART-BIBLE skipped — Lean mode."
-  Then record the skip (below) and proceed to Phase 6.
-- `full` → spawn as normal.
+**评审模式检查**——在生成 AD-ART-BIBLE 之前应用：
+- `solo` → 跳过。注明：“AD-ART-BIBLE skipped — Solo mode.” 然后记录跳过（见下文）并进入 Phase 6。
+- `lean` → 跳过（不是 PHASE-GATE）。注明：“AD-ART-BIBLE skipped — Lean mode.” 然后记录跳过（见下文）并进入 Phase 6。
+- `full` → 照常生成。
 
-On either skip, ask "May I record the skipped sign-off in
-`design/art/art-bible.md`'s header?" and, on yes, replace the header's
-`> **Art Director Sign-Off (AD-ART-BIBLE)**: [Not yet reviewed]` with
-`> **Art Director Sign-Off (AD-ART-BIBLE)**: SKIPPED [date] — [solo|lean] mode`
-— the gate accepts either form as a recorded sign-off.
+在任一跳过情况下，询问“我可以把跳过的签核记录在 `design/art/art-bible.md` 的头部吗？”，若同意，则将头部的 `> **Art Director Sign-Off (AD-ART-BIBLE)**: [Not yet reviewed]` 替换为 `> **Art Director Sign-Off (AD-ART-BIBLE)**: SKIPPED [date] — [solo|lean] mode` ——质量闸门接受任一形式作为已记录的签核。
 
-After all sections are complete (or the scoped set from Phase 1 is complete), spawn `art-director` via `Agent` using gate **AD-ART-BIBLE** (`.claude/docs/director-gates/ad-art-bible.md`).
+所有章节完成后（或 Phase 1 确定的范围集合完成后），使用质量闸门 **AD-ART-BIBLE**（`.claude/docs/director-gates/ad-art-bible.md`）通过 `Agent` 生成 `art-director`。
 
-Pass: the art bible path (`design/art/art-bible.md`); the game pillars and core
-fantasy; the platform and performance constraints (`platform.*` and
-`performance.*` from `project.yaml`, falling back to
-`.claude/docs/technical-preferences.md`); and the visual identity anchor. When
-Phase 0 read the one-page brief, pass its pitch and "what they feel" line as the
-pillars and fantasy, and its "Art & audio direction" line as the anchor.
+传入：美术圣经路径（`design/art/art-bible.md`）；游戏支柱与核心幻想；平台与性能约束（`project.yaml` 中的 `platform.*` 和 `performance.*`，回退到 `.claude/docs/technical-preferences.md`）；以及视觉识别锚点。如果 Phase 0 读取的是一页式简报，则将其提案和“他们感受什么”一行作为游戏支柱与幻想传入，并将其“美术与音频方向”一行作为锚点传入。
 
-Handle verdict per standard rules in `director-gates.md`.
-On `Revise flagged items`, or to resolve a REJECT, the section's own specialist
-— `art-director`, with `ux-designer` for Section 7 and `technical-artist` for
-Section 8 — re-drafts each flagged section, which is then presented, approved
-and written like any other section before `REVISED [date]` is recorded.
-A `NOT ASSESSED` answer is never an approval: name the missing input, then
-supply it and re-run the gate, or record `NOT ASSESSED`.
-Record the verdict in the art bible's status header:
+按 `director-gates.md` 中的标准规则处理结论。
+在 `Revise flagged items` 时，或为处理 REJECT，该章节自己的专家——`art-director`，第 7 节加上 `ux-designer`，第 8 节加上 `technical-artist`——会重新草拟每个被标记的章节，随后像任何其他章节一样呈现、批准和写入，然后记录 `REVISED [date]`。
+`NOT ASSESSED` 的答复绝不是批准：指出缺失的输入，然后补充该输入并重新运行闸门，或记录 `NOT ASSESSED`。
+将结论记录在美术圣经的状态头部：
 `> **Art Director Sign-Off (AD-ART-BIBLE)**: APPROVED [date] / CONCERNS (accepted) [date] / REVISED [date] / NOT ASSESSED [date] — [missing input]`
 
 ---
 
-## Phase 6: Close
+## Phase 6: 收尾
 
-First, name each of the nine sections not authored this run and why — outside
-the chosen scope, or already complete — e.g. *"Not authored this run: sections
-5–9 (outside the chosen scope; `standard` requires 1–4)."* A run that stopped
-after Section 4 must not read like a finished bible.
+首先，列出本次运行未撰写的九个章节及原因——不在所选范围内，或已经完成——例如：*“本次运行未撰写：第 5–9 节（不在所选范围内；`standard` 要求 1–4 节）。”* 一个在第 4 节之后停止的运行，绝不能读起来像一本已完成的美术圣经。
 
-Before presenting next steps, check project state:
-- Does `design/gdd/systems-index.md` exist? → map-systems is done, skip that option
-- Is an engine configured — `engine.name` present in `project.yaml`, or a configured Engine field (not `[TO BE CONFIGURED]`) in `.claude/docs/technical-preferences.md`? → setup-engine is done, skip that option
-- Does `design/gdd/` contain any `*.md` files? → design-system has been run, skip that option
-- Does `design/gdd/gdd-cross-review-*.md` exist? → review-all-gdds is done
-- Do GDDs exist (check above)? → include /consistency-check option
+在呈现下一步之前，检查项目状态：
+- `design/gdd/systems-index.md` 是否存在？→ map-systems 已完成，跳过该选项
+- 是否已配置引擎——`project.yaml` 中存在 `engine.name`，或 `.claude/docs/technical-preferences.md` 中有已配置的 Engine 字段（不是 `[TO BE CONFIGURED]`）？→ setup-engine 已完成，跳过该选项
+- `design/gdd/` 中是否包含任何 `*.md` 文件？→ design-system 已运行过，跳过该选项
+- `design/gdd/gdd-cross-review-*.md` 是否存在？→ review-all-gdds 已完成
+- GDD 是否存在（见上方检查）？→ 包含 /consistency-check 选项
 
-Use `AskUserQuestion` for next steps. Only include options that are genuinely next based on the state check above:
+使用 `AskUserQuestion` 询问下一步。只包含根据上述状态检查确实合理的选项：
 
-At `workflow: minimal`, the pool is `/create-stories` (no stories yet) or
-`/dev-story [next story]`, plus Stop here — the GDD/architecture pool below is
-`standard`/`full` only.
+在 `workflow: minimal` 下，选项池为 `/create-stories`（尚无用户故事）或 `/dev-story [next story]`，再加上“在此停止”——下方的 GDD/架构选项池仅适用于 `standard`/`full`。
 
-**Option pool — include only if not already done:**
-- `[_] Run /map-systems — decompose the concept into systems before writing GDDs` (skip if systems-index.md exists)
-- `[_] Run /setup-engine — configure the engine (asset standards may need revisiting after engine is set)` (skip if engine configured)
-- `[_] Run /design-system — start the first GDD` (skip if any GDDs exist)
-- `[_] Run /review-all-gdds — cross-GDD consistency check (required before Technical Setup gate)` (skip if gdd-cross-review-*.md exists)
-- `[_] Run /asset-spec — generate per-asset visual specs and AI generation prompts from approved GDDs` (include if GDDs exist)
-- `[_] Run /consistency-check — scan existing GDDs against the art bible for visual direction conflicts` (include if GDDs exist)
+**选项池——仅在尚未完成时包含：**
+- `[_] Run /map-systems — decompose the concept into systems before writing GDDs`（若 systems-index.md 存在则跳过）
+- `[_] Run /setup-engine — configure the engine (asset standards may need revisiting after engine is set)`（若引擎已配置则跳过）
+- `[_] Run /design-system — start the first GDD`（若已有任何 GDD 则跳过）
+- `[_] Run /review-all-gdds — cross-GDD consistency check (required before Technical Setup gate)`（若 gdd-cross-review-*.md 存在则跳过）
+- `[_] Run /asset-spec — generate per-asset visual specs and AI generation prompts from approved GDDs`（若存在 GDD 则包含）
+- `[_] Run /consistency-check — scan existing GDDs against the art bible for visual direction conflicts`（若存在 GDD 则包含）
 - `[_] Run /create-architecture — author the master architecture document (next Technical Setup step)`
 - `[_] Stop here`
 
-Assign letters A, B, C… only to the options actually included. Mark the most logical pipeline-advancing option as `(recommended)`.
+只为实际包含的选项分配字母 A、B、C…… 将最合乎逻辑、能推进流水线的选项标记为 `(recommended)`。
 
-> **Always include** (`standard`/`full` only) `/create-architecture` and Stop here as options — these are always valid next steps once the art bible is complete.
-
----
-
-## Collaborative Protocol
-
-**Applies in `collaborative` mode (the default).** For `guided` and
-`autonomous` modes, see `.claude/docs/automation-modes.md` — the rules below
-describe what collaborative mode requires, not universal behavior.
-
-Every section follows: **Question → Options → Decision → Draft (from art-director agent) → Approval → Write to file**
-
-- Never draft a section yourself — every section's content comes from the
-  relevant specialist. One delegation may cover several sections (2–4 share a
-  call, as do 5–6), but no section may be written from the orchestrator's own
-  judgement instead of an agent's.
-- Write each section to file immediately after approval — do not batch **the
-  writes or the approvals**. Batching applies only to the delegation call; the
-  user still sees, approves and commits one section at a time.
-- Surface all agent disagreements to the user — never silently resolve conflicts between art-director and technical-artist
-- The art bible is a constraint document: it restricts future decisions in exchange for visual coherence. Every section should feel like it narrows the solution space productively.
+> **始终包含**（仅 `standard`/`full`）`/create-architecture` 和“在此停止”作为选项——这些在美术圣经完成后始终是有效的下一步。
 
 ---
 
-## Recommended Next Steps
+## 协作协议
 
-After the art bible is approved:
-- Run `/map-systems` to decompose the concept into game systems before authoring GDDs
-- Run `/setup-engine` if the engine is not yet configured (asset standards may need revisiting after engine selection)
-- Run `/design-system [first-system]` to start authoring per-system GDDs
-- Run `/consistency-check` once GDDs exist to validate them against the art bible's visual rules
-- Run `/create-architecture` to produce the master architecture document
+**适用于 `collaborative` 模式（默认）。** 对于 `guided` 和 `autonomous` 模式，请参阅 `.claude/docs/automation-modes.md`——下文规则描述的是 collaborative 模式的要求，而非通用行为。
+
+每个章节都遵循：**提问 → 选项 → 决定 → 草稿（来自 art-director agent）→ 批准 → 写入文件**
+
+- 绝不自己草拟章节——每个章节的内容都来自相关专家。一次委派可以覆盖多个章节（第 2–4 节共用一次调用，第 5–6 节同理），但任何章节都不得由编排者依据自身判断写入，而非来自 agent。
+- 每个章节在批准后立即写入文件——不要批量处理**写入或批准**。批量仅适用于委派调用；用户仍然逐章节查看、批准和确认。
+- 将所有 agent 分歧呈现给用户——绝不在 art-director 与 technical-artist 之间静默解决冲突
+- 美术圣经是一份约束性文档：它以视觉一致性为交换，限制未来的决策。每个章节都应让人感觉它有效地收窄了解空间。
+
+---
+
+## 推荐的后续步骤
+
+美术圣经获批后：
+- 运行 `/map-systems` 在撰写 GDD 之前将概念拆解为游戏系统
+- 若引擎尚未配置，运行 `/setup-engine`（引擎选定后资源标准可能需要重新审视）
+- 运行 `/design-system [first-system]` 开始撰写各系统的 GDD
+- GDD 存在后运行 `/consistency-check`，以对照美术圣经的视觉规则进行验证
+- 运行 `/create-architecture` 生成主架构文档

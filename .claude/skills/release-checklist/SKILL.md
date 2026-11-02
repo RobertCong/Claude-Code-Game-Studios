@@ -1,6 +1,6 @@
 ---
 name: release-checklist
-description: "Pre-release checklist — build verification, certification requirements, store metadata, launch readiness."
+description: "发布前检查清单 —— 构建验证、认证要求、商店元数据、上线就绪度。"
 argument-hint: "[platform: pc|console|mobile|all]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Bash(bash "*/.claude/skills/release-checklist/../../hooks/yaml-helper.sh" resolve_config *)
@@ -8,107 +8,107 @@ model: sonnet
 ---
 !`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys rigor,workflow,project.stage,cert_tier,automation`
 
-**Automation mode**: Resolve `modes.automation` (`project.local.yaml` →
-`project.yaml` → default `collaborative`). Every `AskUserQuestion` call and
-every file write follows `.claude/docs/automation-modes.md`
-(collaborative asks always · guided major-only · autonomous logs and proceeds;
-`automation_always_ask` categories always prompt).
+**自动化模式**：解析 `modes.automation`（`project.local.yaml` →
+`project.yaml` → 默认 `collaborative`）。每次 `AskUserQuestion` 调用和
+每次文件写入都遵循 `.claude/docs/automation-modes.md`
+（collaborative 总是询问 · guided 仅重大事项询问 · autonomous 记录后继续；
+`automation_always_ask` 类别始终提示）。
 
-Resolved above — use as-is. No block → defaults in `.claude/docs/config-resolution.md`.
+已在上方解析 —— 直接使用。无解析块 → 使用 `.claude/docs/config-resolution.md` 中的默认值。
 
-# Release Checklist
+# 发布检查清单
 
-**Scope this checklist to the project.** Emitting every item for every platform
-trains the reader to skip the list, which defeats the gate:
+**将本清单限定到本项目。** 为每个平台罗列所有条目会让读者
+养成跳过列表的习惯，从而使闸门失效：
 
-- **`project.stage`** — items for phases this project has not reached are out of
-  scope; say so rather than listing them unchecked.
-- **`modes.rigor`** — at `minimal`, drop items whose only justification is process
-  weight this project has opted out of.
-- **`platform.cert_tier`** — emit certification items **only** for the tier the
-  project targets. If it is **unset**, **ask which platforms are in scope**
-  rather than emitting all of them — an unset value is a question, not a licence
-  to emit every certification track. If it cannot be determined, mark the section
-  **`NOT ASSESSED — cert tier unknown`**. **Unset is not `none`:** `none` is a
-  decision, unset is a missing one, and they must not produce the same output.
-  Branch on the **four values this key takes** — `none | itch | steam | console` —
-  and not on platform names. The full requirement table is the `## platform.cert_tier`
-  section of `.claude/docs/effects-map.md` — read **only that section** (Grep its
-  heading, then a bounded Read); the file as a whole is not a runtime input.
-  - `none` — **emit no certification section at all.** Internal release, alpha or
-    jam game. Say the section was omitted and why; do not leave it blank.
-  - `itch` — itch.io upload requirements only: build size, page setup, age tags.
-    **No console and no Steamworks items.**
-  - `steam` — Steamworks: store page, depot build, achievements, system
-    requirements, common content rules. **No console certification items.**
-  - `console` — full platform certification (TRC / XR / Lotcheck), save-data
-    rules, controller-mapping rules, age-rating boards. The heaviest tier.
+- **`project.stage`** —— 本项目尚未到达的阶段所对应的条目
+  不在范围内；要说明这一点，而不是将其列为未勾选。
+- **`modes.rigor`** —— 在 `minimal` 下，去掉那些唯一理由只是本项目
+  已选择退出的流程负担的条目。
+- **`platform.cert_tier`** —— **仅**为项目目标的层级输出认证条目。
+  如果它**未设置**，**询问哪些平台在范围内**，
+  而不是输出全部 —— 未设置的值是一个问题，而不是输出每条认证
+  轨道的许可。如果无法确定，将该节标记为
+  **`NOT ASSESSED — cert tier unknown`**。**未设置不是 `none`：** `none` 是一个
+  决定，未设置是缺失的决定，二者绝不能产生相同输出。
+  按**该键的四个取值**分支 —— `none | itch | steam | console` ——
+  而不是按平台名称。完整要求表是 `.claude/docs/effects-map.md` 的
+  `## platform.cert_tier` 节 —— **只读该节**（Grep 其
+  标题，然后做有边界的 Read）；整个文件不是运行时输入。
+  - `none` —— **完全不输出认证节。** 内部发布、alpha 或
+     game jam 游戏。说明该节已省略及原因；不要留空。
+  - `itch` —— 仅 itch.io 上传要求：构建大小、页面设置、年龄标签。
+    **不含主机与 Steamworks 条目。**
+  - `steam` —— Steamworks：商店页面、depot 构建、成就、系统
+    要求、通用内容规则。**不含主机认证条目。**
+  - `console` —— 完整平台认证（TRC / XR / Lotcheck）、存档数据
+    规则、手柄映射规则、年龄分级机构。最重的层级。
 
-  > **Branch on the `cert_tier` values above, not on platform names.** A test on
-  > target platforms treats an `itch` project and a `steam` project identically,
-  > conflates `none` with unset, and keys on `mobile`, which is not a `cert_tier`
-  > value at all. Use the vocabulary the config defines.
+  > **按上面的 `cert_tier` 取值分支，而不是按平台名称。** 基于
+  > 目标平台的判断会把 `itch` 项目和 `steam` 项目视为相同，
+  > 把 `none` 与未设置混为一谈，并以 `mobile` 为键，而它根本
+  > 不是 `cert_tier` 取值。使用配置定义的词汇。
 
-If an item cannot be scoped because the config is absent, mark it
-**`NOT ASSESSED — platform/stage unknown`**. Do not silently include it: a
-`rigor: standard`, single-platform project would otherwise receive a ~150-item
-checklist demanding PC **and** console **and** mobile certification plus age
-ratings, of which ~140 are unassessable.
-
----
-
-
-## Phase 1: Parse Arguments
-
-Read the argument for the target platform (`pc`, `console`, `mobile`, or `all`). If no platform is specified, default to `all`.
-
-**The argument selects DEVICE requirements. It never selects the certification
-track.** Certification is decided by `platform.cert_tier`, resolved in the resolved-config block at the top of this skill —
-see the `platform.cert_tier` rule above. The two axes are different lists that
-happen to share one word: `pc`/`console`/`mobile` are hardware shapes, while
-`none|itch|steam|console` are certification regimes. They agree on `console` and
-nowhere else — `itch` and `none` have no device block at all, and `mobile` is not
-a `cert_tier` value. So emitting a device block says nothing about which
-certification block to emit, and `all` is **not** a licence to emit every
-certification track.
+如果某条目因配置缺失而无法界定范围，将其标记为
+**`NOT ASSESSED — platform/stage unknown`**。不要静默包含它：一个
+`rigor: standard` 的单平台项目否则会收到约 150 项的
+清单，要求 PC **和**主机**和**移动认证加上年龄
+分级，其中约 140 项无法评估。
 
 ---
 
-## Phase 2: Load Project Context
 
-- Read `CLAUDE.md` for project context, version information, and platform targets.
-- Read the current milestone from `production/milestones/` to understand what features and content should be included in this release.
-- Read the open bugs from `production/qa/bugs/`: grep the `**Severity**` and `**Status**` lines of `production/qa/bugs/*.md`, as `/bug-triage` does. A bug is open unless its Status is `Closed` or `Verified Fixed`. The bug items use the thresholds `/gate-check release` applies for the resolved `workflow`: at `full` an open S1, S2 or S3 bug fails its item; at `standard` and `minimal` only an open S1 does, and an open S2 or S3 is listed in the Rationale as a risk. Each failing bug is named in the Rationale as a blocking item. **No bug files in `production/qa/bugs/`** → the bug items read `NOT ASSESSED — no bug records` — never zero and never ticked, since an absent record and a clean one must not produce the same checklist; bugs are filed with `/bug-report`.
+## Phase 1: 解析参数
 
----
+读取参数中的目标平台（`pc`、`console`、`mobile` 或 `all`）。如果未指定平台，默认使用 `all`。
 
-## Phase 3: Scan Codebase
-
-> **State the denominator with every count.** These scans look for something bad,
-> so `0` means either "searched and found none" or "there was nothing to search",
-> and on a release gate those are opposite findings. Report
-> `scanned [N] source files: [M] TODO, [M] FIXME, [M] HACK` — or, when the code
-> root (`src/`, `Assets/` or `Source/`; resolve per
-> `.claude/docs/code-root-resolution.md`) is unresolved,
-> **`NOT ASSESSED — code root unresolved`**, and when it is absent or holds no
-> source files, **`NOT ASSESSED — no source files found to scan`**. A bare `0` is
-> not a result.
-
-Scan for outstanding issues:
-
-- Count `TODO` comments
-- Count `FIXME` comments
-- Count `HACK` comments
-- Note their locations and severity
-
-Check for test results in any test output directories or CI logs if available.
-**If none are found, say so** — `Test results: NOT ASSESSED — no test output or
-CI logs found` — rather than omitting the line. An absent test result and a
-passing one must not produce the same release checklist.
+**参数选择的是设备要求。它从不选择认证
+轨道。** 认证由 `platform.cert_tier` 决定，该值在本技能顶部的已解析配置块中解析 ——
+参见上方的 `platform.cert_tier` 规则。这两个轴是不同的列表，只是
+恰好共用一个词：`pc`/`console`/`mobile` 是硬件形态，而
+`none|itch|steam|console` 是认证制度。它们仅在 `console` 上一致，
+此外毫无重合 —— `itch` 和 `none` 根本没有设备块，而 `mobile` 不是
+`cert_tier` 取值。因此输出设备块并不说明应输出哪个
+认证块，`all` **也不是**输出每条
+认证轨道的许可。
 
 ---
 
-## Phase 4: Generate the Release Checklist
+## Phase 2: 加载项目上下文
+
+- 读取 `CLAUDE.md` 以获取项目上下文、版本信息和平台目标。
+- 从 `production/milestones/` 读取当前里程碑，以了解本次发布应包含哪些功能与内容。
+- 从 `production/qa/bugs/` 读取未关闭的缺陷：Grep `production/qa/bugs/*.md` 的 `**Severity**` 和 `**Status**` 行，与 `/bug-triage` 的做法一致。除非其 Status 为 `Closed` 或 `Verified Fixed`，否则该缺陷即为未关闭。缺陷条目使用 `/gate-check release` 针对已解析 `workflow` 应用的阈值：在 `full` 下，未关闭的 S1、S2 或 S3 缺陷会使该条目失败；在 `standard` 和 `minimal` 下，只有未关闭的 S1 会，未关闭的 S2 或 S3 会在 Rationale 中列为风险。每个失败的缺陷都会在 Rationale 中作为阻塞项列出。**`production/qa/bugs/` 中没有缺陷文件** → 缺陷条目读作 `NOT ASSESSED — no bug records` —— 绝不是零，也绝不勾选，因为缺失的记录与干净的记录绝不能产生相同的清单；缺陷通过 `/bug-report` 登记。
+
+---
+
+## Phase 3: 扫描代码库
+
+> **每个计数都要给出分母。** 这些扫描查找的是坏东西，
+> 因此 `0` 可能意味着"搜索过且没找到"或"根本没有可搜索的东西"，
+> 而在发布闸门上这是两种相反的发现。报告
+> `scanned [N] source files: [M] TODO, [M] FIXME, [M] HACK` —— 或者，当代码
+> 根目录（`src/`、`Assets/` 或 `Source/`；按
+> `.claude/docs/code-root-resolution.md` 解析）无法解析时，
+> 报告 **`NOT ASSESSED — code root unresolved`**；当它不存在或不含任何
+> 源文件时，报告 **`NOT ASSESSED — no source files found to scan`**。光秃秃的 `0` 不是
+> 结果。
+
+扫描待处理问题：
+
+- 统计 `TODO` 注释
+- 统计 `FIXME` 注释
+- 统计 `HACK` 注释
+- 记录其位置与严重程度
+
+检查任何测试输出目录或 CI 日志中是否有测试结果（若可用）。
+**若未找到，要说明** —— `Test results: NOT ASSESSED — no test output or
+CI logs found` —— 而不是省略该行。缺失的测试结果与通过的测试结果
+绝不能产生相同的发布清单。
+
+---
+
+## Phase 4: 生成发布检查清单
 
 ```markdown
 ## Release Checklist: [Version] -- [Platform]
@@ -150,11 +150,11 @@ Generated: [Date]
 - [ ] Credits complete and accurate
 ```
 
-Add **device** sections based on the argument. These carry no certification or
-storefront-SDK items — those are gated on `platform.cert_tier` in the next
-subsection, and repeating them here would hand an `itch` project Steamworks rows.
+根据参数添加**设备**节。这些不含认证或
+商店 SDK 条目 —— 那些在下一小节按 `platform.cert_tier` 判定，在这里
+重复它们会把 Steamworks 行交给一个 `itch` 项目。
 
-**For `pc`:**
+**对于 `pc`：**
 ```markdown
 ### Platform Requirements: PC
 - [ ] Minimum and recommended specs verified and documented
@@ -165,7 +165,7 @@ subsection, and repeating them here would hand an `itch` project Steamworks rows
 - [ ] Graphics settings save and load correctly
 ```
 
-**For `console`:**
+**对于 `console`：**
 ```markdown
 ### Platform Requirements: Console
 - [ ] Platform-specific controller prompts display correctly
@@ -175,7 +175,7 @@ subsection, and repeating them here would hand an `itch` project Steamworks rows
 - [ ] Storage full scenario handled
 ```
 
-**For `mobile`:**
+**对于 `mobile`：**
 ```markdown
 ### Platform Requirements: Mobile
 - [ ] App store guidelines compliance verified
@@ -190,23 +190,23 @@ subsection, and repeating them here would hand an `itch` project Steamworks rows
 - [ ] App size within store limits
 ```
 
-> **Mobile storefront rows stay here on purpose.** `platform.cert_tier` models
-> `none|itch|steam|console` and has no mobile regime, so App Store / Play Store
-> compliance cannot be gated on it. Leaving these in the device block is a
-> deliberate choice, not an oversight — do not "fix" it by inventing a `mobile`
-> tier, which is the exact wrong vocabulary the `cert_tier` rule warns against.
+> **移动商店行特意保留在这里。** `platform.cert_tier` 建模的是
+> `none|itch|steam|console`，没有移动制式，因此 App Store / Play Store
+> 合规无法以其为闸门。将这些留在设备块中是有意为之，
+> 而非疏漏 —— 不要通过发明一个 `mobile`
+> 层级来"修复"它，那正是 `cert_tier` 规则所警告的错误词汇。
 
-**Certification — emit ONLY the block matching `platform.cert_tier`** (resolved in
-the resolved-config block at the top of this skill). Do not emit this subsection's other blocks, and do not fall back to
-emitting all of them because the platform argument was `all`.
+**认证 —— 仅输出与 `platform.cert_tier` 匹配的块**（在本技能顶部的
+已解析配置块中解析）。不要输出本小节的其他块，也不要因为平台参数是
+`all` 就回退为输出全部块。
 
-**At `none`** — emit no certification block at all. Emit exactly this one line in
-its place, so the omission is visible rather than looking like a missing section:
+**在 `none` 下** —— 完全不输出认证块。取而代之只输出这一行，
+使省略清晰可见，而不是看起来像缺失的节：
 ```markdown
 Certification: omitted — cert_tier is 'none' (internal build, alpha or jam release).
 ```
 
-**At `itch`:**
+**在 `itch` 下：**
 ```markdown
 ### Certification: itch.io
 - [ ] Build size within itch.io upload limits
@@ -216,7 +216,7 @@ Certification: omitted — cert_tier is 'none' (internal build, alpha or jam rel
 - [ ] Butler channel names correct for each platform uploaded
 ```
 
-**At `steam`:**
+**在 `steam` 下：**
 ```markdown
 ### Certification: Steamworks
 - [ ] Steamworks SDK integrated and tested
@@ -227,7 +227,7 @@ Certification: omitted — cert_tier is 'none' (internal build, alpha or jam rel
 - [ ] Steam common content rules reviewed
 ```
 
-**At `console`:**
+**在 `console` 下：**
 ```markdown
 ### Certification: Console
 - [ ] TRC/TCR/Lotcheck requirements checklist complete
@@ -238,24 +238,24 @@ Certification: omitted — cert_tier is 'none' (internal build, alpha or jam rel
 - [ ] Age ratings obtained (ESRB, PEGI, regional)
 ```
 
-If `cert_tier` is **unset**, ask which platforms are in scope rather than
-emitting every track; if it cannot be determined, emit
-`### Certification: NOT ASSESSED — cert tier unknown` and say why. **Unset is not
-`none`** — `none` is a decision and unset is a missing one.
+如果 `cert_tier` **未设置**，询问哪些平台在范围内，而不是
+输出每条轨道；如果无法确定，输出
+`### Certification: NOT ASSESSED — cert tier unknown` 并说明原因。**未设置不是
+`none`** —— `none` 是一个决定，未设置是缺失的决定。
 
-> **Certification rows belong here, in one `cert_tier`-gated subsection.** Do not
-> put them in the PC, Console and Mobile device blocks: those are selected by the
-> command argument and default to `all`, so an `itch` project running
-> `/release-checklist` with no argument would be handed the Steamworks SDK rows
-> *and* the Lotcheck rows, which the `cert_tier` rule at the top of this skill
-> forbids.
+> **认证行属于这里，位于一个由 `cert_tier` 判定的子节中。** 不要
+> 将它们放入 PC、Console 和 Mobile 设备块：那些由
+> 命令参数选择且默认 `all`，因此一个 `itch` 项目在无参数运行
+> `/release-checklist` 时会被交予 Steamworks SDK 行
+> *和* Lotcheck 行，这是本技能顶部的 `cert_tier` 规则
+> 所禁止的。
 >
-> **`console` means two different things in this file.** It is a device-block
-> argument value *and* a `cert_tier` value, colliding on one word out of four. A
-> `**For \`console\`:**` heading is argument-gating, not tier-gating — do not read
-> it as evidence that certification is already scoped by tier.
+> **`console` 在本文件中有两种不同含义。** 它既是设备块
+> 的参数值*又是* `cert_tier` 取值，四个词中有一个词发生碰撞。
+> `**For \`console\`:**` 标题是参数判定，不是层级判定 —— 不要
+> 把它读作认证已按层级界定范围的证据。
 
-**Store and launch sections (all platforms):**
+**商店与上线节（所有平台）：**
 ```markdown
 ### Store / Distribution
 - [ ] Store page metadata complete and proofread
@@ -305,18 +305,18 @@ resolution and estimated time to address them.]
 
 ---
 
-## Phase 5: Save Checklist
+## Phase 5: 保存清单
 
-Present the checklist to the user with: total checklist items, number of known blockers (FIXME/HACK counts, known bugs).
+向用户呈现清单，包含：清单条目总数、已知阻塞项数量（FIXME/HACK 计数、已知缺陷）。
 
-Ask: "May I write this to `production/releases/release-checklist-[version].md`?"
+询问："我可以将其写入 `production/releases/release-checklist-[version].md` 吗？"
 
-If yes, write the file, creating the directory if needed.
+如果同意，写入该文件，必要时创建目录。
 
 ---
 
-## Phase 6: Next Steps
+## Phase 6: 后续步骤
 
-- Draft the changelog or patch notes (`/changelog`, `/patch-notes`) if not done — the release gate checks them.
-- Run `/gate-check release` — the Polish → Release gate reads this checklist.
-- After a PASS: `/launch-checklist`, then coordinate the release via `/team-release`.
+- 起草变更日志或补丁说明（`/changelog`、`/patch-notes`）（若尚未完成）—— 发布闸门会检查它们。
+- 运行 `/gate-check release` —— Polish → Release 闸门会读取本清单。
+- PASS 之后：`/launch-checklist`，然后通过 `/team-release` 协调发布。

@@ -2,52 +2,51 @@
 
 ## Skill Summary
 
-`/settings` shows and changes project configuration. It has four forms:
-`/settings` (view-all: every effective setting with its source), `/settings
-<key>` (view-one), `/settings <key>=<value>` (write to `project.yaml`) and
-`/settings --local <key>=<value>` (write a personal override to the gitignored
-`project.local.yaml`). Anything else, including an empty key or value, prints
-the usage block. It runs on the Sonnet model and reads every value through
-`yaml-helper.sh` (`resolve_setting`, `get_yaml_key`, `is_locally_overridable`,
-`validate_enum_value`), so a value the `modes.rigor` preset supplies is shown as
-`(derived from rigor: <level>)` rather than "(not set)".
+`/settings` 展示并修改项目配置。它有四种形式：
+`/settings`（查看全部：每个生效设置及其来源）、`/settings
+<key>`（查看单项）、`/settings <key>=<value>`（写入 `project.yaml`）以及
+`/settings --local <key>=<value>`（把个人覆盖写入已被 git 忽略的
+`project.local.yaml`）。其他任何输入，包括空键或空值，都会打印
+用法区块。它运行在 Sonnet 模型上，并通过
+`yaml-helper.sh`（`resolve_setting`、`get_yaml_key`、`is_locally_overridable`、
+`validate_enum_value`）读取每个值，因此由 `modes.rigor` 预设提供的值会显示为
+`(derived from rigor: <level>)`，而不是 "(not set)"。
 
-Every write is validated against the schema enums first, then confirmed with an
-`AskUserQuestion` approval gate (`[A] Yes, write` / `[B] No, cancel`). A
-`project.yaml` write is a `schema_changes` decision, so it is confirmed even in
-`autonomous` mode. `--local` refuses a key that is not on the local-override
-whitelist. A setting that `.claude/docs/effects-map.md` marks with a
-`> ### RESERVED` banner is stored when asked, but every form says nothing reads
-it. The skill gives no verdict: it prints and writes configuration. No director
-gates apply.
+每次写入都先按 schema 枚举校验，再通过
+`AskUserQuestion` 批准闸门确认（`[A] Yes, write` / `[B] No, cancel`）。
+对 `project.yaml` 的写入属于 `schema_changes` 决策，因此即使在
+`autonomous` 模式下也会确认。`--local` 会拒绝不在本地覆盖
+白名单中的键。`.claude/docs/effects-map.md` 用
+`> ### RESERVED` 横幅标记的设置在被要求时会存储，但每种形式都会说明没有任何东西读取
+它。该技能不给出结论：它打印并写入配置。不适用任何总监
+闸门。
 
 ---
 
 ## Static Assertions (Structural)
 
-Checked against the SKILL.md by `/skill-test spec` — no fixture needed.
+由 `/skill-test spec` 对照 SKILL.md 检查 —— 无需夹具。
 
-- [ ] Has required frontmatter fields: `name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`
-- [ ] Has ≥2 phase headings
-- [ ] No verdict keyword is required: the output is configuration, not a judgement (`/skill-test static` Check 3 gives a WARN, never a FAIL, for this skill)
-- [ ] Both write phases ask for approval with `AskUserQuestion` before the `Edit` or `Write`
-- [ ] The reserved set is derived from `effects-map.md`'s `> ### RESERVED` headings, not hardcoded
-- [ ] Points to `.claude/docs/settings-guidance.md` for which value to choose
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 至少有 2 个阶段标题
+- [ ] 不要求结论关键字：输出是配置，而不是判断（对本次技能，`/skill-test static` 的检查 3 给出 WARN，绝不给出 FAIL）
+- [ ] 两个写入阶段都在 `Edit` 或 `Write` 之前用 `AskUserQuestion` 请求批准
+- [ ] 保留集来自 `effects-map.md` 的 `> ### RESERVED` 标题，而非硬编码
+- [ ] 指向 `.claude/docs/settings-guidance.md` 以了解该选择哪个值
 
 ---
 
 ## Director Gate Checks
 
-None. `/settings` is a configuration utility. No director gates apply.
+无。`/settings` 是配置工具。不适用任何总监闸门。
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非用例自身的夹具另有说明，每个用例的 `project.yaml` 都设置
+`modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有
+`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
 
 ---
 
@@ -56,7 +55,7 @@ Fixture defaults.
 ### Case 1: Happy Path — view-all shows derived values, a local override and the legend
 
 **Fixture:**
-- `project.yaml`:
+- `project.yaml`：
   ```yaml
   framework:
     version: 1.2.0
@@ -68,7 +67,7 @@ Fixture defaults.
   engine:
     name: Godot
   ```
-- `project.local.yaml`:
+- `project.local.yaml`：
   ```yaml
   modes:
     automation: autonomous
@@ -77,52 +76,52 @@ Fixture defaults.
 **Input:** `/settings`
 
 **Expected behavior:**
-1. Reports both files present and `Schema validation: ok`
-2. Lists every file leaf, then appends the rigor family the files do not set:
-   `modes.workflow`, `qa.level`, `modes.story_granularity`, `modes.review_mode`
-   and `team.size`, each annotated `(derived from rigor: full, …)`
-3. `docs.density: terse` is annotated `(project.yaml, locked)` — the explicit
-   value wins over the `thorough` that `rigor: full` would supply
-4. `modes.automation: autonomous` is annotated
+1. 报告两个文件都存在且 `Schema validation: ok`
+2. 列出每个文件叶子，然后追加文件未设置的 rigor 家族：
+   `modes.workflow`、`qa.level`、`modes.story_granularity`、`modes.review_mode`
+   与 `team.size`，各自标注 `(derived from rigor: full, …)`
+3. `docs.density: terse` 标注为 `(project.yaml, locked)` —— 显式
+   值胜过 `rigor: full` 会提供的 `thorough`
+4. `modes.automation: autonomous` 标注为
    `(LOCAL OVERRIDE — yaml has: collaborative)`
-5. Leaves are grouped by top-level section (`modes:`, `docs:`, `qa:`, …), not
-   by the file they came from
-6. Below the block, the two-line legend: `locked` means it cannot be overridden
-   in `project.local.yaml`, and does not mean fixed
-7. No file is written
+5. 叶子按顶层区块分组（`modes:`、`docs:`、`qa:`、…），而不是
+   按来源文件分组
+6. 区块下方是两行图例：`locked` 表示它不能在 `project.local.yaml`
+   中被覆盖，也不表示固定不变
+7. 不写入任何文件
 
 **Assertions:**
-- [ ] All five rigor-derived knobs appear with real values, none as "(not set)"
-- [ ] The explicit `docs.density` shows its own value and source, not the preset's
-- [ ] The local override names the `project.yaml` value it shadows
-- [ ] The `locked` legend is printed, and says a derived value can still be set explicitly
-- [ ] Nothing is written
+- [ ] 五个由 rigor 派生的旋钮都以真实值出现，没有一个是 "(not set)"
+- [ ] 显式的 `docs.density` 显示其自身值与来源，而非预设值
+- [ ] 本地覆盖点名它所遮蔽的 `project.yaml` 值
+- [ ] 打印 `locked` 图例，并说明派生值仍可显式设置
+- [ ] 不写入任何内容
 
 ---
 
 ### Case 2: View-one — a rigor-derived key says how to set it
 
 **Fixture:**
-- `project.yaml` sets `modes.rigor: standard` and no `qa.level`
+- `project.yaml` 设置 `modes.rigor: standard`，未设置 `qa.level`
 
 **Input:** `/settings qa.level`
 
 **Expected behavior:**
-1. Prints `Effective value: standard` and `Source: derived from rigor: standard`
-2. Adds the line `Set explicitly with: /settings qa.level=<value>   (an explicit value wins over rigor)`
-3. `Locally overridden: no`; the whitelist line reads `locked — project-wide`
+1. 打印 `Effective value: standard` 与 `Source: derived from rigor: standard`
+2. 增加一行 `Set explicitly with: /settings qa.level=<value>   (an explicit value wins over rigor)`
+3. `Locally overridden: no`；白名单行显示 `locked — project-wide`
 
 **Assertions:**
-- [ ] The value comes from the rigor expansion, not "(not set)"
-- [ ] The "Set explicitly with" line is shown for a derived value
-- [ ] Nothing is written
+- [ ] 值来自 rigor 展开，不是 "(not set)"
+- [ ] 对派生值显示 "Set explicitly with" 行
+- [ ] 不写入任何内容
 
 ---
 
 ### Case 3: Set-yaml — changing `modes.rigor` reports the six knobs it moves
 
 **Fixture:**
-- `project.yaml`:
+- `project.yaml`：
   ```yaml
   modes:
     rigor: minimal
@@ -130,180 +129,179 @@ Fixture defaults.
   docs:
     density: thorough
   ```
-- The user answers `[A] Yes, write`
+- 用户回答 `[A] Yes, write`
 
 **Input:** `/settings modes.rigor=standard`
 
 **Expected behavior:**
-1. `validate_enum_value modes.rigor standard` passes
-2. `AskUserQuestion` asks ``Set `modes.rigor=standard` in `project.yaml`?``
-   with `[A] Yes, write` / `[B] No, cancel`
-3. The `Edit` anchors on the `modes:` line plus the `rigor: minimal` line and
-   changes only that value; no second `modes:` block is added
-4. Confirms ``Set `modes.rigor=standard` in `project.yaml`.`` and lists what
-   the six knobs resolve to now, re-read with `resolve_setting`:
-   `modes.workflow: standard`, `qa.level: standard`,
-   `modes.story_granularity: balanced`, `modes.review_mode: lean`,
-   `team.size: individual` (each derived from rigor: standard) and
-   `docs.density: thorough` (`project.yaml` — explicit, unchanged)
+1. `validate_enum_value modes.rigor standard` 通过
+2. `AskUserQuestion` 询问 ``Set `modes.rigor=standard` in `project.yaml`?``
+   并提供 `[A] Yes, write` / `[B] No, cancel`
+3. `Edit` 以 `modes:` 行加 `rigor: minimal` 行为锚点，只改动该值；
+   不新增第二个 `modes:` 区块
+4. 确认 ``Set `modes.rigor=standard` in `project.yaml`.``，并列出六个旋钮
+   现在解析为什么值，通过 `resolve_setting` 重新读取：
+   `modes.workflow: standard`、`qa.level: standard`、
+   `modes.story_granularity: balanced`、`modes.review_mode: lean`、
+   `team.size: individual`（各自派生自 rigor: standard）以及
+   `docs.density: thorough`（`project.yaml` —— 显式，未变）
 
 **Assertions:**
-- [ ] Approval is asked before the file is edited
-- [ ] `project.yaml` still has exactly one `modes:` block, with `rigor: standard`
-- [ ] The six-knob list shows the explicit `docs.density` as unchanged, not as `balanced`
-- [ ] No other line of `project.yaml` changes
+- [ ] 在编辑文件之前请求批准
+- [ ] `project.yaml` 仍恰好有一个 `modes:` 区块，含 `rigor: standard`
+- [ ] 六旋钮清单把显式的 `docs.density` 显示为未变，而不是 `balanced`
+- [ ] `project.yaml` 的其他行不变
 
 ---
 
 ### Case 4: Invalid value — rejected before any question
 
 **Fixture:**
-- `project.yaml` sets `modes.review_mode: lean`
+- `project.yaml` 设置 `modes.review_mode: lean`
 
 **Input:** `/settings modes.review_mode=chaotic`
 
 **Expected behavior:**
-1. `validate_enum_value` returns 1; its message is shown verbatim:
+1. `validate_enum_value` 返回 1；其消息原样显示：
    `Invalid value 'chaotic' for 'modes.review_mode'. Allowed: ...`
-2. The skill exits: no approval question, no write
+2. 技能退出：无批准问题、无写入
 
 **Assertions:**
-- [ ] The helper's error line is shown as it is, naming the allowed values
-- [ ] No `AskUserQuestion` is asked
-- [ ] `project.yaml` is unchanged
+- [ ] 原样显示辅助脚本的报错行，并点名允许的值
+- [ ] 不询问 `AskUserQuestion`
+- [ ] `project.yaml` 不变
 
 ---
 
 ### Case 5: `--local` on a locked key — refused with the team-wide route
 
 **Fixture:**
-- `project.yaml` sets `engine.name: Godot`; no `project.local.yaml`
+- `project.yaml` 设置 `engine.name: Godot`；无 `project.local.yaml`
 
 **Input:** `/settings --local engine.name=Unity`
 
 **Expected behavior:**
-1. `is_locally_overridable engine.name` returns 1
-2. One line: ``engine.name cannot be locally overridden — it's a project-wide setting. Use `/settings engine.name=Unity` (no `--local`) to change it for the whole team.``
-3. The skill exits without writing
+1. `is_locally_overridable engine.name` 返回 1
+2. 一行：``engine.name cannot be locally overridden — it's a project-wide setting. Use `/settings engine.name=Unity` (no `--local`) to change it for the whole team.``
+3. 技能退出且不写入
 
 **Assertions:**
-- [ ] The refusal names the `/settings <key>=<value>` route
-- [ ] No approval question is asked
-- [ ] No `project.local.yaml` is created
+- [ ] 拒绝信息点名 `/settings <key>=<value>` 途径
+- [ ] 不询问批准问题
+- [ ] 不创建 `project.local.yaml`
 
 ---
 
 ### Case 6: `--local` on a whitelisted key — creates the override file
 
 **Fixture:**
-- `project.yaml` exists with `modes.automation: collaborative`; no
+- `project.yaml` 存在且含 `modes.automation: collaborative`；无
   `project.local.yaml`
-- The user answers `[A] Yes, write`
+- 用户回答 `[A] Yes, write`
 
 **Input:** `/settings --local modes.automation=autonomous`
 
 **Expected behavior:**
-1. The whitelist and enum checks pass
-2. `AskUserQuestion` asks ``Set `modes.automation=autonomous` in `project.local.yaml` (your personal override, gitignored)?``
-3. `project.local.yaml` is created with the value inside its `modes:` parent
-   block
-4. Confirms ``Set `modes.automation=autonomous` in `project.local.yaml` (your override).``
+1. 白名单与枚举检查通过
+2. `AskUserQuestion` 询问 ``Set `modes.automation=autonomous` in `project.local.yaml` (your personal override, gitignored)?``
+3. 创建 `project.local.yaml`，把值放入其 `modes:` 父
+   区块中
+4. 确认 ``Set `modes.automation=autonomous` in `project.local.yaml` (your override).``
 
 **Assertions:**
-- [ ] Approval is asked before the file is created
-- [ ] The new file nests the key under `modes:`, not as a dotted top-level line
-- [ ] `project.yaml` is unchanged
+- [ ] 在创建文件之前请求批准
+- [ ] 新文件把键嵌套在 `modes:` 下，而不是作为点分隔的顶层行
+- [ ] `project.yaml` 不变
 
 ---
 
 ### Case 7: Reserved setting — stored on request, flagged on every form
 
 **Fixture:**
-- `.claude/docs/effects-map.md` is the live file; pick a key whose section
-  carries the `> ### RESERVED` banner (`accessibility.target` when this spec
-  was written — re-derive it with the skill's own grep)
-- `project.yaml` does not set that key; the user answers `[A] Yes, write`
+- `.claude/docs/effects-map.md` 为现行文件；选择一个其章节
+  带有 `> ### RESERVED` 横幅的键（本规格编写时为 `accessibility.target` ——
+  用技能自身的 grep 重新推导）
+- `project.yaml` 未设置该键；用户回答 `[A] Yes, write`
 
-**Input:** `/settings accessibility.target=standard`, then `/settings`, then
+**Input:** `/settings accessibility.target=standard`，然后 `/settings`，再
 `/settings accessibility.target`
 
 **Expected behavior:**
-1. The write prints, before the approval question: "Note: `accessibility.target`
+1. 写入在批准问题之前打印："Note: `accessibility.target`
    is RESERVED — no skill or hook reads it, so setting it will not change any
    behaviour. Your value is stored either way."
-2. On yes the value is written — the skill never refuses a reserved key
-3. View-all annotates the leaf with `, reserved` and prints the reserved legend
-   below the block
-4. View-one prints "**`accessibility.target` is RESERVED — nothing reads it.**"
-   above the value block, not under it
+2. 回答 yes 后写入该值 —— 技能从不拒绝保留键
+3. 查看全部在叶子上标注 `, reserved`，并在区块下方打印保留
+   图例
+4. 查看单项在值区块上方（而非下方）打印 "**`accessibility.target` is RESERVED — nothing reads it.**"
 
 **Assertions:**
-- [ ] The warning comes before the approval question
-- [ ] The value is written after a yes
-- [ ] View-all and view-one both mark the key reserved
-- [ ] A key that only mentions the banner in prose (`platform.cert_tier`) is not marked reserved
+- [ ] 警告出现在批准问题之前
+- [ ] 回答 yes 后写入该值
+- [ ] 查看全部与查看单项都标记该键为保留
+- [ ] 仅在正文中提及该横幅的键（`platform.cert_tier`）不被标记为保留
 
 ---
 
 ### Case 8: Shadowed write and autonomous mode — still asked, with the shadow named
 
 **Fixture:**
-- `project.yaml` sets `modes.review_mode: lean` and `modes.automation: autonomous`
-- `project.local.yaml` sets `modes.review_mode: solo`
-- The user answers `[A] Yes, write`
+- `project.yaml` 设置 `modes.review_mode: lean` 与 `modes.automation: autonomous`
+- `project.local.yaml` 设置 `modes.review_mode: solo`
+- 用户回答 `[A] Yes, write`
 
 **Input:** `/settings modes.review_mode=full`
 
 **Expected behavior:**
-1. Before the approval question: "Note: this setting is currently locally
+1. 在批准问题之前："Note: this setting is currently locally
    overridden in `project.local.yaml` (value: `solo`). Writing to `project.yaml`
    will not change your effective value."
-2. The approval question is asked even though `modes.automation` is
-   `autonomous`: a `project.yaml` write is a `schema_changes` decision, which is
-   on the default always-ask list
-3. `project.yaml` gets `review_mode: full`; `project.local.yaml` is unchanged
+2. 尽管 `modes.automation` 为 `autonomous`，仍会询问批准问题：
+   对 `project.yaml` 的写入属于 `schema_changes` 决策，它在
+   默认的始终询问清单上
+3. `project.yaml` 得到 `review_mode: full`；`project.local.yaml` 不变
 
 **Assertions:**
-- [ ] The shadow note names the local value and comes before the question
-- [ ] Autonomous mode does not skip the approval question
-- [ ] Only `project.yaml` is edited
+- [ ] 遮蔽提示点名本地值，且出现在问题之前
+- [ ] autonomous 模式不跳过批准问题
+- [ ] 只编辑 `project.yaml`
 
 ---
 
 ### Case 9: Malformed operand — usage, no write
 
 **Fixture:**
-- `project.yaml` exists
+- `project.yaml` 存在
 
-**Input:** `/settings --local modes.automation=` (and, separately,
-`/settings =full`)
+**Input:** `/settings --local modes.automation=`（以及另外单独
+`/settings =full`）
 
 **Expected behavior:**
-1. The empty value (or empty key) routes to Phase 6
-2. The usage block is printed with its four forms and three examples
-3. Nothing is validated, asked or written
+1. 空值（或空键）路由到阶段 6
+2. 打印用法区块，含四种形式与三个示例
+3. 不校验、不询问、不写入任何内容
 
 **Assertions:**
-- [ ] Both inputs print the usage block
-- [ ] No approval question is asked and no file changes
+- [ ] 两种输入都打印用法区块
+- [ ] 不询问批准问题，文件不变
 
 ---
 
 ## Protocol Compliance
 
-- [ ] Every write is preceded by an `AskUserQuestion` approval gate; `[B] No, cancel` leaves both files unchanged
-- [ ] Values are validated with `validate_enum_value` before the approval question
-- [ ] Values are read with `resolve_setting`, so derived values show with their rigor source
-- [ ] `--local` writes only whitelisted keys, and never creates `project.local.yaml` without a `project.yaml`
-- [ ] Reserved keys are flagged on view-all, view-one and both write paths
-- [ ] Every helper call runs from the project root in the same Bash command that sources `yaml-helper.sh`
+- [ ] 每次写入之前都有 `AskUserQuestion` 批准闸门；`[B] No, cancel` 使两个文件都保持不变
+- [ ] 在批准问题之前用 `validate_enum_value` 校验值
+- [ ] 用 `resolve_setting` 读取值，因此派生值会显示其 rigor 来源
+- [ ] `--local` 只写入白名单键，且在没有 `project.yaml` 时绝不创建 `project.local.yaml`
+- [ ] 在查看全部、查看单项与两条写入路径上都标记保留键
+- [ ] 每次辅助脚本调用都从项目根目录、在 sourcing `yaml-helper.sh` 的同一 Bash 命令中运行
 
 ---
 
 ## Coverage Notes
 
-- View-all with schema errors in one or both files, Phase 4's Case D (no clean
-  insertion point) and a session started in a subfolder are not separately
-  fixture-tested.
-- The missing-`project.yaml` stops (view-all, and `--local` with no base file)
-  and a missing `yaml-helper.sh` are not separately fixture-tested.
+- 一个或两个文件存在 schema 错误时的查看全部、阶段 4 的 Case D（没有干净的
+  插入点）以及在子文件夹中启动的会话，未单独做
+  夹具测试。
+- 缺失 `project.yaml` 的停止情形（查看全部，以及没有基础文件时的 `--local`）
+  与缺失 `yaml-helper.sh` 的情形未单独做夹具测试。

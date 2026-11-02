@@ -1,35 +1,29 @@
-# /review-all-gdds — Phase 3: Game Design Holism
+# /review-all-gdds — Phase 3: 游戏设计整体性
 
-> Part of `/review-all-gdds`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> 属于 `/review-all-gdds`。`SKILL.md` 指明何时读取本文件；它解析出的设置以及其后各标题下的规则在此同样适用。
 
-## Phase 3: Game Design Holism
+## Phase 3: 游戏设计整体性
 
-**In this file:**
+**本文件包含：**
 
-- 3a: Progression Loop Competition
-- 3b: Player Attention Budget
-- 3c: Dominant Strategy Detection
-- 3d: Economic Loop Analysis
-- 3e: Difficulty Curve Consistency
-- 3f: Pillar Alignment
-- 3g: Player Fantasy Coherence
+- 3a：成长循环竞争
+- 3b：玩家注意力预算
+- 3c：主导策略检测
+- 3d：经济循环分析
+- 3e：难度曲线一致性
+- 3f：支柱对齐
+- 3g：玩家幻想一致性
 
-Review all GDDs together through the lens of game design theory and player
-psychology. These are issues that individual GDD reviews cannot catch because
-they require seeing all systems at once.
+以游戏设计理论与玩家心理学的视角，将所有 GDD 放在一起评审。这些问题单个 GDD 评审无法捕捉，因为它们需要同时看到所有系统。
 
-### 3a: Progression Loop Competition
+### 3a：成长循环竞争
 
-A game should have one dominant progression loop that players feel is "the
-point" of the game, with supporting loops that feed into it. When multiple
-systems compete equally as the primary progression driver, players don't know
-what the game is about.
+游戏应当有一个玩家认为就是"游戏意义所在"的主导成长循环，并由支撑循环为其供血。当多个系统同等地竞争主要成长驱动力时，玩家就不知道这游戏到底在讲什么。
 
-Scan all GDDs for systems that:
-- Award the player's primary resource (XP, levels, prestige, unlocks)
-- Define themselves as the "core" or "main" loop
-- Have comparable depth and time investment to other systems doing the same
+扫描所有 GDD，找出具备以下特征的系统：
+- 奖励玩家的主要资源（经验值、等级、威望、解锁）
+- 自我描述为"核心"或"主要"循环
+- 与其他做同样事情的系统具有相当的深度与时间投入
 
 ```
 ⚠️  Competing Progression Loops
@@ -41,16 +35,14 @@ exploration.md: Awards XP, unlocks map areas, described as "the main driver"
   Consider: one primary loop with the others as support systems.
 ```
 
-### 3b: Player Attention Budget
+### 3b：玩家注意力预算
 
-Count how many systems require active player attention simultaneously during
-a typical session. Each actively-managed system costs attention:
+统计在典型游戏时段中，有多少系统同时需要玩家主动关注。每个被主动管理的系统都会消耗注意力：
 
-- Active = player must make decisions about this system regularly during play
-- Passive = system runs automatically, player sees results but doesn't manage it
+- 主动 = 玩家在游玩过程中必须经常就该系统做出决策
+- 被动 = 系统自动运行，玩家看到结果但不管理它
 
-More than 3-4 simultaneously active systems creates cognitive overload for most
-players. Present the count and flag if it exceeds 4 concurrent active systems:
+超过 3-4 个同时活跃的系统会让大多数玩家产生认知过载。呈现该计数，并在超过 4 个并发活跃系统时标记：
 
 ```
 ⚠️  Cognitive Load Risk
@@ -66,18 +58,14 @@ Simultaneously active systems during [core loop moment]:
   Consider: which of these can be made passive or simplified?
 ```
 
-### 3c: Dominant Strategy Detection
+### 3c：主导策略检测
 
-A dominant strategy makes other strategies irrelevant — players discover it,
-use it exclusively, and find the rest of the game boring. Look for:
+主导策略会让其他策略变得无关紧要 — 玩家一旦发现它就会只用它，并觉得游戏其余部分很无聊。寻找：
 
-- **Resource monopolies**: One strategy generates a resource significantly
-  faster than all others
-- **Risk-free power**: A strategy that is both high-reward and low-risk
-  (if high-risk strategies exist, they need proportionally higher reward)
-- **No trade-offs**: An option that is superior in all dimensions to all others
-- **Obvious optimal path**: If any progression choice is "clearly correct",
-  the others aren't real choices
+- **资源垄断**：某种策略获取资源的速度显著快于所有其他策略
+- **无风险的力量**：既高回报又低风险的策略（如果存在高风险策略，它们需要按比例更高的回报）
+- **没有取舍**：某个选项在所有维度上都优于其他所有选项
+- **显而易见的唯一最优路**：如果任何成长选择都"显然正确"，那其他选择就不是真正的选择
 
 ```
 ⚠️  Potential Dominant Strategy
@@ -88,22 +76,20 @@ combat.md: Melee attacks deal 100% damage but require close range
   damage. Consider what melee offers that ranged cannot.
 ```
 
-### 3d: Economic Loop Analysis
+### 3d：经济循环分析
 
-Identify all resources across all GDDs (gold, XP, crafting materials, stamina,
-health, mana, etc.). For each resource, map its **sources** (how players gain
-it) and **sinks** (how players spend it).
+识别所有 GDD 中的所有资源（金币、经验值、制作材料、体力、生命值、法力等）。对每种资源，梳理其**来源**（玩家如何获得）和**消耗**（玩家如何花费）。
 
-Flag dangerous economic conditions:
+标记危险的经济状况：
 
-| Condition | Sign | Risk |
+| 状况 | 迹象 | 风险 |
 |-----------|------|------|
-| **Infinite source, no sink** | Resource accumulates indefinitely | Late game becomes trivially easy |
-| **Sink, no source** | Resource drains to zero | System becomes unavailable |
-| **Source >> Sink** | Surplus accumulates | Resource becomes meaningless |
-| **Sink >> Source** | Constant scarcity | Frustration and gatekeeping |
-| **Positive feedback loop** | More resource → easier to earn more | Runaway leader, snowball |
-| **No catch-up** | Falling behind accelerates deficit | Unrecoverable states |
+| **无限来源，无消耗** | 资源无限累积 | 后期变得毫无难度 |
+| **有消耗，无来源** | 资源耗尽至零 | 系统变得不可用 |
+| **来源 >> 消耗** | 盈余不断累积 | 资源变得毫无意义 |
+| **消耗 >> 来源** | 持续稀缺 | 挫败感与卡门槛 |
+| **正反馈循环** | 资源越多 → 越容易获取更多 | 赢家通吃，滚雪球 |
+| **没有追赶机制** | 落后会加速差距 | 不可挽回的状态 |
 
 ```
 🔴 Economic Imbalance: Unbounded Positive Feedback
@@ -115,18 +101,16 @@ gold economy:
   Add ongoing gold sinks (upkeep, consumables, cosmetics, gambling).
 ```
 
-### 3e: Difficulty Curve Consistency
+### 3e：难度曲线一致性
 
-When multiple systems scale with player progression, they must scale in
-compatible directions and at compatible rates. Mismatched scaling curves
-create unintended difficulty spikes or trivialisations.
+当多个系统随玩家成长而缩放时，它们必须以兼容的方向和兼容的速率缩放。不匹配的缩放曲线会制造意外的难度尖峰或使内容变得无足轻重。
 
-For each system that scales over time, extract:
-- What scales (enemy health, player damage, resource cost, area size)
-- How it scales (linear, exponential, stepped)
-- When it scales (level, time, area)
+对于每个随时间缩放的系统，提取：
+- 缩放什么（敌人生命值、玩家伤害、资源成本、区域大小）
+- 如何缩放（线性、指数、阶梯式）
+- 何时缩放（等级、时间、区域）
 
-Compare all scaling curves. Flag mismatches:
+比较所有缩放曲线。标记不匹配：
 
 ```
 ⚠️  Difficulty Curve Mismatch
@@ -137,14 +121,11 @@ progression.md: Player damage scales linearly with level (+10% per level)
   unless the curves are reconciled.
 ```
 
-### 3f: Pillar Alignment
+### 3f：支柱对齐
 
-Every system should clearly serve at least one design pillar. A system that
-serves no pillar is "scope creep by design" — it's in the game but not in
-service of what the game is trying to be.
+每个系统都应明确服务于至少一个设计支柱。不服务于任何支柱的系统是"设计层面的范围蔓延" — 它存在于游戏中，但不服务于游戏试图成为的样子。
 
-For each GDD system, check its Player Fantasy section against the design pillars.
-Flag any system whose stated fantasy doesn't map to any pillar:
+对每个 GDD 系统，检查其 Player Fantasy 章节与设计支柱是否对齐。标记任何所述幻想无法映射到任何支柱的系统：
 
 ```
 ⚠️  Pillar Drift
@@ -154,8 +135,7 @@ Pillars: "Brutal Combat", "Tense Survival", "Emergent Stories"
   that covers it, redesign it to serve an existing pillar, or cut it.
 ```
 
-Also check anti-pillars — flag any system that does what an anti-pillar
-explicitly says the game will NOT do:
+同时检查反支柱 — 标记任何做了反支柱明确声明游戏**不会**做的事的系统：
 
 ```
 🔴 Anti-Pillar Violation
@@ -164,11 +144,9 @@ main-quest.md: Defines a 12-chapter linear story with mandatory sequence
 → This system directly violates the defined anti-pillar.
 ```
 
-### 3g: Player Fantasy Coherence
+### 3g：玩家幻想一致性
 
-The player fantasies across all systems should be compatible — they should
-reinforce a consistent identity for what the player IS in this game. Conflicting
-player fantasies create identity confusion.
+所有系统之间的玩家幻想应当相互兼容 — 它们应强化一个一致的玩家身份，即玩家在这个游戏中**是**什么。相互冲突的玩家幻想会造成身份混乱。
 
 ```
 ⚠️  Player Fantasy Conflict

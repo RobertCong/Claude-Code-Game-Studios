@@ -1,11 +1,11 @@
-# /test-setup — Phase 4: Create CI/CD Workflow
+# /test-setup — Phase 4: 创建 CI/CD 工作流
 
-> Part of `/test-setup`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> `/test-setup` 的一部分。`SKILL.md` 说明何时读取本文件；它解析出的设置
+> 以及其后续标题下的规则在此仍然适用。
 
-## Phase 4: Create CI/CD Workflow
+## Phase 4: 创建 CI/CD 工作流
 
-**In this file:**
+**本文件内容：**
 
 - Godot 4
 - Unity
@@ -13,7 +13,7 @@
 
 ### Godot 4
 
-Create `.github/workflows/tests.yml`:
+创建 `.github/workflows/tests.yml`：
 
 ```yaml
 name: Automated Tests
@@ -67,7 +67,7 @@ jobs:
 
 ### Unity
 
-Create `.github/workflows/tests.yml`:
+创建 `.github/workflows/tests.yml`：
 
 ```yaml
 name: Automated Tests
@@ -113,12 +113,12 @@ jobs:
           path: test-results/
 ```
 
-Note: Unity CI requires a `UNITY_LICENSE` secret. Add to GitHub repository
-secrets before the first CI run.
+注意：Unity CI 需要一个 `UNITY_LICENSE` 密钥。在首次 CI 运行之前
+添加到 GitHub 仓库密钥中。
 
 ### Unreal Engine
 
-Create `.github/workflows/tests.yml`:
+创建 `.github/workflows/tests.yml`：
 
 ```yaml
 name: Automated Tests
@@ -171,13 +171,13 @@ jobs:
           path: Saved/Logs/
 ```
 
-Note: UE CI requires a self-hosted Windows runner with Unreal Editor installed.
-The `windows` label keeps the job off any Linux self-hosted runner the
-repository also has. Set the `UE_ROOT` environment variable on the runner to the engine folder
-(e.g. `C:/Program Files/Epic Games/UE_5.8`). `[ProjectName]Editor` is the
-editor target in `Source/[ProjectName]Editor.Target.cs`. `actions/checkout@v7`
-and `actions/upload-artifact@v7` run on Node.js 24, which needs Actions Runner
-2.327.1 or newer: update the self-hosted runner before the first run
-(https://github.com/actions/checkout/blob/v7.0.1/README.md).
+注意：UE CI 需要一个已安装 Unreal Editor 的自托管 Windows 运行器。
+`windows` 标签可让该任务避开仓库同时拥有的任何 Linux 自托管运行器。
+在运行器上把 `UE_ROOT` 环境变量设为引擎文件夹
+（例如 `C:/Program Files/Epic Games/UE_5.8`）。`[ProjectName]Editor` 是
+`Source/[ProjectName]Editor.Target.cs` 中的编辑器目标。`actions/checkout@v7`
+和 `actions/upload-artifact@v7` 运行在 Node.js 24 上，需要 Actions Runner
+2.327.1 或更新版本：在首次运行之前更新自托管运行器
+（https://github.com/actions/checkout/blob/v7.0.1/README.md）。
 
 ---

@@ -8,8 +8,8 @@
 
 ## Overview
 
-[What resources, currencies, and exchange systems does this economy cover?
-What player behaviors does it incentivize?]
+[该经济模型涵盖哪些资源、货币与兑换系统？
+它激励哪些玩家行为？]
 
 ---
 
@@ -17,14 +17,14 @@ What player behaviors does it incentivize?]
 
 | Currency | Type | Earn Rate | Sink Rate | Cap | Notes |
 | ---- | ---- | ---- | ---- | ---- | ---- |
-| [Gold] | Soft | [per hour] | [per hour] | [max or none] | [Primary transaction currency] |
-| [Gems] | Premium | [per day F2P] | [varies] | [max] | [Premium currency, purchasable] |
-| [XP] | Progression | [per action] | [level-up cost] | [none] | [Cannot be traded] |
+| [Gold] | Soft | [per hour] | [per hour] | [max or none] | [交易主货币] |
+| [Gems] | Premium | [per day F2P] | [varies] | [max] | [付费货币，可购买获得] |
+| [XP] | Progression | [per action] | [level-up cost] | [none] | [不可交易] |
 
 ### Currency Rules
-- [Rule 1 — e.g., "Soft currency has no cap but inflation is controlled via sinks"]
-- [Rule 2 — e.g., "Premium currency cannot be converted back to real money"]
-- [Rule 3]
+- [规则 1 —— 例如 "Soft currency has no cap but inflation is controlled via sinks"]
+- [规则 2 —— 例如 "Premium currency cannot be converted back to real money"]
+- [规则 3]
 
 ---
 
@@ -32,10 +32,10 @@ What player behaviors does it incentivize?]
 
 | Source | Currency | Amount | Frequency | Conditions |
 | ---- | ---- | ---- | ---- | ---- |
-| [Quest completion] | Gold | [50-200] | [per quest] | [Scales with quest difficulty] |
-| [Enemy drops] | Gold | [1-10] | [per kill] | [Modified by luck stat] |
-| [Daily login] | Gems | [5] | [daily] | [Streak bonus: +1 per consecutive day] |
-| [Achievement] | XP | [100-500] | [one-time] | [Per achievement tier] |
+| [Quest completion] | Gold | [50-200] | [per quest] | [随任务难度缩放] |
+| [Enemy drops] | Gold | [1-10] | [per kill] | [受幸运属性修正] |
+| [Daily login] | Gems | [5] | [daily] | [连续登录奖励：每连续一天 +1] |
+| [Achievement] | XP | [100-500] | [one-time] | [按成就等级] |
 
 ---
 
@@ -43,10 +43,10 @@ What player behaviors does it incentivize?]
 
 | Sink | Currency | Cost | Frequency | Purpose |
 | ---- | ---- | ---- | ---- | ---- |
-| [Equipment purchase] | Gold | [100-5000] | [as needed] | [Power progression] |
-| [Repair costs] | Gold | [10-100] | [per death] | [Death penalty, gold drain] |
-| [Cosmetic shop] | Gems | [50-500] | [optional] | [Vanity, premium sink] |
-| [Respec] | Gold | [1000] | [rare] | [Build experimentation tax] |
+| [Equipment purchase] | Gold | [100-5000] | [as needed] | [战力成长] |
+| [Repair costs] | Gold | [10-100] | [per death] | [死亡惩罚，金币消耗] |
+| [Cosmetic shop] | Gems | [50-500] | [optional] | [外观，付费消耗点] |
+| [Respec] | Gold | [1000] | [rare] | [构筑试验成本] |
 
 ---
 
@@ -54,11 +54,11 @@ What player behaviors does it incentivize?]
 
 | Metric | Target | Rationale |
 | ---- | ---- | ---- |
-| Time to first meaningful purchase | [X minutes] | [Player should feel spending power early] |
-| Hourly gold earn rate (mid-game) | [X gold/hr] | [Based on session length and purchase cadence] |
-| Days to max level (F2P) | [X days] | [Enough to retain, not so long it frustrates] |
-| Sink-to-source ratio | [0.7-0.9] | [Slight surplus keeps players feeling wealthy] |
-| Premium currency F2P earn rate | [X/week] | [Enough to buy something monthly, not everything] |
+| Time to first meaningful purchase | [X minutes] | [玩家应尽早感受到消费能力] |
+| Hourly gold earn rate (mid-game) | [X gold/hr] | [基于单次游玩时长与购买节奏] |
+| Days to max level (F2P) | [X days] | [足以维持留存，又不至于漫长到令人沮丧] |
+| Sink-to-source ratio | [0.7-0.9] | [略有盈余，让玩家感觉富有] |
+| Premium currency F2P earn rate | [X/week] | [每月足以买点东西，但买不全] |
 
 ---
 
@@ -84,13 +84,13 @@ What player behaviors does it incentivize?]
 ### [Drop Source Name]
 | Item | Rarity | Drop Rate | Pity Timer | Notes |
 | ---- | ---- | ---- | ---- | ---- |
-| [Common item] | Common | [60%] | [N/A] | [Always useful, never feels bad] |
-| [Uncommon item] | Uncommon | [25%] | [N/A] | [Noticeable upgrade] |
-| [Rare item] | Rare | [12%] | [10 drops] | [Exciting, build-defining] |
-| [Legendary item] | Legendary | [3%] | [30 drops] | [Game-changing, celebration moment] |
+| [Common item] | Common | [60%] | [N/A] | [始终有用，不会让人失望] |
+| [Uncommon item] | Uncommon | [25%] | [N/A] | [可感知的提升] |
+| [Rare item] | Rare | [12%] | [10 drops] | [令人兴奋，可定义构筑] |
+| [Legendary item] | Legendary | [3%] | [30 drops] | [改变玩法，值得庆祝的时刻] |
 
 ### Pity System
-[Describe how the pity system works to prevent extreme bad luck streaks.]
+[描述保底系统如何运作，以避免极端连续的坏运气。]
 
 ---
 
@@ -98,28 +98,28 @@ What player behaviors does it incentivize?]
 
 | Metric | Healthy Range | Warning Threshold | Action if Breached |
 | ---- | ---- | ---- | ---- |
-| Average player gold | [X-Y at level Z] | [>Y or <X] | [Adjust faucets/sinks] |
-| Gold Gini coefficient | [<0.4] | [>0.5] | [Wealth too concentrated] |
-| % players hitting currency cap | [<5%] | [>10%] | [Raise cap or add sinks] |
-| Premium conversion rate | [2-5%] | [<1% or >10%] | [Rebalance F2P earn rate] |
-| Average time between purchases | [X minutes] | [>Y minutes] | [Nothing worth buying] |
+| Average player gold | [X-Y at level Z] | [>Y or <X] | [调整产出/消耗] |
+| Gold Gini coefficient | [<0.4] | [>0.5] | [财富过于集中] |
+| % players hitting currency cap | [<5%] | [>10%] | [提高上限或增加消耗点] |
+| Premium conversion rate | [2-5%] | [<1% or >10%] | [重新平衡 F2P 获取速度] |
+| Average time between purchases | [X minutes] | [>Y minutes] | [没有值得购买的东西] |
 
 ---
 
 ## Ethical Guardrails
 
-- [No pay-to-win: premium currency cannot buy gameplay power advantages]
-- [Pity timers on all random drops: guaranteed outcome within X attempts]
-- [Transparent drop rates displayed to players]
-- [Spending limits for minor accounts]
-- [No artificial scarcity pressure (FOMO timers) on essential items]
+- [不付费获胜：付费货币不能购买玩法上的战力优势]
+- [所有随机掉落均设保底：在 X 次尝试内必定获得]
+- [向玩家展示透明的掉落概率]
+- [未成年账号消费限额]
+- [核心物品不制造人为稀缺压力（FOMO 倒计时）]
 
 ---
 
 ## Simulation Results
 
-[Include results from economy simulations if available: player wealth
-distribution over time, sink effectiveness, inflation rate, etc.]
+[如有经济模拟结果，请附上：玩家财富随时间的分布、
+消耗点有效性、通胀率等。]
 
 ---
 

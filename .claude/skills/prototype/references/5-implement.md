@@ -1,14 +1,14 @@
-# /prototype — Phase 5: Implement
+# /prototype — Phase 5: 实现
 
-> Part of `/prototype`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> `/prototype` 的一部分。`SKILL.md` 规定了何时阅读本文件；它已解析的设置以及
+> 其后续标题下的规则在这里同样适用。
 
-## Phase 5: Implement
+## Phase 5: 实现
 
-Ask: "May I create the prototype directory at `prototypes/[concept-name]-concept/`
-and begin implementation?"
+询问：“我可以创建位于 `prototypes/[concept-name]-concept/` 的原型目录
+并开始实现吗？”
 
-If yes, create the directory. Every file must begin with:
+如果可以，创建目录。每个文件都必须以以下内容开头：
 
 ```
 [comment] PROTOTYPE - NOT FOR PRODUCTION
@@ -16,81 +16,70 @@ If yes, create the directory. Every file must begin with:
 [comment] Date: [Current date]
 ```
 
-Write `[comment]` in each file's own comment syntax — `#` in GDScript (`.gd`) and
-Python, `//` in C#, C++ and JavaScript, `--` in Lua, `<!-- … -->` in HTML and
-Markdown. A header in another language's syntax is a parse error, not a label.
-Files that cannot hold a comment (JSON, engine-generated scene and project
-files) are exempt.
+用每个文件自身的注释语法写入 `[comment]`——GDScript（`.gd`）和
+Python 用 `#`，C#、C++ 和 JavaScript 用 `//`，Lua 用 `--`，HTML 和
+Markdown 用 `<!-- … -->`。用其他语言的语法写头部会导致解析错误，而不是标签。
+无法包含注释的文件（JSON、引擎生成的场景和项目文件）不受此限制。
 
-Standards are intentionally relaxed:
+标准有意放宽：
 
-- Hardcode values freely
-- Use placeholder assets (colored rectangles, debug shapes)
-- Skip error handling entirely
-- Use the simplest approach that works
-- Copy code rather than importing from production
-- No architecture, no patterns, no abstractions
+- 随意硬编码数值
+- 使用占位资源（彩色矩形、调试形状）
+- 完全跳过错误处理
+- 使用能起作用的最简单做法
+- 复制代码，而不是从生产代码导入
+- 不要架构、不要模式、不要抽象
 
-**Do not add polish.** No menus, no game over screens, no music, no tutorial text
-unless the tutorial IS the mechanic being tested. Every addition beyond the
-hypothesis is waste.
+**不要添加打磨。** 不要菜单、不要游戏结束界面、不要音乐、不要教程文本，
+除非教程本身就是正在测试的机制。超出假设的每一处添加都是浪费。
 
-**Playtesting tip:** If you have access to anyone who hasn't seen the game —
-friends, family, strangers online — watching them play without explanation gives
-far better signal than testing it yourself. Watch silently; don't guide them.
-Confusion is data. Ask one question after: "What was confusing?" Not "Did you
-like it?"
+**试玩测试提示：** 如果你能接触到任何没见过这款游戏的人——朋友、家人、网上的陌生人
+——看着他们无解释地游玩，会比自己测试提供好得多的信号。安静观察；不要引导他们。
+困惑就是数据。结束后问一个问题：“哪里让你困惑？”而不是“你喜欢吗？”
 
-**No external testers available?** Use rotation: if you built system A, you're a
-naive tester for system B. In a two-person team this works well. Solo developer?
-Step away for 2-3 days before playing fresh — you won't have perfect first-impression
-signal, but you'll surface the worst blockers. Another option: play your own
-prototype as a speedrun (force yourself through it in 5 minutes without stopping
-to fix things) — the friction you feel is what strangers will hit.
+**没有外部测试者？** 使用轮换：如果你构建了系统 A，你就能作为系统 B 的
+天真测试者。在两人团队中这效果很好。独自开发者？离开 2-3 天再回来重新玩——
+你不会有完美的第一印象信号，但能暴露出最糟糕的阻塞项。另一个办法：把自己的原型
+当作速通来玩（强迫自己在 5 分钟内不停下来修东西地玩完）——你感受到的摩擦就是陌生人
+会遇到的摩擦。
 
-**Want more granular UX data?** Ask the tester to **think aloud** as they play —
-narrate their thoughts in real time: "I'm pressing space... nothing happened... is
-that the jump key?" This surfaces confusion the moment it happens rather than
-waiting for a post-play debrief. Best for UI/UX and onboarding clarity. Silent
-observation is still better for testing raw feel; think-aloud changes how people
-play slightly but gives much richer data about why they're confused.
+**想要更细粒度的 UX 数据？** 请测试者在游玩时**出声思考**——
+实时叙述他们的想法：“我在按空格……什么都没发生……那是跳跃键吗？” 这能在困惑发生的
+当下就暴露出来，而不必等到游玩后的复盘。最适合 UI/UX 和上手引导清晰度。测试原始
+手感时，安静观察仍然更好；出声思考会稍微改变人们的玩法，但能提供关于他们为何困惑
+的更丰富数据。
 
-**HTML prototype?** itch.io, Reddit (r/playmygame), and Discord (GMTK, Brackeys)
-let you reach strangers today at zero cost — see the distribution options in the
-HTML path section above.
+**HTML 原型？** itch.io、Reddit（r/playmygame）和 Discord（GMTK、Brackeys）
+让你今天就能零成本触达陌生人——见上面 HTML 路径部分的分发选项。
 
-**Testing AI, NPC, or complex system behavior before writing the code?** Use the
-**Wizard of Oz** technique: one person plays normally while a second person secretly
-controls the NPC, enemy, or system behavior in real time — making the decisions a
-human would make, not an algorithm. The player believes it's automated. This lets
-you validate whether your AI design *feels right* before writing a single line of
-pathfinding or decision tree code. When you observe what responses the human
-controller naturally produces, you learn exactly what the AI needs to do.
+**在写代码之前测试 AI、NPC 或复杂系统行为？** 使用 **奥兹巫师（Wizard of Oz）**
+技巧：一个人正常游玩，另一个人实时秘密控制 NPC、敌人或系统行为——
+做出人类会做的决策，而不是算法的决策。玩家相信它是自动化的。这让你在写任何一行
+寻路或决策树代码之前，就能验证你的 AI 设计*手感是否正确*。当你观察人类控制者自然
+产生的反应时，你就能确切了解 AI 需要做什么。
 
-### Engine path: multi-turn loop
+### 引擎路径：多轮循环
 
-After writing the initial code:
+写完初始代码后：
 
-> "The prototype files are written. Run the project in your engine now.
-> If there are errors, paste them here and I'll fix them. If it runs,
-> describe what you see and whether it feels like it's answering the question."
+> “原型文件已写好。现在在你的引擎中运行该项目。
+> 如果有错误，粘贴到这里，我来修复。如果能运行，
+> 描述你看到的内容，以及它是否像是在回答那个问题。”
 
-Iterate until the prototype is playable. Each loop:
-1. User runs → reports errors or observations
-2. Agent fixes errors or adjusts the mechanic
-3. Repeat until playable or sunk cost rule triggers
+迭代直到原型可玩。每一轮循环：
+1. 用户运行 → 报告错误或观察
+2. agent 修复错误或调整机制
+3. 重复直到可玩，或沉没成本规则触发
 
-### HTML path: single output
+### HTML 路径：单一产出
 
-Write a single `prototype.html` to `prototypes/[concept-name]-concept/`. Include
-all styles, logic, and assets inline. The file must be openable by double-clicking
-with no server required.
+把单个 `prototype.html` 写入 `prototypes/[concept-name]-concept/`。内联包含
+所有样式、逻辑和资源。文件必须能双击打开，无需服务器。
 
-### Paper path: document + log
+### 纸面路径：文档 + 记录
 
-Write `prototypes/[concept-name]-concept/rules.md` (the game rules) and
-`prototypes/[concept-name]-concept/play-log.md` (a simulated session walking
-through one complete play cycle step by step with dice rolls, decisions, and
-outcomes narrated).
+编写 `prototypes/[concept-name]-concept/rules.md`（游戏规则）和
+`prototypes/[concept-name]-concept/play-log.md`（一次模拟会话，逐步走完一个
+完整游玩循环，并叙述掷骰、决策和结果）。
 
 ---

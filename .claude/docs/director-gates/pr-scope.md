@@ -1,25 +1,24 @@
-> Gate definition. The spawning skill passes this file's path to the director agent; the AGENT reads it — the parent session should not.
+> 质量闸门定义。发起调用的技能会把本文件路径传给总监代理；由该 AGENT 读取——父会话不应读取。
 
-# PR-SCOPE — Scope and Timeline Validation
+# PR-SCOPE — 范围与时间线校验
 
-Agent: `producer` | Model tier: Opus | Domain: Scope, timeline, dependencies, production risk
+Agent：`producer` | 模型层级：session（继承） | 领域：范围、时间线、依赖、制作风险
 
-**Trigger**: After scope tiers are defined (brainstorm Phase 6, map-systems Phase
-4, or any workflow that produces an MVP definition and timeline estimate)
+**触发时机**：范围层级定义完成后（头脑风暴 Phase 6、map-systems Phase
+4，或任何产出 MVP 定义与时间线估算的工作流）
 
-**Context to pass**:
-- Full vision scope description
-- MVP definition
-- Timeline estimate
-- Team size (solo / small team / etc.)
-- Scope tiers (what ships if time runs out)
+**需传入的上下文**：
+- 完整愿景范围描述
+- MVP 定义
+- 时间线估算
+- 团队规模（单人 / 小团队 / 等）
+- 范围层级（时间不够时交付什么）
 
-**Prompt**:
-> "Review this scope estimate. Is the MVP achievable in the stated timeline for
-> the stated team size? Are the scope tiers correctly ordered by risk — does each
-> tier deliver a shippable product if work stops there? What is the most likely
-> cut point under time pressure, and is it a graceful fallback or a broken product?
-> Return REALISTIC (scope matches capacity), OPTIMISTIC [specific adjustments
-> recommended], or UNREALISTIC [blockers — timeline or MVP must be revised]."
+**提示词**：
+> "审查这份范围估算。在既定团队规模下，MVP 能否在既定时间线内达成？范围层级是否
+> 已按风险正确排序——若工作停在那里，每一层级是否都能交付可发布的产品？在时间
+> 压力下最可能削减到哪一点，那是一个体面的兜底方案还是一个残缺的产品？返回
+> REALISTIC（范围匹配产能）、OPTIMISTIC [建议的具体调整]，或 UNREALISTIC
+> [阻塞项——时间线或 MVP 必须修订]。"
 
-**Verdicts**: REALISTIC / OPTIMISTIC / UNREALISTIC
+**结论**：REALISTIC / OPTIMISTIC / UNREALISTIC

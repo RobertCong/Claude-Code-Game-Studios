@@ -1,41 +1,41 @@
-# Phase 2: When the ADR or the manifest changed after the story was written
+# Phase 2: 当 ADR 或清单在故事编写后发生变化
 
-Read only when Phase 2 found a version mismatch.
+仅在 Phase 2 发现版本不匹配时阅读。
 
-## The ADR
+## ADR
 
-The ADR's `version` (from `adr-status.sh`: its Last Verified date, else its Date,
-else `unversioned`) differs from the story's `ADR Version`, or the ADR is
-`unversioned` while the story names a date. Its decision may have changed.
+ADR 的 `version`（来自 `adr-status.sh`：其 Last Verified 日期，否则其 Date，
+否则 `unversioned`）与故事的 `ADR Version` 不同，或 ADR 为
+`unversioned` 而故事指定了日期。其决策可能已经改变。
 
-Ask: "Story was written against ADR v[story date]. The ADR is now v[current].
-How do you want to go on?" Options:
+询问：“Story was written against ADR v[story date]. The ADR is now v[current].
+How do you want to go on?” 选项：
 
-- **Re-read the changed ADR and refresh the story (Recommended).** Read the ADR's
-  Decision, Engine Compatibility and ADR Dependencies sections with
-  `bash .claude/scripts/md-section.sh extract <adr> "Decision"` and the same for
-  the other two. Then edit the story: `ADR Version` becomes the ADR's `version`
-  (never today's date, or the next run mismatches again), and the ADR Decision
-  Summary and `## Implementation Notes` are replaced with the guidance you read.
-  The programmer's brief carries the new guidance, never the old summary.
-- **Implement from the story's summary — I accept the drift.** The brief carries the
-  summary and tells the agent it predates the current ADR. Note it under Deviations.
-- **Stop — I want to review the ADR first.** No agent runs.
+- **Re-read the changed ADR and refresh the story (Recommended).** 使用
+  `bash .claude/scripts/md-section.sh extract <adr> "Decision"` 读取 ADR 的
+  Decision、Engine Compatibility 和 ADR Dependencies 章节，另外两个同样处理。
+  然后编辑故事：`ADR Version` 变为 ADR 的 `version`
+  （绝不是今天的日期，否则下次运行又会不匹配），并且 ADR Decision
+  Summary 和 `## Implementation Notes` 会被替换为你读到的指导。
+  程序员的简报携带新指导，绝不携带旧总结。
+- **Implement from the story's summary — I accept the drift.** 简报携带
+  总结，并告诉 agent 它早于当前 ADR。在 Deviations 下注明。
+- **Stop — I want to review the ADR first.** 不运行 agent。
 
-## The control manifest
+## 控制清单
 
-The story's `Manifest Version` differs from the manifest's. New rules may apply.
+故事的 `Manifest Version` 与清单的不同。新规则可能适用。
 
-Ask: "Story was written against manifest v[story date]. The current manifest is
-v[current]. How do you want to go on?" Options:
+询问：“Story was written against manifest v[story date]. The current manifest is
+v[current]. How do you want to go on?” 选项：
 
 - **Update the story's manifest version and use the current rules (Recommended).**
-  Set the story's `Manifest Version` to the current date, then read the layer's
-  rules for the brief.
-- **Use the old rules — I accept the risk.** Set `Manifest Version` to the current
-  date and add `Manifest-Note: Proceeded with old manifest rules on [date] —
-  non-compliance risk accepted.` to the story header. Note it under Deviations;
-  `/story-done` carries the note into its deviations.
-- **Stop — I want to review the manifest first.** No agent runs.
+  把故事的 `Manifest Version` 设为当前日期，然后阅读该层的
+  规则以供简报使用。
+- **Use the old rules — I accept the risk.** 把 `Manifest Version` 设为当前
+  日期，并在故事头部添加 `Manifest-Note: Proceeded with old manifest rules on [date] —
+  non-compliance risk accepted.`。在 Deviations 下注明；
+  `/story-done` 会把该笔记带入其偏离项。
+- **Stop — I want to review the manifest first.** 不运行 agent。
 
-Each option names the story edit it makes, so choosing it is the ask.
+每个选项都点明它对故事所做的编辑，因此选择它本身就是询问。

@@ -1,32 +1,28 @@
-# /design-system — Phase 3: Create File Skeleton
+# /design-system — Phase 3: 创建文件骨架
 
-> Part of `/design-system`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> 属于 `/design-system` 的一部分。`SKILL.md` 指定何时读取本文件；它已解析的设置
+> 以及其后续标题下的规则在此处仍然适用。
 
-## 3. Create File Skeleton
+## 3. 创建文件骨架
 
-**In this file:**
+**本文件包含：**
 
-- Which sections to scaffold at the resolved tier
-- The GDD skeleton
-- Writing the file, then the session state update
+- 在解析出的层级下应搭建哪些章节
+- GDD 骨架
+- 写入文件，然后更新会话状态
 
-Once the user confirms, **immediately** create the GDD file with empty section
-headers. This ensures incremental writes have a target.
+一旦用户确认，**立即**创建带空章节标题的 GDD 文件。这确保增量写入有目标可循。
 
-**Scaffold only the sections required at the resolved tier** (§1): at
-`standard`, omit Player Fantasy and Tuning Knobs (and Formulas only when the
-system defines no numeric rule — see §1; the category is a hint, not the test);
-at `full`, scaffold all 8.
-**Only the sections §1 named as omitted are skipped** — do not leave empty
-`[To be designed]` placeholders for those. Every other section in the template
-is scaffolded with its placeholder, including the ones §4 has not decided yet.
-This sentence governs the three tier omissions above (Player Fantasy, Tuning
-Knobs, and Formulas when no numeric rule exists) and nothing else: it is not a
-licence to strip a section because it looks optional, and §4 cannot fill a
-section §3 never created.
+**只搭建解析出的层级所要求的章节**（§1）：在 `standard` 下，省略 Player Fantasy
+和 Tuning Knobs（仅当系统不定义数值规则时省略 Formulas —— 见 §1；类别只是提示，
+不是判断依据）；在 `full` 下，搭建全部 8 个。
+**只跳过 §1 点名要省略的章节** —— 不要为这些章节留下空的 `[To be designed]`
+占位符。模板中的其他每个章节都用其占位符搭建，包括 §4 尚未决定的章节。
+这句话只管辖上述三个层级省略项（Player Fantasy、Tuning Knobs，以及无数值规则时的
+Formulas），仅此而已：它不是因为某个章节看起来可选就删掉它的许可，而 §4 也无法填写
+§3 从未创建的章节。
 
-Use the template structure from `.claude/docs/templates/game-design-document.md`:
+使用 `.claude/docs/templates/game-design-document.md` 中的模板结构：
 
 ```markdown
 # [System Name]
@@ -106,18 +102,18 @@ Use the template structure from `.claude/docs/templates/game-design-document.md`
 [To be designed]
 ```
 
-Ask: "May I create the skeleton file at `design/gdd/[system-name].md`?"
+询问："我可以在 `design/gdd/[system-name].md` 创建骨架文件吗？"
 
-If the user declines: Stop with the following message:
-> "Verdict: **BLOCKED** — skeleton creation declined. The design session cannot proceed without the skeleton file, as all subsequent phases use it as the base. Re-run `/design-system [system]` when ready to create the file."
-Do not proceed to Section A.
+如果用户拒绝：以下列消息停止：
+> "结论：**BLOCKED** —— 拒绝创建骨架文件。没有骨架文件，设计会话无法继续，因为所有后续阶段都以它为基准。准备好创建文件时，重新运行 `/design-system [system]`。"
+不要进入 Section A。
 
-After writing, update `production/session-state/active.md`:
-- Use Glob to check if the file exists.
-- If it **does not exist**: use the **Write** tool to create it. Never attempt Edit on a file that may not exist.
-- If it **already exists**: use the **Edit** tool to update the relevant fields.
+写入之后，更新 `production/session-state/active.md`：
+- 使用 Glob 检查文件是否存在。
+- 如果它**不存在**：使用 **Write** 工具创建它。绝不要对可能不存在的文件尝试 Edit。
+- 如果它**已存在**：使用 **Edit** 工具更新相关字段。
 
-File content:
+文件内容：
 - Task: Designing [system-name] GDD
 - Current section: Starting (skeleton created)
 - File: design/gdd/[system-name].md

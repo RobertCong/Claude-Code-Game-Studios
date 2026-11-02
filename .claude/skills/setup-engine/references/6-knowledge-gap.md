@@ -1,38 +1,39 @@
-# /setup-engine — Section 6: Determine Knowledge Gap
+# /setup-engine — 第 6 节：确定知识缺口
 
-> Part of `/setup-engine`. `SKILL.md` names when to read this file; the settings it
-> resolved and the rules under its later headings still apply here.
+> 属于 `/setup-engine` 的一部分。`SKILL.md` 指明何时读取本文件；它解析出的
+> 设置及其后续标题下的规则在此仍然适用。
 
-## 6. Determine Knowledge Gap
+## 6. 确定知识缺口
 
-Check whether the engine version is likely beyond the LLM's training data.
+检查引擎版本是否可能超出 LLM 的训练数据。
 
-**Known approximate coverage** — the same figures the shipped
-`docs/engine-reference/*/VERSION.md` files record:
-- LLM knowledge cutoff: **May 2025**
-- Godot: training data likely covers up to ~4.3
-- Unity: training data likely covers up to ~2022 LTS (2022.3)
-- Unreal: training data likely covers up to ~5.3
+**已知的大致覆盖范围** — 与随附的
+`docs/engine-reference/*/VERSION.md` 文件记录的相同数字：
+- LLM 知识截止时间：**2025 年 5 月**
+- Godot：训练数据可能覆盖到 ~4.3
+- Unity：训练数据可能覆盖到 ~2022 LTS（2022.3）
+- Unreal：训练数据可能覆盖到 ~5.3
 
-> **This table goes stale silently, and a stale table fails in the dangerous
-> direction only if it is too *new*.** A cutoff left unchanged for a year after
-> it stopped being true over-classifies risk — safe, but every project then pays
-> for full reference docs it may not have needed.
-> The opposite error is the harmful one: a cutoff claimed *later* than the model's
-> actual one marks post-cutoff versions LOW RISK and suppresses the reference
-> docs that exist to stop invented APIs.
+> **这个表会悄无声息地过时，而一个过时的表只会在它太*新*时
+> 向危险的方向失败。** 截止时间在不再成立之后若一年未改，会过度归类风险 —
+> 这是安全的，但每个项目随后都要为可能并不需要的完整参考资料
+> 付出代价。
+> 相反的错误才是有害的：声称的截止时间*晚于*模型
+> 实际的截止时间，会把截止后的版本标为低风险（LOW RISK），并抑制那些
+> 本用于阻止虚构 API 的参考资料。
 >
-> **If the model running this skill states an earlier training cutoff than the
-> one above, do not trust the table.** Say so, and treat the engine version as
-> `HIGH RISK` regardless of the comparison — a cutoff the model does not have is
-> not a cutoff that was met.
+> **如果运行此技能的模型声称的训练截止时间早于上述
+> 截止时间，就不要相信这个表。** 明确说明这一点，并且无论
+> 比较结果如何，都将引擎版本视为
+> `HIGH RISK` — 模型不具备的截止时间
+> 不算已满足的截止时间。
 
-Compare the user's chosen version against these baselines:
+将用户选择的版本与这些基线比较：
 
-- **Within training data** → `LOW RISK` — reference docs optional but recommended
-- **Near the edge** → `MEDIUM RISK` — reference docs recommended
-- **Beyond training data** → `HIGH RISK` — reference docs required
+- **在训练数据之内** → `LOW RISK` — 参考资料可选但建议保留
+- **接近边界** → `MEDIUM RISK` — 建议保留参考资料
+- **超出训练数据** → `HIGH RISK` — 必须保留参考资料
 
-Inform the user which category they're in and why.
+告知用户他们属于哪一类以及原因。
 
 ---

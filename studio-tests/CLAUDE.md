@@ -1,31 +1,30 @@
-# Studio Tests — Claude Instructions
+# Studio Tests —— Claude 指令
 
-This folder is the quality assurance layer for the Claude Code Game Studios skill/agent
-framework. It is self-contained and separate from any game project.
+本文件夹是 Claude Code Game Studios 技能/代理框架的质量保证层。它自成一体，与任何游戏项目分离。
 
-## Key files
+## 关键文件
 
-| File | Purpose |
+| 文件 | 用途 |
 |------|---------|
-| `catalog.yaml` | Master registry for all 74 skills and 49 agents. Contains category, spec path, and last-test tracking fields. Always read this first when running any test command. |
-| `quality-rubric.md` | Category-specific pass/fail metrics. Read the matching `###` section for the skill's category when running `/skill-test category`. |
-| `skills/[category]/[name].md` | Behavioral spec for a skill — 5 or more test cases + protocol compliance assertions. |
-| `agents/[tier]/[name].md` | Behavioral spec for an agent — 5 or more test cases + protocol compliance assertions. |
-| `templates/skill-test-spec.md` | Template for writing new skill spec files. |
-| `templates/agent-test-spec.md` | Template for writing new agent spec files. |
-| `results/` | Written by `/skill-test spec` when results are saved. Not gitignored — add it to `.gitignore` to keep results out of commits. |
+| `catalog.yaml` | 全部 74 个技能与 49 个代理的主注册表。包含类别、规格路径和最近测试跟踪字段。运行任何测试命令时始终先读它。 |
+| `quality-rubric.md` | 按类别划分的通过/失败指标。运行 `/skill-test category` 时，读取该技能类别对应的 `###` 章节。 |
+| `skills/[category]/[name].md` | 技能的行为规格 —— 5 个或更多测试用例 + 协议合规断言。 |
+| `agents/[tier]/[name].md` | 代理的行为规格 —— 5 个或更多测试用例 + 协议合规断言。 |
+| `templates/skill-test-spec.md` | 编写新技能规格文件的模板。 |
+| `templates/agent-test-spec.md` | 编写新代理规格文件的模板。 |
+| `results/` | 保存结果时由 `/skill-test spec` 写入。未被 gitignore —— 若要避免结果进入提交，请把它加入 `.gitignore`。 |
 
-## Path conventions
+## 路径约定
 
-- Skill specs: `studio-tests/skills/[category]/[name].md`
-- Agent specs: `studio-tests/agents/[tier]/[name].md`
-- Catalog: `studio-tests/catalog.yaml`
-- Rubric: `studio-tests/quality-rubric.md`
+- 技能规格：`studio-tests/skills/[category]/[name].md`
+- 代理规格：`studio-tests/agents/[tier]/[name].md`
+- 目录：`studio-tests/catalog.yaml`
+- 评分标准：`studio-tests/quality-rubric.md`
 
-The `spec:` field in `catalog.yaml` is the authoritative path for each skill/agent spec.
-Always read it rather than guessing the path.
+`catalog.yaml` 中的 `spec:` 字段是每个技能/代理规格的权威路径。
+始终读取它，而不是猜测路径。
 
-## Skill categories
+## 技能类别
 
 ```
 gate        → gate-check
@@ -45,7 +44,7 @@ sprint      → sprint-plan, sprint-status, milestone-review, retrospective,
 utility     → all remaining skills
 ```
 
-## Agent tiers
+## 代理层级
 
 ```
 directors      → creative-director, technical-director, producer, art-director
@@ -67,28 +66,28 @@ operations     → devops-engineer, release-manager, live-ops-designer,
 qa             → qa-tester, security-engineer, accessibility-specialist
 ```
 
-A tier is the directory a spec lives in. The rubric category is the agent's
-`category:` in `catalog.yaml` and can differ: `security-engineer` and
-`accessibility-specialist` sit in `qa/` but are rated as `specialist`.
+层级是规格文件所在的目录。评分标准类别是代理在 `catalog.yaml` 中的
+`category:`，两者可以不同：`security-engineer` 和
+`accessibility-specialist` 位于 `qa/` 下，但按 `specialist` 评级。
 
-## Workflow for testing a skill or agent
+## 测试技能或代理的工作流
 
-1. Read `catalog.yaml` to get the `spec:` path and `category:` — from the
-   `skills:` entry for a skill, the `agents:` entry for an agent
-2. Read the skill at `.claude/skills/[name]/SKILL.md` and every file in its
-   `references/` folder, or the agent at `.claude/agents/[name].md`
-3. Read the project `CLAUDE.md` and the files it imports with `@`: every
-   subagent receives them, so a rule stated there (for example a redirect in
-   `coordination-rules.md`) counts as the skill's or agent's own
-4. Read the spec at the `spec:` path
-5. Evaluate the spec's Static Assertions, each case's assertions, and its
-   Protocol Compliance list
-6. Offer to write results to `results/` and update `catalog.yaml`
+1. 读取 `catalog.yaml` 获取 `spec:` 路径和 `category:` —— 技能从
+   `skills:` 条目读取，代理从 `agents:` 条目读取
+2. 读取技能 `.claude/skills/[name]/SKILL.md` 及其 `references/` 文件夹中的
+   每个文件，或读取代理 `.claude/agents/[name].md`
+3. 读取项目 `CLAUDE.md` 及它用 `@` 导入的文件：每个子代理都会收到它们，
+   因此其中陈述的规则（例如 `coordination-rules.md` 中的重定向）算作
+   技能或代理自身的规则
+4. 读取 `spec:` 路径下的规格
+5. 评估规格中的 Static Assertions、每个用例的断言，以及其
+   Protocol Compliance 列表
+6. 提出把结果写入 `results/` 并更新 `catalog.yaml`
 
-## Fixture defaults
+## Fixture 默认值
 
-Every skill spec has a `## Fixture Defaults` section above its cases. A case's
-sandbox project starts from this `project.yaml` block:
+每个技能规格在其用例上方都有一个 `## Fixture Defaults` 章节。用例的
+沙盒项目从下面这个 `project.yaml` 块开始：
 
 ```yaml
 modes:
@@ -97,38 +96,36 @@ modes:
   automation: collaborative
 ```
 
-- A setting the case's Fixture names wins over the block, and an explicit
-  sub-knob (`modes.workflow`, `modes.review_mode`, `qa.level`, …) wins over the
-  `rigor` preset (`.claude/docs/config-resolution.md` § Defaults).
-- A case that says `project.yaml` sets no `modes` keys, or that there is no
-  `project.yaml`, runs without the block: it tests the unset defaults.
-- There is no `project.local.yaml` unless the case names one.
-- A case whose expected behaviour changes with a setting pins that setting in
-  its own Fixture, with the reason — e.g. `modes.workflow: standard` (pinned:
-  unset resolves to minimal, which recommends the next build instead of a
-  sprint).
+- 用例 Fixture 中指定的设置优先于该块，显式的子开关（`modes.workflow`、
+  `modes.review_mode`、`qa.level` 等）优先于 `rigor` 预设
+  （`.claude/docs/config-resolution.md` § Defaults）。
+- 若用例声明 `project.yaml` 未设置任何 `modes` 键，或不存在
+  `project.yaml`，则运行时不带该块：它测试的是未设置的默认值。
+- 除非用例点名，否则不存在 `project.local.yaml`。
+- 若用例的预期行为会随某个设置改变，它要在自己的 Fixture 中固定该设置
+  并说明原因 —— 例如 `modes.workflow: standard`（固定原因：
+  未设置时解析为 minimal，而 minimal 推荐下一次构建而不是冲刺）。
 
-The block is pinned so that a change to the framework's defaults cannot
-silently change what a case tests. A spec may set a different default in its
-own section when most of its cases need one.
+固定该块是为了让框架默认值的变化不会悄悄改变用例所测试的内容。如果
+一个规格的大多数用例都需要不同的默认值，它可以在自己的章节中设置。
 
-## Workflow for improving a skill
+## 改进技能的工作流
 
-Use `/skill-improve [name]`. It handles the full loop:
-test → diagnose → propose fix → rewrite → retest → keep or revert.
+使用 `/skill-improve [name]`。它处理完整循环：
+测试 → 诊断 → 提出修复 → 重写 → 重新测试 → 保留或回滚。
 
-## Spec validity note
+## 规格有效性说明
 
-Specs in this folder assert the **correct** behavior, not whatever a skill or agent
-does today. A failing assertion means the skill or agent is wrong until shown
-otherwise: fix it and re-run, and never weaken an assertion just so it passes.
-Specs can be wrong too — when one asserts behavior that is itself incorrect,
-correct the spec toward the right behavior, not toward what the skill currently does.
+本文件夹中的规格断言的是**正确**行为，而不是某个技能或代理今天的实际
+行为。失败断言意味着技能或代理是错的，直到证明并非如此：修复它并重跑，
+绝不要为了让断言通过而削弱它。
+规格也可能出错 —— 当某条断言本身就在断言错误行为时，应按正确行为修正
+规格，而不是按技能当前的行为修正。
 
-## This folder is deletable
+## 此文件夹可删除
 
-Nothing in `.claude/` imports from here, and every other CCGS skill and agent works
-without it — but `/skill-test` and `/skill-improve` read it by path. Without it,
-`/skill-test static` still works, `/skill-test spec` and `/skill-test category`
-stop working, `/skill-test audit` reports that no catalog exists, and
-`/skill-improve` skips its category checks (the table in `README.md` has the detail).
+`.claude/` 中没有任何东西从这里导入，其他所有 CCGS 技能和代理也能在没有
+它的情况下工作 —— 但 `/skill-test` 和 `/skill-improve` 会按路径读取它。
+没有它时：`/skill-test static` 仍然可用，`/skill-test spec` 和
+`/skill-test category` 停止工作，`/skill-test audit` 会报告不存在目录，
+`/skill-improve` 会跳过其类别检查（`README.md` 中的表格有详细说明）。

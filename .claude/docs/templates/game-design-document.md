@@ -1,12 +1,12 @@
 # [System Name]
 
-> Authoring guidance: .claude/docs/templates/guidance/game-design-document-guide.md (load per-section as you author — do not read entirely).
+> Authoring guidance: .claude/docs/templates/guidance/game-design-document-guide.md（撰写时按小节加载——不要整篇通读）。
 
 > **Status**: [In Design | Designed | In Review | Needs Revision | Approved | Implemented]
 > **Author**: [user + agents]
-> **Last Updated**: [today's date]
-> **Last Verified**: [today's date]
-> **Implements Pillar**: [from context]
+> **Last Updated**: [今天的日期]
+> **Last Verified**: [今天的日期]
+> **Implements Pillar**: [来自上下文]
 
 ## Summary
 

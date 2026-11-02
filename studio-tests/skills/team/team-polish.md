@@ -2,336 +2,335 @@
 
 ## Skill Summary
 
-Orchestrates the polish team through a six-phase pipeline: performance assessment
-(performance-analyst, whose report carries the optimisation list with an owner per
-item) → optimization (the list implemented by its owners in the active set —
-engine-programmer for engine-level root causes, tools-programmer for a content
-tool; performance-analyst writes no game code) → visual polish
-(technical-artist, parallel with Phase 2) → audio polish (sound-designer, parallel
-with Phase 2) → hardening (qa-tester) → sign-off (orchestrator collects all results
-and issues READY FOR RELEASE, NOT ASSESSED or NEEDS MORE WORK — NOT ASSESSED when a
-budget is uncommitted or a phase did not run). Phase 0 resolves `review_mode`,
-`automation`, `team.size` and `workflow` and the skill announces the active set before Phase 1
-— the default `individual` spawns performance-analyst + technical-artist only, so
-no programmer is active and the report names the optimisation list as handed to
-`/dev-story`; `small` adds sound-designer, qa-tester and engine-programmer (the full
-pipeline); `studio` keeps that set and adds an adversarial pass. Each agent writes a
-date-stamped report to a named path under `production/polish/` under the bounded
-write exception (no per-write prompt), and the orchestrator states that nothing
-reads `production/polish/` yet. The code, shader, audio and asset changes of
-Phases 2–4 are outside that exception: one ask covers the whole set. Uses
-`AskUserQuestion` at each phase transition. Engine-programmer is spawned
-conditionally only when Phase 1 identifies engine-level root causes.
+通过六阶段流水线编排打磨团队：性能评估
+（performance-analyst，其报告携带优化清单，每一项都有负责人）
+→ 优化（由活动集中的负责人实现该清单 ——
+引擎层面根因交由 engine-programmer，内容工具交由 tools-programmer；
+performance-analyst 不写任何游戏代码）→ 视觉打磨
+（technical-artist，与 Phase 2 并行）→ 音频打磨（sound-designer，与
+Phase 2 并行）→ 加固（qa-tester）→ 签核（编排器收集所有结果，
+并给出 READY FOR RELEASE、NOT ASSESSED 或 NEEDS MORE WORK —— 当
+预算未承诺或某阶段未运行时为 NOT ASSESSED）。Phase 0 解析 `review_mode`、
+`automation`、`team.size` 与 `workflow`，技能在 Phase 1 之前宣布活动集
+—— 默认的 `individual` 仅启动 performance-analyst + technical-artist，因此
+没有程序员活动，报告会将优化清单记为已交接给
+`/dev-story`；`small` 增加 sound-designer、qa-tester 与 engine-programmer（完整
+流水线）；`studio` 保留该集合并增加一轮对抗性检验。每个代理在
+有界写入例外下（无逐次写入提示）向 `production/polish/` 下的指定路径写入
+带日期的报告，编排器说明目前尚无任何东西
+读取 `production/polish/`。Phase 2–4 的代码、着色器、音频与资源变更
+不在此例外内：一次询问覆盖整组。在每个阶段转换处使用
+`AskUserQuestion`。只有当 Phase 1 识别出引擎层面根因时，
+才会条件性启动 engine-programmer。
 
 ---
 
 ## Static Assertions (Structural)
 
-- [ ] Has required frontmatter fields: `name`, `description`, `argument-hint`, `user-invocable`, `allowed-tools`
-- [ ] Has ≥2 phase headings
-- [ ] Contains verdict keywords: READY FOR RELEASE, NOT ASSESSED, NEEDS MORE WORK — and states that NOT ASSESSED ranks above READY FOR RELEASE and below NEEDS MORE WORK
-- [ ] Contains "File Write Protocol" section
-- [ ] File writes are delegated to sub-agents — orchestrator does not write files directly
-- [ ] Names a destination per agent under `production/polish/`: `[area]-report-[date].md` (performance-analyst), `[area]-render-notes-[date].md` (technical-artist), `[area]-engine-fixes-[date].md` (engine-programmer), `[area]-tool-fixes-[date].md` (tools-programmer), `[area]-audio-notes-[date].md` (sound-designer), `[area]-verification-[date].md` (qa-tester)
-- [ ] Sub-agents write those named `production/` paths without a per-write prompt (bounded exception), and must ask for any write outside it; implementation files (code, shaders, audio, assets) are outside it — each agent lists the files it will create or change, and the skill asks once for the set before any is written — one ask for the whole Phase 2–4 set, never one per phase
-- [ ] The `small` and `studio` sets include `engine-programmer`; at `individual` no programmer is active and the report names the optimisation list as handed to `/dev-story`
-- [ ] Defines a phase gate as a decision point the pipeline itself lists, whatever the `automation` mode, and claims no director spawn at phase gates
-- [ ] Has a next-step handoff at the end (references `/release-checklist`, `/sprint-plan update`, `/gate-check`)
-- [ ] Error Recovery Protocol section is present: verify a named artifact is on disk, surface BLOCKED immediately, always produce a partial report, full procedure in `.claude/docs/error-recovery-protocol.md`
-- [ ] `AskUserQuestion` is used at phase transitions before proceeding (`collaborative` mode)
-- [ ] Phase 0 resolves `team.size`, and the skill requires a one-line active-set announcement before Phase 1
-- [ ] Phase 3 (visual polish) and Phase 4 (audio polish) are explicitly run in parallel with Phase 2
-- [ ] Phase 1's report carries the optimisation list with an owner per item; performance-analyst writes no game code in any phase
-- [ ] engine-programmer is conditionally spawned in Phase 2 only when Phase 1 identifies engine-level root causes
-- [ ] Phase 6 sign-off compares metrics against budgets before issuing verdict
-- [ ] Phase 6 lists every remaining issue with its severity, the measured gap where there is one (e.g. "3 ms over budget") and a recommendation
+- [ ] 具备必需的前置元数据（frontmatter）字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 至少包含 2 个 Phase 标题
+- [ ] 包含结论关键词：READY FOR RELEASE、NOT ASSESSED、NEEDS MORE WORK —— 并说明 NOT ASSESSED 排在 READY FOR RELEASE 之上、NEEDS MORE WORK 之下
+- [ ] 包含 "File Write Protocol" 章节
+- [ ] 文件写入委托给子代理 —— 编排器不直接写文件
+- [ ] 为每个代理在 `production/polish/` 下指定目标位置：`[area]-report-[date].md`（performance-analyst）、`[area]-render-notes-[date].md`（technical-artist）、`[area]-engine-fixes-[date].md`（engine-programmer）、`[area]-tool-fixes-[date].md`（tools-programmer）、`[area]-audio-notes-[date].md`（sound-designer）、`[area]-verification-[date].md`（qa-tester）
+- [ ] 子代理无需逐次写入提示即可写入这些指定的 `production/` 路径（有界例外），若写入其外则必须询问；实现文件（代码、着色器、音频、资源）在此例外之外 —— 每个代理列出它将创建或更改的文件，技能在任何文件被写入之前一次性询问整组 —— 对 Phase 2–4 的整组一次询问，绝不逐阶段各问一次
+- [ ] `small` 与 `studio` 集合包含 `engine-programmer`；在 `individual` 下没有程序员活动，报告会将优化清单记为已交接给 `/dev-story`
+- [ ] 将阶段闸门定义为流水线自身列出的决策点，无论 `automation` 模式如何，且不声称总监在阶段闸门处启动
+- [ ] 结尾具备后续步骤交接（引用 `/release-checklist`、`/sprint-plan update`、`/gate-check`）
+- [ ] 存在 Error Recovery Protocol 章节：核实指定产出物在磁盘上、立即呈现 BLOCKED、始终产出部分报告，完整流程见 `.claude/docs/error-recovery-protocol.md`
+- [ ] 在继续之前的阶段转换处使用 `AskUserQuestion`（`collaborative` 模式）
+- [ ] Phase 0 解析 `team.size`，且技能要求在 Phase 1 之前有一行活动集公告
+- [ ] 明确说明 Phase 3（视觉打磨）与 Phase 4（音频打磨）与 Phase 2 并行运行
+- [ ] Phase 1 的报告携带优化清单，每一项都有负责人；performance-analyst 在任何阶段都不写游戏代码
+- [ ] engine-programmer 仅在 Phase 1 识别出引擎层面根因时于 Phase 2 条件性启动
+- [ ] Phase 6 签核在给出结论之前，将指标与预算进行比较
+- [ ] Phase 6 列出每个遗留问题及其严重程度、可测量时测得的差距（例如 "3 ms over budget"）与建议
 
 ---
 
 ## Fixture Defaults
 
-Every case's `project.yaml` sets `modes.rigor: minimal` and
-`modes.automation: collaborative`, with no `project.local.yaml`, unless its own
-Fixture says otherwise. Rules: `studio-tests/CLAUDE.md` §
-Fixture defaults.
+除非某个用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 与
+`modes.automation: collaborative`，且不含 `project.local.yaml`。规则见：`studio-tests/CLAUDE.md` §
+Fixture defaults。
 
 ---
 
 ## Test Cases
 
-### Case 1: Happy Path — Full pipeline completes, READY FOR RELEASE verdict
+### Case 1: 顺利路径 —— 完整流水线完成，结论 READY FOR RELEASE
 
 **Fixture:**
-- Resolved config block: `team.size: small`, `automation: collaborative`
-- Feature exists and is functionally complete (e.g., `combat` system)
-- Performance budgets are defined in `project.yaml` (`performance.target_framerate: 60`, `performance.frame_budget_ms: 16.6`, `performance.draw_call_limit: 2000`, `performance.memory_ceiling_mb: 2048`)
-- No frame budget violations exist before polishing begins
-- No audio events are missing; VFX assets are complete
-- No regressions are introduced by polish changes
+- 已解析配置块：`team.size: small`、`automation: collaborative`
+- 功能存在且功能上完整（例如 `combat` 系统）
+- 性能预算在 `project.yaml` 中定义（`performance.target_framerate: 60`、`performance.frame_budget_ms: 16.6`、`performance.draw_call_limit: 2000`、`performance.memory_ceiling_mb: 2048`）
+- 打磨开始前不存在任何帧预算违规
+- 没有缺失的音频事件；VFX 资源完整
+- 打磨变更未引入任何回归
 
 **Input:** `/team-polish combat`
 
 **Expected behavior:**
-1. Before any spawn, one line announces the active set for `team.size: small` (the full pipeline)
-2. Phase 1: performance-analyst is spawned; profiles the combat system, measures frame budget, checks memory usage; writes `production/polish/combat-report-[date].md` showing all metrics within budget
-3. `AskUserQuestion` presents performance report; user approves before Phases 2, 3, and 4 begin
-4. Phase 2: the report's optimisation list holds only minor rendering items (e.g., draw call batching), owned by technical-artist, so they join its Phase 3 brief; no engine-level root cause was identified, so engine-programmer is not spawned; performance-analyst changes no code
-5. Phases 3 and 4 are launched in parallel alongside Phase 2:
-   - Phase 3: technical-artist reviews VFX for quality, optimizes particle systems, adds screen shake and visual juice; writes `production/polish/combat-render-notes-[date].md`
-   - Phase 4: sound-designer reviews audio events for completeness, checks mix levels, adds ambient audio layers; writes `production/polish/combat-audio-notes-[date].md`
-   - The agents changing shaders, VFX or assets first list the files; one `AskUserQuestion` covers the whole Phase 2–4 set, and nothing is edited before the yes
-6. All three parallel phases complete; `AskUserQuestion` presents results; user approves before Phase 5 begins
-7. Phase 5: qa-tester runs edge case tests, soak tests, stress tests, and regression tests; all pass; writes `production/polish/combat-verification-[date].md`
-8. `AskUserQuestion` presents test results; user approves before Phase 6
-9. Phase 6: orchestrator collects all results; compares before/after performance metrics against budgets; all metrics pass
-10. The report says the `production/polish/` files are a record that nothing in the repo reads yet
-11. Verdict: READY FOR RELEASE
+1. 在任何启动之前，用一行宣布 `team.size: small` 的活动集（完整流水线）
+2. Phase 1：启动 performance-analyst；对 combat 系统做性能剖析，测量帧预算，检查内存使用；写入 `production/polish/combat-report-[date].md`，显示所有指标都在预算内
+3. `AskUserQuestion` 呈现性能报告；用户在 Phase 2、3、4 开始之前批准
+4. Phase 2：报告的优化清单仅包含轻微渲染项（例如绘制调用批处理），由 technical-artist 负责，因此并入其 Phase 3 简报；未识别出引擎层面根因，故不启动 engine-programmer；performance-analyst 不改动任何代码
+5. Phase 3 与 Phase 4 与 Phase 2 同时启动：
+   - Phase 3：technical-artist 审视 VFX 质量，优化粒子系统，添加屏幕震动与视觉表现力；写入 `production/polish/combat-render-notes-[date].md`
+   - Phase 4：sound-designer 审视音频事件的完整性，检查混音电平，添加环境音层；写入 `production/polish/combat-audio-notes-[date].md`
+   - 更改着色器、VFX 或资源的代理首先列出文件；一次 `AskUserQuestion` 覆盖 Phase 2–4 的整组，并且在得到同意之前不编辑任何内容
+6. 三个并行阶段全部完成；`AskUserQuestion` 呈现结果；用户在 Phase 5 开始之前批准
+7. Phase 5：qa-tester 运行边界用例测试、浸泡测试、压力测试与回归测试；全部通过；写入 `production/polish/combat-verification-[date].md`
+8. `AskUserQuestion` 呈现测试结果；用户在 Phase 6 之前批准
+9. Phase 6：编排器收集所有结果；将打磨前后的性能指标与预算进行比较；所有指标均通过
+10. 报告说明 `production/polish/` 下的文件只是一份记录，仓库中尚无任何东西读取它们
+11. 结论：READY FOR RELEASE
 
 **Assertions:**
-- [ ] Active-set line naming `team.size: small` appears before the first agent is spawned
-- [ ] performance-analyst is spawned first in Phase 1 before any other agents
-- [ ] `AskUserQuestion` appears after Phase 1 output and before Phases 2/3/4 launch
-- [ ] Phases 3 and 4 Agent calls are issued at the same time as Phase 2 (not after Phase 2 completes)
-- [ ] engine-programmer is NOT spawned when Phase 1 finds no engine-level root causes
-- [ ] performance-analyst edits no code, shader or asset in any phase
-- [ ] Implementation files of Phases 2–4 are listed by each agent and asked for in one `AskUserQuestion` for the whole set — not once per phase — before any is edited
-- [ ] qa-tester (Phase 5) is not launched until the parallel phases complete and user approves
-- [ ] Each agent writes to its named `production/polish/[area]-…-[date].md` path without a per-write prompt, and the orchestrator confirms the file exists before treating the phase as done
-- [ ] Phase 6 verdict is based on comparison of metrics against defined budgets
-- [ ] Summary report includes: before/after performance metrics, visual polish changes, audio polish changes, test results
-- [ ] Summary states that nothing reads `production/polish/` yet
-- [ ] No files are written by the orchestrator directly
-- [ ] Verdict is READY FOR RELEASE
+- [ ] 指明 `team.size: small` 的活动集行出现在第一个代理启动之前
+- [ ] performance-analyst 在任何其他代理之前于 Phase 1 首先启动
+- [ ] `AskUserQuestion` 出现在 Phase 1 输出之后、Phase 2/3/4 启动之前
+- [ ] Phase 3 与 Phase 4 的 Agent 调用与 Phase 2 同时发起（而非在 Phase 2 完成之后）
+- [ ] 当 Phase 1 未发现引擎层面根因时，不启动 engine-programmer
+- [ ] performance-analyst 在任何阶段都不编辑代码、着色器或资源
+- [ ] Phase 2–4 的实现文件由各代理列出，并在一次覆盖整组的 `AskUserQuestion` 中询问 —— 而非每阶段一次 —— 且在任何编辑之前完成
+- [ ] 并行阶段完成且用户批准之前，不启动 qa-tester（Phase 5）
+- [ ] 每个代理无需逐次写入提示即写入其指定的 `production/polish/[area]-…-[date].md` 路径，且编排器在将该阶段视为完成之前确认文件存在
+- [ ] Phase 6 的结论基于指标与既定预算的比较
+- [ ] 摘要报告包含：打磨前后性能指标、视觉打磨变更、音频打磨变更、测试结果
+- [ ] 摘要说明目前尚无任何东西读取 `production/polish/`
+- [ ] 编排器不直接写入任何文件
+- [ ] 结论为 READY FOR RELEASE
 
 ---
 
-### Case 2: Performance Blocker — Frame budget violation cannot be fully resolved
+### Case 2: 性能阻塞项 —— 帧预算违规无法完全解决
 
 **Fixture:**
-- Resolved config block: `team.size: small`, `automation: collaborative`, `workflow: standard` (pinned: unset resolves to minimal, whose next step adds the issue to the brief's build order instead of `/sprint-plan update`; Case 8 covers that)
-- Feature being polished: `particle-storm` VFX system
-- Phase 1 identifies a frame budget violation: particle-storm costs 12ms on target hardware (budget is 6ms for this system)
-- Phase 1's optimisation list assigns the particle work to technical-artist and an engine-level particle-update hot path to engine-programmer; after both are applied the cost is 9ms — still over the 6ms budget
-- Phase 2 cannot fully resolve the violation without a fundamental design change
+- 已解析配置块：`team.size: small`、`automation: collaborative`、`workflow: standard`（已固定：未设置时解析为 minimal，其后续步骤会把该问题加入简报的构建顺序，而非 `/sprint-plan update`；Case 8 覆盖该情况）
+- 正在打磨的功能：`particle-storm` VFX 系统
+- Phase 1 识别出一项帧预算违规：particle-storm 在目标硬件上耗时 12ms（本系统预算为 6ms）
+- Phase 1 的优化清单将粒子工作分配给 technical-artist，将引擎层面的粒子更新热路径分配给 engine-programmer；两者应用之后耗时为 9ms —— 仍超出 6ms 预算
+- 若不进行根本性设计变更，Phase 2 无法完全解决该违规
 
 **Input:** `/team-polish particle-storm`
 
 **Expected behavior:**
-1. Phase 1: performance-analyst identifies the 12ms frame cost vs. 6ms budget; reports "FRAME BUDGET VIOLATION: particle-storm costs 12ms, budget is 6ms", with an optimisation list naming each item's owner
-2. `AskUserQuestion` presents the violation; user chooses to proceed with optimization attempt
-3. Phase 2: engine-programmer implements the engine-level item and technical-artist the particle items (after the one ask for the set); the re-profile reads 9ms — reduced but still over budget: "Optimization reduced cost to 9ms (was 12ms) — 3ms over budget. No further gains achievable without design changes."
-4. Phases 3 and 4 run in parallel with Phase 2 (visual and audio polish)
-5. Phase 5: qa-tester runs regression and edge case tests; all pass
-6. Phase 6: orchestrator collects results; frame budget violation (9ms vs 6ms budget) remains unresolved
-7. Verdict: NEEDS MORE WORK
-8. Report lists the specific unresolved issue with severity: "particle-storm frame cost (9ms) exceeds budget (6ms) by 3ms — requires design scope reduction or budget renegotiation"
-9. Next Steps: schedule the remaining issue in `/sprint-plan update`; re-run `/team-polish` after fix
+1. Phase 1：performance-analyst 识别出 12ms 帧耗时 vs. 6ms 预算；报告 "FRAME BUDGET VIOLATION: particle-storm costs 12ms, budget is 6ms"，并给出标明每项负责人的优化清单
+2. `AskUserQuestion` 呈现该违规；用户选择继续尝试优化
+3. Phase 2：engine-programmer 实现引擎层面项，technical-artist 实现粒子项（在对整组的一次询问之后）；重新剖析读数为 9ms —— 有所降低但仍超预算："Optimization reduced cost to 9ms (was 12ms) — 3ms over budget. No further gains achievable without design changes."
+4. Phase 3 与 Phase 4 与 Phase 2 并行运行（视觉与音频打磨）
+5. Phase 5：qa-tester 运行回归与边界用例测试；全部通过
+6. Phase 6：编排器收集结果；帧预算违规（9ms vs 6ms 预算）仍未解决
+7. 结论：NEEDS MORE WORK
+8. 报告列出具体的未解决问题及其严重程度："particle-storm frame cost (9ms) exceeds budget (6ms) by 3ms — requires design scope reduction or budget renegotiation"
+9. Next Steps：在 `/sprint-plan update` 中安排遗留问题；修复后重新运行 `/team-polish`
 
 **Assertions:**
-- [ ] Frame budget violation is flagged in Phase 1 with specific numbers (actual vs. budget)
-- [ ] Phase 2 reports the post-optimization metric explicitly (9ms achieved, 3ms still over)
-- [ ] Verdict is NEEDS MORE WORK (not READY FOR RELEASE) when a budget violation remains
-- [ ] The specific unresolved issue is listed by name with the remaining gap quantified
-- [ ] Next Steps references `/sprint-plan update` for scheduling the remaining fix
-- [ ] Phases 3 and 4 still run (polish work is not abandoned due to a Phase 2 partial resolution)
-- [ ] Phase 5 qa-tester still runs (regression testing is independent of the performance outcome)
+- [ ] Phase 1 以具体数字标记帧预算违规（实际值 vs. 预算）
+- [ ] Phase 2 明确报告优化后的指标（达到 9ms，仍超出 3ms）
+- [ ] 当预算违规仍然存在时，结论为 NEEDS MORE WORK（而非 READY FOR RELEASE）
+- [ ] 具体未解决问题按名称列出，并量化剩余差距
+- [ ] Next Steps 引用 `/sprint-plan update` 来安排剩余修复
+- [ ] Phase 3 与 Phase 4 仍然运行（打磨工作不因 Phase 2 的部分解决而放弃）
+- [ ] Phase 5 的 qa-tester 仍然运行（回归测试独立于性能结果）
 
 ---
 
-### Case 3: No Argument — Usage guidance shown
+### Case 3: 无参数 —— 展示用法指引
 
 **Fixture:**
-- Any project state
+- 任意项目状态
 
-**Input:** `/team-polish` (no argument)
+**Input:** `/team-polish`（无参数）
 
 **Expected behavior:**
-1. Skill detects no argument is provided
-2. Outputs usage guidance: e.g., "Usage: `/team-polish [feature or area to polish] [--review full|lean|solo]` — specify the feature or area to polish (e.g., `combat`, `main menu`, `inventory system`, `level-1`)"
-3. Skill exits without spawning any agents
+1. 技能检测到未提供参数
+2. 输出用法指引：例如 "Usage: `/team-polish [feature or area to polish] [--review full|lean|solo]` — specify the feature or area to polish (e.g., `combat`, `main menu`, `inventory system`, `level-1`)"
+3. 技能退出，不启动任何代理
 
 **Assertions:**
-- [ ] Skill does NOT spawn any agents when no argument is provided
-- [ ] Usage message shows the full argument-hint — `/team-polish [feature or area to polish] [--review full|lean|solo]` — and argument examples
-- [ ] Skill does NOT attempt to guess a feature from project files
-- [ ] No `AskUserQuestion` is used — output is direct guidance
+- [ ] 未提供参数时，技能不启动任何代理
+- [ ] 用法消息展示完整 argument-hint —— `/team-polish [feature or area to polish] [--review full|lean|solo]` —— 以及参数示例
+- [ ] 技能不从项目文件中猜测功能
+- [ ] 不使用 `AskUserQuestion` —— 输出为直接指引
 
 ---
 
-### Case 4: Engine-Level Bottleneck — engine-programmer spawned conditionally in Phase 2
+### Case 4: 引擎层面瓶颈 —— engine-programmer 在 Phase 2 条件性启动
 
 **Fixture:**
-- Resolved config block: `team.size: small`, `automation: collaborative`
-- Feature being polished: `open-world` environment streaming
-- Phase 1 identifies a performance bottleneck with a root cause in the rendering pipeline: "draw call overhead is caused by the engine's scene tree traversal in the spatial indexer — this is an engine-level issue, not a game code issue"
-- Performance budgets are defined; the rendering overhead exceeds target frame budget
+- 已解析配置块：`team.size: small`、`automation: collaborative`
+- 正在打磨的功能：`open-world` 环境流式加载
+- Phase 1 识别出一个性能瓶颈，其根因在渲染流水线中："draw call overhead is caused by the engine's scene tree traversal in the spatial indexer — this is an engine-level issue, not a game code issue"
+- 性能预算已定义；渲染开销超出目标帧预算
 
 **Input:** `/team-polish open-world`
 
 **Expected behavior:**
-1. Phase 1: performance-analyst profiles the environment; identifies frame budget violation; root cause analysis points to engine-level rendering pipeline (spatial indexer traversal overhead)
-2. Phase 1 output explicitly classifies the root cause as engine-level
-3. `AskUserQuestion` presents the performance report including the engine-level root cause; user approves before Phase 2
-4. Phase 2: engine-programmer (in the `small` set) is spawned for the engine-level rendering item on the optimisation list, writing `production/polish/open-world-engine-fixes-[date].md`; performance-analyst writes no code
-5. Phases 3 and 4 also run in parallel with Phase 2 (visual and audio polish); engine-programmer lists the engine files it will change along with the other agents' files, and one ask covers the set
-6. engine-programmer addresses the spatial indexer traversal after the yes; provides profiler validation showing the fix reduces overhead
-7. Phase 5: qa-tester runs regression tests including tests for the engine-level change
-8. Phase 6: orchestrator collects all results; if metrics are now within budget, verdict is READY FOR RELEASE; if not, NEEDS MORE WORK
+1. Phase 1：performance-analyst 对场景做性能剖析；识别出帧预算违规；根因分析指向引擎层面渲染流水线（空间索引器遍历开销）
+2. Phase 1 输出明确将根因归类为引擎层面
+3. `AskUserQuestion` 呈现包含引擎层面根因的性能报告；用户在 Phase 2 之前批准
+4. Phase 2：为优化清单上的引擎层面渲染项启动 engine-programmer（属于 `small` 集合），写入 `production/polish/open-world-engine-fixes-[date].md`；performance-analyst 不写代码
+5. Phase 3 与 Phase 4 也与 Phase 2 并行运行（视觉与音频打磨）；engine-programmer 列出它将更改的引擎文件以及其他代理的文件，一次询问覆盖整组
+6. engine-programmer 在得到同意后处理空间索引器遍历；提供剖析器验证，显示该修复降低了开销
+7. Phase 5：qa-tester 运行回归测试，包含针对引擎层面变更的测试
+8. Phase 6：编排器收集所有结果；若指标现已在预算内，结论为 READY FOR RELEASE；否则为 NEEDS MORE WORK
 
 **Assertions:**
-- [ ] engine-programmer is NOT spawned in Phase 2 unless Phase 1 explicitly identifies an engine-level root cause
-- [ ] engine-programmer is spawned in Phase 2 when Phase 1 identifies an engine-level root cause
-- [ ] engine-programmer's Phase 2 Agent call is issued alongside the Phase 3 and 4 calls (not sequentially), and performance-analyst is not re-spawned to change code
-- [ ] engine-programmer edits nothing before the one ask for the Phase 2–4 implementation set is answered yes
-- [ ] Phases 3 and 4 also run in parallel with Phase 2 (not deferred until Phase 2 completes)
-- [ ] engine-programmer's output includes profiler validation of the fix
-- [ ] qa-tester in Phase 5 runs regression tests that cover the engine-level change
-- [ ] Verdict correctly reflects whether all metrics including the engine fix now meet budgets
+- [ ] 除非 Phase 1 明确识别出引擎层面根因，否则 Phase 2 不启动 engine-programmer
+- [ ] 当 Phase 1 识别出引擎层面根因时，Phase 2 会启动 engine-programmer
+- [ ] engine-programmer 的 Phase 2 Agent 调用与 Phase 3、4 的调用同时发起（而非顺序执行），且不重新启动 performance-analyst 去改代码
+- [ ] 在针对 Phase 2–4 实现集的一次询问得到同意之前，engine-programmer 不编辑任何内容
+- [ ] Phase 3 与 Phase 4 也与 Phase 2 并行运行（不推迟到 Phase 2 完成之后）
+- [ ] engine-programmer 的输出包含对该修复的剖析器验证
+- [ ] Phase 5 的 qa-tester 运行覆盖引擎层面变更的回归测试
+- [ ] 结论正确反映包含引擎修复在内的所有指标现在是否满足预算
 
 ---
 
-### Case 5: Regression Found — Polish change broke an existing feature
+### Case 5: 发现回归 —— 打磨变更破坏了既有功能
 
 **Fixture:**
-- Resolved config block: `team.size: small`, `automation: collaborative`, `workflow: standard` (pinned for the same reason as Case 2)
-- Feature being polished: `inventory-ui`
-- Phases 1–4 complete successfully; performance and polish changes are applied
-- Phase 5: qa-tester runs regression tests and finds that a shader optimization applied in Phase 3 broke the item highlight glow effect on hover — an existing feature that was working before the polish pass
+- 已解析配置块：`team.size: small`、`automation: collaborative`、`workflow: standard`（因与 Case 2 相同的原因而固定）
+- 正在打磨的功能：`inventory-ui`
+- Phase 1–4 成功完成；性能与打磨变更已应用
+- Phase 5：qa-tester 运行回归测试，发现 Phase 3 应用的某项着色器优化破坏了悬停时的物品高亮辉光效果 —— 这是打磨轮次之前一直正常工作的既有功能
 
-**Input:** `/team-polish inventory-ui` (Phase 5 scenario)
+**Input:** `/team-polish inventory-ui`（Phase 5 场景）
 
 **Expected behavior:**
-1. Phases 1–4 complete; polish changes include a shader optimization from technical-artist
-2. Phase 5: qa-tester runs regression tests and detects "Item highlight glow on hover no longer renders — regression introduced by shader optimization in Phase 3"
-3. qa-tester writes its findings to `production/polish/inventory-ui-verification-[date].md` (no per-write prompt) and returns the regression as a CONCERNS/BLOCKED line in its return contract
-4. The orchestrator confirms the verification file exists, then at the Phase 5 → Phase 6 transition writes qa-tester's full analysis in conversation — naming the broken behavior and the Phase 3 shader change that caused it — and captures the decision via `AskUserQuestion` with qa-tester's proposals as options
-5. Phase 6: the regression is listed among remaining issues with severity and a recommendation
-6. Verdict: NEEDS MORE WORK
-7. Next Steps: schedule the fix in `/sprint-plan update` and re-run `/team-polish` after fixes
+1. Phase 1–4 完成；打磨变更包含 technical-artist 的着色器优化
+2. Phase 5：qa-tester 运行回归测试并检测到 "Item highlight glow on hover no longer renders — regression introduced by shader optimization in Phase 3"
+3. qa-tester 将发现写入 `production/polish/inventory-ui-verification-[date].md`（无逐次写入提示），并在其返回契约中将该回归作为 CONCERNS/BLOCKED 行返回
+4. 编排器确认验证文件存在，然后在 Phase 5 → Phase 6 的转换处，在对话中写出 qa-tester 的完整分析 —— 点名被破坏的行为与导致它的 Phase 3 着色器变更 —— 并通过 `AskUserQuestion` 以 qa-tester 的建议为选项捕获决策
+5. Phase 6：该回归被列入遗留问题，附严重程度与建议
+6. 结论：NEEDS MORE WORK
+7. Next Steps：在 `/sprint-plan update` 中安排修复，并在修复后重新运行 `/team-polish`
 
 **Assertions:**
-- [ ] Regression is surfaced before Phase 6 sign-off
-- [ ] The specific broken behavior and the responsible change are both named in the report
-- [ ] qa-tester's findings are written to `production/polish/inventory-ui-verification-[date].md` without a separate approval prompt
-- [ ] `AskUserQuestion` at the Phase 5 → 6 transition presents the regression and qa-tester's proposed resolutions as selectable options
-- [ ] Phase 6 lists the regression as a remaining issue with severity
-- [ ] Verdict is NEEDS MORE WORK when a regression is present and unresolved
-- [ ] Next Steps directs the fix to `/sprint-plan update` and a `/team-polish` re-run — no in-session fix is reported as verified
+- [ ] 回归在 Phase 6 签核之前呈现
+- [ ] 报告中同时点名具体被破坏的行为与应负责的变更
+- [ ] qa-tester 的发现写入 `production/polish/inventory-ui-verification-[date].md`，无需单独的批准提示
+- [ ] Phase 5 → 6 转换处的 `AskUserQuestion` 将该回归与 qa-tester 提出的解决方案作为可选项呈现
+- [ ] Phase 6 将该回归列为遗留问题并附严重程度
+- [ ] 当回归存在且未解决时，结论为 NEEDS MORE WORK
+- [ ] Next Steps 将修复指向 `/sprint-plan update` 与一次 `/team-polish` 重新运行 —— 不把会话内修复报告为已验证
 
 ---
 
-### Case 6: No Budgets Committed — NOT ASSESSED, not READY FOR RELEASE
+### Case 6: 未承诺预算 —— NOT ASSESSED，而非 READY FOR RELEASE
 
 **Fixture:**
-- Resolved config block: `team.size: small`, `automation: collaborative`
-- `project.yaml` sets none of `performance.target_framerate`, `performance.frame_budget_ms`, `performance.draw_call_limit` or `performance.memory_ceiling_mb`, and no design doc states a budget for the area
-- Feature being polished: `main-menu`; every phase completes, and qa-tester finds no regressions
+- 已解析配置块：`team.size: small`、`automation: collaborative`
+- `project.yaml` 未设置 `performance.target_framerate`、`performance.frame_budget_ms`、`performance.draw_call_limit` 或 `performance.memory_ceiling_mb` 中的任何一项，且没有设计文档为该领域声明预算
+- 正在打磨的功能：`main-menu`；每个阶段都完成，qa-tester 未发现回归
 
 **Input:** `/team-polish main-menu`
 
 **Expected behavior:**
-1. Phase 1: performance-analyst profiles the menu via `/perf-profile`; each metric is reported as measured but `NOT ASSESSED` — no committed budget — never as within budget or with headroom against a placeholder such as 16.67 ms
-2. Phases 2–5 run normally; nothing is found over budget and there are no regressions
-3. Phase 6: no known problem, but the budget comparison could not run, so the verdict is NOT ASSESSED — not READY FOR RELEASE — and the report names each unset `performance.*` key
-4. Next Steps: commit the budgets in `project.yaml` and re-run `/team-polish`; `/release-checklist` is not offered as the next step
+1. Phase 1：performance-analyst 通过 `/perf-profile` 对菜单做性能剖析；每个指标都报告为已测量但 `NOT ASSESSED` —— 没有承诺预算 —— 绝不说成在预算内，或用 16.67 ms 之类的占位值计算余量
+2. Phase 2–5 正常运行；未发现任何超出预算之处，也没有回归
+3. Phase 6：没有已知问题，但预算比较无法运行，因此结论为 NOT ASSESSED —— 而非 READY FOR RELEASE —— 报告点名每个未设置的 `performance.*` 键
+4. Next Steps：在 `project.yaml` 中承诺预算并重新运行 `/team-polish`；不提议将 `/release-checklist` 作为下一步
 
 **Assertions:**
-- [ ] Verdict is NOT ASSESSED, not READY FOR RELEASE
-- [ ] The report names each unset `performance.*` key as the reason
-- [ ] No metric is described as within budget, and no headroom is computed against a placeholder budget
-- [ ] Next Steps asks for the budgets and a re-run rather than handing off to `/release-checklist`
-- [ ] A regression found in the same run would make the verdict NEEDS MORE WORK instead — the missing budgets do not mask a known problem
+- [ ] 结论为 NOT ASSESSED，而非 READY FOR RELEASE
+- [ ] 报告点名每个未设置的 `performance.*` 键作为原因
+- [ ] 没有任何指标被描述为在预算内，也不针对占位预算计算余量
+- [ ] Next Steps 要求提供预算并重新运行，而非交接给 `/release-checklist`
+- [ ] 同一次运行中若发现回归，则结论会变为 NEEDS MORE WORK —— 缺失预算不会掩盖已知问题
 
 ---
 
-### Case 7: Default `individual` — the optimisation list is handed to `/dev-story`
+### Case 7: 默认 `individual` —— 优化清单交接给 `/dev-story`
 
 **Fixture:**
-- Resolved config block: `team.size: individual`, `automation: collaborative`
-- Budgets committed in `project.yaml` (as in Case 1)
-- Feature being polished: `crafting-menu`; Phase 1 finds a draw-call overrun owned by technical-artist and a script hot path in the crafting logic owned by gameplay-programmer — no engine-level root cause
+- 已解析配置块：`team.size: individual`、`automation: collaborative`
+- 预算已在 `project.yaml` 中承诺（同 Case 1）
+- 正在打磨的功能：`crafting-menu`；Phase 1 发现一项由 technical-artist 负责的绘制调用超限，以及一条由 gameplay-programmer 负责的 crafting 逻辑脚本热路径 —— 无引擎层面根因
 
 **Input:** `/team-polish crafting-menu`
 
 **Expected behavior:**
-1. The active-set line names performance-analyst + technical-artist; the not-spawned line names sound-designer, qa-tester, engine-programmer and tools-programmer
-2. Phase 1: performance-analyst writes `production/polish/crafting-menu-report-[date].md` with the optimisation list, each item naming its owner
-3. Phase 2: no programmer is active, so no agent implements the script item — performance-analyst does not implement it either; the draw-call item joins technical-artist's Phase 3 brief
-4. The report lists the gameplay-programmer item under "Optimisation list handed to `/dev-story`: `production/polish/crafting-menu-report-[date].md`"
-5. Phase 6: audio polish and hardening did not run; if the script hot path keeps a metric over budget the verdict is NEEDS MORE WORK, otherwise NOT ASSESSED
-6. Next Steps: implement the handed-off items with `/dev-story`, then re-run `/team-polish`
+1. 活动集行点名 performance-analyst + technical-artist；未启动行点名 sound-designer、qa-tester、engine-programmer 与 tools-programmer
+2. Phase 1：performance-analyst 写入 `production/polish/crafting-menu-report-[date].md`，附优化清单，每一项都标明负责人
+3. Phase 2：没有程序员活动，因此没有代理实现该脚本项 —— performance-analyst 也不实现它；绘制调用项并入 technical-artist 的 Phase 3 简报
+4. 报告在 "Optimisation list handed to `/dev-story`: `production/polish/crafting-menu-report-[date].md`" 下列出 gameplay-programmer 项
+5. Phase 6：音频打磨与加固未运行；若该脚本热路径使某项指标仍超预算，结论为 NEEDS MORE WORK，否则为 NOT ASSESSED
+6. Next Steps：用 `/dev-story` 实现交接的项，然后重新运行 `/team-polish`
 
 **Assertions:**
-- [ ] No agent changes code for the gameplay-programmer item in this run, and performance-analyst changes nothing
-- [ ] The report names the optimisation list as handed to `/dev-story`, with the path and each item's owner
-- [ ] Verdict is never READY FOR RELEASE at `individual`
-- [ ] An over-budget metric the handed-off item targets makes the verdict NEEDS MORE WORK
+- [ ] 本次运行中没有代理为 gameplay-programmer 项改代码，performance-analyst 也不改任何东西
+- [ ] 报告将优化清单记作已交接给 `/dev-story`，含路径与每项的负责人
+- [ ] 在 `individual` 下结论绝不为 READY FOR RELEASE
+- [ ] 交接项所针对的超预算指标会使结论为 NEEDS MORE WORK
 
 ---
 
-### Case 8: Workflow Minimal — NEEDS MORE WORK goes to the brief's build order
+### Case 8: Workflow Minimal —— NEEDS MORE WORK 归入简报的构建顺序
 
 **Fixture:**
-- Resolved config block: `workflow: minimal` (from `modes.rigor: minimal`), `team.size: small` (pinned so the full pipeline runs), `automation: collaborative`
-- `design/game-brief.md` exists with a build order; no `production/sprints/` folder
-- Budgets committed in `project.yaml` (as in Case 1)
-- Feature being polished: `particle-storm`, set up as in Case 2: after optimisation the cost is 9ms against a 6ms budget
+- 已解析配置块：`workflow: minimal`（来自 `modes.rigor: minimal`）、`team.size: small`（已固定，以便完整流水线运行）、`automation: collaborative`
+- `design/game-brief.md` 存在并含构建顺序；没有 `production/sprints/` 文件夹
+- 预算已在 `project.yaml` 中承诺（同 Case 1）
+- 正在打磨的功能：`particle-storm`，设置与 Case 2 相同：优化后耗时为 9ms，预算为 6ms
 
 **Input:** `/team-polish particle-storm`
 
 **Expected behavior:**
-1. Phase 0 resolves `workflow` along with `review_mode`, `automation` and `team.size`
-2. The run proceeds as in Case 2 to Phase 6 and the verdict NEEDS MORE WORK, with the 3ms gap listed
-3. Next Steps: add the remaining issue to the brief's build order, because `minimal` has no sprints, then re-run `/team-polish` after the fix
+1. Phase 0 解析 `workflow` 以及 `review_mode`、`automation` 与 `team.size`
+2. 运行按 Case 2 的方式推进至 Phase 6，结论为 NEEDS MORE WORK，并列出 3ms 差距
+3. Next Steps：将遗留问题加入简报的构建顺序，因为 `minimal` 没有冲刺，然后在修复后重新运行 `/team-polish`
 
 **Assertions:**
-- [ ] `workflow` is among the keys Phase 0 resolves
-- [ ] The scheduling step says to add the remaining issue to the brief's build order
-- [ ] `/sprint-plan update` is not recommended
-- [ ] A `/team-polish` re-run after the fix is still named
-- [ ] The verdict and the remaining-issue list are the same as in Case 2
+- [ ] `workflow` 是 Phase 0 解析的键之一
+- [ ] 安排步骤说明要将遗留问题加入简报的构建顺序
+- [ ] 不推荐 `/sprint-plan update`
+- [ ] 仍点名在修复后重新运行 `/team-polish`
+- [ ] 结论与遗留问题清单与 Case 2 相同
 
 ---
 
 ## Protocol Compliance
 
-- [ ] At the default `team.size: individual`, the run opens with an `Active set (team.size: individual): performance-analyst + technical-artist` line and a `Not spawned this run:` line naming sound-designer, qa-tester, engine-programmer and tools-programmer — before any agent is spawned
-- [ ] Phase 1 (assessment) must complete before any other phase begins
-- [ ] In `collaborative` mode, `AskUserQuestion` is used after every phase output before the next phase launches
-- [ ] Phases 3 and 4 are launched in parallel with Phase 2 whenever their agents are in the active set (not deferred)
-- [ ] engine-programmer is only spawned when Phase 1 explicitly identifies engine-level root causes, and only at `small` or `studio`
-- [ ] performance-analyst produces the optimisation list and never implements it; an item whose owner is not active is named as handed to `/dev-story`
-- [ ] Phase 2–4 implementation files are asked for once, as a set — not once per phase
-- [ ] No files are written by the orchestrator directly — all writes are delegated to sub-agents
-- [ ] Sub-agents skip the per-write prompt only for their named `production/polish/` paths; any other write requires a "May I write" ask
-- [ ] A phase whose named artifact is missing on disk is treated as failed, not done
-- [ ] BLOCKED status from any agent is surfaced immediately — not silently skipped
-- [ ] A partial report is always produced when some agents complete and others block
-- [ ] Verdict is exactly one of READY FOR RELEASE, NOT ASSESSED or NEEDS MORE WORK — a known problem is NEEDS MORE WORK even when something else went unchecked, and READY FOR RELEASE is reachable only when every measured metric had a committed budget and every phase ran
-- [ ] At `team.size: individual`, sound-designer's audio polish and qa-tester's hardening are named as not run, so the verdict is NOT ASSESSED unless a known problem makes it NEEDS MORE WORK
-- [ ] NEEDS MORE WORK verdict always lists specific remaining issues with severity, the measured gap where there is one, and a recommendation
-- [ ] Next Steps handoff references `/release-checklist` (on success), `/sprint-plan update` (at `workflow: minimal`, the brief's build order in its place) and a `/team-polish` re-run (on failure), `/gate-check` before handing off to release, and, on NOT ASSESSED, supplying the missing budgets or phases before a re-run
-- [ ] At `team.size: studio`, Phase 5's qa-tester is told to find how the polished feature breaks rather than confirm it holds, and the report says the adversarial pass ran; no engine specialist is added
+- [ ] 在默认的 `team.size: individual` 下，运行以 `Active set (team.size: individual): performance-analyst + technical-artist` 行与一行 `Not spawned this run:` 开始，后者点名 sound-designer、qa-tester、engine-programmer 与 tools-programmer —— 这一切发生在任何代理启动之前
+- [ ] Phase 1（评估）必须先完成，其他任何阶段才能开始
+- [ ] 在 `collaborative` 模式下，每个阶段输出之后、下一阶段启动之前使用 `AskUserQuestion`
+- [ ] 只要其代理在活动集中，Phase 3 与 Phase 4 就与 Phase 2 并行启动（不推迟）
+- [ ] 只有当 Phase 1 明确识别出引擎层面根因时才启动 engine-programmer，且仅在 `small` 或 `studio` 下
+- [ ] performance-analyst 产出优化清单且从不实现它；负责人不在活动集中的项会被记作已交接给 `/dev-story`
+- [ ] Phase 2–4 的实现文件作为一组一次性询问 —— 而非每阶段一次
+- [ ] 编排器不直接写入任何文件 —— 所有写入都委托给子代理
+- [ ] 子代理仅对其指定的 `production/polish/` 路径跳过逐次写入提示；任何其他写入都需要 "May I write" 询问
+- [ ] 指定产出物在磁盘上缺失的阶段被视为失败，而非完成
+- [ ] 任何代理的 BLOCKED 状态都会立即呈现 —— 不被静默跳过
+- [ ] 当部分代理完成而其他代理阻塞时，始终产出部分报告
+- [ ] 结论只能是 READY FOR RELEASE、NOT ASSESSED 或 NEEDS MORE WORK 之一 —— 已知问题即为 NEEDS MORE WORK，即便其他内容未检查；只有当每个已测量指标都有承诺预算且每个阶段都运行时，才可能得出 READY FOR RELEASE
+- [ ] 在 `team.size: individual` 下，sound-designer 的音频打磨与 qa-tester 的加固被记为未运行，因此除非已知问题使其变为 NEEDS MORE WORK，结论为 NOT ASSESSED
+- [ ] NEEDS MORE WORK 结论始终列出具体遗留问题及其严重程度、可测量时的测得差距与建议
+- [ ] Next Steps 交接引用 `/release-checklist`（成功时）、`/sprint-plan update`（在 `workflow: minimal` 下以简报的构建顺序替代）与一次 `/team-polish` 重新运行（失败时），以及在交接给发布之前的 `/gate-check`，并在 NOT ASSESSED 时要求补齐缺失预算或阶段后再重新运行
+- [ ] 在 `team.size: studio` 下，Phase 5 的 qa-tester 会被要求找出被打磨功能如何失效，而非确认其成立，报告中说明已运行对抗性检验；不增加引擎专家
 
 ---
 
 ## Coverage Notes
 
-- The tools-programmer optional agent (for content pipeline tool fixes) is not
-  separately tested — it follows the same conditional spawn pattern as engine-programmer
-  and is invoked in Phase 2, at `small` or `studio`, only when Phase 1 traces a cause
-  to a content authoring tool.
-- The "Retry with narrower scope" and "Skip this agent" resolution paths from the Error
-  Recovery Protocol are not separately tested — they follow the same `AskUserQuestion`
-  + partial-report pattern validated in Cases 2 and 5.
-- Phase 6 sign-off logic (collecting and comparing all metrics) is validated implicitly
-  by Cases 1 and 2. The distinction between READY FOR RELEASE and NEEDS MORE WORK is
-  exercised in both directions across these cases, and NOT ASSESSED by Case 6.
-- The `individual` path — audio polish and hardening not run, the optimisation list
-  handed to `/dev-story` — is given Case 7.
-- Soak testing and stress testing (Phase 5) are validated implicitly by Case 1's
-  qa-tester output. Case 5 focuses on the regression detection aspect of Phase 5.
-- The "minimum spec hardware" test path in Phase 5 is not separately tested — it follows
-  the same qa-tester delegation pattern when the hardware is available.
-- The `studio` addition (the adversarial review pass) is asserted in Protocol Compliance
-  but not given its own case.
+- tools-programmer 可选代理（用于内容流水线工具修复）未
+  单独测试 —— 它遵循与 engine-programmer 相同的条件性启动模式，
+  只在 Phase 1 将某个原因追溯到内容创作工具时，于 Phase 2 在 `small` 或 `studio` 下
+  被调用。
+- Error Recovery Protocol 中的 "Retry with narrower scope" 与 "Skip this agent"
+  解决路径未单独测试 —— 它们遵循与 Case 2 和 Case 5 中验证过的
+  相同的 `AskUserQuestion` + 部分报告模式。
+- Phase 6 签核逻辑（收集并比较所有指标）由 Case 1 与 Case 2 隐式
+  验证。READY FOR RELEASE 与 NEEDS MORE WORK 的区分在这些用例中
+  双向检验，NOT ASSESSED 则由 Case 6 检验。
+- `individual` 路径 —— 音频打磨与加固未运行、优化清单
+  交接给 `/dev-story` —— 由 Case 7 覆盖。
+- 浸泡测试与压力测试（Phase 5）由 Case 1 的
+  qa-tester 输出隐式验证。Case 5 聚焦 Phase 5 的回归检测方面。
+- Phase 5 的 "minimum spec hardware" 测试路径未单独测试 —— 它在硬件
+  可用时遵循相同的 qa-tester 委托模式。
+- `studio` 的附加内容（对抗性评审轮次）在 Protocol Compliance 中作了断言，
+  但没有专门用例。

@@ -1,81 +1,81 @@
-# /gate-check — Handoff Contract
+# /gate-check —— 交接契约
 
-## Role in Pipeline
-Validates whether the project is ready to advance from one development phase to the next by auditing required artifacts and quality checks, producing a PASS / NOT ASSESSED / CONCERNS / FAIL verdict (NOT ASSESSED outranks PASS — a gate that could not check part of its scope has not established readiness; see SKILL.md's verdict section for the precedence order), and — on PASS with user confirmation, or on CONCERNS when the user explicitly accepts the listed risks — writing the new stage name to `project.stage` in `project.yaml` (and legacy `production/stage.txt` for backward compatibility).
+## 在流水线中的角色
+通过审计必需产出物与质量检查，校验项目是否已准备好从一个开发阶段推进到下一个阶段，产出 PASS / NOT ASSESSED / CONCERNS / FAIL 结论（NOT ASSESSED 高于 PASS——无法检查自身部分范围的闸门并未确立就绪状态；优先级顺序见 SKILL.md 的结论一节），并在 PASS 且用户确认时，或在 CONCERNS 且用户明确接受所列风险时，把新阶段名写入 `project.yaml` 的 `project.stage`（并为向后兼容写入旧版 `production/stage.txt`）。
 
-## Inputs Required
+## 所需输入
 
-### Files That Must Exist
-| File | Required Fields / Sections | Read-Only? |
+### 必须存在的文件
+| 文件 | 必需字段 / 章节 | 只读？ |
 |------|---------------------------|-----------|
-| `project.yaml` (`project.stage`, fallback `production/stage.txt`) | Stage name (used when no argument provided, to auto-detect current stage) | Yes |
-| `project.yaml` (`modes.workflow`, which follows `modes.rigor` — `minimal` by default; `workflow_overrides.system_overrides.*`, `workflow_overrides.art_bible_strict`) | Workflow tier — selects the per-gate artifact checklist (Section 2b); per-system overrides resolved when validating MVP GDDs | Yes |
-| `docs/engine-reference/[engine]/VERSION.md` | Engine version, post-cutoff risk levels (read during engine validation checks) | Yes |
-| `.claude/docs/technical-preferences.md` | Legacy fallback for `engine.*`, `naming.*` and `performance.*` when those keys are absent or empty in `project.yaml`; sole source for forbidden patterns (never migrated). Referenced in quality checks | Yes — required only for keys absent from `project.yaml` |
-| `docs/consistency-failures.md` | Domain-tagged entries surfaced as increased-scrutiny context (read if exists; skip if absent) | Yes |
+| `project.yaml`（`project.stage`，回退 `production/stage.txt`） | 阶段名（未提供参数时用于自动检测当前阶段） | 是 |
+| `project.yaml`（`modes.workflow`，它跟随 `modes.rigor`——默认 `minimal`；`workflow_overrides.system_overrides.*`、`workflow_overrides.art_bible_strict`） | 工作流层级——选择逐闸门的产出物清单（第 2b 节）；在校验 MVP GDD 时解析按系统覆盖 | 是 |
+| `docs/engine-reference/[engine]/VERSION.md` | 引擎版本、cutoff 之后的风险等级（在引擎校验检查中读取） | 是 |
+| `.claude/docs/technical-preferences.md` | 当 `project.yaml` 中这些键缺失或为空时，作为 `engine.*`、`naming.*` 和 `performance.*` 的旧版回退；禁用模式的唯一来源（从未迁移）。在质量检查中被引用 | 是——仅在 `project.yaml` 缺少相应键时必需 |
+| `docs/consistency-failures.md` | 带领域标记的条目，作为提高审查力度的上下文呈现（存在则读取；缺失则跳过） | 是 |
 
-### Phase-specific inputs (subset read depending on target gate)
-| Target Gate | Key Files Checked |
+### 阶段特定输入（视目标闸门读取子集）
+| 目标闸门 | 检查的关键文件 |
 |-------------|------------------|
-| Concept → Systems Design | `design/gdd/game-concept.md`; pillars either inside it **or** in an optional `design/gdd/game-pillars.md` — at the `minimal` tier, `design/game-brief.md` instead (pillars check drops) |
-| Systems Design → Technical Setup | `design/gdd/systems-index.md`, all MVP GDDs in `design/gdd/`, cross-GDD review report |
-| Technical Setup → Pre-Production | `docs/architecture/` ADRs (≥3), `docs/engine-reference/[engine]/deprecated-apis.md`, `docs/architecture/architecture.md`, `docs/architecture/requirements-traceability.md`, `design/accessibility-requirements.md`, `design/ux/interaction-patterns.md` |
-| Pre-Production → Production | `production/sprints/` (first sprint plan), `docs/architecture/control-manifest.md`, `production/epics/` (Foundation + Core layer epics), `design/ux/hud.md`, `design/ux/` key screen specs; recommended, not blocking: `prototypes/*-vertical-slice/REPORT.md` and its playtest in `production/qa/playtests/` — at the `minimal` tier, only a filled `design/game-brief.md` with its build order and stories under `production/epics/` (no sprint plan; the rest drops, the Vertical Slice items included — two checks on the current build replace them: the core loop is fun, and it runs end to end) |
-| Production → Polish | code-root subsystems (resolve per `.claude/docs/code-root-resolution.md`), the engine's test root — `tests/unit/` + `tests/integration/` (Godot), `Assets/Tests/` (Unity), `Source/<Module>/Private/Tests/` (Unreal) — with all Logic stories covered, `production/qa/smoke-*.md` (PASS or PASS WITH WARNINGS), `production/qa/playtests/` (≥3 sessions) |
-| Polish → Release | Full story test evidence for all Must Have stories, QA sign-off report, localization check, `production/qa/` QA plan, release checklist output, changelog, the newest full-scope `production/security/security-audit-*.md` (plus any later `quick` re-run) |
+| Concept → Systems Design | `design/gdd/game-concept.md`；游戏支柱位于其中**或**可选的 `design/gdd/game-pillars.md`——在 `minimal` 层级改用 `design/game-brief.md`（支柱检查取消） |
+| Systems Design → Technical Setup | `design/gdd/systems-index.md`、`design/gdd/` 中所有 MVP GDD、跨 GDD 评审报告 |
+| Technical Setup → Pre-Production | `docs/architecture/` 中的 ADR（≥3）、`docs/engine-reference/[engine]/deprecated-apis.md`、`docs/architecture/architecture.md`、`docs/architecture/requirements-traceability.md`、`design/accessibility-requirements.md`、`design/ux/interaction-patterns.md` |
+| Pre-Production → Production | `production/sprints/`（首个冲刺计划）、`docs/architecture/control-manifest.md`、`production/epics/`（Foundation + Core 层史诗）、`design/ux/hud.md`、`design/ux/` 关键界面规格；推荐但非阻塞：`prototypes/*-vertical-slice/REPORT.md` 及其位于 `production/qa/playtests/` 的试玩测试——在 `minimal` 层级，只需一份填写完整的 `design/game-brief.md`（含其构建顺序）以及 `production/epics/` 下的用户故事（无冲刺计划；其余项取消，包括垂直切片项——改用对当前构建的两项检查替代：核心循环有趣，且能端到端跑通） |
+| Production → Polish | 代码根下的子系统（按 `.claude/docs/code-root-resolution.md` 解析）、引擎的测试根——`tests/unit/` + `tests/integration/`（Godot）、`Assets/Tests/`（Unity）、`Source/<Module>/Private/Tests/`（Unreal）——且所有 Logic 用户故事均被覆盖、`production/qa/smoke-*.md`（PASS 或 PASS WITH WARNINGS）、`production/qa/playtests/`（≥3 次会话） |
+| Polish → Release | 所有 Must Have 用户故事的完整测试证据、QA 签核报告、本地化检查、`production/qa/` QA 计划、发布清单输出、变更日志、最新一份全范围 `production/security/security-audit-*.md`（外加之后任何一次 `quick` 重跑） |
 
-### Preconditions
-- The target phase argument must be one of: `systems-design`, `technical-setup`, `pre-production`, `production`, `polish`, `release`; if omitted, auto-detects from `project.stage` in `project.yaml` (fallback `production/stage.txt`) and validates the next transition
-- The skill does not require any prior skill to have run in the same session, but it will surface missing prerequisites (e.g., missing ADRs, missing playtest reports) as blockers in the verdict
+### 前置条件
+- 目标阶段参数必须是以下之一：`systems-design`、`technical-setup`、`pre-production`、`production`、`polish`、`release`；若省略，则根据 `project.yaml` 中的 `project.stage`（回退 `production/stage.txt`）自动检测，并校验下一次跃迁
+- 本技能不要求同一会话中先运行过任何技能，但会把缺失的前置条件（例如缺少 ADR、缺少试玩测试报告）作为阻塞项呈现在结论中
 
-## Outputs Produced
+## 产出的输出
 
-### Files Written
-| File | Guaranteed Fields / Sections | Notes |
+### 写入的文件
+| 文件 | 保证包含的字段 / 章节 | 说明 |
 |------|------------------------------|-------|
-| `production/gate-checks/gate-[phase]-[date].md` (or path chosen by user) | Full checklist with per-item status, Blockers list, Recommendations, Verdict, Chain-of-Verification note | written only after user approves ("May I write this gate check report to production/gate-checks/?") |
-| `project.yaml` (`project.stage`) + legacy `production/stage.txt` | New stage name (dual-write for backward compat) | written ONLY when the verdict is PASS and the user explicitly confirms, or the verdict is CONCERNS and the user explicitly accepts the listed risks; never written on FAIL or NOT ASSESSED |
+| `production/gate-checks/gate-[phase]-[date].md`（或用户选择的路径） | 带逐项状态的完整清单、阻塞项列表、建议、结论、验证链注记 | 仅在用户批准后写入（“我可以把这份闸门校验报告写入 production/gate-checks/ 吗？”） |
+| `project.yaml`（`project.stage`）+ 旧版 `production/stage.txt` | 新阶段名（为向后兼容双写） | 仅在结论为 PASS 且用户明确确认，或结论为 CONCERNS 且用户明确接受所列风险时写入；在 FAIL 或 NOT ASSESSED 下绝不写入 |
 
-### Output Guarantees
-- The gate report always contains: artifact checklist (with file sizes or "MISSING"), quality check results, list of blockers (empty if PASS), recommendations, and the Chain-of-Verification note — plus an `### Accepted Risks` section (each concern, accepted by the user, dated) when the user advanced on CONCERNS
-- `project.stage` (and legacy `production/stage.txt`) is updated to the new stage name only on a confirmed PASS, or on CONCERNS after the user explicitly accepts the risks — never speculatively
-- Any item that cannot be automatically verified is marked `MANUAL CHECK NEEDED` and the user is asked before the verdict is finalized
+### 输出保证
+- 闸门报告始终包含：产出物清单（含文件大小或“MISSING”）、质量检查结果、阻塞项列表（PASS 时为空）、建议，以及验证链注记——此外，当用户在 CONCERNS 下推进时，还包含 `### Accepted Risks` 一节（每条关注项、由用户接受、带日期）
+- `project.stage`（及旧版 `production/stage.txt`）只在确认的 PASS 后，或在用户明确接受风险后的 CONCERNS 后，才更新为新阶段名——绝不臆测性写入
+- 任何无法自动核实的事项都标记为 `MANUAL CHECK NEEDED`，并在最终确定结论前询问用户
 
-## Immutability Rules
-- READS but does NOT modify: all GDDs in `design/gdd/`, all ADRs in `docs/architecture/`, `docs/architecture/control-manifest.md`, `docs/architecture/tr-registry.yaml`, `.claude/docs/technical-preferences.md` (legacy fallback), `docs/engine-reference/[engine]/VERSION.md`, `docs/engine-reference/[engine]/deprecated-apis.md`, all story files in `production/epics/`, all sprint files in `production/sprints/`, all playtest files in `production/qa/playtests/`, source files in the code root (Grep only), test files under the engine's test root (run via Bash)
-- MODIFIES: `project.yaml` (`project.stage` only) + legacy `production/stage.txt` (both on a confirmed PASS or an accepted CONCERNS override only), `production/gate-checks/[report].md` (new file, with user approval)
-- Does NOT modify story files, ADRs, GDDs, or any source/test code
+## 不可变规则
+- 读取但不修改：`design/gdd/` 中所有 GDD、`docs/architecture/` 中所有 ADR、`docs/architecture/control-manifest.md`、`docs/architecture/tr-registry.yaml`、`.claude/docs/technical-preferences.md`（旧版回退）、`docs/engine-reference/[engine]/VERSION.md`、`docs/engine-reference/[engine]/deprecated-apis.md`、`production/epics/` 中所有用户故事文件、`production/sprints/` 中所有冲刺文件、`production/qa/playtests/` 中所有试玩测试文件、代码根下的源文件（仅 Grep）、引擎测试根下的测试文件（通过 Bash 运行）
+- 修改：`project.yaml`（仅 `project.stage`）+ 旧版 `production/stage.txt`（两者仅在确认的 PASS 或被接受的 CONCERNS 覆盖时）、`production/gate-checks/[report].md`（新文件，需用户批准）
+- 不修改用户故事文件、ADR、GDD 或任何源码/测试代码
 
-## Hard Constraints (Never Violate)
-- Never writes stage (either `project.yaml` `project.stage` or legacy `production/stage.txt`) unless the verdict is PASS and the user has explicitly confirmed advancement, or the verdict is CONCERNS and the user has explicitly accepted every listed risk (recorded in the report's `### Accepted Risks`)
-- Never writes stage on a FAIL or NOT ASSESSED verdict under any circumstances — no override turns either into a stage change
-- Never auto-advances stage — even a PASS verdict requires explicit user confirmation before the file is written
-- Never assumes PASS for items that cannot be automatically verified — always marks them `MANUAL CHECK NEEDED` and asks the user
-- Never blocks the user from working — the verdict decides only whether the stage is written; a CONCERNS override records the accepted risks in the gate report
-- Never passes a director "none" for an artifact the target gate does not require yet — that is "not expected before [phase]" (or "not required at `workflow: [tier]`"), and not a finding; "none" is reserved for an artifact the gate asks for that does not exist
-- Always runs Chain-of-Verification (5 challenge questions) after drafting the verdict before finalizing it
-- If any Vertical Slice Validation item is NO at the Pre-Production → Production gate, the verdict is automatically FAIL regardless of all other checks, at `full` and `standard`; at `minimal`, where the slice items drop, a "no" to either current-build check (the core loop is fun, it runs end to end) is FAIL the same way (tier reductions relax what must *exist*, never make a broken build passable)
-- Workflow-tier reductions (Section 2b) only ever *relax* a requirement (Required → CONCERNS-if-absent, or drop); they never add one. The sole exception that adds is `workflow_overrides`: a system pinned via `system_overrides` to a higher tier than the project blocks the gate until that one system's GDD meets the higher section count, and `art_bible_strict: true` forces the complete art bible regardless of tier
-- gate-check honors `modes.workflow` but is exempt from `modes.automation` — the collaborative prompting protocol (the Collaborative Protocol section) always applies; a phase gate is never auto-run
+## 硬性约束（绝不违反）
+- 除非结论为 PASS 且用户已明确确认推进，或结论为 CONCERNS 且用户已明确接受每一项所列风险（记录在报告的 `### Accepted Risks` 中），否则绝不写入阶段（`project.yaml` 的 `project.stage` 或旧版 `production/stage.txt`）
+- 在任何情况下都不在 FAIL 或 NOT ASSESSED 结论下写入阶段——没有任何覆盖能把这两种结论变成阶段变更
+- 绝不自动推进阶段——即便是 PASS 结论，也需要用户明确确认后才写入文件
+- 绝不为无法自动核实的事项假定 PASS——始终标记 `MANUAL CHECK NEEDED` 并询问用户
+- 绝不阻止用户继续工作——结论只决定是否写入阶段；CONCERNS 覆盖会把已接受的风险记录在闸门报告中
+- 绝不把目标闸门尚不要求的产出物向总监传“none”——那是“在 [阶段] 之前不预期”（或“在 `workflow: [tier]` 下不要求”），不构成发现项；“none”专指闸门要求但实际不存在的产出物
+- 在起草结论后、最终确定前，始终运行验证链（5 个质疑性问题）
+- 如果在 Pre-Production → Production 闸门中任何垂直切片校验项为 NO，则无论其他检查如何，结论自动为 FAIL，适用于 `full` 与 `standard`；在 `minimal` 下切片项取消，若对两项当前构建检查（核心循环有趣、能端到端跑通）中任一项回答“否”，同样为 FAIL（层级削减放宽的是必须*存在*的东西，绝不让损坏的构建变得可通过）
+- 工作流层级削减（第 2b 节）只会*放宽*要求（必需 → 缺失即 CONCERNS，或取消）；绝不新增要求。唯一新增要求的是 `workflow_overrides`：经 `system_overrides` 钉到高于项目层级的系统，在该系统 GDD 满足更高章节数之前会阻塞闸门；`art_bible_strict: true` 会无视层级强制完整美术圣经
+- gate-check 遵循 `modes.workflow`，但不受 `modes.automation` 约束——协作提示协议（“协作协议”一节）始终适用；阶段闸门绝不自动运行
 
-## Downstream Skill Expects
-**Next skill (on PASS):** varies by gate
+## 下游技能的预期
+**下一个技能（PASS 时）：** 视闸门而定
 
-| Gate Passed | Enabled downstream skill |
+| 通过的闸门 | 启用的下游技能 |
 |-------------|-------------------------|
-| Concept → Systems Design | `/map-systems` — or `/design-system` for the first system when `design/gdd/systems-index.md` already exists |
-| Systems Design → Technical Setup | `/create-architecture` first — the master architecture and the ADR work plan (it needs an engine, so `/setup-engine` if none is configured) — then `/architecture-decision` |
-| Technical Setup → Pre-Production | `/create-control-manifest` if `docs/architecture/control-manifest.md` does not exist yet, then `/vertical-slice`; `/create-epics` and `/create-stories` once the slice has validated the core loop |
-| Pre-Production → Production | `/dev-story`, `/sprint-plan`, `/story-readiness` |
-| Production → Polish | `/perf-profile`, `/playtest-report`, `/smoke-check` |
-| Polish → Release | `/launch-checklist`, `/team-release` (the release checklist, changelog and security audit are done before this gate) |
+| Concept → Systems Design | `/map-systems`——或者当 `design/gdd/systems-index.md` 已存在时，对第一个系统运行 `/design-system` |
+| Systems Design → Technical Setup | 先 `/create-architecture`——主架构与 ADR 工作计划（它需要引擎，若未配置则先 `/setup-engine`）——然后 `/architecture-decision` |
+| Technical Setup → Pre-Production | 若 `docs/architecture/control-manifest.md` 尚不存在，先 `/create-control-manifest`，然后 `/vertical-slice`；切片验证核心循环后，再 `/create-epics` 与 `/create-stories` |
+| Pre-Production → Production | `/dev-story`、`/sprint-plan`、`/story-readiness` |
+| Production → Polish | `/perf-profile`、`/playtest-report`、`/smoke-check` |
+| Polish → Release | `/launch-checklist`、`/team-release`（发布清单、变更日志与安全审计在此闸门之前完成） |
 
-- Downstream skills read `project.stage` from `project.yaml` (fallback `production/stage.txt`) to confirm their phase is active before proceeding
-- `/create-epics` reads `docs/architecture/control-manifest.md` — required at `full`, read if present at `standard` — and the Pre-Production → Production gate checks it
+- 下游技能会从 `project.yaml`（回退 `production/stage.txt`）读取 `project.stage`，以确认自己的阶段已激活再继续
+- `/create-epics` 读取 `docs/architecture/control-manifest.md`——在 `full` 下必需，在 `standard` 下存在则读取——Pre-Production → Production 闸门会检查它
 
-## Known Fragile Points
-- `project.stage` in `project.yaml` (with legacy `production/stage.txt` as fallback) is the authoritative stage indicator — if either is manually edited to a wrong value outside of `/gate-check`, auto-detection in future sessions will be incorrect; never edit them outside `/gate-check`'s stage write
-- The Production → Polish gate runs the test suite via Bash. If the test runner command is not configured or fails to start (e.g. gdUnit4 is not installed at `addons/gdUnit4/`), the test check yields `NOT ASSESSED`, which outranks PASS — so the gate cannot advance a stage on the strength of a suite that never ran. With a concern also found, the verdict is CONCERNS, and its override is not offered while that check is NOT ASSESSED
-- The Pre-Production → Production gate has a hard Vertical Slice validation block; any subjective checklist item (e.g., "core mechanic feels good") requires a user response via `AskUserQuestion` — if the user answers without playing the build, a false PASS is possible
-- Gate report files in `production/gate-checks/` are not validated for completeness by any downstream skill; a partial report written due to a session interruption will look identical to a complete one
-- `docs/consistency-failures.md` is optional context that adjusts scrutiny but does not change the formal checklist; if this file exists but is stale, the increased-scrutiny signals may point at resolved issues
+## 已知脆弱点
+- `project.yaml` 中的 `project.stage`（以旧版 `production/stage.txt` 为回退）是权威的阶段指示器——若在 `/gate-check` 之外被手动改成错误值，未来会话的自动检测就会出错；绝不要在 `/gate-check` 的阶段写入之外编辑它们
+- Production → Polish 闸门会通过 Bash 运行测试套件。如果未配置测试运行器命令或启动失败（例如 `addons/gdUnit4/` 下未安装 gdUnit4），测试检查会给出 `NOT ASSESSED`，其优先级高于 PASS——因此闸门不能仅凭一个从未运行过的套件推进阶段。若同时发现问题，结论为 CONCERNS，且在该检查为 NOT ASSESSED 期间不提供其覆盖
+- Pre-Production → Production 闸门有一个硬性的垂直切片校验块；任何主观清单项（例如“核心机制手感好”）都需要通过 `AskUserQuestion` 获得用户答复——如果用户没玩过构建就回答，可能产生错误的 PASS
+- `production/gate-checks/` 中的闸门报告文件不会被任何下游技能校验完整性；因会话中断而写出的残缺报告，看起来会和完整报告一模一样
+- `docs/consistency-failures.md` 是可选上下文，会调整审查力度但不改变正式清单；如果该文件存在但已过时，提高审查力度的信号可能指向已解决的问题

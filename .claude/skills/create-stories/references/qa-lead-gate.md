@@ -1,54 +1,53 @@
-# Phase 5: QA lead review (QL-STORY-READY)
+# Phase 5: QA 主管评审（QL-STORY-READY）
 
-Read only when the `review_gate` line says `skill-gates=run` (`review_mode: full`).
-Run it after the stories are drafted and before the Phase 6 write ask.
+仅当 `review_gate` 行显示 `skill-gates=run`（`review_mode: full`）时阅读。
+在故事起草完成之后、Phase 6 写入询问之前运行它。
 
-**An existing QA plan first.** Look for the newest `production/qa/qa-plan-*.md`. If
-its Automated Tests Required section holds specs for stories in this epic (match by
-title or slug), they can stand in for the agent's specs. Where the two differ, ask:
-"Which test specs should these stories carry?" Options: The QA plan's / The QA
-lead's / None yet. "None yet" writes
-`*Test cases not yet defined — run /qa-plan to generate them.*` This never adds a
-second hand-off.
+**先看已有的 QA 计划。** 查找最新的 `production/qa/qa-plan-*.md`。如果
+其 Automated Tests Required 章节包含本史诗中故事的规格（按
+标题或 slug 匹配），它们可以代替 agent 的规格。两者不同时，询问：
+“Which test specs should these stories carry?” 选项：The QA plan's / The QA
+lead's / None yet。“None yet”会写入
+`*Test cases not yet defined — run /qa-plan to generate them.*` 这绝不会增加
+第二次交接。
 
-**Hand the review to the `qa-lead` agent, once,** with gate **QL-STORY-READY**. The
-agent reads its own gate file; do not read it here. One report carries both the
-verdicts and the specs: never hand it a second job for the specs.
+**把评审交给 `qa-lead` agent，仅一次，** 使用闸门 **QL-STORY-READY**。该
+agent 读取自己的闸门文件；不要在这里读取它。一份报告同时携带
+结论和规格：绝不要为规格再交给它第二项工作。
 
-Brief:
-- **Objective:** judge each drafted story's acceptance criteria for testability, and
-  write test specs for the ones that pass.
-- **Give it:** the full story list inline (no story file exists yet, so the stories
-  stand in for the gate's paths), each with its acceptance criteria, type, and
-  TR-IDs with their requirement text from `tr-registry.yaml`; and the epic GDD's
-  acceptance criteria for reference.
-- **Return:** per story, ADEQUATE, GAPS, INADEQUATE, or NOT ASSESSED naming a
-  missing input. For each ADEQUATE story, its spec block in the formats below: one
-  Given/When/Then per criterion for Logic and Integration, manual steps for
-  Visual/Feel and UI.
-- **Boundaries:** it writes no file.
+简报：
+- **目标：** 判断每个已起草故事的验收标准是否可测试，并为通过的故事
+  编写测试规格。
+- **交给它：** 完整故事列表内联（尚无故事文件存在，因此故事
+  代替闸门的路径），每个都附其验收标准、类型，以及带来自
+  `tr-registry.yaml` 需求文本的 TR-ID；以及史诗 GDD 的
+  验收标准作为参考。
+- **返回：** 每个故事为 ADEQUATE、GAPS、INADEQUATE，或 NOT ASSESSED 并点名
+  缺失的输入。对于每个 ADEQUATE 故事，其规格块按以下格式：Logic 和 Integration
+  每个验收标准一个 Given/When/Then，Visual/Feel 和 UI 用人工步骤。
+- **边界：** 它不写任何文件。
 
-Act on each story's verdict:
+对每个故事的结论采取行动：
 
-- **ADEQUATE:** keep its specs.
-- **GAPS:** ask: "How do you want to handle the flagged criteria?" Options: Revise
-  them / Accept and go on / Discuss further. Revise nothing before the answer. On
-  Revise: draft the new criteria, show them, and send just those stories back to
-  the agent in one follow-up brief. On Accept: the criteria stay, and the story's
-  QA Test Cases read `*Test cases not yet defined — run /qa-plan to generate them.*`
-- **INADEQUATE:** the story is not written as it stands. Revise its criteria with
-  the user (draft, show, confirm), then ask the agent for its specs. If the user
-  will not revise it, drop it from this run and name it as dropped in the Phase 6
-  list.
-- **NOT ASSESSED:** not an ADEQUATE. Name the missing input, then supply it and ask
-  again, or write the story without specs (the `/qa-plan` line) and mark it
-  `QL-STORY-READY: NOT ASSESSED — [input]` in the Phase 6 list.
+- **ADEQUATE：** 保留其规格。
+- **GAPS：** 询问：“How do you want to handle the flagged criteria?” 选项：Revise
+  them / Accept and go on / Discuss further。回答之前不要修改任何内容。选择
+  Revise：起草新的验收标准，展示它们，并在一次后续简报中只把这些故事送回
+  agent。选择 Accept：验收标准保持不变，故事的
+  QA Test Cases 读作 `*Test cases not yet defined — run /qa-plan to generate them.*`
+- **INADEQUATE：** 故事按现状不应写入。与用户一起修改其验收标准
+  （起草、展示、确认），然后向 agent 索取其规格。如果用户
+  不愿修改，就把它从本次运行中移除，并在 Phase 6 列表中
+  点名它已被移除。
+- **NOT ASSESSED：** 不等于 ADEQUATE。点名缺失的输入，然后补充它并再次
+  询问，或在没有规格的情况下写入故事（`/qa-plan` 行）并在 Phase 6 列表中标记为
+  `QL-STORY-READY: NOT ASSESSED — [input]`。
 
-A story carries specs only once it is ADEQUATE: untestable criteria cannot be built
-correctly. The specs go in the story's `## QA Test Cases`; the user builds
-against them and does not invent new ones.
+故事只有在 ADEQUATE 后才携带规格：不可测试的验收标准无法被正确
+构建。规格写入故事的 `## QA Test Cases`；用户依据它们构建，
+不自行编造新的。
 
-Logic and Integration:
+Logic 和 Integration：
 
 ```
 Test: [criterion text]
@@ -58,7 +57,7 @@ Test: [criterion text]
   Edge cases: [boundary values or failure states]
 ```
 
-Visual/Feel and UI:
+Visual/Feel 和 UI：
 
 ```
 Manual check: [criterion text]

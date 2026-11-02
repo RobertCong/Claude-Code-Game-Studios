@@ -1,6 +1,6 @@
 ---
 name: localize
-description: "Localization pipeline — find hardcoded strings, extract string tables, cultural review, VO, RTL, enforce string freeze."
+description: "本地化流水线 — 查找硬编码字符串、提取字符串表、文化审查、VO、RTL、执行字符串冻结。"
 argument-hint: "[scan|extract|validate|status|brief|cultural-review|vo-pipeline|rtl-check|freeze|qa]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Agent, AskUserQuestion, Bash(bash "*/.claude/skills/localize/../../hooks/yaml-helper.sh" resolve_config *)
@@ -11,98 +11,94 @@ model: sonnet
 
 
 
-# Localization Pipeline
+# 本地化流水线
 
-Localization is not just translation — it is the full process of making a game
-feel native in every language and region. Poor localization breaks immersion,
-confuses players, and blocks platform certification. This skill covers the
-complete pipeline from string extraction through cultural review, VO recording,
-RTL layout testing, and localization QA sign-off.
+本地化不仅仅是翻译——它是让游戏在每种语言和地区都显得自然的完整过程。糟糕的本地化会破坏沉浸感、让玩家困惑，并阻碍平台认证。本技能涵盖从字符串提取、文化审查、VO 录制、RTL 布局测试到本地化 QA 签字的完整流水线。
 
-**Modes:**
-- `scan` — Find hardcoded strings and localization anti-patterns (read-only)
-- `extract` — Extract strings and generate translation-ready tables
-- `validate` — Check translations for completeness, placeholders, and length
-- `status` — Coverage matrix across all locales
-- `brief` — Generate translator context briefing document for an external team
-- `cultural-review` — Flag culturally sensitive content, symbols, colours, idioms
-- `vo-pipeline` — Manage voice-over localization: scripts, recording specs, integration
-- `rtl-check` — Validate RTL language layout, mirroring, and font support
-- `freeze` — Enforce string freeze; lock source strings before translation begins
-- `qa` — Run the full localization QA cycle before release
+**模式：**
+- `scan` — 查找硬编码字符串和本地化反模式（只读）
+- `extract` — 提取字符串并生成可供翻译的表格
+- `validate` — 检查翻译的完整性、占位符和长度
+- `status` — 所有语言地区的覆盖率矩阵
+- `brief` — 为外部团队生成译者上下文简报文档
+- `cultural-review` — 标记文化敏感内容、符号、颜色和习语
+- `vo-pipeline` — 管理配音本地化：脚本、录制规格、集成
+- `rtl-check` — 校验 RTL 语言布局、镜像和字体支持
+- `freeze` — 执行字符串冻结；在翻译开始前锁定源字符串
+- `qa` — 在发布前运行完整的本地化 QA 循环
 
-If no subcommand is provided, output usage and stop. Verdict: **FAIL** — missing required subcommand.
+如果未提供子命令，输出用法并停止。结论（Verdict）：**FAIL** — 缺少必需的子命令。
 
 ---
 
-Every `AskUserQuestion` call follows `.claude/docs/automation-modes.md`
-(collaborative asks always · guided major-only · autonomous logs and proceeds;
-`automation_always_ask` categories always prompt).
+每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+（collaborative 总是询问 · guided 仅重大问题 · autonomous 记录日志后继续；
+`automation_always_ask` 类别总是提示）。
 
-## Phase 2A: Scan Mode
+## Phase 2A: 扫描模式
 
-Search the **code root** (resolve per `.claude/docs/code-root-resolution.md`) for hardcoded user-facing strings. **If the code root is unresolved, report `NOT ASSESSED — code root unresolved` rather than zero hits.** Zero hits from an unresolved root reads as "nothing to localize", which is the failure this guards:
+在**代码根目录**（按 `.claude/docs/code-root-resolution.md` 解析）中搜索硬编码的面向用户的字符串。**如果代码根目录无法解析，报告 `NOT ASSESSED — code root unresolved`，而不是零命中。** 从无法解析的根目录得出零命中会被读作“没有需要本地化的内容”，而这正是本检查要防范的失败情形：
 
-- String literals in UI code not wrapped in a localization function (`tr()`, `Tr()`, `NSLocalizedString`, `GetText`, etc.)
-- Concatenated strings that should be parameterized
-- Strings with positional placeholders (`%s`, `%d`) instead of named ones (`{playerName}`)
-- Format strings that mix locale-sensitive data (numbers, dates, currencies) without locale-aware formatting
+- 用户界面（UI）代码中未包裹在本地化函数（`tr()`、`Tr()`、`NSLocalizedString`、`GetText` 等）中的字符串字面量
+- 本应参数化的拼接字符串
+- 使用位置占位符（`%s`、`%d`）而非具名占位符（`{playerName}`）的字符串
+- 混合了语言环境敏感数据（数字、日期、货币）却未使用语言环境感知格式化的格式字符串
 
-Search for localization anti-patterns:
+搜索本地化反模式：
 
-- Date/time formatting not using locale-aware functions
-- Number formatting without locale awareness (`1,000` vs `1.000`)
-- Text embedded in images or textures (flag asset files in `assets/`)
-- Strings that assume left-to-right text direction (positional layout, string assembly order)
-- Gender/plurality assumptions baked into string logic (must use plural forms or gender tokens)
-- Hardcoded punctuation (e.g. `"You won!"` — exclamation styles vary by locale)
+- 未使用语言环境感知函数的日期/时间格式化
+- 未考虑语言环境的数字格式化（`1,000` 与 `1.000`）
+- 嵌入图像或纹理中的文本（标记 `assets/` 中相关的资源文件）
+- 假定从左到右文本方向的字符串（位置布局、字符串拼接顺序）
+- 固化在字符串逻辑中的性别/复数假设（必须使用复数形式或性别标记）
+- 硬编码标点（例如 `"You won!"`——感叹号风格因语言地区而异）
 
-Report all findings with file paths and line numbers. This mode is read-only — no files are written.
-
----
-
-## Phase 2B: Extract Mode
-
-- Scan all source files for localized string references
-- Compare against the existing string table in `assets/data/strings/`
-- Generate new entries for strings not yet keyed
-- Suggest key names following the convention: `[category].[subcategory].[description]`
-  - Example: `ui.hud.health_label`, `dialogue.npc.merchant.greeting`, `menu.main.play_button`
-- Each new entry must include a `context` field — a translator comment explaining:
-  - Where it appears (which screen, which scene)
-  - Maximum character length
-  - Any placeholder meaning (`{playerName}` = the player's chosen display name)
-  - Gender/plurality context if applicable
-
-Output a diff of new strings to add to the string table.
-
-Present the diff to the user. Ask: "May I write these new entries to `assets/data/strings/strings-en.json`?"
-
-If yes, write only the diff (new entries), not a full replacement. Verdict: **COMPLETE** — strings extracted and written.
+报告所有发现，附上文件路径和行号。此模式为只读——不会写入任何文件。
 
 ---
 
-## Phase 2C: Validate Mode
+## Phase 2B: 提取模式
 
-Read all string table files in `assets/data/strings/`. For each locale, check:
+- 扫描所有源文件中的本地化字符串引用
+- 与 `assets/data/strings/` 中现有的字符串表比对
+- 为尚未建键的字符串生成新条目
+- 按如下约定建议键名：`[category].[subcategory].[description]`
+  - 示例：`ui.hud.health_label`、`dialogue.npc.merchant.greeting`、`menu.main.play_button`
+- 每个新条目都必须包含一个 `context` 字段——一条译者注释，说明：
+  - 它出现在哪里（哪个屏幕、哪个场景）
+  - 最大字符长度
+  - 任何占位符的含义（`{playerName}` = 玩家选择的显示名称）
+  - 如适用，说明性别/复数上下文
 
-- **Completeness** — key exists in source (en) but no translation for this locale
-- **Placeholder mismatches** — source has `{name}` but translation omits it or adds extras
-- **String length violations** — translation exceeds the character limit recorded in the source `context` field
-- **Plural form count** — locale requires N plural forms; translation provides fewer
-- **Orphaned keys** — translation exists but nothing in the code root references the key
-- **Stale translations** — source string changed after translation was written (flag for re-translation)
-- **Encoding** — non-ASCII characters present and font atlas supports them (flag if uncertain)
+输出要添加到字符串表的新字符串差异（diff）。
 
-Report validation results grouped by locale and severity. This mode is read-only — no files are written.
+将差异呈现给用户。询问：“我可以把这些新条目写入 `assets/data/strings/strings-en.json` 吗？”
+
+如果同意，只写入差异（新条目），而不是完整替换。结论（Verdict）：**COMPLETE** — 字符串已提取并写入。
 
 ---
 
-## Phase 2D: Status Mode
+## Phase 2C: 校验模式
 
-- Count total localizable strings in the source table
-- Per locale: count translated, untranslated, stale (source changed since translation)
-- Generate a coverage matrix:
+读取 `assets/data/strings/` 中的所有字符串表文件。对每个语言地区，检查：
+
+- **完整性** — 键存在于源（en）中，但该语言地区没有翻译
+- **占位符不匹配** — 源中有 `{name}`，但翻译遗漏了它或额外添加了占位符
+- **字符串长度违规** — 翻译超出源 `context` 字段中记录的字符限制
+- **复数形式数量** — 语言地区要求 N 种复数形式，而翻译提供得更少
+- **孤立键** — 翻译存在，但代码根目录中没有任何地方引用该键
+- **过时翻译** — 翻译写入后源字符串发生了变更（标记为需重新翻译）
+- **编码** — 存在非 ASCII 字符，且字体图集支持它们（不确定时标记）
+
+按语言地区和严重程度分组报告校验结果。此模式为只读——不会写入任何文件。
+
+---
+
+## Phase 2D: 状态模式
+
+- 统计源表中的可本地化字符串总数
+- 按语言地区统计：已翻译、未翻译、过时（翻译后源发生变更）
+- 生成覆盖率矩阵：
 
 ```markdown
 ## Localization Status
@@ -130,23 +126,22 @@ String freeze: [Active / Not yet called / Lifted]
 - [N] strings added after freeze was called (freeze violations)
 ```
 
-This mode is read-only — no files are written.
+此模式为只读——不会写入任何文件。
 
 ---
 
-## Phase 2E: Brief Mode
+## Phase 2E: 简报模式
 
-Generate a translator context briefing document. This document is sent to the
-external translation team or localisation vendor alongside the string table export.
+生成一份译者上下文简报文档。该文档与字符串表导出一起发送给外部翻译团队或本地化供应商。
 
-Read:
-- `design/gdd/` — extract game genre, tone, setting, character names. Read the
-  GDDs by section: find the headings you need with the Grep tool (pattern `^#`,
-  content mode) and Read those ranges with offset and limit.
-- `assets/data/strings/strings-en.json` — the source string table
-- Any existing lore or narrative documents in `design/narrative/`
+读取：
+- `design/gdd/` — 提取游戏类型、基调、设定、角色名称。按章节阅读
+  GDD：用 Grep 工具（pattern `^#`，content 模式）找到所需标题，
+  再用 offset 和 limit 读取相应范围。
+- `assets/data/strings/strings-en.json` — 源字符串表
+- `design/narrative/` 中任何现有的世界观或叙事文档
 
-Generate `production/localization/translator-brief-[locale]-[date].md`:
+生成 `production/localization/translator-brief-[locale]-[date].md`：
 
 ```markdown
 # Translator Brief — [Game Name] — [Locale]
@@ -191,70 +186,70 @@ Direct questions to: [placeholder for user/team contact]
 Delivery format: JSON, same schema as strings-en.json
 ```
 
-Ask: "May I write this translator brief to `production/localization/translator-brief-[locale]-[date].md`?"
+询问：“我可以把这份译者简报写入 `production/localization/translator-brief-[locale]-[date].md` 吗？”
 
 ---
 
-## Phase 2F: Cultural Review Mode
+## Phase 2F: 文化审查模式
 
-Spawn `localization-lead` via `Agent`. Ask them to audit the following for cultural sensitivity across the target locales (read from `assets/data/strings/` and `assets/`):
+通过 `Agent` 派出 `localization-lead`。要求他们在目标语言地区范围内审查以下内容的文化敏感性（从 `assets/data/strings/` 和 `assets/` 读取）：
 
-### Content Areas to Review
+### 需要审查的内容领域
 
-**Symbols and gestures**
-- Thumbs up, OK hand, peace sign — meanings vary by region
-- Religious or spiritual symbols in art, UI, or audio
-- National flags, map representations, disputed territories
+**符号和手势**
+- 竖大拇指、OK 手势、V 字手势——含义因地区而异
+- 美术、用户界面（UI）或音频中的宗教或精神符号
+- 国旗、地图表示、争议领土
 
-**Colours**
-- White (mourning in some Asian cultures), green (political associations in some regions), red (luck vs danger)
-- Alert/warning colours that conflict with cultural associations
+**颜色**
+- 白色（在某些亚洲文化中表示哀悼）、绿色（在某些地区有政治联想）、红色（幸运与危险）
+- 与当地文化联想冲突的警报/警告颜色
 
-**Numbers**
-- 4 (death in Japanese/Chinese), 13, 666 — flag use in UI (room numbers, item counts, prices)
+**数字**
+- 4（在日语/中文中代表死亡）、13、666——标记其在用户界面（UI）中的使用（房间号、物品数量、价格）
 
-**Humour and idioms**
-- Idioms that translate as offensive in other locales
-- Toilet/bodily humour that is inappropriate in some markets (notably Japan, Germany, Middle East)
-- Dark humour around topics that are culturally sensitive in specific regions
+**幽默和习语**
+- 在其他语言地区会被翻译成冒犯性内容的习语
+- 在某些市场（尤其是日本、德国、中东）不合适的厕所/身体幽默
+- 围绕特定地区文化敏感话题的黑色幽默
 
-**Violence and content ratings**
-- Content that would require ratings changes in DE (Germany), AU (Australia), CN (China), or AE (UAE)
-- Blood colour, gore level, drug references — flag all for region-specific asset variants if needed
+**暴力和内容分级**
+- 在 DE（德国）、AU（澳大利亚）、CN（中国）或 AE（阿联酋）需要变更分级的内容
+- 血液颜色、血腥程度、药物引用——如需要，全部标记为地区特定资源变体
 
-**Names and representations**
-- Character names that are offensive, profane, or carry negative meaning in target locales
-- Stereotyped representation of nationalities, religions, or ethnic groups
+**名称和表现**
+- 在目标语言地区具有冒犯性、亵渎性或负面含义的角色名称
+- 对国籍、宗教或族群的刻板印象式表现
 
-Present findings as a table:
+将发现以表格形式呈现：
 
-| Finding | Locale(s) Affected | Severity | Recommended Action |
+| 发现 | 受影响的语言地区 | 严重程度 | 建议措施 |
 |---------|--------------------|----------|--------------------|
-| [Description] | [Locale] | [BLOCKING / ADVISORY / NOTE] | [Change / Flag for review / Accept] |
+| [描述] | [Locale] | [BLOCKING / ADVISORY / NOTE] | [修改 / 标记待审 / 接受] |
 
-BLOCKING = must fix before shipping that locale. ADVISORY = recommend change. NOTE = informational only.
+BLOCKING = 在该语言地区发布前必须修复。ADVISORY = 建议修改。NOTE = 仅供参考。
 
-Ask: "May I write this cultural review report to `production/localization/cultural-review-[date].md`?"
+询问：“我可以把这份文化审查报告写入 `production/localization/cultural-review-[date].md` 吗？”
 
 ---
 
-## Phase 2G: VO Pipeline Mode
+## Phase 2G: VO 流水线模式
 
-Manage the voice-over localization process. Determine the sub-task from the argument:
+管理配音本地化流程。根据参数确定子任务：
 
-- `vo-pipeline scan` — identify all dialogue lines that require VO recording
-- `vo-pipeline script` — generate recording scripts with director notes
-- `vo-pipeline validate` — check that all recorded VO files are present and correctly named
-- `vo-pipeline integrate` — verify VO files are correctly referenced in code/assets
+- `vo-pipeline scan` — 识别所有需要 VO 录制的对话台词
+- `vo-pipeline script` — 生成带导演注释的录制脚本
+- `vo-pipeline validate` — 检查所有已录制的 VO 文件是否存在且命名正确
+- `vo-pipeline integrate` — 验证 VO 文件在代码/资源中被正确引用
 
-### VO Pipeline: Scan
+### VO 流水线：扫描
 
-Read `assets/data/strings/` and `design/narrative/`. Identify:
-- All dialogue lines (keys matching `dialogue.*`) with source text
-- Lines already recorded (audio file exists in `assets/audio/vo/`)
-- Lines not yet recorded
+读取 `assets/data/strings/` 和 `design/narrative/`。识别：
+- 所有对话台词（键匹配 `dialogue.*`）及其源文本
+- 已录制的台词（`assets/audio/vo/` 中存在音频文件）
+- 尚未录制的台词
 
-Output a recording manifest:
+输出录制清单：
 
 ```
 ## VO Recording Manifest — [Date]
@@ -265,79 +260,78 @@ Output a recording manifest:
 | dialogue.npc.merchant.haggle | Merchant | "That's my final offer." | Needs recording |
 ```
 
-### VO Pipeline: Script
+### VO 流水线：脚本
 
-Generate a recording script document for each character, grouped by scene. Include:
+为每个角色生成录制脚本文档，按场景分组。包括：
 
-- Character name and brief personality note
-- Full dialogue line with pronunciation guide for unusual proper nouns
-- Emotion/direction note for each line (`[Warm, welcoming]`, `[Annoyed, clipped]`)
-- Any lines that are responses in a conversation (provide context: "Player just said X")
+- 角色名称和简要性格说明
+- 完整对话台词，并为不寻常的专有名词提供发音指南
+- 每句台词的情绪/导演注释（`[Warm, welcoming]`、`[Annoyed, clipped]`）
+- 任何作为对话回应的台词（提供上下文：“Player just said X”）
 
-Ask: "May I write the VO recording scripts to `production/localization/vo-scripts-[locale]-[date].md`?"
+询问：“我可以把 VO 录制脚本写入 `production/localization/vo-scripts-[locale]-[date].md` 吗？”
 
-### VO Pipeline: Validate
+### VO 流水线：校验
 
-Glob `assets/audio/vo/[locale]/` for all `.wav`/`.ogg` files. Cross-reference against the VO manifest. Report:
-- Missing files (line in script, no audio file)
-- Extra files (audio file exists, no matching string key)
-- Naming convention violations
+用 Glob 查找 `assets/audio/vo/[locale]/` 中的所有 `.wav`/`.ogg` 文件。与 VO 清单交叉比对。报告：
+- 缺失文件（脚本中有台词，但没有音频文件）
+- 多余文件（存在音频文件，但没有匹配的字符串键）
+- 命名约定违规
 
-### VO Pipeline: Integrate
+### VO 流水线：集成
 
-Grep the code root for VO audio references. Verify each referenced path exists in `assets/audio/vo/[locale]/`. Report broken references.
-
----
-
-## Phase 2H: RTL Check Mode
-
-Right-to-left languages (Arabic, Hebrew, Persian, Urdu) require layout mirroring beyond
-just translating text. This mode validates the implementation.
-
-Determine the engine: read `engine.name` from `project.yaml`; if that key is absent or empty (including when `project.yaml` has no `engine:` block), fall back to `.claude/docs/technical-preferences.md`. Then check:
-
-**Layout mirroring**
-- Is RTL layout enabled in the engine? (Godot: `Control.layout_direction`, Unity: `RTL Support` package, Unreal: text direction flags)
-- Are all UI containers set to auto-mirror, or are positions hardcoded?
-- Do progress bars, health bars, and directional indicators mirror correctly?
-
-**Text rendering**
-- Are fonts loaded that support Arabic/Hebrew character sets?
-- Is Arabic text rendered with correct ligatures (connected script)?
-- Are numbers displayed as Eastern Arabic numerals where required?
-
-**String assembly**
-- Are there any string concatenations that assume left-to-right reading order?
-- Do `{placeholder}` positions in sentences work correctly when sentence structure is reversed?
-
-**Asset review**
-- Are there UI icons with directional arrows or asymmetric designs that need mirrored variants?
-- Do any text-in-image assets exist that require RTL versions?
-
-Grep patterns to check:
-- Engine-specific RTL flags in scene/prefab files
-- Any `HBoxContainer`, `LinearLayout`, `HorizontalBox` nodes — verify layout_direction settings
-- String concatenation with `+` near dialogue or UI code
-
-Report findings. Flag BLOCKING issues (content unreadable without fix) vs ADVISORY (cosmetic improvements).
-
-Ask: "May I write this RTL check report to `production/localization/rtl-check-[date].md`?"
+在代码根目录中 Grep 查找 VO 音频引用。验证每个引用的路径都存在于 `assets/audio/vo/[locale]/`。报告断开的引用。
 
 ---
 
-## Phase 2I: Freeze Mode
+## Phase 2H: RTL 检查模式
 
-String freeze locks the source (English) string table so that translations can proceed
-without the source changing under the translators.
+从右到左的语言（阿拉伯语、希伯来语、波斯语、乌尔都语）需要布局镜像，
+而不仅仅是翻译文本。此模式校验实现情况。
 
-### freeze call
+确定引擎：从 `project.yaml` 读取 `engine.name`；如果该键缺失或为空（包括 `project.yaml` 没有 `engine:` 块的情况），则回退到 `.claude/docs/technical-preferences.md`。然后检查：
 
-Check current freeze status in `production/localization/freeze-status.md` (if it exists).
+**布局镜像**
+- 引擎中是否启用了 RTL 布局？（Godot：`Control.layout_direction`，Unity：`RTL Support` 包，Unreal：文本方向标志）
+- 所有用户界面（UI）容器是否都设置为自动镜像，还是位置被硬编码？
+- 进度条、生命条和方向指示器是否正确地镜像？
 
-If already frozen:
-> "String freeze is currently ACTIVE (called [date]). [N] strings have been added or modified since freeze. These are freeze violations — they require re-translation or an approved freeze lift."
+**文本渲染**
+- 是否加载了支持阿拉伯语/希伯来语字符集的字体？
+- 阿拉伯语文本是否以正确的连字（连写文字）渲染？
+- 在需要的地方，数字是否显示为东部阿拉伯数字？
 
-If not frozen, present the pre-freeze checklist:
+**字符串组装**
+- 是否存在假定从左到右阅读顺序的字符串拼接？
+- 当句子结构被反转时，句子中的 `{placeholder}` 位置是否仍然正确？
+
+**资源审查**
+- 是否有带方向箭头或不对称设计的用户界面（UI）图标需要镜像变体？
+- 是否存在需要 RTL 版本的图文合一资源？
+
+要检查的 Grep 模式：
+- 场景/预制体文件中的引擎特定 RTL 标志
+- 任何 `HBoxContainer`、`LinearLayout`、`HorizontalBox` 节点——验证 layout_direction 设置
+- 对话或用户界面（UI）代码附近使用 `+` 的字符串拼接
+
+报告发现。标记 BLOCKING 问题（不修复则内容无法阅读）与 ADVISORY（外观改进）。
+
+询问：“我可以把这份 RTL 检查报告写入 `production/localization/rtl-check-[date].md` 吗？”
+
+---
+
+## Phase 2I: 冻结模式
+
+字符串冻结会锁定源（英文）字符串表，使翻译工作可以在源不发生变化的情况下进行。
+
+### freeze 调用
+
+检查 `production/localization/freeze-status.md` 中的当前冻结状态（如果存在）。
+
+如果已冻结：
+> “字符串冻结当前处于 ACTIVE 状态（调用于 [date]）。自冻结以来已新增或修改了 [N] 个字符串。这些是冻结违规——需要重新翻译或经批准的冻结解除。”
+
+如果未冻结，呈现冻结前检查清单：
 
 ```
 Pre-Freeze Checklist
@@ -349,11 +343,11 @@ Pre-Freeze Checklist
 [ ] Marketing strings (store description, achievements) are final
 ```
 
-Use `AskUserQuestion`:
-- Prompt: "Call string freeze now? This writes `production/localization/freeze-status.md` (Status: ACTIVE) and locks the source table."
-- Options: `[A] Yes — call string freeze now` / `[B] No — I still have strings to add`
+使用 `AskUserQuestion`：
+- 提示：“现在调用字符串冻结吗？这会写入 `production/localization/freeze-status.md`（Status: ACTIVE）并锁定源表。”
+- 选项：`[A] Yes — call string freeze now` / `[B] No — I still have strings to add`
 
-If [A]: Write `production/localization/freeze-status.md`:
+如果选 [A]：写入 `production/localization/freeze-status.md`：
 
 ```markdown
 # String Freeze Status
@@ -369,37 +363,35 @@ If [A]: Write `production/localization/freeze-status.md`:
 
 ### freeze lift
 
-If argument includes `lift`: ask "May I update `freeze-status.md` to LIFTED?", then set its Status to `LIFTED` and record the reason and date. Warn: "Lifting the freeze requires re-translation of all modified strings. Notify the translation team."
+如果参数包含 `lift`：询问“我可以把 `freeze-status.md` 更新为 LIFTED 吗？”，然后将其 Status 设为 `LIFTED` 并记录原因和日期。警告：“解除冻结需要重新翻译所有已修改的字符串。请通知翻译团队。”
 
-### freeze check (auto-integrated into extract)
+### freeze check（自动集成到 extract）
 
-When `extract` mode finds new or modified strings and `freeze-status.md` shows Status: ACTIVE — name `freeze-status.md` in extract's own "May I write" question, append the new keys to its `## Post-Freeze Changes` on approval, and warn:
-> "⚠️ String freeze is active. [N] new/modified strings have been added. These are freeze violations. Notify your localization vendor before proceeding."
+当 `extract` 模式发现新增或修改的字符串，且 `freeze-status.md` 显示 Status: ACTIVE 时——在 extract 自己的“我可以写入吗”问题中点名 `freeze-status.md`，在获批后把新键追加到其 `## Post-Freeze Changes`，并警告：
+> “⚠️ 字符串冻结处于活动状态。已新增/修改 [N] 个字符串。这些是冻结违规。在继续之前请通知你的本地化供应商。”
 
 ---
 
-## Phase 2J: QA Mode
+## Phase 2J: QA 模式
 
-Localization QA is a dedicated pass that runs after translations are delivered but
-before any locale ships. This is not the same as `/localize validate` (which checks
-completeness) — this is a structured playthrough-based quality check.
+本地化 QA 是一个专门的检查环节，在翻译交付之后、任何语言地区发布之前运行。它不同于 `/localize validate`（后者检查完整性）——这是基于结构化试玩的质量检查。
 
-Spawn `localization-lead` via `Agent` with:
-- The target locale(s) to QA
-- The list of all screens/flows in the game (from `design/gdd/` or `/content-audit` output)
-- The current `/localize validate` report
-- The cultural review report (if it exists)
+通过 `Agent` 派出 `localization-lead`，并提供：
+- 要 QA 的目标语言地区
+- 游戏中所有屏幕/流程的列表（来自 `design/gdd/` 或 `/content-audit` 输出）
+- 当前的 `/localize validate` 报告
+- 文化审查报告（如果存在）
 
-Ask the localization-lead to produce a QA plan covering:
+要求 localization-lead 制定一份 QA 计划，涵盖：
 
-1. **Functional string check** — every string displays in-game without truncation, placeholder errors, or encoding corruption
-2. **UI overflow check** — translated strings that exceed UI bounds (even if within character limits, some languages expand)
-3. **Contextual accuracy** — a sample of 10% of strings reviewed in-game for translation accuracy and natural phrasing
-4. **Cultural review items** — verify all BLOCKING items from the cultural review are resolved
-5. **VO sync check** — if VO exists, verify lip sync or subtitle timing is acceptable after translation
-6. **Platform cert requirements** — check platform-specific localization requirements (age ratings text, legal notices, ESRB/PEGI/CERO text)
+1. **功能字符串检查** — 每个字符串在游戏中显示时都没有截断、占位符错误或编码损坏
+2. **用户界面（UI）溢出检查** — 超出用户界面（UI）边界的翻译字符串（即使未超出字符限制，某些语言也会膨胀）
+3. **上下文准确性** — 在游戏内抽查 10% 的字符串，检查翻译准确性和措辞是否自然
+4. **文化审查项** — 验证文化审查中的所有 BLOCKING 项都已解决
+5. **VO 同步检查** — 如果存在 VO，验证翻译后的口型同步或字幕时间是否可以接受
+6. **平台认证要求** — 检查平台特定的本地化要求（年龄分级文本、法律声明、ESRB/PEGI/CERO 文本）
 
-Output a QA verdict per locale:
+按语言地区输出 QA 结论：
 
 ```
 ## Localization QA Verdict — [Locale]
@@ -422,33 +414,27 @@ Output a QA verdict per locale:
 [ ] Producer approves shipping [Locale]
 ```
 
-First match wins: **FAIL** if any BLOCKING finding is open; else **NOT ASSESSED**
-if a check could not run — the checks are playthrough-based, so a locale nobody
-has played in-game (or whose translations were not delivered) cannot pass on the
-string tables alone; name each check that did not run; else **PASS WITH
-CONDITIONS** if conditions remain; else **PASS**. NOT ASSESSED outranks both
-pass values — an unplayed locale has not passed — and ranks below FAIL, so an
-open BLOCKING finding is never buried behind it.
+优先匹配：如果有任何 BLOCKING 发现未解决，则为 **FAIL**；否则，如果某项检查无法运行，则为 **NOT ASSESSED**——这些检查基于试玩，因此没有任何人在游戏内玩过的语言地区（或其翻译尚未交付的语言地区）仅凭字符串表无法通过；请点名每项未运行的检查；否则，如果仍有条件未满足，则为 **PASS WITH CONDITIONS**；否则为 **PASS**。NOT ASSESSED 的优先级高于两个通过值——未被试玩过的语言地区尚未通过——且低于 FAIL，因此未解决的 BLOCKING 发现永远不会被其掩盖。
 
-Ask: "May I write this localization QA report to `production/localization/loc-qa-[locale]-[date].md`?"
+询问：“我可以把这份本地化 QA 报告写入 `production/localization/loc-qa-[locale]-[date].md` 吗？”
 
-**Gate integration**: At `workflow: full`, the Polish → Release gate requires a PASS or PASS WITH CONDITIONS verdict for every translated locale being shipped (recommended at `standard`; dropped at `minimal`). A FAIL blocks release for that locale only — other locales may still proceed if their QA passes. A NOT ASSESSED locale has not passed: its QA did not run.
+**质量闸门（gate）集成**：在 `workflow: full` 下，Polish → Release 质量闸门要求每个要发布的已翻译语言地区都获得 PASS 或 PASS WITH CONDITIONS 结论（在 `standard` 下为推荐，在 `minimal` 下不要求）。FAIL 仅阻止该语言地区的发布——其他语言地区如果通过 QA 仍可继续。NOT ASSESSED 的语言地区尚未通过：其 QA 未运行。
 
 ---
 
-## Phase 3: Rules and Next Steps
+## Phase 3: 规则与后续步骤
 
-### Rules
-- English (en) is always the source locale
-- Every string table entry must include a `context` field with translator notes, character limits, and placeholder meaning
-- Never modify translation files directly — generate diffs for review
-- Character limits must be defined per-UI-element and enforced in validate mode
-- String freeze must be called before sending strings to translators — never translate a moving target
-- RTL support must be designed in from the start — retrofitting RTL layout is expensive
-- Cultural review is required for any locale where the game will be sold commercially
-- VO scripts must include director notes — raw dialogue lines produce flat recordings
+### 规则
+- 英文（en）始终是源语言地区
+- 每个字符串表条目都必须包含 `context` 字段，附译者注释、字符限制和占位符含义
+- 绝不要直接修改翻译文件——生成差异供审查
+- 字符限制必须按用户界面（UI）元素定义，并在 validate 模式中强制执行
+- 必须先将字符串发送给译者之前调用字符串冻结——绝不要翻译移动目标
+- RTL 支持必须从一开始就设计好——事后改造 RTL 布局成本高昂
+- 对于游戏将进行商业销售的任何语言地区，都必须进行文化审查
+- VO 脚本必须包含导演注释——原始对话台词会产生平淡的录音
 
-### Recommended Workflow
+### 推荐工作流
 
 ```
 /localize scan            → find hardcoded strings
@@ -463,4 +449,4 @@ Ask: "May I write this localization QA report to `production/localization/loc-qa
 /localize qa              → full localization QA pass
 ```
 
-After `qa` returns PASS or PASS WITH CONDITIONS for every translated locale you ship, include the QA report paths when running `/gate-check release`.
+在 `qa` 为你发布的每个已翻译语言地区返回 PASS 或 PASS WITH CONDITIONS 后，在运行 `/gate-check release` 时附上 QA 报告路径。

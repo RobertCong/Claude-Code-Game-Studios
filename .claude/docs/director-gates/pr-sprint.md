@@ -1,24 +1,21 @@
-> Gate definition. The spawning skill passes this file's path to the director agent; the AGENT reads it — the parent session should not.
+> 质量闸门定义。发起调用的技能会把本文件路径传给总监代理；由该 AGENT 读取——父会话不应读取。
 
-# PR-SPRINT — Sprint Feasibility Review
+# PR-SPRINT — 冲刺可行性评审
 
-Agent: `producer` | Model tier: Opus | Domain: Scope, timeline, dependencies, production risk
+Agent：`producer` | 模型层级：session（继承） | 领域：范围、时间线、依赖、制作风险
 
-**Trigger**: Before finalising a sprint plan (`/sprint-plan`), and after any
-mid-sprint scope change
+**触发时机**：冲刺计划定稿之前（`/sprint-plan`），以及任何冲刺中期范围变更之后
 
-**Context to pass**:
-- Proposed sprint story list (titles, estimates, dependencies)
-- Team capacity (hours available)
-- Current sprint backlog debt (if any)
-- Milestone constraints
+**需传入的上下文**：
+- 拟定的冲刺用户故事清单（标题、估算、依赖）
+- 团队产能（可用工时）
+- 当前冲刺积压欠账（如有）
+- 里程碑约束
 
-**Prompt**:
-> "Review this sprint plan for feasibility. Is the story load realistic for the
-> available capacity? Are stories correctly ordered by dependency? Are there hidden
-> dependencies between stories that could block the sprint mid-way? Are any stories
-> underestimated given their technical complexity? Return REALISTIC (plan is
-> achievable), CONCERNS [specific risks], or UNREALISTIC [sprint must be
-> descoped — identify which stories to defer]."
+**提示词**：
+> "审查这份冲刺计划的可行性。故事负载相对于可用产能是否现实？故事是否按依赖正确
+> 排序？故事之间是否存在可能中途阻塞冲刺的隐藏依赖？考虑到技术复杂度，是否有
+> 故事被低估？返回 REALISTIC（计划可达成）、CONCERNS [具体风险]，或 UNREALISTIC
+> [必须削减冲刺范围——指出应推迟哪些故事]。"
 
-**Verdicts**: REALISTIC / CONCERNS / UNREALISTIC
+**结论**：REALISTIC / CONCERNS / UNREALISTIC

@@ -1,65 +1,65 @@
-# Unreal Engine 5.8 — Input Module Reference
+# Unreal Engine 5.8 — 输入模块参考
 
-**Last verified:** 2026-10-17 (UE 5.8 changes block); 2026-02-13 (rest of file, written against 5.7)
-**Knowledge Gap:** UE 5.7+ uses Enhanced Input as default (legacy input deprecated); UE 5.8 unifies it with Common UI input
+**Last verified:** 2026-10-17（UE 5.8 变更区块）；2026-02-13（文件其余部分，针对 5.7 编写）
+**Knowledge Gap:** UE 5.7+ 默认使用 Enhanced Input（遗留输入已弃用）；UE 5.8 将其与 Common UI 输入统一
 
-> **UE 5.8 changes:** Enhanced Input and Common Input/UI are unified,
-> which "removes the need for duplicate data assets"; there is a new Input
-> Debugger for Enhanced Input UI. Fixes ship behind CVars that "will be removed
-> in a future release": `EnhancedInput.IgnoreHeldKeysOnFlush` (default true) and
-> `EnhancedInput.CorrectTouchBoolActionKeys` (default on). The Raw Input plugin
-> is deprecated (`"DeprecatedEngineVersion": "5.8"`) in favour of the Game Input
-> for Windows plugin (`GameInputWindows`, Beta); the release notes say to set
-> `IncludeRedistFiles=True` in the Game Input section of `DefaultEngine.ini` so
-> packaging includes `GameInputRedist.msi`. Source: UE 5.8 release notes, https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-5-8-release-notes?application_version=5.8
-
----
-
-## Overview
-
-UE 5.8 input systems:
-- **Enhanced Input** (RECOMMENDED, default in UE5): Modular, rebindable, context-based
-- **Legacy Input**: Deprecated, avoid for new projects
+> **UE 5.8 变更：** Enhanced Input 与 Common Input/UI 已统一，
+> 这"removes the need for duplicate data assets"；新增了
+> Input Debugger 用于 Enhanced Input UI。修复项位于 CVar 之后，这些 CVar
+> "will be removed in a future release"：`EnhancedInput.IgnoreHeldKeysOnFlush`（默认 true）与
+> `EnhancedInput.CorrectTouchBoolActionKeys`（默认开启）。Raw Input 插件
+> 已弃用（`"DeprecatedEngineVersion": "5.8"`），改用 Game Input
+> for Windows 插件（`GameInputWindows`，Beta）；发布说明要求
+> 在 `DefaultEngine.ini` 的 Game Input 区段设置
+> `IncludeRedistFiles=True`，以便打包时包含 `GameInputRedist.msi`。来源：UE 5.8 发布说明，https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-5-8-release-notes?application_version=5.8
 
 ---
 
-## Enhanced Input System
+## 概述
 
-### Setup Enhanced Input
-
-1. **Enable Plugin**: `Edit > Plugins > Enhanced Input` (enabled by default in UE5)
-2. **Project Settings**: `Engine > Input > Default Classes > Default Player Input Class = EnhancedPlayerInput`
+UE 5.8 输入系统：
+- **Enhanced Input**（推荐，UE5 中的默认项）：模块化、可重绑定、基于上下文
+- **Legacy Input**：已弃用，新项目请避免使用
 
 ---
 
-### Create Input Actions
+## Enhanced Input 系统
+
+### 设置 Enhanced Input
+
+1. **启用插件**：`Edit > Plugins > Enhanced Input`（在 UE5 中默认启用）
+2. **项目设置**：`Engine > Input > Default Classes > Default Player Input Class = EnhancedPlayerInput`
+
+---
+
+### 创建 Input Action
 
 1. Content Browser > Input > Input Action
-2. Name it (e.g., `IA_Jump`, `IA_Move`)
-3. Configure:
-   - **Value Type**: Digital (bool), Axis1D (float), Axis2D (Vector2D), Axis3D (Vector)
+2. 命名（例如 `IA_Jump`、`IA_Move`）
+3. 配置：
+   - **Value Type**：Digital (bool)、Axis1D (float)、Axis2D (Vector2D)、Axis3D (Vector)
 
-Example Input Actions:
-- `IA_Jump`: Digital (bool)
-- `IA_Move`: Axis2D (Vector2D)
-- `IA_Look`: Axis2D (Vector2D)
-- `IA_Fire`: Digital (bool)
+示例 Input Action：
+- `IA_Jump`：Digital (bool)
+- `IA_Move`：Axis2D (Vector2D)
+- `IA_Look`：Axis2D (Vector2D)
+- `IA_Fire`：Digital (bool)
 
 ---
 
-### Create Input Mapping Context
+### 创建 Input Mapping Context
 
 1. Content Browser > Input > Input Mapping Context
-2. Name it (e.g., `IMC_Default`)
-3. Add mappings:
+2. 命名（例如 `IMC_Default`）
+3. 添加映射：
    - `IA_Jump` → Space Bar
-   - `IA_Move` → W/A/S/D keys (combine X/Y)
+   - `IA_Move` → W/A/S/D 键（合成 X/Y）
    - `IA_Look` → Mouse XY
    - `IA_Fire` → Left Mouse Button
 
 ---
 
-### Bind Input in C++
+### 在 C++ 中绑定输入
 
 ```cpp
 #include "EnhancedInputComponent.h"
@@ -130,46 +130,46 @@ protected:
 
 ---
 
-## Input Triggers
+## 输入触发器（Input Trigger）
 
-### Trigger Types
+### 触发器类型
 
-Input Actions can have triggers to control when they fire:
-- **Pressed**: When input starts
-- **Released**: When input ends
-- **Hold**: Hold for duration
-- **Tap**: Quick press
-- **Pulse**: Repeated firing while held
+Input Action 可以带有触发器，以控制其触发时机：
+- **Pressed**：输入开始时
+- **Released**：输入结束时
+- **Hold**：按住一段时间
+- **Tap**：快速按下
+- **Pulse**：按住时重复触发
 
-### Add Trigger in Editor
+### 在编辑器中添加触发器
 
-1. Open Input Action asset
-2. Triggers > Add > Select trigger type (e.g., `Hold`)
-3. Configure (e.g., Hold Time = 0.5s)
-
----
-
-## Input Modifiers
-
-### Modifier Types
-
-Modifiers transform input values:
-- **Negate**: Flip sign (-1 ↔ 1)
-- **Dead Zone**: Ignore small inputs
-- **Scalar**: Multiply by value
-- **Smooth**: Smoothing over time
-
-### Add Modifier in Editor
-
-1. Open Input Action asset
-2. Modifiers > Add > Select modifier (e.g., `Negate`)
-3. Configure
+1. 打开 Input Action 资源
+2. Triggers > Add > 选择触发器类型（例如 `Hold`）
+3. 配置（例如 Hold Time = 0.5s）
 
 ---
 
-## Input Mapping Contexts (Context Switching)
+## 输入修饰器（Input Modifier）
 
-### Multiple Contexts
+### 修饰器类型
+
+修饰器会变换输入值：
+- **Negate**：翻转符号（-1 ↔ 1）
+- **Dead Zone**：忽略微小输入
+- **Scalar**：乘以一个值
+- **Smooth**：随时间平滑
+
+### 在编辑器中添加修饰器
+
+1. 打开 Input Action 资源
+2. Modifiers > Add > 选择修饰器（例如 `Negate`）
+3. 配置
+
+---
+
+## Input Mapping Context（上下文切换）
+
+### 多个上下文
 
 ```cpp
 // Define contexts
@@ -193,9 +193,9 @@ void EnterVehicle() {
 
 ---
 
-## Legacy Input (Deprecated)
+## 遗留输入（已弃用）
 
-### Legacy Input Bindings
+### 遗留输入绑定
 
 ```cpp
 // ❌ DEPRECATED: Do not use for new projects
@@ -213,13 +213,13 @@ void MoveForward(float Value) {
 }
 ```
 
-**Migration:** Use Enhanced Input instead.
+**迁移：** 请改用 Enhanced Input。
 
 ---
 
-## Gamepad Input
+## 手柄输入
 
-### Gamepad with Enhanced Input
+### 配合 Enhanced Input 使用手柄
 
 ```cpp
 // Input Mapping Context:
@@ -232,9 +232,9 @@ void MoveForward(float Value) {
 
 ---
 
-## Touch Input (Mobile)
+## 触摸输入（移动端）
 
-### Touch Input with Enhanced Input
+### 配合 Enhanced Input 使用触摸输入
 
 ```cpp
 // Input Mapping Context:
@@ -246,9 +246,9 @@ void MoveForward(float Value) {
 
 ---
 
-## Rebinding Input at Runtime
+## 运行时重绑定输入
 
-### Change Key Mapping
+### 更改按键映射
 
 ```cpp
 #include "PlayerMappableInputConfig.h"
@@ -266,9 +266,9 @@ Subsystem->AddPlayerMappedKey(/*..*/);
 
 ---
 
-## Input Debugging
+## 输入调试
 
-### Debug Input
+### 调试输入
 
 ```cpp
 // Console commands:
@@ -280,9 +280,9 @@ UE_LOG(LogTemp, Warning, TEXT("Move Input: %s"), *MoveVector.ToString());
 
 ---
 
-## Common Patterns
+## 常见模式
 
-### Check if Key Pressed (Quick & Dirty)
+### 检查按键是否按下（快速粗略法）
 
 ```cpp
 // For debugging only (not recommended for gameplay)
@@ -293,6 +293,6 @@ if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::SpaceBar)) {
 
 ---
 
-## Sources
+## 来源
 - https://docs.unrealengine.com/5.7/en-US/enhanced-input-in-unreal-engine/
 - https://docs.unrealengine.com/5.7/en-US/enhanced-input-action-and-input-mapping-context-in-unreal-engine/
