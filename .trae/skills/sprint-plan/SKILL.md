@@ -3,21 +3,19 @@ name: sprint-plan
 description: "基于当前里程碑、已完成工作和可用产能，制定新的或更新的冲刺计划。"
 argument-hint: "[new|update|status] [--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, Bash(bash "*/.claude/skills/sprint-plan/../../hooks/yaml-helper.sh" resolve_config *), Bash(ls production/sprints/*)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,story_granularity,workflow`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,story_granularity,workflow`
 
-已在上面解析——按原样使用；`--review` 覆盖 `review_mode`。无输出块时 →
-使用 `.claude/docs/config-resolution.md` 中的默认值。
+已在上一步解析——按原样使用；`--review` 覆盖 `review_mode`。无输出块时 →
+使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 # 冲刺计划
 
 
 ## 现有冲刺
 
-!`ls production/sprints/ 2>/dev/null || echo "(no production/sprints/ directory yet)"`
+**运行并读取输出：** `ls production/sprints/ 2>/dev/null || echo "(no production/sprints/ directory yet)"`
 
 在本技能运行前已解析——用它来在 Phase 1 中识别上一个冲刺，
 而不是重新执行 glob。
@@ -28,10 +26,10 @@ model: sonnet
 
 提取模式参数（`new`、`update` 或 `status`）。
 
-完整检查模式见 `.claude/docs/director-gates.md`。单个质量闸门（gate）的定义位于 `.claude/docs/director-gates/[gate-id].md`——被派出的 agent 读取自己的 gate 文件；不要在父会话中读取它。
+完整检查模式见 `.trae/docs/director-gates.md`。单个质量闸门（gate）的定义位于 `.trae/docs/director-gates/[gate-id].md`——被派出的 agent 读取自己的 gate 文件；不要在父会话中读取它。
 
 
-每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+每次 `AskUserQuestion` 调用都遵循 `.trae/docs/automation-modes.md`
 （collaborative 总是询问 · guided 仅重大问题 · autonomous 记录日志后继续；
 `automation_always_ask` 类别总是提示）。
 
@@ -41,7 +39,7 @@ model: sonnet
 就绪待办事项会被整体规划——绝不用编造的用户故事来填充。
 
 **评审模式检查**（在质量闸门运行之前）：
-- 使用上面解析块中的评审模式（`--review` 会为此
+- 使用上一步命令输出中的评审模式（`--review` 会为此
   次运行覆盖它）——不要重新解析，也不要询问。未配置时，
   它跟随 `modes.rigor`：`minimal` 时为 `solo`，`standard` 时为 `lean`。
 - **绝不要写入评审模式**——不要写入 `project.yaml`，也不要写入
@@ -60,7 +58,7 @@ model: sonnet
 
 1. **读取当前里程碑**，从 `production/milestones/` **如果它存在**。
    没有技能写入该目录——它是根据
-   `.claude/docs/templates/milestone-definition.md` 手工编写的。在大多数项目中
+   `.trae/docs/templates/milestone-definition.md` 手工编写的。在大多数项目中
    它不存在，这是正常状态，而不是缺失：注明“未定义里程碑——仅基于
    用户故事待办事项进行规划”并继续。绝不要因此阻塞
    冲刺规划，也绝不要从冲刺文件推断里程碑。
@@ -100,7 +98,7 @@ model: sonnet
 
 5. **检查风险登记册**，在 `production/risk-register/` **如果它存在**。
    与上面的里程碑一样，没有技能写入它——条目是根据
-   `.claude/docs/templates/risk-register-entry.md` 手工编写的。如果该目录
+   `.trae/docs/templates/risk-register-entry.md` 手工编写的。如果该目录
    不存在，说明一次（“无风险登记册——仅基于冲刺
    内容评估风险”），而不是静默跳过风险评估。
 
@@ -314,7 +312,7 @@ stories:
 - `lean` → 跳过（不是 PHASE-GATE）。注明：“PR-SPRINT 已跳过——Lean 模式。”继续到 Phase 5（QA 计划闸门）。
 - `full` → 照常派出。
 
-在最终确定冲刺计划之前，通过 `Agent` 使用质量闸门 **PR-SPRINT**（`.claude/docs/director-gates/pr-sprint.md`）派出 `producer`。
+在最终确定冲刺计划之前，通过 `Agent` 使用质量闸门 **PR-SPRINT**（`.trae/docs/director-gates/pr-sprint.md`）派出 `producer`。
 
 传递：拟议的用户故事列表（标题、估算、依赖）、团队总产能（小时/天）、上一个冲刺的任何结转、里程碑约束和截止日期，以及任何缺失的目标先决条件。
 
@@ -322,7 +320,7 @@ stories:
 
 如果为 UNREALISTIC：修订用户故事选择（将用户故事推迟到应该有或最好有），重新呈现更新后的计划，然后继续到 Phase 5。
 
-如果为 NOT ASSESSED：点名缺失的输入——它不是 REALISTIC。提供该输入并重新运行 PR-SPRINT，或在计划的头部（`.claude/docs/director-gates.md`）中为 PR-SPRINT 记录 `NOT ASSESSED — [missing input]` 并继续到 Phase 5，在写入请求时重复说明。
+如果为 NOT ASSESSED：点名缺失的输入——它不是 REALISTIC。提供该输入并重新运行 PR-SPRINT，或在计划的头部（`.trae/docs/director-gates.md`）中为 PR-SPRINT 记录 `NOT ASSESSED — [missing input]` 并继续到 Phase 5，在写入请求时重复说明。
 
 如果为 CONCERNS，使用 `AskUserQuestion`：
 - 提示：“制作人认为此冲刺计划存在关注项。你希望如何继续？”

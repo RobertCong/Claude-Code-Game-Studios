@@ -3,19 +3,19 @@
 本文档为每个编写、评审、闸门控制或规划项目产出物的技能定义 `modes.workflow` 和 `workflow_overrides`——即代码开始前**要求**多少设计文档。技能引用
 本文档，而不是内联嵌入层级表。
 
-**配套规格**：`.claude/docs/effects-map.md`
+**配套规格**：`.trae/docs/effects-map.md`
 的 `modes.workflow` 和 `workflow_overrides` 节是行为的
 事实来源。本文档是实现模式。
 
 > **不要在技能运行期间阅读 `effects-map.md`。** 它的体积是
-> CLAUDE.md 每次会话加载的全部内容之和的许多倍——而且它是
+> AGENTS.md 每次会话加载的全部内容之和的许多倍——而且它是
 > *编写和更改规格*的参考资料，不是运行时输入。
 > **本文档自给自足**，足以解析层级并应用它：解析链、三个层级、要求
 > 的小节以及覆盖规则都在这里。如果你遇到本文档确实未覆盖的情况，
 > 只读 `effects-map.md` 中与相关配置项有关的那一节——绝不要读整个文件。
 
-**相关共享文档**：`.claude/docs/automation-modes.md`（技能如何提示）、
-`.claude/docs/director-gates.md`（生成哪些评审者）。`workflow` 与两者
+**相关共享文档**：`.trae/docs/automation-modes.md`（技能如何提示）、
+`.trae/docs/director-gates.md`（生成哪些评审者）。`workflow` 与两者
 正交——它控制*必须存在哪些产出物*，而不是*技能如何提示*或*谁来评审*。
 
 ---
@@ -66,7 +66,7 @@ Resolve the workflow tier (store the result; see scope note below):
 
 > **在预期 GDD 已存在的地方检查——而不是由编写它们的技能检查。**
 > `/gate-check` 是唯一实现位置（见
-> `.claude/skills/gate-check/SKILL.md` §"Per-system overrides"），它在
+> `.trae/skills/gate-check/SKILL.md` §"Per-system overrides"），它在
 > 阶段边界运行，到那时每个范围内的 GDD 都应已在磁盘上。那里出现
 > 未匹配的键确实可疑。
 >
@@ -116,7 +116,7 @@ Resolve the workflow tier (store the result; see scope note below):
 | `standard` | 平衡 | 每个系统 5 个 GDD 小节、一份架构文档、关键 ADR、游戏概念、系统索引 | 已超出简报范围的项目——多个相互作用的系统，或由他人实现的设计 |
 | `minimal` | 低 | 单页 `design/game-brief.md` + 引擎选择（其构建顺序字段就是计划——无需单独的冲刺计划） | **默认。** Game jam 项目、小范围、设计已在脑中 |
 
-**默认**：`minimal`（`.claude/hooks/yaml-helper.sh` 中 `_yaml_helper_defaults` 上方的
+**默认**：`minimal`（`.trae/hooks/yaml-helper.sh` 中 `_yaml_helper_defaults` 上方的
 理由说明块包含推理和顺序
 约束）。**设置方式**：`/start`（通过 `modes.rigor`）、`/settings`。**锁定到
 `project.yaml`**（不可本地覆盖——分歧会改变
@@ -134,7 +134,7 @@ Resolve the workflow tier (store the result; see scope note below):
 
 > **"Game brief" 在 `minimal` 下是真实产出物：`design/game-brief.md`。**
 > 当生效层级为 `minimal` 时，`/brainstorm` 会从单页模板
-> （`.claude/docs/templates/game-brief.md`）写入它，
+> （`.trae/docs/templates/game-brief.md`）写入它，
 > 以替代它在
 > `standard`/`full` 下写入的完整长度 `design/gdd/game-concept.md`。两者是针对不同层级的
 > 不同文件：任何针对 `minimal` 设计产出物的检查、
@@ -150,7 +150,7 @@ Resolve the workflow tier (store the result; see scope note below):
 Edge Cases、Dependencies、Tuning Knobs、Acceptance Criteria。
 
 > **小节名称别名。** "Detailed Rules" 是设计
-> 标准中的规范名称，但 GDD 模板（`.claude/docs/templates/game-design-document.md`）
+> 标准中的规范名称，但 GDD 模板（`.trae/docs/templates/game-design-document.md`）
 > 和 `/design-system` 在标题 `## Detailed Design`
 > 下编写此节（带有 Core Rules / States / Interactions 子标题）。两个名称表示
 > **同一个要求的小节**——任何检测或验证小节存在性的技能
@@ -241,7 +241,7 @@ workflow_overrides:
 `content-audit`。
 
 **闸门执行**——`gate-check` 按阶段、按层级使用不同的产出物清单（影响可见度最高）。每个闸门自己的清单和
-层级削减位于 `.claude/skills/gate-check/references/gate-<phase>.md`，
+层级削减位于 `.trae/skills/gate-check/references/gate-<phase>.md`，
 而 `/gate-check` 只加载它正在运行的那一个闸门——那才是正确
 的查阅位置，而不是 `effects-map.md`。
 

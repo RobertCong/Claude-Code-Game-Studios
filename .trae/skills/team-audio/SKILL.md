@@ -3,8 +3,6 @@ name: team-audio
 description: "编排音频团队——audio-director、sound-designer、technical-artist、gameplay-programmer——从方向到实现。"
 argument-hint: "[feature or area to design audio for] [--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, TaskCreate, TaskGet, TaskList, TaskUpdate, Bash(bash "*/.claude/skills/team-audio/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
 # 音频团队（Team Audio）
@@ -21,14 +19,14 @@ model: sonnet
 在 `autonomous` 模式下，它端到端运行，并通过
 `log_decision` 记录每个步骤的结果。`automation_always_ask` 类别中的决策
 （`is_always_ask_category` 辅助函数）无论何种模式都会始终提示。参见
-`.claude/docs/automation-modes.md`。
+`.trae/docs/automation-modes.md`。
 
 ## Phase 0: 解析配置
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,team.size`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,team.size`
 
-以上已解析——直接使用；`--review` 覆盖 `review_mode`。无配置块 →
-使用 `.claude/docs/config-resolution.md` 中的默认值。
+以上命令的输出已解析——直接使用；`--review` 覆盖 `review_mode`。无配置块 →
+使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 `review_mode` 设定总监闸门（director gate）的深度，而本流水线没有总监闸门：
 无论 `review_mode` 为何，下面的任何阶段都不会生成 CD-、TD-、PR- 或 AD-PHASE-GATE。
@@ -36,7 +34,7 @@ model: sonnet
 而在这些点上工作的代理是团队成员，不是总监闸门。
 
 `automation` 驱动上面的决策点说明。关于每种模式如何改变流水线行为，参见上面的决策点说明和
-`.claude/docs/automation-modes.md`。
+`.trae/docs/automation-modes.md`。
 
 **`team.size`**：哪些代理处于活动状态（与 review_mode 的闸门深度和工作流文档相互正交）。
 - **`individual`**（默认）：仅 `sound-designer`。其他代理通过 sound-designer 咨询，不单独生成。
@@ -87,12 +85,12 @@ model: sonnet
 ## 如何委派
 
 使用 `Agent` 工具把每位团队成员生成为子代理：
-- `subagent_type: audio-director` —— 声音识别、情感基调、音频调色板
-- `subagent_type: sound-designer` —— SFX 规格、音频事件、混音分组
-- `subagent_type: accessibility-specialist` —— 关键音频的视觉替代与字幕、听觉敏感度
-- `subagent_type: technical-artist` —— 音频中间件、总线结构、内存预算
-- `subagent_type: [primary engine specialist]` —— 校验引擎的音频集成模式
-- `subagent_type: gameplay-programmer` —— 音频管理器、玩法触发器、自适应音乐
+- 委派给 `audio-director` 子代理 —— 声音识别、情感基调、音频调色板
+- 委派给 `sound-designer` 子代理 —— SFX 规格、音频事件、混音分组
+- 委派给 `accessibility-specialist` 子代理 —— 关键音频的视觉替代与字幕、听觉敏感度
+- 委派给 `technical-artist` 子代理 —— 音频中间件、总线结构、内存预算
+- 委派给 `[primary engine specialist]` 子代理 —— 校验引擎的音频集成模式
+- 委派给 `gameplay-programmer` 子代理 —— 音频管理器、玩法触发器、自适应音乐
 
 **为每个代理写简报——不要倾倒上下文。** 把共享输入**只读一次**，并以内联方式传递提炼后的简报：只给每个代理真正需要的那些行，绝不要把你已经读过的文档以文件路径形式发给它（拿到路径的代理会重新读取整个文件）。只有当你未读过、且只有该代理需要的文档，才传路径。
 
@@ -114,7 +112,7 @@ model: sonnet
 
 这些是工作草稿；持久记录是你由它们汇编而成的音频设计文档。
 
-> **为什么这不算违反协作协议。** `CLAUDE.md` 要求代理在 Write/Edit 之前询问"我可以把它写入 [filepath] 吗？"。在这里生成的子代理写入时**不**询问，这是有意为之的受限例外，而不是疏忽——与 `consistency-check` 追加到 `active.md` 时已有的处理相同。该例外仅在以下三者同时成立时才适用：（1）路径是**你**在提示词中点名的，因此用户在批准该阶段时已批准了目标位置；（2）它是位于 `production/`、`docs/` 或 `tests/` 下的新产出物，绝不是对现有源码或配置的修改；（3）产生它的阶段本身在流水线推进之前由 `AskUserQuestion` 把关。超出这三条，代理必须询问。**不要通过逐个子代理询问来"修复"这件事**——每个代理每个阶段都提示一次会让编排器无法使用，这正是该例外存在的原因。
+> **为什么这不算违反协作协议。** `AGENTS.md` 要求代理在 Write/Edit 之前询问"我可以把它写入 [filepath] 吗？"。在这里生成的子代理写入时**不**询问，这是有意为之的受限例外，而不是疏忽——与 `consistency-check` 追加到 `active.md` 时已有的处理相同。该例外仅在以下三者同时成立时才适用：（1）路径是**你**在提示词中点名的，因此用户在批准该阶段时已批准了目标位置；（2）它是位于 `production/`、`docs/` 或 `tests/` 下的新产出物，绝不是对现有源码或配置的修改；（3）产生它的阶段本身在流水线推进之前由 `AskUserQuestion` 把关。超出这三条，代理必须询问。**不要通过逐个子代理询问来"修复"这件事**——每个代理每个阶段都提示一次会让编排器无法使用，这正是该例外存在的原因。
 
 3. **按顺序编排音频团队**：
 
@@ -153,7 +151,7 @@ model: sonnet
 - 规划流式加载与预加载的资源策略
 - 设计任何音频响应式视觉效果
 
-并行生成**主要引擎专家**（由 `engine.name` 推导出 `<engine>-specialist` —— Godot→`godot-specialist`、Unity→`unity-specialist`、Unreal→`unreal-specialist`；回退到 `.claude/docs/technical-preferences.md` 中 `## Engine Specialists` 的 Primary 行）来校验集成方案：
+并行生成**主要引擎专家**（由 `engine.name` 推导出 `<engine>-specialist` —— Godot→`godot-specialist`、Unity→`unity-specialist`、Unreal→`unreal-specialist`；回退到 `.trae/docs/technical-preferences.md` 中 `## Engine Specialists` 的 Primary 行）来校验集成方案：
 - 提议的音频中间件集成对该引擎是否地道？（例如 Godot 内置的 AudioStreamPlayer 对比 FMOD、Unity 的 Audio Mixer 对比 Wwise、Unreal 的 MetaSounds 对比 FMOD）
 - 是否有应当使用的引擎特定音频节点/组件模式？
 - 固定引擎版本中是否有已知的音频系统变更会影响集成计划？
@@ -210,7 +208,7 @@ model: sonnet
 - 设计获批后，使用 `/dev-story` 实现音频管理器与事件系统。
 - 音频资源创建后运行 `/asset-audit`，校验命名与格式合规性。
 - 如果之前没有声音圣经，在下一轮音频工作之前创建一个：请
-  `audio-director` 代理依据 `.claude/docs/templates/sound-bible.md` 起草 `design/audio/sound-bible.md`，
+  `audio-director` 代理依据 `.trae/docs/templates/sound-bible.md` 起草 `design/audio/sound-bible.md`，
   从本次运行 Step 1 的方向开始（在 `design/` 下写入前它会先询问）。
 
 ## 错误恢复协议
@@ -223,7 +221,7 @@ model: sonnet
 通常还在。
 
 如果任何生成的代理返回 BLOCKED、报错或无法完成：**立即呈现出来，不要越过它阻塞的依赖继续推进，并始终产出
-部分报告。** 被跳过代理的章节保持为具名缺口——绝不要用自己的内容填充。完整流程：`.claude/docs/error-recovery-protocol.md`。
+部分报告。** 被跳过代理的章节保持为具名缺口——绝不要用自己的内容填充。完整流程：`.trae/docs/error-recovery-protocol.md`。
 
 常见阻塞项：
 - 输入文件缺失（找不到用户故事、缺少 GDD）→ 引导到创建它的技能

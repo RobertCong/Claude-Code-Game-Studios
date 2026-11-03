@@ -9,7 +9,7 @@ Agent：`art-director` | 模型层级：session（继承） | 领域：视觉识
 **需传入的上下文**：
 - 美术圣经路径（`design/art/art-bible.md`）
 - 游戏支柱与核心幻想
-- 平台与性能约束（`project.yaml` 中的 `platform.*` 与 `performance.*`，回退至 `.claude/docs/technical-preferences.md`）
+- 平台与性能约束（`project.yaml` 中的 `platform.*` 与 `performance.*`，回退至 `.trae/docs/technical-preferences.md`）
 - 头脑风暴阶段选定的视觉识别锚点（来自 `design/gdd/game-concept.md`；若没有 `design/gdd/game-concept.md`，则改传 `design/game-brief.md` 中的 "Art & audio direction" 一行）
 
 **提示词**：

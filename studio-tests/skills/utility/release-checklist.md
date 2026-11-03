@@ -4,7 +4,7 @@
 
 `/release-checklist [platform: pc|console|mobile|all]` 生成按项目范围收窄的
 预发布清单。它解析 `modes.rigor`、`modes.workflow`、
-`project.stage` 与 `platform.cert_tier`，读取 `CLAUDE.md` 与
+`project.stage` 与 `platform.cert_tier`，读取 `AGENTS.md` 与
 `production/milestones/` 中的当前里程碑，并从
 `production/qa/bugs/` 读取未解决缺陷（Severity 与 Status
 行）。缺陷条目使用解析出的 `workflow` 对应的发布
@@ -37,7 +37,7 @@ Complete 节，设备块由参数选择（默认 `all`），随后是
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 有 ≥2 个 phase 标题
 - [ ] 包含结论关键词：READY、NOT READY、NOT ASSESSED
 - [ ] 在写入清单之前包含 "May I write" 用语
@@ -58,7 +58,7 @@ Creative Director）是给人工使用的清单，而非被派发的闸门。正
 
 除非某个用例自己的 Fixture 另有说明，否则每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。
-规则见：`studio-tests/CLAUDE.md` §
+规则见：`studio-tests/AGENTS.md` §
 Fixture defaults。
 
 ---
@@ -78,7 +78,7 @@ Fixture defaults。
 **Input:** `/release-checklist pc`
 
 **Expected behavior:**
-1. 技能读取 `CLAUDE.md` 与当前里程碑
+1. 技能读取 `AGENTS.md` 与当前里程碑
 2. Codebase Health 说明分母：`scanned 40 source files: 3 TODO, 1
    FIXME, 0 HACK`，并列出该 FIXME
 3. 生成 PC 设备块；没有 Console 或 Mobile 设备块
@@ -159,7 +159,7 @@ Fixture defaults。
 **Expected behavior:**
 1. 代码根无法解析，因此不运行扫描
 2. Codebase Health 读作 `NOT ASSESSED — code root unresolved`
-   （`.claude/docs/code-root-resolution.md`），而非 `0` 个 TODO/FIXME/HACK
+   （`.trae/docs/code-root-resolution.md`），而非 `0` 个 TODO/FIXME/HACK
 3. 测试行读作 `Test results: NOT ASSESSED — no test output or CI logs
    found`，而非被省略
 4. 清单其余部分仍会生成并提供写入

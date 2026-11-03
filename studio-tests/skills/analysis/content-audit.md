@@ -28,7 +28,7 @@ COMPLETE / IN PROGRESS / EARLY / NOT STARTED，带 HIGH PRIORITY 标记，以及
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 有 ≥2 个 phase 标题
 - [ ] 包含状态与结论关键词：COMPLETE、IN PROGRESS、EARLY、NOT STARTED、NOT ASSESSED
 - [ ] 在可选报告写入 `docs/content-audit-[YYYY-MM-DD].md` 之前包含 "May I write"
@@ -46,7 +46,7 @@ COMPLETE / IN PROGRESS / EARLY / NOT STARTED，带 HIGH PRIORITY 标记，以及
 
 除非某个用例自己的 Fixture 另有说明，否则每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。
-规则见：`studio-tests/CLAUDE.md` §
+规则见：`studio-tests/AGENTS.md` §
 Fixture defaults。
 
 ---
@@ -256,7 +256,7 @@ Fixture defaults。
 
 **Fixture:**
 - `modes.workflow` 解析为 `full`
-- `project.yaml` 没有 `engine.name`；`.claude/docs/technical-preferences.md` 显示 `[TO BE CONFIGURED]`；`src/` 与 `Source/` 都存在，因此目录树无法决定根
+- `project.yaml` 没有 `engine.name`；`.trae/docs/technical-preferences.md` 显示 `[TO BE CONFIGURED]`；`src/` 与 `Source/` 都存在，因此目录树无法决定根
 - `design/gdd/systems-index.md` 列出 Levels（MVP）与 Enemies（MVP）
 - `design/gdd/levels.md` 指定 "6 levels"；`design/gdd/enemies.md` 指定 "3 enemy types: Grunt, Sniper, Boss"
 - `assets/data/enemies/` 包含 3 个敌人文件；`assets/` 下不存在场景文件

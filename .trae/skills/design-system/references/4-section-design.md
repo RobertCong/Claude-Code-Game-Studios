@@ -50,7 +50,7 @@ Context  ->  Questions  ->  Options  ->  Decision  ->  Draft  ->  Approval  ->  
    任何临时假设。
 
 6. **批准（Approval）**：依据解析出的 `modes.automation` 模式
-   （`.claude/docs/automation-modes.md`）：
+   （`.trae/docs/automation-modes.md`）：
 
    **在 `collaborative` 模式下**：紧接草稿之后 —— 在同一个响应中 —— 使用
    `AskUserQuestion`。**绝不使用纯文本。绝不跳过这一步。**

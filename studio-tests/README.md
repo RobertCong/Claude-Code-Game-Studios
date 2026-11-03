@@ -29,7 +29,7 @@
 ```
 studio-tests/
 ├── README.md              ← you are here
-├── CLAUDE.md              ← tells Claude how to use this framework
+├── AGENTS.md              ← tells Claude how to use this framework
 ├── catalog.yaml           ← master registry: all 74 skills + 49 agents, coverage tracking
 ├── quality-rubric.md      ← category-specific pass/fail metrics for /skill-test category
 │

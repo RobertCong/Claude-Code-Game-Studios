@@ -13,7 +13,7 @@
 
 确定所使用的引擎与语言：从 `project.yaml` 读取 `engine.name` 和
 `engine.language`。对于每个字段，如果键缺失或为空（包括 `project.yaml` 中没有
-`engine:` 块的情况），回退到 `CLAUDE.md` 和 `.claude/docs/technical-preferences.md`。
+`engine:` 块的情况），回退到 `AGENTS.md` 和 `.trae/docs/technical-preferences.md`。
 将 `[TO BE CONFIGURED]` 值视为未设置。
 
 ---

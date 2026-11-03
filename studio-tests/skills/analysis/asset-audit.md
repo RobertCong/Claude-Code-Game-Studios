@@ -10,10 +10,10 @@
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需夹具。
 
-- [ ] 具有必需的前置元数据（frontmatter）字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 具有 ≥2 个阶段标题
 - [ ] 包含结论关键词：COMPLIANT、WARNINGS、NON-COMPLIANT、NOT ASSESSED
-- [ ] 不要求「May I write」措辞（只读：`allowed-tools` 不含 Write/Edit，且技能声明不写入文件）
+- [ ] 不要求「May I write」措辞（只读：技能声明不写入文件）
 - [ ] 具有下一步交接（审计结果之后该做什么）
 
 ---
@@ -26,7 +26,7 @@
 
 ## Fixture Defaults
 
-除非某个用例自己的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见 `studio-tests/CLAUDE.md` § Fixture defaults。
+除非某个用例自己的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见 `studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 
@@ -241,14 +241,14 @@
 ### Case 9: 引擎未解析 — 扫描前停止
 
 **Fixture:**
-- `project.yaml` 没有 `engine.name`；`.claude/docs/technical-preferences.md` 内容为 `[TO BE CONFIGURED]`
+- `project.yaml` 没有 `engine.name`；`.trae/docs/technical-preferences.md` 内容为 `[TO BE CONFIGURED]`
 - `src/` 和 `Source/` 都存在，因此目录树无法判定引擎
 - `design/art/art-bible.md` 有资源标准；`assets/art/` 存放 PNG 文件
 
 **Input:** `/asset-audit`
 
 **Expected behavior:**
-1. Phase 2 无法按 `.claude/docs/code-root-resolution.md` 解析引擎或其代码根
+1. Phase 2 无法按 `.trae/docs/code-root-resolution.md` 解析引擎或其代码根
 2. 技能以 `NOT ASSESSED — engine unresolved` 停止，并点名 `/setup-engine`
 3. 不猜测任何资源根，因此不应用 Godot 命名模式，也不把任何章节报告为干净
 

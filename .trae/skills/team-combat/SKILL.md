@@ -3,8 +3,6 @@ name: team-combat
 description: "编排战斗团队 — game-designer、gameplay-programmer、ai-programmer、technical-artist、sound-designer、qa-tester — 从设计到实现与验证。"
 argument-hint: "[combat feature description] [--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, TaskCreate, TaskGet, TaskList, TaskUpdate, Bash(bash "*/.claude/skills/team-combat/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 # 战斗团队
 
@@ -22,14 +20,14 @@ model: sonnet
 在 `autonomous` 模式下，流水线端到端运行，并通过
 `log_decision` 记录每个阶段的结果。`automation_always_ask` 类别中的决策
 （`is_always_ask_category` 辅助函数）无论模式如何都会始终提示。参见
-`.claude/docs/automation-modes.md`。
+`.trae/docs/automation-modes.md`。
 
 ## Phase 0: 解析配置
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,team.size,workflow`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,team.size,workflow`
 
-已在上面解析——按原样使用；`--review` 覆盖 `review_mode`。无输出块时 →
-使用 `.claude/docs/config-resolution.md` 中的默认值。
+已在上一步解析——按原样使用；`--review` 覆盖 `review_mode`。无输出块时 →
+使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 `review_mode` 设定总监闸门深度，而本流水线没有总监闸门：
 在任何 `review_mode` 下，下面的阶段都不会派出 CD-、TD-、PR- 或 AD-PHASE-GATE。
@@ -37,7 +35,7 @@ model: sonnet
 在这些决策点上工作的 agent 是团队成员，而不是总监闸门。
 
 `automation` 驱动上面的决策点说明。关于每种模式如何改变流水线行为，
-参见上面的决策点说明和 `.claude/docs/automation-modes.md`。
+参见上面的决策点说明和 `.trae/docs/automation-modes.md`。
 
 `workflow` 像 `/design-system` 那样设定 Phase 1 设计文档的规模：
 `full` 时为 `## Summary` 加上全部 8 个章节；`standard` 时为 Overview、Detailed
@@ -86,13 +84,13 @@ GDD 是可选的——起草那五个章节，并告知用户在此工作流级�
 ## 如何委派
 
 使用 `Agent` 工具将每个团队成员作为子代理派出：
-- `subagent_type: game-designer` — 设计机制，定义公式和边界情况
-- `subagent_type: gameplay-programmer` — 实现核心玩法代码
-- `subagent_type: ai-programmer` — 实现 NPC/敌人 AI 行为
-- `subagent_type: technical-artist` — 创建 VFX、着色器效果、视觉反馈
-- `subagent_type: sound-designer` — 定义音频事件、打击音效、环境音频
-- `subagent_type: [primary engine specialist]` — 针对架构和实现的引擎惯用做法验证
-- `subagent_type: qa-tester` — 编写测试用例并验证实现
+- 委派给 `game-designer` 子代理 — 设计机制，定义公式和边界情况
+- 委派给 `gameplay-programmer` 子代理 — 实现核心玩法代码
+- 委派给 `ai-programmer` 子代理 — 实现 NPC/敌人 AI 行为
+- 委派给 `technical-artist` 子代理 — 创建 VFX、着色器效果、视觉反馈
+- 委派给 `sound-designer` 子代理 — 定义音频事件、打击音效、环境音频
+- 委派给 `[primary engine specialist]` 子代理 — 针对架构和实现的引擎惯用做法验证
+- 委派给 `qa-tester` 子代理 — 编写测试用例并验证实现
 
 **给每个 agent 写简报——不要倾倒上下文。** 只读取一次共享输入，并以内联方式传递提炼后的简报：每个 agent 实际需要的那几行，绝不要为你已经读过的文档传文件路径（拿到路径的 agent 会重新读取整个文件）。只为你尚未读过且只有该 agent 需要的文档传递路径。
 
@@ -122,7 +120,7 @@ Phase 6 是口头状态报告，不是产出物——没有路径，也不需要
 > ADR 本身，而且**仓库中没有任何东西读取这两个文件**。在报告时说明这一点，
 > 以便草图被理解为记录，而不是后续闸门的输入。
 
-> **为什么这不违反协作协议。** `CLAUDE.md` 要求 agent 在 Write/Edit 之前询问“May I write this to [filepath]?”。此处派出的子代理**不询问**即可写入，这是刻意的有界例外，而不是疏忽——与 `consistency-check` 追加到 `active.md` 时已做出的相同决定。该例外仅在以下三项全部成立时适用：（1）路径是**你**在提示中命名的，因此用户在批准该阶段时已批准目标；（2）它是 `production/`、`docs/` 或 `tests/` 下的新产出物，绝不是对现有源码或配置的编辑；（3）产生它的阶段本身在流水线推进前由 `AskUserQuestion` 把关。超出这三项，agent 必须询问。**不要通过按子代理逐个询问来“修复”这一点**——每个阶段每个 agent 一个提示会让编排器无法使用，这正是该例外存在的原因。
+> **为什么这不违反协作协议。** `AGENTS.md` 要求 agent 在 Write/Edit 之前询问“May I write this to [filepath]?”。此处派出的子代理**不询问**即可写入，这是刻意的有界例外，而不是疏忽——与 `consistency-check` 追加到 `active.md` 时已做出的相同决定。该例外仅在以下三项全部成立时适用：（1）路径是**你**在提示中命名的，因此用户在批准该阶段时已批准目标；（2）它是 `production/`、`docs/` 或 `tests/` 下的新产出物，绝不是对现有源码或配置的编辑；（3）产生它的阶段本身在流水线推进前由 `AskUserQuestion` 把关。超出这三项，agent 必须询问。**不要通过按子代理逐个询问来“修复”这一点**——每个阶段每个 agent 一个提示会让编排器无法使用，这正是该例外存在的原因。
 
 在流水线允许的情况下并行启动独立 agent（例如 Phase 3 的 agent 可以同时运行）。
 
@@ -130,7 +128,7 @@ Phase 6 是口头状态报告，不是产出物——没有路径，也不需要
 
 ### Phase 1: 设计
 委派给 **game-designer**：
-- 根据 `.claude/docs/templates/game-design-document.md` 创建或更新 `design/gdd/[feature].md` 的设计文档，包含 `## Summary` 和 `workflow` 要求的章节（Phase 0）——在 `full` 下：机制概述、玩家幻想、详细规则、带变量定义的公式、边界情况、依赖、带安全范围的调参旋钮，以及验收标准
+- 根据 `.trae/docs/templates/game-design-document.md` 创建或更新 `design/gdd/[feature].md` 的设计文档，包含 `## Summary` 和 `workflow` 要求的章节（Phase 0）——在 `full` 下：机制概述、玩家幻想、详细规则、带变量定义的公式、边界情况、依赖、带安全范围的调参旋钮，以及验收标准
 - 输出：完成的设计文档，草稿写入 `production/combat/[feature]-gdd-draft.md`
 
 `design/` 在上述有界写入例外之外，因此由 game-designer
@@ -200,7 +198,7 @@ Phase 6 是口头状态报告，不是产出物——没有路径，也不需要
 
 **首先，验证产出物。** 如果返回契约点名了路径，在将该阶段视为完成之前检查该路径是否存在——**一个已命名但不在磁盘上的产出物就是失败的阶段，无论回复读起来多么流畅。** 一个 agent 可能烧掉整个阶段，返回一段看似合理的前言却什么都没写，这既不是 BLOCKED，也不是错误，也不是“无法完成”，因此下面的触发器永远不会触发。以未满足的契约名义恢复它；上下文通常还在。
 
-如果任何派出的 agent 返回 BLOCKED、错误或无法完成：**立即暴露它，不要越过它阻塞的依赖继续推进，并且始终产生部分报告。** 被跳过 agent 的章节保持为已命名的缺口——绝不要用你自己的内容填充它。完整流程见：`.claude/docs/error-recovery-protocol.md`。
+如果任何派出的 agent 返回 BLOCKED、错误或无法完成：**立即暴露它，不要越过它阻塞的依赖继续推进，并且始终产生部分报告。** 被跳过 agent 的章节保持为已命名的缺口——绝不要用你自己的内容填充它。完整流程见：`.trae/docs/error-recovery-protocol.md`。
 
 常见阻塞项：
 - 输入文件缺失（未找到用户故事、缺少 GDD）→ 重定向到创建它的技能
@@ -230,7 +228,7 @@ Phase 6 是口头状态报告，不是产出物——没有路径，也不需要
 
 结论（Verdict）：**NEEDS WORK** — 每个阶段都运行了，但 Phase 5 验证留下了未解决的失败或未修复缺陷；报告会列出每项及其负责人。
 
-结论（Verdict）：**BLOCKED** — 一个或多个阶段无法完成，或有 agent 被跳过（`.claude/docs/error-recovery-protocol.md` 第 5 步）；已产生部分报告并列出未解决项。
+结论（Verdict）：**BLOCKED** — 一个或多个阶段无法完成，或有 agent 被跳过（`.trae/docs/error-recovery-protocol.md` 第 5 步）；已产生部分报告并列出未解决项。
 
 ## 后续步骤
 

@@ -3,21 +3,19 @@ name: skill-test
 description: "校验技能文件的结构合规性与行为正确性。四种模式：static 结构检查器、spec 规格测试、category 分类评分量规、audit 审计。"
 argument-hint: "static [skill-name | all] | spec [skill-or-agent-name] | category [skill-or-agent-name | all] | audit"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Bash(bash "*/.claude/skills/skill-test/../../hooks/yaml-helper.sh" resolve_config *), Bash(bash .claude/scripts/agent-check.sh*), Bash(bash .claude/scripts/compat-inventory.sh*)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation`
 
 **自动化模式**：解析 `modes.automation`（`project.local.yaml` →
 `project.yaml` → 默认 `collaborative`）。每次 `AskUserQuestion` 调用和
-每次文件写入都遵循 `.claude/docs/automation-modes.md`
+每次文件写入都遵循 `.trae/docs/automation-modes.md`
 （collaborative 始终询问 · guided 仅重大事项 · autonomous 记录并继续；
 `automation_always_ask` 类别始终提示）。
 
 # 技能测试
 
-校验技能（`.claude/skills/*/SKILL.md`）和 agent（`.claude/agents/*.md`）的
+校验技能（`.trae/skills/*/SKILL.md`）和 agent（`.trae/agents/*.md`）的
 结构合规性与行为正确性。无外部依赖 —
 完全在现有的技能/钩子/模板架构内运行。
 
@@ -32,7 +30,7 @@ model: sonnet
 
 **一次通过能证明什么。** 每种模式都只读取文件；没有一种会运行技能。`static`：
 文件具备技能所需的结构，而非它行为正确。`spec`：仔细阅读，说明覆盖了
-每种情况，而非 Claude 运行时会遵循它们。`category`：技能按书面内容
+每种情况，而非 Trae 运行时会遵循它们。`category`：技能按书面内容
 满足其类别的评分量规。`audit`：哪些技能和 agent 有规格，以及各自
 上次检查的时间。技能实际做什么，只有运行时才显现：在一个一次性项目副本中
 发出真实请求，在你使用的每个模型上，分别在有技能和无技能的情况下运行
@@ -45,7 +43,7 @@ model: sonnet
 根据第一个参数确定模式：
 
 - `static [name]` → 对一个技能运行 7 项结构检查，或对一个 agent 运行观察项
-- `static all` → 对所有技能运行 7 项结构检查（Glob `.claude/skills/*/SKILL.md`），外加每个 agent 的观察项
+- `static all` → 对所有技能运行 7 项结构检查（Glob `.trae/skills/*/SKILL.md`），外加每个 agent 的观察项
 - `spec [name]` → 读取技能或 agent 及其测试规格，评估断言
 - `category [name]` → 运行 `studio-tests/quality-rubric.md` 中类别专属的评分量规
 - `category all` → 对每个技能和每个在 catalog 中带 `category:` 的 agent 运行分类评分量规
@@ -61,10 +59,10 @@ model: sonnet
 
 **在 `spec` 或 `category` 之前先解析名称。** 在
 `studio-tests/catalog.yaml` 中查找：`skills:` 下的条目是技能
-（`.claude/skills/[name]/SKILL.md`）；`agents:` 下的条目是 agent
-（`.claude/agents/[name].md`）。若 catalog 中没有条目，则使用这两个文件中
+（`.trae/skills/[name]/SKILL.md`）；`agents:` 下的条目是 agent
+（`.trae/agents/[name].md`）。若 catalog 中没有条目，则使用这两个文件中
 存在的那一个。仅当两者都不存在时，报告“‘[name]’ 既不是
-`.claude/skills/` 中的技能，也不是 `.claude/agents/` 中的 agent。”并停止。
+`.trae/skills/` 中的技能，也不是 `.trae/agents/` 中的 agent。”并停止。
 一个同时也是普通单词的名称仍然是名称：`/skill-test spec help` 测试的是 `/help`
 技能，绝不会是对本技能用法的请求。
 
@@ -86,11 +84,13 @@ model: sonnet
 - `description:`
 - `argument-hint:`
 - `user-invocable:`
-- `allowed-tools:`
 
-若缺少任何一项则 **FAIL**。frontmatter 无法解析的文件同样无法通过 Check 1 —
-格式错误的 YAML 是这项检查存在的目的所要捕获的结构缺陷，而不是
-无法评估的文件；参见下方的单技能结果规则。
+并且**不得**包含 `model:` 或 `allowed-tools:`：Trae 的 Skill frontmatter 不支持
+`model`，`allowed-tools` 的工具名白名单也容易静默失效。
+
+若缺少任一必需字段，或仍包含 `model:` / `allowed-tools:`，则 **FAIL**。frontmatter
+无法解析的文件同样无法通过 Check 1 — 格式错误的 YAML 是这项检查存在的目的所要捕获的
+结构缺陷，而不是无法评估的文件；参见下方的单技能结果规则。
 
 ### Check 2 — 多个阶段
 技能必须具有 ≥2 个带编号的阶段标题。查找类似模式：
@@ -129,7 +129,7 @@ description 或正文承诺了评审、审计、检查、质量闸门或就绪�
 - 同一章节内相近位置出现 `"ask"` + `"write"`
 
 若不存在则 **WARN**（一些只读技能合理地跳过此项）。
-若 `allowed-tools` 包含 `Write` 或 `Edit` 但未找到写入前询问用语，则 **FAIL**。
+若技能正文承诺写入文件（提到 `Write`/`Edit`，或要求把产出物写到某个路径）但没有写入前询问用语，则 **FAIL**。Trae 不写 `allowed-tools`，因此不能再靠它判断技能是否可写。
 
 ### Check 5 — 下一步交接
 技能必须以推荐的下一步行动或后续路径结束。查找：
@@ -155,9 +155,9 @@ description 或正文承诺了评审、审计、检查、质量闸门或就绪�
 
 ### Agent 与委派观察项（不计分）
 
-对技能运行 `bash .claude/scripts/agent-check.sh --skill [name]`，
-对 agent 运行 `bash .claude/scripts/agent-check.sh --agent [name]`，或在 `static all` 时一次性运行
-`bash .claude/scripts/agent-check.sh`。它打印观察项，从不给出结论，此处任何内容都不会改变
+对技能运行 `bash .trae/scripts/agent-check.sh --skill [name]`，
+对 agent 运行 `bash .trae/scripts/agent-check.sh --agent [name]`，或在 `static all` 时一次性运行
+`bash .trae/scripts/agent-check.sh`。它打印观察项，从不给出结论，此处任何内容都不会改变
 技能的结论。在 `Observations:` 下报告它们，并逐一评判：
 
 - **`DELEGATION:`** 技能中把工作交给 agent 的部分。阅读它并
@@ -165,8 +165,7 @@ description 或正文承诺了评审、审计、检查、质量闸门或就绪�
   来源以及边界，以及它交给 agent 的是仅需少量
   工具调用的任务，还是对技能自身工作的复查。它的 `markers:` 是词数
   标记，用来说明该看哪里，而非评分。
-- **`AGENT:`** 设置中的模型、投入程度和回合上限，以及
-  description 旁边的工具：指出 description 中的任务并不需要的任何工具。
+- **`AGENT:`** description 旁边的工具与 `disallowedTools`：指出 description 中的任务并不需要的任何工具。Trae 子代理没有回合上限或自动记忆，因此不要评价这些字段。
 - **`NOTE:`** 无法解析的 frontmatter；`asks-user`（agent 没有
   提问工具，因此其问题应放在报告末尾）；被忽略或
   描述与实际不符的设置（`agent-type-list`、`preload-off`、
@@ -179,15 +178,14 @@ description 或正文承诺了评审、审计、检查、质量闸门或就绪�
 
 ### 兼容性观察项（不计分）
 
-对技能运行 `bash .claude/scripts/compat-inventory.sh --skill [name]`，
-对 agent 运行 `bash .claude/scripts/compat-inventory.sh --agent [name]`，或在 `static all` 时一次性运行
-`bash .claude/scripts/compat-inventory.sh`。每条 `FOUND:`
-行都是文件依赖只有 Claude Code 才提供之内容的位置，并标明
-其特性：questions、subagents、skill-loading、shell-lines、arguments、
-frontmatter、instructions、hooks、settings 或 tools。Claude Code 会运行
-所有这些，因此都不是缺陷，也不会改变结论。在
-`Compatibility:` 下报告它们，每个特性一行，注明其构造和行号；
-对于 `static all`，改为按特性给出 `COUNT:` 总计。`NOT FOUND:`
+对技能运行 `bash .trae/scripts/trae-compat-check.sh --skill [name]`，
+对 agent 运行 `bash .trae/scripts/trae-compat-check.sh --agent [name]`，或在 `static all` 时一次性运行
+`bash .trae/scripts/trae-compat-check.sh`。每条 `FOUND:`
+行都是文件仍然带有 Trae 不会按 Claude Code 方式执行的构造，并标明
+其类别：frontmatter、shell-lines、subagents、variables、rules、hooks 或 legacy-paths。
+这些行值得在迁移或评审时逐条确认；它们不改变技能的行为结论。在
+`Compatibility:` 下报告它们，每个类别一行，注明其构造和行号；
+对于 `static all`，改为按类别给出 `COUNT:` 总计。`NOT FOUND:`
 行表示名称未匹配任何文件：如实说明。如果脚本无法运行，写
 `Compatibility: not run (<reason>)`。
 
@@ -212,8 +210,7 @@ Observations (not scored):
     The brief names the output file and limits but no sources to read.
 
 Compatibility (not scored):
-  questions: AskUserQuestion (lines 13, 88) · shell-lines: shell-line (line 10)
-  frontmatter: allowed-tools, argument-hint, model, user-invocable (lines 4-7)
+  variables: var:CLAUDE_SKILL_DIR (line 10) · legacy-paths: .legacy (line 88)
 
 Verdict: WARNINGS (1 warning, 0 failures)
 Recommended: Add a "Follow-Up Actions" section at the end of the skill.
@@ -304,24 +301,23 @@ agent 文件，以及测试规格文件。
 
 **针对运行它的模型所能看到的内容进行评估。** 技能会在一个
 会话中运行，而派生出的 agent 在其自己的上下文中运行，两者都会加载项目的
-`CLAUDE.md`，以及它在 `@path` 行上导入的每个文件（派生出的 agent
+`AGENTS.md`，以及它在 `@path` 行上导入的每个文件（派生出的 agent
 会逐字引用 `coordination-rules.md` 而无需读取它）。
 也要读取这些文件。其中陈述的规则对每个技能和 agent 都算数 —
 引用其来源文件。当技能或 agent 自身的文件与之矛盾时，
 以自身文件为准：它是更具体的指令。
 
 **对于 agent**，规格的各章节是针对 agent 文件评估的 —
-并且也针对其 frontmatter 在 `skills:` 下列出的每个技能，这些技能会被 Claude
-Code 在启动时加载进 agent：
+并且也针对其正文提到的每个可加载技能（Trae 用 Skill 工具按需加载，不预先注入）：
 
 - **Static Assertions** — 对照 agent 的 frontmatter 和正文逐条检查。
-  命名了字面值（一个 `model:` 别名、一个 frontmatter 键、
-  一个工具名）的断言是与文件的精确比较：`model: inherit` 不满足
-  “Model tier is `sonnet`”，近似匹配是 FAIL，绝不是 PARTIAL。
+  命名了字面值（一个 `description` 关键词、一个 frontmatter 键、
+  一个工具名）的断言是与文件的精确比较：`tools: Read, Glob` 不满足
+  “tools includes Write”，近似匹配是 FAIL，绝不是 PARTIAL。
 - **Test Cases** — 按下方评估技能的方式，根据 agent 的
   书面说明评估每个用例的预期行为。命名了质量闸门 ID（`LP-FEASIBILITY`、`CD-PILLARS`、…）的用例
   就是对该闸门的调用：派生它的技能会让 agent 先读取
-  `.claude/docs/director-gates/[gate-id].md`，因此该文件的 Prompt 和
+  `.trae/docs/director-gates/[gate-id].md`，因此该文件的 Prompt 和
   Verdicts 就是 agent 针对该用例的说明 — 也要读取它。
 - **重定向与升级用例** — agent 被要求做另一个角色
   拥有的工作，或遇到它无法解决的冲突。当已加载的
@@ -354,7 +350,7 @@ Code 在启动时加载进 agent：
 没有单独的检查清单就让用例结论悬而未决。
 
 对每条断言，评估若在给定 fixture 状态下正确遵循技能的书面说明，
-是否会满足它。这是由 Claude 评估的推理检查，而非代码执行。
+是否会满足它。这是由模型评估的推理检查，而非代码执行。
 
 标记每条断言：
 - **PASS** — 技能说明清楚地满足该断言
@@ -450,7 +446,7 @@ FAIL、PARTIAL、NOT ASSESSED、PASS。无人能评估的断言会阻止
 并逐一处理，技能和 agent 分别在两个表中报告。
 `category: utility` 的技能仅按 U1（静态检查通过）和 U2
 （质量闸门模式正确，若适用）评估 — U1 跳到 static 模式。
-对照 `.claude/skills/*/SKILL.md` 和 `.claude/agents/*.md`
+对照 `.trae/skills/*/SKILL.md` 和 `.trae/agents/*.md`
 交叉检查（Audit 模式的 Step 2 glob）：按名称列出任何未在 catalog 中的技能或 agent，
 或已编目但没有 `category:` 的，标记为 **NOT ASSESSED** — 绝不悄悄
 排除在运行之外。
@@ -466,9 +462,9 @@ FAIL、PARTIAL、NOT ASSESSED、PASS。无人能评估的断言会阻止
 ### Step 3 — 读取技能
 
 完整读取技能的 `SKILL.md` 及其 `references/` 文件夹中的每个文件，或
-agent 的 `.claude/agents/[name].md`，
+agent 的 `.trae/agents/[name].md`，
 以及 Phase 2B Step 3 描述的项目上下文 — 由
-`CLAUDE.md` 或其导入文件中的规则满足的指标即算满足，并引用该文件。其针对
+`AGENTS.md` 或其导入文件中的规则满足的指标即算满足，并引用该文件。其针对
 重定向与升级用例的规则也决定领域、推迟和升级
 指标（D2、D3、L2、S1–S3、O2）。
 
@@ -521,11 +517,11 @@ catalog 中的 `last_category_result`。
 
 ### Step 2 — 枚举所有技能和 Agent
 
-Glob `.claude/skills/*/SKILL.md` 获取完整的技能列表。
+Glob `.trae/skills/*/SKILL.md` 获取完整的技能列表。
 从每个路径（目录名）提取技能名称。
 
-Glob `.claude/agents/*.md` 获取完整的 agent 列表 — 仓库本身，
-而非 catalog，才是被覆盖集合（`.claude/rules/skill-authoring.md` §5：
+Glob `.trae/agents/*.md` 获取完整的 agent 列表 — 仓库本身，
+而非 catalog，才是被覆盖集合（`.trae/rules/skill-authoring.md` §5：
 质量闸门从被覆盖集合推导，而非枚举它）。将两个 glob 的结果
 与 catalog 的 `skills:`/`agents:` 条目比较，并按名称报告任何
 未在 catalog 中的技能或 agent，这样未编目的就不会悄悄漏掉。

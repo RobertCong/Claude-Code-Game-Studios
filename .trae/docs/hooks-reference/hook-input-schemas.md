@@ -1,27 +1,30 @@
-# 钩子输入/输出 schema
+# 钩子输入/输出 schema（Trae）
 
-本文记录每种事件类型下，每个 Claude Code 钩子通过 stdin 收到的 JSON 负载，以及钩子的输出如何传递给用户和 Claude。每个负载还带有公共字段 `session_id`、`transcript_path`、`cwd` 和
-`hook_event_name`；下面的示例只展示事件特有的字段。完整参考资料是 Claude Code 钩子文档（https://code.claude.com/docs/en/hooks）。
+本文记录 `.trae/hooks.json` 中每个事件通过 stdin 收到的 JSON 负载，以及钩子的输出
+如何传递给用户和模型。完整参考资料是 Trae 钩子文档：
+<https://docs.trae.cn/ide_hook-configuration-reference>。
+
+所有负载都有公共字段 `session_id`、`cwd`、`hook_event_name`、`workspace_roots`；
+下面的示例只展示事件特有的字段。
 
 ## PreToolUse
 
-在工具执行前触发。退出码 2 **阻止**该调用。退出码 0 让调用继续走正常的权限流程——它并不等于批准，用户仍可能被询问。若要只警告而不阻止，退出 0 并打印钩子 JSON——
-见下文[输出](#output-warnings-someone-sees)。
+在工具执行前触发。退出码 2 **阻止**该调用；退出 0 让调用继续走正常的权限流程。
+只警告而不阻止时，退出 0 并打印钩子 JSON——见下文“输出”。
 
-### PreToolUse: Bash
+### PreToolUse: RunCommand
 
 ```json
 {
-  "tool_name": "Bash",
+  "tool_name": "RunCommand",
   "tool_input": {
-    "command": "git commit -m 'feat: add player health system'",
-    "description": "Commit changes with message",
-    "timeout": 120000
+    "command": "git commit -m 'feat: add player health system'"
   }
 }
 ```
 
-PowerShell 工具发送的形状相同，只是 `"tool_name": "PowerShell"`，因此匹配器写 `Bash|PowerShell` 即可同时覆盖两者。
+Trae 的终端工具名是 `RunCommand`（不是 `Bash`/`PowerShell`）。`matcher` 必须写
+`RunCommand` 才能覆盖所有终端命令。
 
 ### PreToolUse: Write
 
@@ -42,8 +45,9 @@ PowerShell 工具发送的形状相同，只是 `"tool_name": "PowerShell"`，�
   "tool_name": "Edit",
   "tool_input": {
     "file_path": "src/gameplay/health.gd",
-    "old_string": "var health = 100",
-    "new_string": "var health: int = 100"
+    "old_string": "var hp = 10",
+    "new_string": "var hp = config.max_hp",
+    "replace_all": false
   }
 }
 ```
@@ -54,119 +58,135 @@ PowerShell 工具发送的形状相同，只是 `"tool_name": "PowerShell"`，�
 {
   "tool_name": "Read",
   "tool_input": {
-    "file_path": "src/gameplay/health.gd"
+    "file_path": "design/gdd/combat.md",
+    "offset": 1,
+    "limit": 200
   }
 }
 ```
 
-在真实的负载中，文件工具的 `file_path` 是绝对路径，使用平台自身的分隔符——Windows 上是反斜杠。应先剥掉项目根目录，再从剩余部分的开头进行匹配（`assets/data/`）。像
-`/assets/data/` 这样在任意位置匹配的片段，也会命中同名的父文件夹以及项目之外的文件，例如用户自己的 `~/.claude/skills/`。
-`validate-assets.sh` 演示了剥离的做法。
+Trae 的 PreToolUse 负载**没有** `transcript_path`、`agent_type`、`agent_id`。
+子代理发起的调用与主代理形状相同，`validate-write.sh` 的子代理例外因此退化为普通规则。
 
 ## PostToolUse
 
-在工具完成后触发。**无法阻止**——工具已经执行了。退出码 2 会把 stderr 显示给 Claude，以便它修正刚写入的内容。退出 0 时 stderr 只进入调试日志，因此警告性质的提示必须以钩子 JSON 的形式写到 stdout。
-
-### PostToolUse: Write
+在工具完成后触发。**无法阻止**——工具已经执行了。退出码 2 会把 stderr 传给模型，
+以便它修正刚写入的内容。退出 0 时 stderr 只进入调试日志，因此警告性质的提示必须以
+钩子 JSON 的形式写到 stdout。
 
 ```json
 {
   "tool_name": "Write",
-  "tool_input": {
-    "file_path": "assets/data/enemy_stats.json",
-    "content": "{\"goblin\": {\"health\": 50}}"
-  },
-  "tool_response": {
-    "filePath": "assets/data/enemy_stats.json",
-    "type": "create"
-  }
-}
-```
-
-### PostToolUse: Edit
-
-```json
-{
-  "tool_name": "Edit",
-  "tool_input": {
-    "file_path": "assets/data/enemy_stats.json",
-    "old_string": "\"health\": 50",
-    "new_string": "\"health\": 75"
-  },
-  "tool_response": { "filePath": "assets/data/enemy_stats.json" }
-}
-```
-
-## SubagentStart
-
-通过 `Agent` 工具创建子代理时触发（Claude Code 2.1.63 之前名为 `Task`；`Task` 在权限规则和
-`tools:` frontmatter 中仍可作为别名使用，但钩子负载中的 `tool_name` 现已为 `Agent`）。代理的名称在 `agent_type` 中——没有 `agent_name` 字段。
-
-```json
-{
-  "agent_id": "agent-abc123",
-  "agent_type": "game-designer"
+  "tool_input": { "file_path": "assets/data/weapons.json", "content": "..." },
+  "tool_response": { "success": true }
 }
 ```
 
 ## SessionStart
 
-在会话开始、恢复、被 `/clear` 清除或被压缩时触发。
-stdin 携带 `source`：`startup`、`resume`、`clear`、`compact` 或 `fork`。纯 stdout 会被加入 Claude 的上下文——正是这个事件在压缩之后恢复上下文。
+在创建会话后、第一个提示之前触发。`source` 目前只支持 `startup`。
 
-## PreCompact
+```json
+{ "source": "startup" }
+```
 
-在上下文压缩前触发。stdin 携带 `trigger`（`manual` 或 `auto`）。
-**它的输出不会到达 Claude**：stdout 进入调试日志，`systemMessage` 被丢弃。退出码 2 会阻止压缩。
-
-## Stop
-
-**每次 Claude 完成一次回复时都会触发**，而不是在会话结束时只触发一次。
-stdin 携带公共字段以及 `stop_hook_active` 和
-`last_assistant_message`。退出码 2 会让 Claude 继续工作而非停止。
-
-## <a id="output-warnings-someone-sees"></a>Output: warnings someone sees
-
-只做警告、不得阻止的钩子应退出 0——并且**在退出 0 时，stderr 不会到达任何人**。改为把 JSON 对象打印到 stdout：
+纯文本 stdout 会作为附加上下文给模型；也可以用：
 
 ```json
 {
-  "systemMessage": "Shown to the user",
   "hookSpecificOutput": {
-    "hookEventName": "PostToolUse",
-    "additionalContext": "Given to Claude next to the tool result"
+    "hookEventName": "SessionStart",
+    "additionalContext": "上下文文本"
   }
 }
 ```
 
-- stdout 必须**只**包含该对象。
-- `hookEventName` 在 `hookSpecificOutput` 内是必需的。
-- **不要写 `permissionDecision`**，除非你确实有意为之：在 PreToolUse 上，`"allow"` 会跳过用户的权限提示。
+也可以通过 `TRAE_ENV_FILE` 写入环境变量，供本次会话后续的 Hook 和 RunCommand 使用。
 
-CCGS 钩子使用 `.claude/hooks/yaml-helper.sh` 中的 `hook_warn`，它负责构建该对象并转义消息，无需 `jq`：
+## Stop
 
-```bash
-. .claude/hooks/yaml-helper.sh
-hook_warn PostToolUse "Asset names must be lowercase: $FILE_PATH"
-exit 0
+**每次模型完成一次回复时都会触发**，而不是在会话结束时只触发一次。
+
+```json
+{
+  "stop_hook_active": false,
+  "loop_count": 0,
+  "last_assistant_message": "..."
+}
 ```
 
-## Exit Code Reference（退出码参考）
+退出码 2 会让模型继续工作而非停止；`loop_limit`（默认 5）限制阻断次数。
 
-| Exit Code | Meaning |
-|-----------|---------|
-| 0 | 成功。stdout 上的 JSON 对象会被读取为钩子输出；其他 stdout 进入调试日志，但 UserPromptSubmit、UserPromptExpansion、SessionStart 和 PostModelSwitch 除外，这些事件上它会加入 Claude 的上下文。stderr 只进入调试日志。 |
-| 2 | 在 PreToolUse（Claude 将 stderr 视为原因）、UserPromptSubmit（提示词被抹除）、UserPromptExpansion、Stop、SubagentStop（子代理继续工作）和 PreCompact 上阻止。在 PostToolUse 上向 Claude 显示 stderr——工具已执行。在 SessionStart、SubagentStart、PostCompact 和 PostModelSwitch 上只向用户显示 stderr。在 Notification 上被忽略。按事件分列的完整表格见 Claude Code 钩子文档。 |
-| Other | 非阻塞错误；操作照常继续。 |
+## Notification
 
-**输出上限为 10,000 个字符（实测；Claude Code 钩子文档未说明这一点）。**
-纯 stdout，以及 `additionalContext`、`systemMessage` 和
-`initialUserMessage` 各自单独计量。超过上限后，Claude Code 会把文本存到文件，并传递一个路径
-外加 2,000 字符的预览，而且没有任何机制提示 Claude 去读取该文件。把 Claude 必须看到的内容保持在上限之内——`session-start.sh` 正因如此对其检查点预览做了截断。
+`notification_type` 是 `permission_prompt` 或 `idle_prompt`；同时带 `message` 和
+可选 `tool_use_id`。
 
-## Notes（备注）
+```json
+{
+  "notification_type": "idle_prompt",
+  "message": "Agent is waiting for your input",
+  "tool_use_id": "toolu_xxx"
+}
+```
 
-- 钩子通过 **stdin**（管道）接收 JSON。用 `INPUT=$(cat)` 捕获。
-- 如可用则用 `jq` 解析，为跨平台兼容可回退到 `grep`。
-- 在 Windows 上，`grep -P`（Perl 正则）通常不可用。改用 `grep -E`（POSIX 扩展）。
-- 在 Windows 上路径分隔符可能是 `\`。比较路径时用 `sed 's|\\|/|g'` 归一化。
+## 输出
+
+### 通用流程控制
+
+```json
+{ "continue": true, "stopReason": "string" }
+```
+
+`continue: false` 会停止本次执行，优先级高于事件特定的 `decision`。
+
+### PreToolUse
+
+```json
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "allow",
+    "permissionDecisionReason": "原因",
+    "updatedInput": { "command": "改写后的命令" },
+    "additionalContext": "给模型的附加上下文"
+  }
+}
+```
+
+`permissionDecision` 可选 `allow` / `deny` / `ask`；多个 Hook 同时返回时优先级为
+`deny` → `ask` → `allow`。`updatedInput` 会整体替换原始参数。
+
+### PostToolUse / Stop
+
+```json
+{
+  "decision": "block",
+  "reason": "阻断原因",
+  "hookSpecificOutput": {
+    "hookEventName": "PostToolUse",
+    "additionalContext": "给模型的附加上下文"
+  }
+}
+```
+
+`decision` 只支持 `block`。在 Stop 上，`reason` 会作为新的用户请求让模型继续。
+
+### 没有 `systemMessage`
+
+Trae 的 Hook 输出规范没有 `systemMessage`。需要让用户看到的信息请写入
+`permissionDecisionReason` 或 `reason`；需要让模型看到的信息写入
+`additionalContext`。本仓库的 `hook_warn` 只输出 `additionalContext`。
+
+### 退出码
+
+| 退出码 | 行为 |
+| ---- | ---- |
+| `0` | 成功。stdout 按事件解析为 JSON 或纯文本；stderr 进入调试日志。 |
+| `2` | 阻断性错误。在 PreToolUse 等价于 `permissionDecision: deny`；在 PostToolUse/Stop 把 stderr 传给模型；在 SessionStart 不影响流程。 |
+| 其他 | 非阻断性错误，输出被忽略。 |
+
+## 不支持的事件
+
+Trae 没有 `SubagentStart` / `SubagentStop` / `PostCompact`。子代理审计钩子
+（`log-agent.sh`、`log-agent-stop.sh`、`validate-agent-artifact.sh`）因此未注册。

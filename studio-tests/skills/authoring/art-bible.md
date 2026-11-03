@@ -16,7 +16,7 @@
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] 具有必填的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 至少包含 2 个阶段标题
 - [ ] 包含记录在状态头中的质量闸门（gate）结论关键词：`APPROVED`、`CONCERNS`
 - [ ] 包含写入前询问用语：在文件存在之前询问 “May I create `design/art/art-bible.md` from the art bible template?”，以及每个小节明确指明写入的批准选项（`Lock this in and write it to design/art/art-bible.md`）
@@ -31,7 +31,7 @@
 |--------------|----------------------------------------------------------|------------|
 | AD-ART-BIBLE | Phase 5 — 在 Phase 1 范围内的所有小节写入之后 | 仅 full；lean 注明 “AD-ART-BIBLE skipped — Lean mode.”，solo 注明 “AD-ART-BIBLE skipped — Solo mode.” |
 
-该闸门以其定义中指定的代理身份启动（`.claude/docs/director-gates/ad-art-bible.md`：`art-director`），并接收该定义列出的四项内容：美术设定集路径、游戏支柱与核心幻想、平台与性能约束（`platform.*` 和 `performance.*`），以及视觉识别锚点。当输入为一页式简报时，它会把简报的提案（pitch）和 “what they feel” 行作为游戏支柱与核心幻想，并把 “Art & audio direction” 行作为锚点。
+该闸门以其定义中指定的代理身份启动（`.trae/docs/director-gates/ad-art-bible.md`：`art-director`），并接收该定义列出的四项内容：美术设定集路径、游戏支柱与核心幻想、平台与性能约束（`platform.*` 和 `performance.*`），以及视觉识别锚点。当输入为一页式简报时，它会把简报的提案（pitch）和 “what they feel” 行作为游戏支柱与核心幻想，并把 “Art & audio direction” 行作为锚点。
 
 向 `art-director`（以及 `ux-designer` / `technical-artist`）分派小节起草不属于质量闸门（gate）：它是强制性的，在每种评审模式下都会运行。
 
@@ -39,7 +39,7 @@
 
 ## Fixture Defaults
 
-除非某个案例自身的 Fixture 另有说明，每个案例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见 `studio-tests/CLAUDE.md` § Fixture defaults。
+除非某个案例自身的 Fixture 另有说明，每个案例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见 `studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 
@@ -58,7 +58,7 @@
 **Expected behavior:**
 1. Phase 0 读取游戏概念，并提取标题、提案、游戏支柱、Visual Identity Anchor 和平台
 2. Phase 1 提出一个 `AskUserQuestion`，包含 Scope 标签页（将 Full bible 标记为 Recommended，因为 `full` 要求全部 9 个小节）和自由文本 References 标签页，并说明它找到的锚点
-3. 第 1 节：由 `art-director` 起草；用户从 `[A] Lock this in and write it to design/art/art-bible.md` / `[B] Revise the one-liner` / `[C] Revise a supporting principle` / `[D] Describe my own direction` 中选择；在 “May I create `design/art/art-bible.md` from the art bible template?” 之后，从 `.claude/docs/templates/art-bible.md` 创建文件，并用已批准的小节替换第 1 节的 `[To be designed]` 行
+3. 第 1 节：由 `art-director` 起草；用户从 `[A] Lock this in and write it to design/art/art-bible.md` / `[B] Revise the one-liner` / `[C] Revise a supporting principle` / `[D] Describe my own direction` 中选择；在 “May I create `design/art/art-bible.md` from the art bible template?” 之后，从 `.trae/docs/templates/art-bible.md` 创建文件，并用已批准的小节替换第 1 节的 `[To be designed]` 行
 4. 第 2–4 节：一次 `art-director` 调用返回三个带标签的块；第 2 节先呈现，用明确指明写入的选项批准并写入，然后再呈现第 3 节，依此类推
 5. 第 5–6 节：一次 `art-director` 调用；逐节呈现、批准和写入
 6. 第 7 节：`art-director` 与 `ux-designer` 并行启动；第 8 节：`art-director` 与 `technical-artist` 并行启动；第 9 节：`art-director`
@@ -71,7 +71,7 @@
 - [ ] 每个小节的内容都来自被启动的专家代理，绝不来自编排器（orchestrator）自行起草
 - [ ] 第 2–4 节来自单次 `art-director` 调用，但逐节呈现、批准和写入
 - [ ] 在获得明确指明写入的选项批准之前不写入任何小节（`Lock this in and write it to design/art/art-bible.md`），且每个小节都在批准后立即写入
-- [ ] 只有在询问 “May I create `design/art/art-bible.md` from the art bible template?”（该询问明确指名文件）之后，才会从 `.claude/docs/templates/art-bible.md` 创建文件，从而其九个 `## N. Name` 标题正是 retrofit 模式（Case 4）所读取的标题
+- [ ] 只有在询问 “May I create `design/art/art-bible.md` from the art bible template?”（该询问明确指名文件）之后，才会从 `.trae/docs/templates/art-bible.md` 创建文件，从而其九个 `## N. Name` 标题正是 retrofit 模式（Case 4）所读取的标题
 - [ ] AD-ART-BIBLE 仅在全部九个小节写入之后才以 `art-director`（其闸门定义指定的代理）身份启动
 - [ ] AD-ART-BIBLE 接收全部四项上下文：美术设定集路径、游戏支柱与核心幻想、平台与性能约束，以及视觉识别锚点
 - [ ] APPROVE 结论记录在美术设定集的状态头行中

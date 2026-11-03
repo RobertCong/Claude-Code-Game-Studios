@@ -25,7 +25,7 @@
 #
 # OBSERVATIONS, NEVER VERDICTS
 #
-# Per CLAUDE.md: a script that scores or judges will eventually contradict a mode
+# Per AGENTS.md: a script that scores or judges will eventually contradict a mode
 # or override it cannot see. This one prints what it compared and what it found,
 # and always exits 0. The reader decides. A check that cannot run says so by
 # name — silence is never treated as agreement.
@@ -34,8 +34,8 @@ set -u
 export LC_ALL=C
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-if [ -n "${CLAUDE_PROJECT_DIR:-}" ] && [ -f "$CLAUDE_PROJECT_DIR/project.yaml" ]; then
-  ROOT="$CLAUDE_PROJECT_DIR"
+if [ -n "${TRAE_PROJECT_DIR:-}" ] && [ -f "$TRAE_PROJECT_DIR/project.yaml" ]; then
+  ROOT="$TRAE_PROJECT_DIR"
 fi
 cd "$ROOT" || exit 0
 

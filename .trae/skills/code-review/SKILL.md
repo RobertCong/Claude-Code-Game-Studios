@@ -3,17 +3,15 @@ name: code-review
 description: "架构级代码评审 —— 编码规范、SOLID、可测试性、性能关注点。"
 argument-hint: "[path-to-file-or-directory]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Bash(git log *), Agent, AskUserQuestion, Bash(bash "*/.claude/skills/code-review/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation`
 
 # 代码评审
 
 
 
-每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+每次 `AskUserQuestion` 调用都遵循 `.trae/docs/automation-modes.md`
 （collaborative 总是询问 · guided 仅重大事项询问 · autonomous 记录后继续；
 `automation_always_ask` 类别始终提示）。
 
@@ -48,13 +46,13 @@ model: sonnet
 
 ## Phase 1: 加载目标文件
 
-完整读取目标文件。读取 CLAUDE.md 以了解项目编码规范。
+完整读取目标文件。读取 AGENTS.md 以了解项目编码规范。
 
 ---
 
 ## Phase 2: 识别引擎专家
 
-从 `project.yaml` 读取 `specialists` 块；如果它缺失，回退到 `.claude/docs/technical-preferences.md` 的 `## Engine Specialists` 节。注意：
+从 `project.yaml` 读取 `specialists` 块；如果它缺失，回退到 `.trae/docs/technical-preferences.md` 的 `## Engine Specialists` 节。注意：
 
 - **Primary** 专家 —— 由 `engine.name` 派生的 `<engine>-specialist`（Godot→`godot-specialist`，Unity→`unity-specialist`，Unreal→`unreal-specialist`）；用于架构和广泛的引擎问题
 - **语言/代码专家** —— `specialists.code` —— 用于评审项目主要语言文件

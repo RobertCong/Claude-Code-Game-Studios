@@ -3,8 +3,6 @@ name: asset-audit
 description: "依照命名规范、文件大小预算与格式标准审计资源。找出孤立资源与缺失引用。"
 argument-hint: "[category|all]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Bash(stat *), Bash(file *), Bash(od *), Bash(wc *), Bash(du *)
-model: sonnet
 # Read-only diagnostic skill — no specialist agent delegation needed
 ---
 
@@ -62,7 +60,7 @@ model: sonnet
 ## Phase 2: 扫描资源目录
 
 资源位于引擎的资源根目录下：Godot 为 `assets/`，Unity 为 `Assets/`，Unreal 为 `Content/`。
-按 `.claude/docs/code-root-resolution.md` 解析引擎及其代码根目录；Phase 3 的孤立资源与
+按 `.trae/docs/code-root-resolution.md` 解析引擎及其代码根目录；Phase 3 的孤立资源与
 缺失资源搜索读取的就是该代码根目录。如果无法解析，停止：
 `NOT ASSESSED — engine unresolved`，并指出 `/setup-engine`。
 

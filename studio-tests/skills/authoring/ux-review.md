@@ -6,7 +6,7 @@
 
 Phase 2 加载交叉引用上下文：来自 `project.yaml` `platform` 块的输入方式（输入覆盖检查的权威来源）、`design/accessibility-requirements.md` 中承诺的无障碍层级、模式库、规格头部指明的 GDD 的 UI Requirements，以及玩家旅程。随后它按文档类型运行检查清单——UX 规格使用 Phase 3A（15 个完整性项加质量检查），HUD 设计使用 3B，模式库使用 3C——并输出结构化报告。类型来自文件的 `> **Template**:` 头部行（由 `/ux-design` 写入）；没有该行的文件按名称分类（`hud.md` → 3B，`interaction-patterns.md` → 3C，其他 → 3A），报告会说明假定了哪套检查清单。
 
-结论：**APPROVED**、**NOT ASSESSED**（无法读取规格，或某维度没有判断标准——例如未承诺无障碍层级）、**NEEDS REVISION**、**MAJOR REVISION NEEDED**。该技能为只读（`allowed-tools: Read, Glob, Grep`，外加唯一一次为 Pattern Library 规则解析 `workflow` 的 `resolve_config` 调用），不启动任何代理，其结论仅供参考。交接：APPROVED → `/team-ui` Phase 2；NEEDS REVISION → 修复后重新运行 `/ux-review`；MAJOR REVISION NEEDED → 返回 `/ux-design`。
+结论：**APPROVED**、**NOT ASSESSED**（无法读取规格，或某维度没有判断标准——例如未承诺无障碍层级）、**NEEDS REVISION**、**MAJOR REVISION NEEDED**。该技能为只读（技能正文只读（Read/Glob/Grep），外加唯一一次为 Pattern Library 规则解析 `workflow` 的 `resolve_config` 调用），不启动任何代理，其结论仅供参考。交接：APPROVED → `/team-ui` Phase 2；NEEDS REVISION → 修复后重新运行 `/ux-review`；MAJOR REVISION NEEDED → 返回 `/ux-design`。
 
 ---
 
@@ -14,10 +14,10 @@ Phase 2 加载交叉引用上下文：来自 `project.yaml` `platform` 块的输
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] 具有必填的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 至少包含 2 个阶段标题
 - [ ] 包含结论关键词：`APPROVED`、`NOT ASSESSED`、`NEEDS REVISION`、`MAJOR REVISION NEEDED`
-- [ ] 不包含 “May I write” 用语，且 `allowed-tools` 中没有 Write 或 Edit（技能为只读）
+- [ ] 不包含 “May I write” 用语（技能为只读）
 - [ ] 包含按结论区分的下一步交接（`/team-ui`、NOT ASSESSED 时缺失的输入、重新运行 `/ux-review`、`/ux-design`）
 
 ---
@@ -30,7 +30,7 @@ Phase 2 加载交叉引用上下文：来自 `project.yaml` `platform` 块的输
 
 ## Fixture Defaults
 
-除非某个案例自身的 Fixture 另有说明，每个案例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见 `studio-tests/CLAUDE.md` § Fixture defaults。
+除非某个案例自身的 Fixture 另有说明，每个案例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见 `studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 
@@ -39,7 +39,7 @@ Phase 2 加载交叉引用上下文：来自 `project.yaml` `platform` 块的输
 ### Case 1: 正常路径 — 完整的 UX 规格，APPROVED
 
 **Fixture:**
-- `design/ux/inventory.md` 遵循 `.claude/docs/templates/ux-spec.md`：头部包含 Status、Author、Platform Target（PC、Console）、Related GDDs（`design/gdd/inventory.md`）、Accessibility Tier 和 `> **Template**: UX Spec`；每个小节都已填充，包括 States & Variants（loading、empty、populated、error）、带焦点顺序的键盘与方向键导航、分别针对键盘/鼠标和手柄且每项都勾选的 Input Method Completeness Checklist 块，以及至少 5 条可测试的验收标准
+- `design/ux/inventory.md` 遵循 `.trae/docs/templates/ux-spec.md`：头部包含 Status、Author、Platform Target（PC、Console）、Related GDDs（`design/gdd/inventory.md`）、Accessibility Tier 和 `> **Template**: UX Spec`；每个小节都已填充，包括 States & Variants（loading、empty、populated、error）、带焦点顺序的键盘与方向键导航、分别针对键盘/鼠标和手柄且每项都勾选的 Input Method Completeness Checklist 块，以及至少 5 条可测试的验收标准
 - `design/accessibility-requirements.md` 承诺 Standard 层级
 - `design/ux/interaction-patterns.md` 存在，且规格中的每个交互组件都指明其中的一个模式
 - `project.yaml` 的 `platform` 块：`targets: [PC, Console]`、`gamepad_support: Full`
@@ -139,7 +139,7 @@ Phase 2 加载交叉引用上下文：来自 `project.yaml` `platform` 块的输
 ### Case 5: `all` 参数与无总监闸门
 
 **Fixture:**
-- `design/ux/` 包含 `hud.md`（由 `/ux-design hud` 写入，头部行为 `> **Template**: HUD Design`）、`inventory.md`（由 `/ux-design inventory` 写入，`> **Template**: UX Spec`）和 `pause-menu.md`（依据 `.claude/docs/templates/ux-spec.md` 手写，没有 Template 行）
+- `design/ux/` 包含 `hud.md`（由 `/ux-design hud` 写入，头部行为 `> **Template**: HUD Design`）、`inventory.md`（由 `/ux-design inventory` 写入，`> **Template**: UX Spec`）和 `pause-menu.md`（依据 `.trae/docs/templates/ux-spec.md` 手写，没有 Template 行）
 - `project.yaml` 中 `modes.review_mode: full`
 
 **Input:** `/ux-review all`
@@ -180,4 +180,4 @@ Phase 2 加载交叉引用上下文：来自 `project.yaml` `platform` 块的输
   fixture 测试。
 - 无参数提示（“要验证哪份规格”）未测试。
 - 当 `project.yaml` 没有 `platform` 块时回退到
-  `.claude/docs/technical-preferences.md`，再回退到规格头部的行为未测试。
+  `.trae/docs/technical-preferences.md`，再回退到规格头部的行为未测试。

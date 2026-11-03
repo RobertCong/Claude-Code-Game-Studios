@@ -150,9 +150,9 @@ to implement it.]
 也绝不重用 `Domain` 值（模板在 Engine Compatibility 下方的说明解释了原因）。
 
 5.5. **引擎专家验证** —— 在保存之前，通过 `Agent` 生成**主引擎专家**来验证起草的 ADR：
-   - 解析主专家：由 `project.yaml` 中的 `engine.name` 推导 `<engine>-specialist`（Godot→`godot-specialist`，Unity→`unity-specialist`，Unreal→`unreal-specialist`）；如果 `engine.name` 缺失或为空，读取 `.claude/docs/technical-preferences.md` 中 `## Engine Specialists` 章节的 Primary 行
+   - 解析主专家：由 `project.yaml` 中的 `engine.name` 推导 `<engine>-specialist`（Godot→`godot-specialist`，Unity→`unity-specialist`，Unreal→`unreal-specialist`）；如果 `engine.name` 缺失或为空，读取 `.trae/docs/technical-preferences.md` 中 `## Engine Specialists` 章节的 Primary 行
    - 如果未配置引擎（两个来源都未产出引擎），跳过此步，**在本次运行的输出中记录 ``Engine validation: NOT ASSESSED — no engine configured (`engine.name` unset in `project.yaml`)``。** 一项跳过却不作声明的检查与一项通过的检查无法区分；读者无法知道从未寻求过引擎指导。
-   - 生成 `subagent_type: [primary specialist]`，传入：ADR 的 Engine Compatibility 章节、Decision 章节、Key Interfaces，以及引擎参考文档路径。请他们：
+   - 委派给 `[primary specialist]` 子代理，传入：ADR 的 Engine Compatibility 章节、Decision 章节、Key Interfaces，以及引擎参考文档路径。请他们：
      1. 确认所提议的方法对于锁定版本的引擎是地道的
      2. 标出任何已弃用或在训练截止后发生变更的 API 或模式
      3. 识别当前 ADR 草案中未捕获的引擎专属风险或陷阱
@@ -164,7 +164,7 @@ to implement it.]
 - `lean` → 跳过（不是 PHASE-GATE）。注明："TD-ADR skipped — Lean mode." 进入第 5.7 步（GDD 同步检查）。
 - `full` → 照常生成。
 
-5.6. **技术总监战略评审** —— 在引擎专家验证之后，使用质量闸门 **TD-ADR**（`.claude/docs/director-gates/td-adr.md`）通过 `Agent` 生成 `technical-director`：
+5.6. **技术总监战略评审** —— 在引擎专家验证之后，使用质量闸门 **TD-ADR**（`.trae/docs/director-gates/td-adr.md`）通过 `Agent` 生成 `technical-director`：
    - 传入：ADR 文件路径（或草案内容）、引擎版本、领域、同一领域中的任何现有 ADR
    - TD 验证架构一致性（此决策是否与整个系统一致？）——区别于引擎专家的 API 级检查
    - 遇到 CONCERNS 时：逐字向用户展示，并使用 `director-gates.md` 中的标准选项询问——`Revise flagged items` / `Accept and proceed` / `Discuss further`。仅在 `Revise flagged items` 时修订被标出的 Decision 或 Alternatives 章节。
@@ -250,7 +250,7 @@ Registry candidates from this ADR:
 正在变更，将旧条目设为 `status: "superseded_by: ADR-[NNNN]"` 并添加新条目。保留引号：
 不加引号时，第二个冒号会使文件成为无效 YAML。
 
-写入后，运行 `bash .claude/scripts/registry.sh validate`，并在继续之前修复所有关于本次写入新增
+写入后，运行 `bash .trae/scripts/registry.sh validate`，并在继续之前修复所有关于本次写入新增
 或变更条目的行（DUPLICATE、STATUS 或 LAYOUT 行，UNQUOTED 行（为其点名的值加引号），或其所点名路径的 PATH_MISSING 行）；
 对于涉及其他条目的行，向用户点名说明，而不是未经请求就去修复。如果脚本缺失或不打印任何内容，
 说明注册表检查未运行，然后对照文件头部的规则重新读取你写入的条目。

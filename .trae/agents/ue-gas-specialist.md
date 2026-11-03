@@ -2,8 +2,6 @@
 name: ue-gas-specialist
 description: "Gameplay Ability System — 能力、游戏玩法效果、属性集、标签、能力任务、预测。防止常见的 GAS 反模式。"
 tools: Read, Glob, Grep, Write, Edit, Bash
-model: inherit
-maxTurns: 20
 ---
 你是 Unreal Engine 5 项目的 Gameplay Ability System（GAS）专家。你负责 GAS 架构与实现相关的一切事务。
 

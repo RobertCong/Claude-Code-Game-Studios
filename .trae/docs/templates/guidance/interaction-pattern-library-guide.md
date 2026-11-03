@@ -7,9 +7,9 @@
 
 | Template Section | Guidance File |
 |------------------|---------------|
-| Standard Control Patterns (Button variants, Toggle, Slider, Dropdown / Select, List Item, Grid Item, Modal Dialog, Confirmation Dialog, Toast / Notification, Tooltip, Progress Bar, Input Field, Tab Bar, Scroll Container) | `.claude/docs/templates/guidance/interaction-pattern-library-guide-standard-controls.md` |
-| Game-Specific UI Patterns (Inventory Slot, Ability / Skill Icon, Health / Resource Bar, Dialogue Box, Context Action Prompt, Damage Number) | `.claude/docs/templates/guidance/interaction-pattern-library-guide-game-specific.md` |
-| Navigation Patterns + Feedback and Loading Patterns (Screen Push / Pop / Replace, Focus Management, Escape / Cancel, Loading State, Empty State, Error State) | `.claude/docs/templates/guidance/interaction-pattern-library-guide-navigation-feedback.md` |
+| Standard Control Patterns (Button variants, Toggle, Slider, Dropdown / Select, List Item, Grid Item, Modal Dialog, Confirmation Dialog, Toast / Notification, Tooltip, Progress Bar, Input Field, Tab Bar, Scroll Container) | `.trae/docs/templates/guidance/interaction-pattern-library-guide-standard-controls.md` |
+| Game-Specific UI Patterns (Inventory Slot, Ability / Skill Icon, Health / Resource Bar, Dialogue Box, Context Action Prompt, Damage Number) | `.trae/docs/templates/guidance/interaction-pattern-library-guide-game-specific.md` |
+| Navigation Patterns + Feedback and Loading Patterns (Screen Push / Pop / Replace, Focus Management, Escape / Cancel, Loading State, Empty State, Error State) | `.trae/docs/templates/guidance/interaction-pattern-library-guide-navigation-feedback.md` |
 
 每个指导文件都包含其模式的完整参考规格——When to Use / When NOT to Use 的理由、
 含时间与音效值的完整状态表、无障碍需求，以及引擎实现说明。在填写模板中对应的

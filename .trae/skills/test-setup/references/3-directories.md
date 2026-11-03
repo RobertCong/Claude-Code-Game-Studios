@@ -51,7 +51,7 @@ production/qa/
 
 ## Test Naming
 
-Names follow the engine's language (`.claude/rules/test-standards.md`):
+Names follow the engine's language (`.trae/rules/test-standards.md`):
 - **Godot**: file `[system]_[feature]_test.gd`, function `test_[scenario]_[expected]`
   — `combat_damage_test.gd` → `test_base_attack_returns_expected_damage()`
 - **Unity**: class `[System]Tests` in `[System]Tests.cs`, method `[Scenario]_[Expected]`
@@ -79,7 +79,7 @@ A failed test suite blocks merging.
 
 README 和本技能的完成摘要指明相同的证据路径 —
 `production/qa/evidence/` 正是 `/smoke-check`、`/test-evidence-review`、
-`/qa-plan` 以及 `.claude/docs/coding-standards.md` 中证据表读取的位置，
+`/qa-plan` 以及 `.trae/docs/coding-standards.md` 中证据表读取的位置，
 因此 `tests/evidence/` 会是一个无人读取的目录。
 
 ### `production/qa/evidence/.gitkeep`

@@ -3,15 +3,13 @@ name: patch-notes
 description: "根据 git 历史与变更日志生成面向玩家的补丁说明。把开发者语言转译为玩家沟通语言。"
 argument-hint: "[version] [--style brief|detailed|full]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Bash(bash "*/.claude/skills/patch-notes/../../hooks/yaml-helper.sh" resolve_config *), Bash(git log *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation`
 
 **自动化模式**：解析 `modes.automation`（`project.local.yaml` →
 `project.yaml` → 默认 `collaborative`）。每次 `AskUserQuestion` 调用与
-每次文件写入都遵循 `.claude/docs/automation-modes.md`
+每次文件写入都遵循 `.trae/docs/automation-modes.md`
 （collaborative 总是询问 · guided 仅重大事项 · autonomous 记录后继续；
 `automation_always_ask` 类别总是询问）。
 
@@ -91,7 +89,7 @@ Verdict：**BLOCKED** —— 就此停止，不生成说明。
 
 **语气指南检测** —— 起草说明之前，检查写作风格指引：
 
-1. 检查 `.claude/docs/technical-preferences.md` 中是否有任何 "tone"、"voice" 或 "style"
+1. 检查 `.trae/docs/technical-preferences.md` 中是否有任何 "tone"、"voice" 或 "style"
    字段或章节。
 2. 如果 `docs/PATCH-NOTES-STYLE.md` 存在，检查它。
 3. 如果 `design/community/tone-guide.md` 存在，检查它。
@@ -102,7 +100,7 @@ Verdict：**BLOCKED** —— 就此停止，不生成说明。
 
 **模板检测** —— 检查是否存在补丁说明模板：
 
-1. Glob `docs/patch-notes-template.md` 与 `.claude/docs/templates/patch-notes-template.md`。
+1. Glob `docs/patch-notes-template.md` 与 `.trae/docs/templates/patch-notes-template.md`。
 2. 若在任一位置找到，读取它，并在 Phase 4 中用它替代内置风格模板（Brief / Detailed /
    Full）作为输出结构。用已分类的数据填写模板的各个章节，把每个类别映射到含义相同的模板
    章节（New Content → 其 new-features 章节，Bug Fixes → 其 fixes 章节）；没有对应章节的

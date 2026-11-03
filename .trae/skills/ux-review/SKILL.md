@@ -3,14 +3,12 @@ name: ux-review
 description: "验证 UX 规格、HUD 设计或模式库 — 无障碍、GDD 一致性、就绪度。APPROVED / NOT ASSESSED / NEEDS REVISION / MAJOR REVISION NEEDED。"
 argument-hint: "[file-path or 'all' or 'hud' or 'patterns']"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Bash(bash "*/.claude/skills/ux-review/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys workflow`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys workflow`
 
-上面已解析 — 直接使用。若无解析块 → 使用
-`.claude/docs/config-resolution.md` 中的默认值。
+上一步命令的输出已解析 — 直接使用。若无解析块 → 使用
+`.trae/docs/config-resolution.md` 中的默认值。
 
 # UX 评审
 
@@ -68,7 +66,7 @@ model: sonnet
 1. **输入与平台配置**：从 `project.yaml` 读取 `platform` 块
    （`platform.targets`、`platform.primary_input`、`platform.gamepad_support`、
    `platform.touch_support`）；如果 `project.yaml` 没有 `platform` 块，则
-   退回到 `.claude/docs/technical-preferences.md` 的 `## Input & Platform` 小节。对于支持的输入
+   退回到 `.trae/docs/technical-preferences.md` 的 `## Input & Platform` 小节。对于支持的输入
    方式集合：从 `project.yaml` 读取时，推导它 — 如果
    `targets` 中有 `PC` 或 `Web`，则为键盘/鼠标；如果 `gamepad_support` 为 Full 或
    Partial，则为手柄；如果 `touch_support` 为 Full 或 Partial，则为触摸；

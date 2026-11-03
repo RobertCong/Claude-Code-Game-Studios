@@ -27,7 +27,7 @@
 
 由 `/skill-test spec` 对照 SKILL.md 检查 —— 无需夹具。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 至少有 2 个阶段标题
 - [ ] 对其错误恢复协议的 `BLOCKED` 关键字执行检查 3 通过；该技能按设计没有运行结论（产出物生产者），运行以 "Asset specs complete for **[target]**. What's next?" 收尾
 - [ ] 对规格文件包含 "May I write" 措辞，对清单包含 "May I update"
@@ -52,7 +52,7 @@
 
 除非用例自身的夹具另有说明，每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有
-`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
+`project.local.yaml`。规则见：`studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 

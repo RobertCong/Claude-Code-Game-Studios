@@ -1,9 +1,9 @@
-# /setup-engine — 第 4 节：更新 CLAUDE.md 技术栈
+# /setup-engine — 第 4 节：更新 AGENTS.md 技术栈
 
 > 属于 `/setup-engine` 的一部分。`SKILL.md` 指明何时读取本文件；它解析出的
 > 设置及其后续标题下的规则在此仍然适用。
 
-## 4. 更新 CLAUDE.md 技术栈
+## 4. 更新 AGENTS.md 技术栈
 
 ### 语言选择（仅 Godot）
 
@@ -17,7 +17,7 @@
 >
 > 本项目主要使用哪一种？"
 
-记录该选择。它决定 CLAUDE.md 模板、命名约定、专家路由，以及整个项目中为代码文件生成哪个 agent。
+记录该选择。它决定 AGENTS.md 模板、命名约定、专家路由，以及整个项目中为代码文件生成哪个 agent。
 
 ### 主要语言（Unreal）
 
@@ -27,8 +27,8 @@ C++ 还是 Blueprint 中？" — `[A] C++ (Blueprints for tuning and prototyping
 
 ---
 
-读取 `CLAUDE.md` 并向用户展示拟议的技术栈变更。
-询问："我可以把这些引擎设置写入 `CLAUDE.md` 吗？"
+读取 `AGENTS.md` 并向用户展示拟议的技术栈变更。
+询问："我可以把这些引擎设置写入 `AGENTS.md` 吗？"
 
 在做任何编辑之前等待确认。
 
@@ -56,7 +56,7 @@ Language 行遵循上面的主要语言回答：`[A]`（`engine.language: "C++"`
 
 ### 引擎引用导入
 
-在同一次 CLAUDE.md 写入中，把 **Engine Version Reference** 导入设置为
+在同一次 AGENTS.md 写入中，把 **Engine Version Reference** 导入设置为
 所选引擎。找到标记为 `ENGINE-REFERENCE-IMPORT` 的行（其注释下方的
 `@docs/engine-reference/<engine>/VERSION.md` 行），Edit 它
 使其指向已配置的引擎：

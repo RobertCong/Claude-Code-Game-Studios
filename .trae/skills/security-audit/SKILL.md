@@ -3,19 +3,17 @@ name: security-audit
 description: "安全审计——存档篡改、作弊途径、网络漏洞利用、数据暴露、输入验证。在公开发布或多人发布之前使用。"
 argument-hint: "[full | network | save | input | quick]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Agent, Bash(bash "*/.claude/skills/security-audit/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow`
 
 **自动化模式**：解析 `modes.automation`（`project.local.yaml` →
 `project.yaml` → 默认 `collaborative`）。每次 `AskUserQuestion` 调用和
-每次文件写入都遵循 `.claude/docs/automation-modes.md`
+每次文件写入都遵循 `.trae/docs/automation-modes.md`
 （协作模式始终询问 · 引导模式仅询问重大决策 · 自主模式记录并继续；
 `automation_always_ask` 类别始终询问）。
 
-**`workflow`**（上面已解析）只决定 Phase 7 就发布闸门告诉你什么：
+**`workflow`**（上一步命令的输出已解析）只决定 Phase 7 就发布闸门告诉你什么：
 在 `standard` 和 `full` 下它需要本报告；在 `minimal` 下不需要。
 审计本身在每个层级都以相同方式运行。
 
@@ -49,7 +47,7 @@ model: sonnet
 - `quick`——仅高严重度检查（最快，用于迭代使用）
 - 无参数——运行 `full`
 
-读取 `project.yaml` 以确定以下内容，当某个键缺失或为空时回退到 `.claude/docs/technical-preferences.md` 的引擎/语言/平台：
+读取 `project.yaml` 以确定以下内容，当某个键缺失或为空时回退到 `.trae/docs/technical-preferences.md` 的引擎/语言/平台：
 - `engine.name` 和 `engine.language`——**承重项：它们选择 Phase 3
   的模式集，而某个类别若没有针对该引擎的已溯源集合，该
   类别即成为 `NOT ASSESSED`。** 如果 `engine.name` 缺失或为空，在
@@ -93,7 +91,7 @@ model: sonnet
 
 **发送以下固定简报模板。** 只填写 `{…}` 槽位，来源为
 `project.yaml`（否则技术偏好）、按
-`.claude/docs/code-root-resolution.md` 解析的代码根，以及原样复制的 Phase 3 文本。
+`.trae/docs/code-root-resolution.md` 解析的代码根，以及原样复制的 Phase 3 文本。
 不要添加任何其他内容：不对游戏类型发表看法，不预期严重度，不对
 任何发现发表意见——你自己的一句话正是预评级混入的地方。
 
@@ -397,7 +395,7 @@ At `workflow: standard` and `full`, the Polish → Release gate requires this re
 ## Phase 7: 闸门集成
 
 本报告是 `workflow: standard` 和 `full` 下 **Polish → Release 闸门**的必需产出物；
-`minimal` 闸门则连同冒烟测试和 S1 缺陷之外的一切一起放弃它。根据上面解析出的 `workflow`，
+`minimal` 闸门则连同冒烟测试和 S1 缺陷之外的一切一起放弃它。根据上一步命令输出中的 `workflow`，
 说明本项目适用哪一种。
 
 修复发现后，重新运行：`/security-audit quick` 确认 CRITICAL/HIGH 项已解决，再运行 `/gate-check release`。

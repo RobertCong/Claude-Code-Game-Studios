@@ -27,7 +27,7 @@
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 有 ≥2 个 phase 标题
 - [ ] 包含结论关键词：PASS、CONFLICTS FOUND、NOT ASSESSED、COMPLETE、BLOCKED
 - [ ] 分析阶段（1–5）为只读
@@ -48,7 +48,7 @@
 
 除非某个用例自己的 Fixture 另有说明，否则每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。
-规则见：`studio-tests/CLAUDE.md` §
+规则见：`studio-tests/AGENTS.md` §
 Fixture defaults。
 
 ---
@@ -158,7 +158,7 @@ Fixture defaults。
 
 **Assertions:**
 - [ ] 技能输出空注册表消息并指明 `/design-system`
-- [ ] 结论为 NOT ASSESSED，并说明空注册表是原因——绝不是 PASS、CONFLICTS FOUND、COMPLETE 或 BLOCKED，也绝不是完全没有结论（`.claude/rules/skill-authoring.md` obligation 1）
+- [ ] 结论为 NOT ASSESSED，并说明空注册表是原因——绝不是 PASS、CONFLICTS FOUND、COMPLETE 或 BLOCKED，也绝不是完全没有结论（`.trae/rules/skill-authoring.md` obligation 1）
 - [ ] 不写入任何文件，包括 `production/session-state/active.md`
 - [ ] 技能不崩溃，也不产出部分报告
 

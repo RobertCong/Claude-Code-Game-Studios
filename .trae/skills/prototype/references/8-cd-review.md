@@ -28,7 +28,7 @@ REJECT——或在无法判断时返回 NOT ASSESSED。将它应用到建议上�
   `Discuss further`。由用户决定；总监不决定。
 - **REJECT**（核心幻想不存在）→ PROCEED 建议无法维持。使用 `AskUserQuestion`
   请用户选择 `PIVOT` 或 `KILL`，并针对该选择运行 Phase 9。PIVOT 或 KILL 建议维持。
-- **NOT ASSESSED**（总监缺少某项输入——`.claude/docs/director-gates.md`）
+- **NOT ASSESSED**（总监缺少某项输入——`.trae/docs/director-gates.md`）
   → 不是批准。指出缺失了什么；补充它并重新运行闸门，或
   把该评审记录为 NOT ASSESSED，让用户决定该建议是否在未评审的情况下维持。
 

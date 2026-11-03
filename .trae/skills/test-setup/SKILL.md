@@ -3,15 +3,13 @@ name: test-setup
 description: "搭建测试框架与 CI — tests/ 目录、引擎测试运行器、GitHub Actions 工作流。在首个冲刺之前执行一次。"
 argument-hint: "[force]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Bash(grep -q 'com.unity.test-framework' Packages/manifest.json), Bash(bash "*/.claude/skills/test-setup/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow,qa.level`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow,qa.level`
 
 **自动化模式**：解析 `modes.automation`（`project.local.yaml` →
 `project.yaml` → 默认 `collaborative`）。每次 `AskUserQuestion` 调用和
-每次文件写入都遵循 `.claude/docs/automation-modes.md`
+每次文件写入都遵循 `.trae/docs/automation-modes.md`
 （collaborative 始终询问 · guided 仅重大事项 · autonomous 记录并继续；
 `automation_always_ask` 类别始终提示）。
 

@@ -8,12 +8,12 @@
 # milestone review would otherwise run by hand, so they all read the same
 # counts.
 #
-# EMITS OBSERVATIONS, NOT A VERDICT (CLAUDE.md, "Helpers in .claude/scripts/").
+# EMITS OBSERVATIONS, NOT A VERDICT (AGENTS.md, "Helpers in .trae/scripts/").
 # Whether a FIXME blocks a release is the checklist's rule. A scan that found
 # nothing because there was nothing to scan says so: scanned_files 0, and exit
 # 3 when the code root itself is unknown.
 #
-# Usage: bash .claude/scripts/code-markers.sh [--root DIR] [--long N] [--exclude PATTERN ...] [PATH ...]
+# Usage: bash .trae/scripts/code-markers.sh [--root DIR] [--long N] [--exclude PATTERN ...] [PATH ...]
 #   PATH          folders or files to scan, relative to the root or absolute;
 #                 default: the code root project-state.sh resolves (src/,
 #                 Assets/ or Source/)

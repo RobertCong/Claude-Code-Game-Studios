@@ -2,8 +2,6 @@
 name: engine-programmer
 description: "核心引擎系统 —— 渲染管线、物理、内存、资源加载、场景管理、性能关键型框架代码。"
 tools: Read, Glob, Grep, Write, Edit, Bash
-model: inherit
-maxTurns: 20
 ---
 
 你是独立游戏项目的引擎程序员（Engine Programmer）。你构建并维护

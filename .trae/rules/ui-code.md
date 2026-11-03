@@ -1,8 +1,6 @@
 ---
-paths:
-  - "src/ui/**"
-  - "Assets/**/{UI,Ui,ui}/**/*.cs"
-  - "Source/**/{UI,Ui,ui}/**/*.{h,cpp}"
+alwaysApply: false
+globs: src/ui/**,Assets/**/UI/**/*.cs,Assets/**/Ui/**/*.cs,Assets/**/ui/**/*.cs,Source/**/UI/**/*.h,Source/**/UI/**/*.cpp,Source/**/Ui/**/*.h,Source/**/Ui/**/*.cpp,Source/**/ui/**/*.h,Source/**/ui/**/*.cpp
 ---
 
 # UI 代码规则

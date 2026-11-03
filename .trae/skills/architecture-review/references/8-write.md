@@ -39,7 +39,7 @@ traceability index and its TR registry entries"。在 `requirements-traceability
 `CHANGED`。
 
 ```
-Bash: bash .claude/scripts/review-receipts.sh hash docs/architecture/adr-*.md design/gdd/*.md docs/architecture/tr-registry.yaml docs/architecture/architecture.md docs/engine-reference/[engine]/*.md docs/engine-reference/[engine]/modules/*.md project.yaml .claude/docs/technical-preferences.md docs/consistency-failures.md .claude/skills/architecture-review/SKILL.md .claude/skills/architecture-review/references/*.md
+Bash: bash .trae/scripts/review-receipts.sh hash docs/architecture/adr-*.md design/gdd/*.md docs/architecture/tr-registry.yaml docs/architecture/architecture.md docs/engine-reference/[engine]/*.md docs/engine-reference/[engine]/modules/*.md project.yaml .trae/docs/technical-preferences.md docs/consistency-failures.md .trae/skills/architecture-review/SKILL.md .trae/skills/architecture-review/references/*.md
 ```
 
 它与 Phase 1a 的检查是同一列表，`[engine]` 也以同样方式填入。
@@ -127,7 +127,7 @@ Requirements where the full chain is broken, prioritised by layer:
 - **绝不**重新编号或删除现有条目
 - 更新顶部的 `last_updated` 和 `version` 字段
 
-写入后，运行 `bash .claude/scripts/registry.sh validate`，并在继续之前修复所有关于
+写入后，运行 `bash .trae/scripts/registry.sh validate`，并在继续之前修复所有关于
 本次写入新增或修改条目的行（DUPLICATE、STATUS 或 LAYOUT 行，或其点名的路径的
 PATH_MISSING 行）；关于其他条目的行请告知用户，而不是未经请求就去修复。如果脚本
 缺失或没有输出，说明注册表检查未运行，然后对照文件头部的规则重新阅读你写入的条目。

@@ -3,11 +3,9 @@ name: architecture-review
 description: "将 GDD 需求映射到 ADR 的可追溯性矩阵。发现缺口、跨 ADR 冲突与引擎兼容性问题。PASS/CONCERNS/NOT ASSESSED/FAIL。"
 argument-hint: "[focus: full | coverage | consistency | engine | rtm | single-gdd path/to/gdd.md]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, Bash(bash "*/.claude/skills/architecture-review/../../hooks/yaml-helper.sh" resolve_config *), Bash(bash .claude/scripts/review-receipts.sh check *), Bash(bash .claude/scripts/review-receipts.sh hash *), Bash(bash .claude/scripts/adr-dep-graph.sh*), Bash(bash .claude/scripts/registry.sh validate*)
-model: opus
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow`
 
 # 架构评审
 
@@ -23,11 +21,11 @@ model: opus
 
 ---
 
-每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+每次 `AskUserQuestion` 调用都遵循 `.trae/docs/automation-modes.md`
 （collaborative 始终询问 · guided 仅关键项询问 · autonomous 记录并继续；
 `automation_always_ask` 类别的项目始终提示）。
 
-**`workflow`**（见 `.claude/docs/workflow-modes.md`）：
+**`workflow`**（见 `.trae/docs/workflow-modes.md`）：
 - `full` —— 跨所有 GDD 与所有 ADR 的完整可追溯性矩阵。
 - `standard` —— 缩小范围：仅架构文档 + 关键 ADR。
 - `minimal` —— 不适用（不要求架构文档）。
@@ -78,14 +76,14 @@ model: opus
 
 如果任何被派生的 agent 返回 BLOCKED、报错或未能完成：**立即上报，不要越过它阻塞的
 依赖继续推进，并且始终产出部分报告**（此处的重试范围 = 更少的 GDD / 单系统）。完整流程：
-`.claude/docs/error-recovery-protocol.md`。
+`.trae/docs/error-recovery-protocol.md`。
 
 ---
 
 ## 协作协议
 
 **适用于 `collaborative` 模式（默认）。** 关于 `guided` 与 `autonomous` 模式，见
-`.claude/docs/automation-modes.md` —— 以下规则说明的是协作模式的要求，而非通用行为。
+`.trae/docs/automation-modes.md` —— 以下规则说明的是协作模式的要求，而非通用行为。
 
 1. **静默读取** —— 不要为每次文件读取做旁白说明
 2. **展示矩阵** —— 在任何写入审批之前先呈现完整的可追溯性矩阵；让用户看到当前状态

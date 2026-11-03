@@ -46,7 +46,7 @@
 | **R5 — 结构化发现** | 输出在最终结论前包含按章节的状态表或检查清单 |
 
 > **例外：**
-> - `design-review`：其 allowed-tools 中有 `Write, Edit`，用于支持可选的“Revise now”路径（所有写入都以用户批准为前提）并写入评审日志。R1 仍然满足，因为被评审文档绝不会被静默修改。
+> - `design-review`：其正文允许 `Write, Edit`，用于支持可选的“Revise now”路径（所有写入都以用户批准为前提）并写入评审日志。R1 仍然满足，因为被评审文档绝不会被静默修改。
 
 ---
 
@@ -177,10 +177,11 @@ day-one-patch，以及任何不在上述类别中的技能
 ## 代理类别
 
 供 `/skill-test category [agent-name]` 按类别指标评估
-`.claude/agents/` 中的代理定义。
+`.trae/agents/` 中的代理定义。
 
-没有任何类别固定模型。每个代理的层级就是它自己 frontmatter 中的 `model:`，
-其 `agents/` 下的规格断言该别名；见 `.claude/docs/model-tiers.md`。
+没有任何类别固定模型。Trae 中模型由当前会话或子代理配置决定，`.trae/agents/` 的
+frontmatter 不含 `model:`；其 `agents/` 下的规格断言该字段不存在；见
+`.trae/docs/model-tiers.md`。
 
 ### `director`
 

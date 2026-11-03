@@ -11,7 +11,7 @@
 
 - [ ] `description:` 字段存在且限定于本领域（引用长线运营、季节性活动、战斗通行证、留存）
 - [ ] `tools:` 为 `Read, Glob, Grep, Write, Edit`，且 `disallowedTools:` 指明 `Bash` —— 仅设计文档，不含 shell、代码或分析工具
-- [ ] 模型档位为 `inherit` —— frontmatter `model:` 精确为 `inherit`（档位见：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 代理定义未声称对经济数值、分析流水线或叙事方向拥有权限
 
 ---

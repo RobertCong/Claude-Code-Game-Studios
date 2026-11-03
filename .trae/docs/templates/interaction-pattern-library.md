@@ -1,6 +1,6 @@
 # Interaction Pattern Library
 
-> 编写指引：.claude/docs/templates/guidance/interaction-pattern-library-guide.md（编写时按章节加载——不要整体通读）。
+> 编写指引：.trae/docs/templates/guidance/interaction-pattern-library-guide.md（编写时按章节加载——不要整体通读）。
 
 > **Status**: [In Design | Stable | Under Revision]
 > **Author**: [user + ux-designer]
@@ -115,7 +115,7 @@
 ### Standard Control Patterns
 
 > 本节中每个模式的完整参考规格（带时长/音频值的状态表、无障碍要求、
-> 实现说明）位于 `.claude/docs/templates/guidance/interaction-pattern-library-guide-standard-controls.md`——
+> 实现说明）位于 `.trae/docs/templates/guidance/interaction-pattern-library-guide-standard-controls.md`——
 > 只加载当前正在规定的模式。
 
 ---
@@ -437,7 +437,7 @@
 ### Game-Specific UI Patterns
 
 > 本节中每个模式的完整参考规格位于
-> `.claude/docs/templates/guidance/interaction-pattern-library-guide-game-specific.md`——
+> `.trae/docs/templates/guidance/interaction-pattern-library-guide-game-specific.md`——
 > 只加载当前正在规定的模式。
 
 ---
@@ -557,7 +557,7 @@
 ### Navigation Patterns
 
 > 本节及下一节的完整参考规格位于
-> `.claude/docs/templates/guidance/interaction-pattern-library-guide-navigation-feedback.md`——
+> `.trae/docs/templates/guidance/interaction-pattern-library-guide-navigation-feedback.md`——
 > 只加载当前正在规定的模式。
 
 ---

@@ -3,15 +3,13 @@ name: bug-report
 description: "根据描述生成结构化缺陷报告，或分析代码中的潜在缺陷。包含复现步骤与严重程度。"
 argument-hint: "[description] | analyze [path-to-file] | verify [BUG-ID] | close [BUG-ID]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Bash(bash "*/.claude/skills/bug-report/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation`
 
 **自动化模式**：解析 `modes.automation`（`project.local.yaml` →
 `project.yaml` → 默认 `collaborative`）。每次 `AskUserQuestion` 调用与
-每次文件写入都遵循 `.claude/docs/automation-modes.md`
+每次文件写入都遵循 `.trae/docs/automation-modes.md`
 （collaborative 总是询问 · guided 仅重大事项 · autonomous 记录后继续；
 `automation_always_ask` 类别总是询问）。
 
@@ -94,7 +92,7 @@ model: sonnet
 
 **Severity** 与 **Priority** 标签使用 `/bug-triage` 的 S、P 编号与名称，后者会从本文件中
 解析出它们。`P4-Won't fix` 对应它的 `P4 — Won't fix / Deferred`（一种已接受的风险），而
-不是愿望清单。如果你改动任一等级阶梯，也要同步修改 `.claude/skills/bug-triage/SKILL.md`。
+不是愿望清单。如果你改动任一等级阶梯，也要同步修改 `.trae/skills/bug-triage/SKILL.md`。
 
 ---
 
@@ -121,7 +119,7 @@ model: sonnet
 1. **重新执行复现步骤** —— 使用 Grep/Glob 检查根因代码路径是否仍按所述存在。若修复已移除或
    改变了它，记录该变化。
 2. **运行相关测试** —— 如果缺陷所属系统在引擎测试根目录（`tests/` Godot，`Assets/Tests/`
-   Unity，`Source/<Module>/Private/Tests/` Unreal —— 见 `.claude/docs/directory-structure.md`）
+   Unity，`Source/<Module>/Private/Tests/` Unreal —— 见 `.trae/docs/directory-structure.md`）
    中有测试文件，则通过 Bash 用 `project.yaml` 中的 `commands.test` 运行它；在运行器允许的
    情况下缩小到受影响的套件 —— 绝不要凭记忆编写运行器命令行，那会丢掉引擎所需的标志
    （gdUnit4 缺少 `--remote-debug tcp://127.0.0.1:0` 会挂起）—— 并报告通过/失败。

@@ -4,69 +4,27 @@
 
 ## 规则
 
-需要配置的技能把这条命令放在其**正文**顶部附近（不是 frontmatter 中）：
+需要配置的技能在正文顶部写一条明确的执行指令（不是 frontmatter 中）：
 
 ````markdown
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys a,b`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys a,b`
 ````
 
-**并且**在其自己的 frontmatter 中精确预批准该命令，路径中使用自己的
-目录名：
+Trae 不会像 Claude Code 那样自动预执行 `!` 行。技能必须把这行命令交给模型，由模型用
+RunCommand 实际运行，再把输出当作配置值。技能随后读取已解析的值，**不再重新推导它们**。
 
-````yaml
-allowed-tools: Read, …, Bash(bash "*/.claude/skills/<skill-name>/../../hooks/yaml-helper.sh" resolve_config *)
-````
-
-该命令在*模型看到技能之前*作为预处理运行，其输出会就地替换占位符。
-随后技能读取已解析的值，**不再重新推导它们**。
+- `${CLAUDE_SKILL_DIR}` 由 Trae 替换为当前技能目录，因此 `../../hooks` 指向 `.trae/hooks`。
+- 不要再使用 `${VAR:-x}` 展开或 `source … && …` 复合命令；`yaml-helper.sh` 会从自身位置
+  找到仓库根目录。
+- 迁移时已从技能 frontmatter 删除 `allowed-tools`。Trae 默认加载全部工具，命令可以直接运行。
+- 如果命令无法运行（例如被权限策略拒绝），按下方默认值表继续，并说明配置未解析。
 
 解析按系统层级设置的技能会传入系统名：`resolve_config combat`。
 
 ## 为何放在正文，而非 `context:`
 
-技能正文中的 `` !`cmd` `` 是文档化的机制。Frontmatter
-`context:` 只接受 `context: fork`——它**不**运行 shell。包含 `!` 命令的
-`context: |` 块**永远不会执行**；请把命令放在技能正文中。
-
-## 为何偏偏是这条命令——权限检查
-
-Claude Code 会在技能渲染**之前**对每条注入命令做权限检查。在自动模式之外，任何没有返回 "allow" 的东西——包括
-一个通常只会弹出提示的命令——都会**中止整个调用**，
-模型根本看不到该技能。像 `git status` 这样的只读命令，Claude Code 会自行
-批准，返回 "allow" 并无需授权即可运行。预加载的技能（agent 上的 `skills:`）在 agent 启动时以同样方式
-检查，因此一行失败的引导代码会让 agent 无法启动。在默认
-模式下，引导形式的表现如下：
-
-| 引导形式 | 仓库根目录 | 子目录 | 预先加载它的无 Bash agent |
-|---|---|---|---|
-| `source "${CLAUDE_PROJECT_DIR:-.}/…" && resolve_config` | 中止 | 中止 | 启动失败 |
-| 同上，带裸 `Bash` 授权 | 中止 | — | — |
-| `bash "${CLAUDE_PROJECT_DIR}/…"` + 授权 | 运行 | 中止 | — |
-| **`bash "${CLAUDE_SKILL_DIR}/../../hooks/…"` + 每技能授权** | **运行** | **运行** | **启动** |
-
-该表排除了哪些做法：
-
-- **不能使用 `${VAR:-x}` 展开。** 它会以 "Contains expansion" 失败，且没有任何授权
-  可以批准它。`${CLAUDE_SKILL_DIR}` 和 `${CLAUDE_PROJECT_DIR}` 没问题：Claude
-  Code 会在检查前把它们作为文本替换。
-- **路径不能使用 `${CLAUDE_PROJECT_DIR}`。** 在技能中它指的是
-  Claude Code 启动时所在的目录，而不是仓库根目录，因此当 Claude
-  Code 在子目录中启动时会出错。
-  `${CLAUDE_SKILL_DIR}` 始终指向技能自己的文件夹。
-- **不能使用 `source … && …` 复合命令。** 每一部分都必须被批准；`bash <file>
-  resolve_config` 是一条命令。`yaml-helper.sh` 执行时只会分派
-  `resolve_config`，并从自身位置找到仓库根目录。
-- **授权是必需的。** `allowed-tools` 才是预批准注入命令的东西。
-  模式必须在路径后包含字面量 `"`——以 `…yaml-helper.sh *` 结尾的模式
-  不匹配。
-- **任何非零退出也会中止。** 入口点始终以 0 退出；其他可能失败的
-  注入命令以 `|| true` 结尾。
-
-自动模式可以自行批准旧形式，v1.1.0 就是这样发布的。
-请在默认模式下、在未设置 `settings.local.json` 的项目中测试引导变更。
-
-`disableSkillShellExecution: true` 会把每条注入命令替换为
-占位消息。如果技能看不到配置块，则回退到下方的默认值。
+Trae 的 Skill frontmatter 没有 `context:` 字段来运行 shell。把命令放在技能正文中，作为
+一个显式步骤；这样也便于模型在命令失败时说明原因并回退到默认值。
 
 ## 配置块
 
@@ -171,7 +129,7 @@ An inline --review flag, if passed, overrides review_mode.
 由于 `rigor` 本身默认为 `minimal`，未配置的项目会把
 这六项解析为精简行。该默认值曾是 `standard`；之所以更改，是因为较重的层级
 在不产生更好结果的情况下，达到可运行代码的成本更高。推理和顺序
-约束见 `.claude/hooks/yaml-helper.sh` 中 `_yaml_helper_defaults`
+约束见 `.trae/hooks/yaml-helper.sh` 中 `_yaml_helper_defaults`
 上方的理由说明块。提升层级是 `/start` 中的一个问题，或一次 `/settings`
 调用，而 `settings-guidance.md § 4` 的上行触发条件正是从这个
 起始状态出发设计的。（`team.size` 是唯一不受该翻转影响的配置项：
@@ -200,12 +158,12 @@ An inline --review flag, if passed, overrides review_mode.
 **`testing.strict.*` 有意没有中央默认值。** 其未设置时的默认值
 按技能设计而异：`/smoke-check` 把未设置视为**阻塞**（它是
 构建健康闸门），而 `/story-done` 和 `/dev-story` 应用
-`.claude/docs/coding-standards.md` 中的按故事类型表。因此 `testing.strict` 行
+`.trae/docs/coding-standards.md` 中的按故事类型表。因此 `testing.strict` 行
 只报告*配置状态*（缺失处为 `unset`）。`gate_level` 行
 （见下文）应用该表，并在 `config` 旁标明 `/smoke-check` 自己的默认值。
 
 **`engine` 行只从 `project.yaml` 报告。** `engine_values`
-行（见下文）增加了到 `.claude/docs/technical-preferences.md` 的逐字段回退，
+行（见下文）增加了到 `.trae/docs/technical-preferences.md` 的逐字段回退，
 后者也仍是禁止模式与允许库的唯一来源——那些从未迁移。
 
 ## 派生行（仅按名输出）
@@ -243,9 +201,9 @@ An inline --review flag, if passed, overrides review_mode.
 | `project.local.yaml` 缺少基础文件 | `validate_local_yaml_base` 消息出现在 `notes:` |
 | `project.local.yaml` 中的锁定键 | 一如既往被忽略，但现在会在 `notes:` 中**点名**——`local: not locally overridable, ignored — modes.rigor (move to project.yaml or delete)` |
 | 无 Python 解释器 | 仅使用旧版文件和默认值；在 `notes:` 中**明确注明** |
-| 完全没有配置块 | shell 预处理被禁用（`disableSkillShellExecution`）——使用上方的默认值表 |
-| 配置块位置出现任务通知（"Command did not complete within its 120s timeout and was moved to the background"） | 设置行超出了 Claude Code 对技能 `!` 行的 120 秒限制，因为每个进程启动都被拖慢——通常是因为杀毒软件对项目文件夹的实时扫描。设置是存在的：自己从 `project.local.yaml`、然后 `project.yaml`、然后上方默认值表逐个读取每个键 |
-| 引导行未获批准，或以非零退出 | **不是降级状态——技能根本不会渲染。** 见上文 "Why exactly this command" |
+| 命令没有输出 | 使用上方的默认值表，并在回复中说明配置未解析 |
+| 配置解析命令超时或被移到后台 | `yaml-helper.sh` 启动被杀毒软件或慢磁盘拖慢。设置仍然存在：自己从 `project.local.yaml`、然后 `project.yaml`、然后上方默认值表逐个读取每个键，并在回复中说明配置未由命令解析。 |
+| 命令被权限策略拒绝，或以非零退出 | 使用上方的默认值表，并说明是哪条命令失败；不要假装配置已解析。 |
 
 技能绝不能把缺失的配置块当作 "配置以某种有趣的方式未设置"。
 它意味着配置块没有渲染；应应用默认值。例外是

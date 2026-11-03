@@ -3,13 +3,11 @@ name: adopt
 description: "棕地（brownfield）审计 — 现有产出物真的可用吗？带编号的迁移计划。与 /project-stage-detect 不同，检查的是合规性而非存在性。"
 argument-hint: "[focus: full | gdds | adrs | stories | infra]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, AskUserQuestion, Bash(bash "*/.claude/skills/adopt/../../hooks/yaml-helper.sh" resolve_config *), Bash(bash .claude/scripts/gdd-structure-check.sh *), Bash(bash .claude/scripts/migrate-v1-config.sh --dry-run*)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,automation_always_ask,workflow`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,automation_always_ask,workflow`
 
-上文已解析 — 直接使用。`/adopt` 在报告和写入迁移状态时还会直接检查 `project.yaml`
+上一步命令的输出已解析 — 直接使用。`/adopt` 在报告和写入迁移状态时还会直接检查 `project.yaml`
 与旧版配置文件；这种原始检查是有意为之，且与上文的解析值相互独立。
 
 # Adopt — 棕地模板采纳
@@ -39,11 +37,11 @@ model: sonnet
 ---
 
 **自动化模式**：解析 `modes.automation`（`project.local.yaml` →
-`project.yaml` → 默认 `collaborative`）。每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+`project.yaml` → 默认 `collaborative`）。每次 `AskUserQuestion` 调用都遵循 `.trae/docs/automation-modes.md`
 （collaborative 始终询问 · guided 仅重大事项 · autonomous 记录并继续；
 `automation_always_ask` 类别始终提示）。
 
-**`workflow`**（依据 `.claude/docs/workflow-modes.md`）。它限定 Phase 2 审计与
+**`workflow`**（依据 `.trae/docs/workflow-modes.md`）。它限定 Phase 2 审计与
 Phase 3 严重程度：`full` 按完整结构审计所有文档类型；`standard` 仅审计
 必需的文档/章节（可选章节仅供参考，不算缺口）；
 `minimal` 是一次 `design/game-brief.md` 格式检查 — 不预期存在 GDD/ADR/UX。参见 Phase 2。
@@ -79,7 +77,7 @@ Phase 3 严重程度：`full` 按完整结构审计所有文档类型；`standar
 ## 协作协议
 
 **适用于 `collaborative` 模式（默认）。** 对于 `guided` 和
-`autonomous` 模式，参见 `.claude/docs/automation-modes.md` — 以下规则
+`autonomous` 模式，参见 `.trae/docs/automation-modes.md` — 以下规则
 描述的是协作模式的要求，而非普遍行为。
 
 1. **静默读取** — 在呈现任何内容之前完成完整审计

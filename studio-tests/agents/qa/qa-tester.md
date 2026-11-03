@@ -12,7 +12,7 @@
 
 - [ ] `description:` 字段存在且限定于本领域（引用测试用例、缺陷报告、测试执行、回归测试）
 - [ ] `tools:` 列表为 Read、Glob、Grep、Write、Edit、Bash。授权无法限定路径范围，因此禁止编辑源码的边界必须写在正文中：「What This Agent Must NOT Do」列出「Fix bugs (report them for assignment)」，而编排运行的写入例外仅覆盖 `production/`、`docs/` 或 `tests/` 下的新产出物，「never an edit to existing source or config」
-- [ ] 模型档位为 `inherit` —— frontmatter `model:` 精确为 `inherit`（档位见：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 代理定义未声称对测试策略、修复实现或验收标准定义拥有权限
 
 ---
@@ -58,7 +58,7 @@
 - 不产出泛泛的「全部测一遍」清单 —— 定向回归的价值在于具体性
 
 ### Case 5: Context pass — 来自 coding-standards.md 的测试证据格式
-**Input context**: coding-standards.md（由 CLAUDE.md 导入）规定：逻辑用户故事需要在 `tests/unit/[system]/` 中提供自动化单元测试。视觉/手感用户故事需要在 `production/qa/evidence/` 中提供截图 + 主管签署。UI 用户故事需要在 `production/qa/evidence/` 中保留每个涉及界面的截图。项目的 `project.yaml` 设置 `qa.level: minimal`。
+**Input context**: coding-standards.md（由 AGENTS.md 导入）规定：逻辑用户故事需要在 `tests/unit/[system]/` 中提供自动化单元测试。视觉/手感用户故事需要在 `production/qa/evidence/` 中提供截图 + 主管签署。UI 用户故事需要在 `production/qa/evidence/` 中保留每个涉及界面的截图。项目的 `project.yaml` 设置 `qa.level: minimal`。
 **Input**: "为背包 UI（一个 UI 故事）编写测试用例：网格布局、物品提示框显示、拖放重新排序。"
 **Expected behavior**:
 - 按所提供标准将其正确归类为 UI 故事
@@ -85,6 +85,6 @@
 ## Coverage Notes
 - Case 1（测试用例完整性）是基础质量测试 —— 缺少字段（前置条件、步骤、预期结果、通过标准）即为失败
 - Case 3（含糊标准）是协调测试 —— qa-tester 不得静默接受不可测试的标准
-- Case 5 依赖 coding-standards.md，CLAUDE.md 会导入它，因此测试证据表和 `qa.level: minimal` 规则始终在代理上下文中；代理必须正确应用证据类型和位置
+- Case 5 依赖 coding-standards.md，AGENTS.md 会导入它，因此测试证据表和 `qa.level: minimal` 规则始终在代理上下文中；代理必须正确应用证据类型和位置
 - ADVISORY 与 BLOCKING 的质量闸门级别（Case 5）是影响用户故事完成的细节 —— 验证代理报告该级别，且不会在 `qa.level: minimal` 下免除视觉证据
 - 无自动运行器；请手动审查或通过 `/skill-test`

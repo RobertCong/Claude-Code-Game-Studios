@@ -2,7 +2,7 @@
 
 ## Skill Summary
 
-`/help` 告诉用户他们在流水线中的位置，以及接下来要做的那一件事。它是只读的，并声明 Haiku 层级（`model: haiku`），该层级仅在用户于 Manual 模式下输入 `/help` 时使用——在 auto 模式下，或由 Claude 自行启动该技能时，使用会话模型运行（`.claude/docs/model-tiers.md`）。运行之前，它会被传入解析后的配置块（`project.stage`、`workflow`）以及 `.claude/scripts/story-status.sh` 的输出；它自己读取会话检查点（Step 3）。随后它读取 `.claude/docs/workflow-catalog.yaml`，通过一次调用 `bash .claude/scripts/artifact-check.sh --phase [phase]` 解析当前阶段的步骤完成情况，并在 Production 阶段读取 `production/sprint-status.yaml`。
+`/help` 告诉用户他们在流水线中的位置，以及接下来要做的那一件事。它是只读的；模型由 Trae 会话决定，技能不声明 `model:`（`.trae/docs/model-tiers.md`）。运行之前，它先执行配置解析命令并读取输出（`project.stage`、`workflow`），以及 `.trae/scripts/story-status.sh` 的输出；它自己读取会话检查点（Step 3）。随后它读取 `.trae/docs/workflow-catalog.yaml`，通过一次调用 `bash .trae/scripts/artifact-check.sh --phase [phase]` 解析当前阶段的步骤完成情况，并在 Production 阶段读取 `production/sprint-status.yaml`。
 
 当 `workflow` 解析为 `minimal` 时（默认值，因为 `modes.rigor` 默认为 `minimal`），它跳过阶段阶梯，读取会话检查点（Step 3），并走 minimal 路径（Step 4m）：引擎 → `design/game-brief.md` → 用户故事 → `/dev-story` ↔ `/story-done`。可选参数是**用户刚刚完成或正卡住的内容**——技能用它越过所指的步骤，其中的困惑性措辞会追加一段升级页脚。它不是主题筛选器。
 
@@ -14,11 +14,11 @@
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
-- [ ] Frontmatter 设置 `model: haiku`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 有 ≥2 个 phase 标题
 - [ ] 包含结论关键词：COMPLETE
-- [ ] 不包含 "May I write" 措辞，且 `allowed-tools` 中没有 Write 或 Edit（技能为只读）
+- [ ] 不包含 "May I write" 措辞（技能为只读）
 - [ ] 有下一步交接（一条 `→ Next up` 建议加上升级路径）
 
 ---
@@ -31,7 +31,7 @@
 
 ## Fixture Defaults
 
-除非某个用例自己的 Fixture 另有说明，否则每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/CLAUDE.md` §
+除非某个用例自己的 Fixture 另有说明，否则每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/AGENTS.md` §
 Fixture defaults。
 
 ---
@@ -53,8 +53,8 @@ Fixture defaults。
 
 **Expected behavior:**
 1. 技能从配置块取得 `project.stage: Production` 与 `workflow: standard`
-2. 技能读取 `.claude/docs/workflow-catalog.yaml` 并运行
-   `bash .claude/scripts/artifact-check.sh --phase production`
+2. 技能读取 `.trae/docs/workflow-catalog.yaml` 并运行
+   `bash .trae/scripts/artifact-check.sh --phase production`
 3. 技能读取 `production/sprint-status.yaml`：进行中的用户故事为
    "currently active"，ready-for-dev 的用户故事为 "next up"，done 的用户故事计入
    完成，被阻塞的用户故事连同其 `blocker` 文本一并指明
@@ -80,7 +80,7 @@ Fixture defaults。
 **Fixture:**
 - `project.yaml` 设置 `project.stage: Concept`、`modes.rigor: full`，以及
   `engine.name: "Godot"`（选择 `full` 是因为在 `standard` 下，美术圣经仅在存在
-  视觉资源用户故事时才被要求——`.claude/docs/workflow-modes.md`
+  视觉资源用户故事时才被要求——`.trae/docs/workflow-modes.md`
   ——而 Concept 阶段的项目没有用户故事可据以判断）
 - 没有 `design/gdd/game-concept.md`、没有 `design/art/art-bible.md`、没有
   `design/gdd/systems-index.md`、没有冲刺文件
@@ -186,7 +186,7 @@ Fixture defaults。
 1. `workflow: minimal` 使技能越过 Step 2 的其余部分；不映射 `project.stage`
 2. 技能读取 `active.md` 的 STATUS 与 CHECKPOINT 块（Step 3），然后进入
    Step 4m
-3. 技能运行 `bash .claude/scripts/artifact-check.sh --path minimal`
+3. 技能运行 `bash .trae/scripts/artifact-check.sh --path minimal`
 4. 注入的 `story-status.sh` 列表在第一行 `IN_PROGRESS` 上包含 story-002；
    技能不重新运行脚本，也不重新排序用户故事
 5. 输出采用 minimal 形态：`## Where You Are: Minimal path — 1 of 3 stories complete`，

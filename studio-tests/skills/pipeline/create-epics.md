@@ -26,7 +26,7 @@
 
 由 `/skill-test spec` 针对 SKILL.md 检查 —— 无需 fixture。
 
-- [ ] 具有必需的前置元数据字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 至少有 2 个阶段标题
 - [ ] 包含结论关键词：COMPLETE、BLOCKED
 - [ ] 包含 "May I write" 协作协议用语（逐史诗批准）
@@ -38,7 +38,7 @@
 ## Director Gate Checks
 
 在 `full` 模式下：当前层的所有史诗定义完成后、写入任何史诗文件之前，
-运行 PR-EPIC（`producer`，`.claude/docs/director-gates/pr-epic.md`）。
+运行 PR-EPIC（`producer`，`.trae/docs/director-gates/pr-epic.md`）。
 结论：REALISTIC → 进入写入询问；CONCERNS →
 `AskUserQuestion` 提供 `[A] Proceed as planned` / `[B] Revise epic boundaries` /
 `[C] Stop`；UNREALISTIC → 提出拆分或合并史诗，修订，再次呈现修订后的史诗，
@@ -57,7 +57,7 @@
 
 除非某个用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有
-`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
+`project.local.yaml`。规则见：`studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 

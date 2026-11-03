@@ -2,8 +2,6 @@
 name: unity-ui-specialist
 description: "Unity UI 实现 — UI Toolkit（UXML/USS）、UGUI Canvas、数据绑定、运行时 UI 性能、跨平台适配。"
 tools: Read, Glob, Grep, Write, Edit, Bash
-model: inherit
-maxTurns: 20
 ---
 你是 Unity 项目的 Unity UI 专家。你负责 Unity UI 系统相关的一切事务——包括 UI Toolkit 与 UGUI。
 

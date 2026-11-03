@@ -3,8 +3,6 @@ name: help
 description: "我接下来该做什么？在卡住或不知道做什么时使用。"
 argument-hint: "[optional: what you just finished, e.g. 'finished design-review' or 'stuck on ADRs']"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Bash(bash "*/.claude/skills/help/../../hooks/yaml-helper.sh" resolve_config *), Bash(bash "*/.claude/skills/help/../../scripts/story-status.sh"), Bash(bash .claude/scripts/story-status.sh*), Bash(bash .claude/scripts/artifact-check.sh *), Bash(bash ".claude/scripts/artifact-check.sh" *), Bash(bash ./.claude/scripts/artifact-check.sh *), Bash(git log *)
-model: haiku
 ---
 
 # 工作室帮助 — 我接下来该做什么？
@@ -17,22 +15,22 @@ model: haiku
 
 ## 实时项目状态
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys project.stage,workflow`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys project.stage,workflow`
 
-这些内容在本技能运行之前已解析。请直接使用：
+这些内容应在上一步命令的输出中。请直接使用：
 
 - 配置块中的 **`project.stage`** 是步骤 2 的权威阶段
   — 它已经应用了 `project.yaml` → `production/stage.txt` 的回退，
   并保留含空格的值（`Systems Design`）。
 - 配置块中的 **`workflow`** 是步骤 2 和 5 的层级 — 不要重新读取它。
 - 如果没有渲染出配置块，说明 shell 预处理被禁用；回退到
-  `.claude/docs/config-resolution.md` 中的默认值。
+  `.trae/docs/config-resolution.md` 中的默认值。
 
 ---
 
 ## 步骤 1：读取目录
 
-读取 `.claude/docs/workflow-catalog.yaml`。这是所有
+读取 `.trae/docs/workflow-catalog.yaml`。这是所有
 阶段、各阶段的步骤（按顺序）、每个步骤是必需还是可选，以及
 表示完成的产出物 glob 的权威列表。
 
@@ -40,7 +38,7 @@ model: haiku
 
 ## 步骤 1b：查找不在目录中的技能
 
-读取目录之后，Glob `.claude/skills/*/SKILL.md` 以获取已安装技能的完整
+读取目录之后，Glob `.trae/skills/*/SKILL.md` 以获取已安装技能的完整
 列表。对每个文件，从其 frontmatter 中提取 `name:` 字段。
 
 与目录中的 `command:` 值进行比较。任何技能的名称
@@ -90,7 +88,7 @@ model: haiku
    - 都没有 → `concept`（全新项目）
 
 3. **`workflow`** 已在本步骤开头取得（依据
-   `.claude/docs/workflow-modes.md`）。它控制可选的文档是否作为
+   `.trae/docs/workflow-modes.md`）。它控制可选的文档是否作为
    后续步骤呈现（步骤 5）。
 
 ---
@@ -98,7 +96,7 @@ model: haiku
 ## 步骤 3：读取会话上下文
 
 读取 `production/session-state/active.md`（如果存在）— 但只读其中的 STATUS
-和 CHECKPOINT 块（schema：`.claude/docs/templates/session-state.md`）；它们下方的
+和 CHECKPOINT 块（schema：`.trae/docs/templates/session-state.md`）；它们下方的
 叙述可能很长。找到标记
 （`Grep pattern="<!-- /?(STATUS|CHECKPOINT) -->" path="production/session-state/active.md" output_mode="content" -n`）
 并从第一个读到最后一个。没有标记的文件早于该 schema：改为读取其
@@ -123,7 +121,7 @@ model: haiku
 **以确定性的方式解析这些 — 一次调用，而不是每个步骤做一次 glob：**
 
 ```
-Bash: bash .claude/scripts/artifact-check.sh --phase [current-phase]
+Bash: bash .trae/scripts/artifact-check.sh --phase [current-phase]
 ```
 
 严格按写法运行，此处及下文皆然：从项目根目录，使用
@@ -144,7 +142,7 @@ Bash: bash .claude/scripts/artifact-check.sh --phase [current-phase]
 不要用 Glob/Grep 重新推导其中任何内容。尤其是 `any_of`，它是一个
 **备选项**列表 — 匹配一个就足够 — 手工评估会有误判为
 "未完成"的风险：`engine-setup` 由 `project.yaml` 中的 `engine.name`
-**或** `.claude/docs/technical-preferences.md` 中旧版的 `Engine:` 行满足，
+**或** `.trae/docs/technical-preferences.md` 中旧版的 `Engine:` 行满足，
 脚本会报告匹配的是哪个备选项（`alt=`/`match=`）。
 
 **`NO_CHECK` 绝不意味着已完成。** 脚本会在各行之前打印 `NO_CHECK:` 总数；
@@ -179,7 +177,7 @@ Bash: bash .claude/scripts/artifact-check.sh --phase [current-phase]
 一次调用解析它：
 
 ```
-Bash: bash .claude/scripts/artifact-check.sh --path minimal
+Bash: bash .trae/scripts/artifact-check.sh --path minimal
 ```
 
 完全按步骤 4 的方式映射状态。`implement` 和 `story-done` 按设计就是
@@ -192,12 +190,12 @@ Bash: bash .claude/scripts/artifact-check.sh --path minimal
    （在 `minimal` 下它会写出单页简报），而在已构建的游戏上这会开始一个新想法。
 3. `create-stories` 不是 PRESENT → 不带参数的 `/create-stories`（在
    `minimal` 下它会直接从简报的 MVP 列表构建用户故事）
-4. 用户故事已存在 → 你读取本技能之前，以下列表已由 `.claude/scripts/story-status.sh`
+4. 用户故事已存在 → 你读取本技能之前，以下列表已由 `.trae/scripts/story-status.sh`
    打印：每个未完成的用户故事一行，**已按路线顺序排列** — 先是 `IN_REVIEW`，
    再是 `IN_PROGRESS`，再是按构建顺序的 `TODO`（`Ready` 或 `Not Started` 的用户故事）—
    然后是 `BLOCKED`、`OTHER`、`NO_STATUS` 以及 `COMPLETE` 计数：
 
-!`bash "${CLAUDE_SKILL_DIR}/../../scripts/story-status.sh"`
+   **运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../scripts/story-status.sh"`
 
    **下一个就是第一条 `IN_REVIEW`、`IN_PROGRESS` 或 `TODO`
    行上的用户故事。** 列表已是最新；不要再次运行脚本，也不要
@@ -227,7 +225,7 @@ Bash: bash .claude/scripts/artifact-check.sh --path minimal
 美术圣经、系统地图、GDD、`/create-epics`、冲刺计划、
 `/gate-check`，或冲刺收尾（`/smoke-check`、`/team-qa`、
 `/retrospective`）。简报取代设计文档，其构建顺序
-取代冲刺计划（`.claude/docs/workflow-modes.md` — `minimal` 基线）。
+取代冲刺计划（`.trae/docs/workflow-modes.md` — `minimal` 基线）。
 如果用户要求，它们仍然都能运行；只有当用户的问题涉及某项时才提及它。
 
 然后跳过步骤 5 和 8，并按步骤 7 中的 `minimal` 形态呈现。
@@ -347,7 +345,7 @@ Need more detail?
 - `/start` — re-orient from scratch
 - `/settings` — if the process feels mismatched to your project, adjust
   `modes.rigor`. Apply the change-triggers in
-  `.claude/docs/settings-guidance.md § 4`: a **lower** tier when the user sounds
+  `.trae/docs/settings-guidance.md § 4`: a **lower** tier when the user sounds
   overwhelmed by process (and rigor isn't already `minimal`), or a **higher** tier
   when the project has outgrown it (many systems, or in Production on
   `workflow: minimal`)

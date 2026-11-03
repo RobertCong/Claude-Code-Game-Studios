@@ -3,7 +3,7 @@
 ## Skill Summary
 
 `/project-stage-detect [role]` 判定项目的开发阶段及其缺口。它先执行一次确定性检查
-（`bash .claude/scripts/artifact-check.sh`，逐个产出物报告 PRESENT / ABSENT / SHORT /
+（`bash .trae/scripts/artifact-check.sh`，逐个产出物报告 PRESENT / ABSENT / SHORT /
 PATTERN_MISS / NO_CHECK），然后扫描 `design/`、代码根目录、
 `production/`、`prototypes/`、`docs/architecture/` 与 `tests/`。
 
@@ -31,7 +31,7 @@ production/project-stage-report.md?"。它从不写入阶段本身。不适用�
 
 由 `/skill-test spec` 对照 SKILL.md 检查 —— 无需夹具。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 至少有 2 个阶段标题
 - [ ] 包含全部七个阶段名称：Concept、Systems Design、Technical Setup、Pre-Production、Production、Polish、Release
 - [ ] 包含 Stage Confidence 取值 PASS、CONCERNS、NOT ASSESSED 与 FAIL，并给出先匹配顺序
@@ -51,7 +51,7 @@ production/project-stage-report.md?"。它从不写入阶段本身。不适用�
 
 除非用例自身的夹具另有说明，每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有
-`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
+`project.local.yaml`。规则见：`studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 
@@ -72,7 +72,7 @@ production/project-stage-report.md?"。它从不写入阶段本身。不适用�
 **Input:** `/project-stage-detect`
 
 **Expected behavior:**
-1. 技能在手工扫描之前运行 `bash .claude/scripts/artifact-check.sh`
+1. 技能在手工扫描之前运行 `bash .trae/scripts/artifact-check.sh`
 2. 技能从 `project.yaml` 读取配置阶段 `Production`
 3. 技能仍运行启发式判断；24 个源文件（10+）表明为 Production
 4. 报告说明配置阶段与观测阶段一致；Stage Confidence 为 PASS
@@ -201,7 +201,7 @@ production/project-stage-report.md?"。它从不写入阶段本身。不适用�
 
 **Fixture:**
 - 没有 `project.stage`，没有 `production/stage.txt`
-- `project.yaml` 没有 `engine.name`；`.claude/docs/technical-preferences.md`
+- `project.yaml` 没有 `engine.name`；`.trae/docs/technical-preferences.md`
   写为 `[TO BE CONFIGURED]`
 - `src/` 与 `Assets/` 均存在，且各自持有源文件（目录树含糊）
 - `design/gdd/game-concept.md` 与 `design/gdd/systems-index.md` 存在，每个被索引的

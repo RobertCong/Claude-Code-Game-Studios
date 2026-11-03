@@ -70,7 +70,7 @@
 **Visual/Feel** 用户故事需要下方的主管签核——由 art-director 或拥有该功能的
 设计师——之后 `/story-done` 才会把它标记为 COMPLETE。**UI** 用户故事通过
 其触及的每个界面的保留截图来关闭；此处签核受欢迎但不是必需
-（`.claude/docs/coding-standards.md`）。
+（`.trae/docs/coding-standards.md`）。
 
 **独立开发者**：你可以自己以主管身份签核。其意图是有人在标记完成前刻意
 审阅证据。
@@ -88,6 +88,6 @@
 
 ---
 
-*Template: `.claude/docs/templates/test-evidence.md`*
+*Template: `.trae/docs/templates/test-evidence.md`*
 *Used for: Visual/Feel 和 UI 用户故事类型的证据记录*
 *Location: `production/qa/evidence/[story-slug]-evidence.md`*

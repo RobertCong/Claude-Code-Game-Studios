@@ -2,8 +2,6 @@
 name: sound-designer
 description: "音效规格与规格表——音频事件文档化、混音参数、声音类别定义。"
 tools: Read, Glob, Grep, Write, Edit
-model: inherit
-maxTurns: 10
 disallowedTools: Bash
 ---
 

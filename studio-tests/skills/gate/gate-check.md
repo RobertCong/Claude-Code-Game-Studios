@@ -3,8 +3,8 @@
 ## Skill Summary
 
 `/gate-check` 校验项目是否已准备好推进到下一个开发阶段。它用
-`.claude/scripts/artifact-check.sh` 解析产出物是否存在，抽读结论所依据的产出物，
-运行目标闸门的质量检查（从 `.claude/skills/gate-check/references/` 下的一个文件
+`.trae/scripts/artifact-check.sh` 解析产出物是否存在，抽读结论所依据的产出物，
+运行目标闸门的质量检查（从 `.trae/skills/gate-check/references/` 下的一个文件
 加载），就不可验证的条目询问用户，运行总监小组（其是否存在由 `review_mode` 设定、
 宽度由 `workflow` 设定），并产生 PASS / CONCERNS / NOT ASSESSED / FAIL 结论。
 在 PASS 且用户确认后，它把新阶段写入 `project.yaml` 中的 `project.stage`，以及
@@ -20,7 +20,7 @@
 
 由 `/skill-test spec` 对照 SKILL.md 检查 —— 无需 fixture。
 
-- [ ] 具备必需的前置字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 具备 ≥2 个阶段标题（编号的 Phase N 或 ## 小节）
 - [ ] 包含结论关键词：PASS、CONCERNS、NOT ASSESSED、FAIL
 - [ ] 针对阶段更新包含 "May I" 写入批准措辞
@@ -32,7 +32,7 @@
 
 除非用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有
-`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
+`project.local.yaml`。规则见：`studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 
@@ -53,8 +53,8 @@
 **输入：** `/gate-check systems-design`
 
 **预期行为：**
-1. 技能只加载 `.claude/skills/gate-check/references/gate-systems-design.md`
-2. 技能运行 `bash .claude/scripts/artifact-check.sh --phase concept` 解析存在性，
+1. 技能只加载 `.trae/skills/gate-check/references/gate-systems-design.md`
+2. 技能运行 `bash .trae/scripts/artifact-check.sh --phase concept` 解析存在性，
    然后抽读 `design/gdd/game-concept.md`，确认它有真实内容（不是模板骨架）
 3. 技能检查游戏支柱、视觉标识锚点、核心循环和目标受众
 4. 技能找不到评审记录，将 "Game concept has been reviewed" 标记为

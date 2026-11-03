@@ -10,7 +10,7 @@
 而不是生成全部轨道的许可；若无法确定，该节标记为
 `NOT ASSESSED — cert tier unknown`。
 
-Phase 2 读取 `CLAUDE.md`、最新里程碑、`production/releases/` 中任何现有清单
+Phase 2 读取 `AGENTS.md`、最新里程碑、`production/releases/` 中任何现有清单
 以及内容日历。Phase 3 扫描代码根中的
 TODO/FIXME/HACK、调试输出、占位资源与硬编码开发值，并
 对每次扫描报告其分母（`scanned [N] files, [M] hits`）或
@@ -39,7 +39,7 @@ Status** 由它们计算，首个命中者胜出：`NOT READY`（任何阻塞项
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] frontmatter 设置 `disable-model-invocation: true`：仅在用户手动输入时运行，该设置在 frontmatter 中声明，而非在正文中询问
 - [ ] 有 ≥2 个 phase 标题
 - [ ] 包含结论关键词：READY、CONDITIONAL、NOT ASSESSED、NOT READY（Overall Status 首个命中顺序为 NOT READY → NOT ASSESSED → CONDITIONAL → READY），以及无法评估的扫描与 cert tier 的 NOT ASSESSED
@@ -62,7 +62,7 @@ Producer、Release Manager）是给人工使用的清单文本，之后通过
 
 除非某个用例自己的 Fixture 另有说明，否则每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。
-规则见：`studio-tests/CLAUDE.md` §
+规则见：`studio-tests/AGENTS.md` §
 Fixture defaults。
 
 ---

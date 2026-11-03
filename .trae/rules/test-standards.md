@@ -1,8 +1,6 @@
 ---
-paths:
-  - "tests/**"
-  - "Assets/Tests/**/*.cs"
-  - "Source/**/Tests/**/*.{h,cpp}"
+alwaysApply: false
+globs: tests/**,Assets/Tests/**/*.cs,Source/**/Tests/**/*.h,Source/**/Tests/**/*.cpp
 ---
 
 # 测试标准
@@ -32,7 +30,7 @@ paths:
   确认它失败，然后应用修复并确认它通过。一个只见过通过的
   回归测试，不能算作测试了任何东西。
 
-  > 这是把 `.claude/rules/skill-authoring.md` 的「没有亲眼见它失败的闸门
+  > 这是把 `.trae/rules/skill-authoring.md` 的「没有亲眼见它失败的闸门
   > 不是闸门」应用到测试上。这里写出来是因为只陈述
   > *目标*不够。针对迭代顺序缺陷的回归测试可能使用
   > 一个没有任何单元在单个 tick 内参与两次传输的 fixture——于是它对着

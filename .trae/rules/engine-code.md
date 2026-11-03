@@ -1,8 +1,6 @@
 ---
-paths:
-  - "src/core/**"
-  - "Assets/**/{Core,core}/**/*.cs"
-  - "Source/**/{Core,core}/**/*.{h,cpp}"
+alwaysApply: false
+globs: src/core/**,Assets/**/Core/**/*.cs,Assets/**/core/**/*.cs,Source/**/Core/**/*.h,Source/**/Core/**/*.cpp,Source/**/core/**/*.h,Source/**/core/**/*.cpp
 ---
 
 # 引擎代码规则

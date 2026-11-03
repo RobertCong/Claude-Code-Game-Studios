@@ -10,10 +10,10 @@
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] Frontmatter 包含所有必填字段（`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`）
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 找到 2 个及以上 phase 标题
 - [ ] 包含该技能的结论关键词——即 `/skill-test static` 检查项 3 所接受的任意一种（gate 或 review 结论、go/no-go 结论，或严重程度等级），并在任何依赖该结论之处加上 `NOT ASSESSED`；若该技能输出的是产出物而非判断，则无需任何结论词
-- [ ] 若 `allowed-tools` 包含 Write/Edit：存在 `"May I write"` 表述
+- [ ] 若技能正文承诺写入文件：存在 `"May I write"` 表述
 - [ ] 结尾存在下一步交接章节
 
 ---
@@ -33,7 +33,7 @@
 
 除非用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 与 `modes.automation: collaborative`，且不含
-`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` §
+`project.local.yaml`。规则见：`studio-tests/AGENTS.md` §
 Fixture defaults。
 
 ---

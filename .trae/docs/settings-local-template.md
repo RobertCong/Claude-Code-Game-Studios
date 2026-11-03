@@ -1,68 +1,47 @@
-# settings.local.json 模板
+# 本地覆盖模板（Trae）
 
-创建 `.claude/settings.local.json`，用于存放不应提交到版本控制的个人覆盖设置。
-随附的 `.gitignore` 已经忽略它。
+Trae 没有项目级的 `settings.local.json`。个人覆盖走下面三条路，且都不应提交到仓库。
 
-## settings.local.json 示例
+## 1. 个人指令：`CLAUDE.local.md`
 
-```json
-{
-  "permissions": {
-    "allow": [
-      "Bash(git add *)",
-      "Bash(git commit *)",
-      "Bash(npm run *)"
-    ],
-    "deny": [
-      "Bash(git push *)"
-    ]
-  }
-}
+Trae 兼容 `CLAUDE.local.md`，并会从项目根目录读取它。用于记录只属于你的偏好，例如：
+
+```markdown
+# 我的本地约定
+
+- 回复先给结论，再给步骤。
+- 不要自动提交；每次提交前先展示 diff。
 ```
 
-把 `*` 放在子命令之后。`Bash(git commit *)` 只允许提交；`Bash(git *)` 会允许所有
-git 命令，包括 `git push`。只读命令如 `git status`、`git log` 和 `ls` 无需规则：
-Claude Code 会直接运行它们而不询问。你的规则会添加到 `.claude/settings.json` 中
-随附的规则之上，因此其中的 deny 规则仍然生效。
+`CLAUDE.local.md` 已被 `.gitignore` 忽略。
 
-## 权限模式
+## 2. 个人权限：Trae 用户设置
 
-Claude Code 有多种权限模式。随附的 `.claude/settings.json` 以 `default` 模式启动
-终端会话；若要以其他模式启动，在此处设置 `permissions.defaultMode`。
-`setup-requirements.md` 中的 "One setting CCGS does ship" 列出了它能改变和不能
-改变的内容。你也可以在会话过程中切换。游戏开发建议：
+Trae 的权限配置属于用户级，不随项目仓库分发：
 
-### 开发期间 — 手动（`default`）
-Claude 在运行大多数命令和编辑文件之前都会询问。这对生产代码最安全。
+- 图形界面：**设置 > 规则与记忆 / 权限**。
+- 配置文件：`~/.trae-cn/permission/global.json`（macOS/Linux）。
 
-### 原型期间 — `acceptEdits`
-文件编辑以及 `mkdir`、`mv` 等常见文件系统命令会被直接接受而不询问；其他命令仍会
-询问。它作用于整个工作目录，而不只是 `prototypes/`，因此回到生产代码时要切回来。
+项目的危险命令拦截不依赖这里，而是 `.trae/hooks/deny-rules.json` +
+`.trae/hooks/validate-deny.sh`，因此克隆仓库即可获得同一套 deny 规则。个人只应
+在此基础上加自己的白名单，不要删除项目规则。
 
-### 代码评审期间 — `plan`
-Claude 会读取文件并运行只读命令来探索，但不会编辑你的源文件。
+## 3. 个人钩子：`~/.trae-cn/hooks.json`
 
-### `auto`
-无需常规提示即可运行：后台分类器会在每个动作执行前检查。本地 `defaultMode`
-无法以该模式启动终端会话；请在会话过程中切换（`setup-requirements.md` 列出了
-可用途径）。
-
-## 本地自定义钩子
-
-你可以在 `settings.local.json` 中添加个人钩子，它会扩展（而非覆盖）项目钩子。
-例如，每次 Claude 完成一次回复时记录一行个人日志：
+Trae 会把全局 Hook 与项目 Hook 合并执行。个人 Hook 写到
+`~/.trae-cn/hooks.json`，使用与 `.trae/hooks.json` 相同的 `version: 1` 结构：
 
 ```json
 {
+  "version": 1,
   "hooks": {
     "Stop": [
       {
-        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'echo \"Response finished at $(date)\" >> \"$CLAUDE_PROJECT_DIR/production/session-logs/my-stops.log\"'",
-            "timeout": 5
+            "command": "bash \"$HOME/.trae/my-session-log.sh\"",
+            "timeout": 10
           }
         ]
       }
@@ -71,7 +50,17 @@ Claude 会读取文件并运行只读命令来探索，但不会编辑你的源�
 }
 ```
 
-钩子的输出只有对少数事件才会传回 Claude，例如 `SessionStart` 和
-`UserPromptSubmit`。对于其他事件（包括 `Stop`），Claude Code 会把 stdout 写入
-调试日志，因此只打印不写文件的钩子什么也显示不出来：要像上面那样写入文件，或写入
-其他工具。`Stop` 在每次回复结束时触发，而不是每个会话一次。
+可用的 Hook 事件：`SessionStart`、`UserPromptSubmit`、`PreToolUse`、
+`PostToolUse`、`Stop`、`Notification`。`PreCompact` 视 Trae 版本而定。
+
+## 自动化程度
+
+Trae 没有 Claude Code 的 `default` / `acceptEdits` / `plan` / `auto` 权限模式。
+对应关系是：
+
+- **手动确认**：Trae 的默认审批模式；大多数命令和文件编辑前会询问。
+- **减少询问**：在 Trae 设置里调整审批策略，或把 Hook 运行方式设为
+  「本地自动运行」。
+- **只读评审**：让 Agent 只读文件、不写入；本仓库的评审技能本身不会写源文件。
+- **完全自动**：由 Trae 的 Agent 自动模式承担；项目的协作协议仍然要求
+  在写文件前询问，除非用户明确切换到自动模式。

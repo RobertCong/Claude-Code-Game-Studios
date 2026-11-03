@@ -27,7 +27,7 @@ these [N] stories to `production/epics/[epic-slug]/`, and update
 
 由 `/skill-test spec` 针对 SKILL.md 检查 —— 无需 fixture。
 
-- [ ] 具有必需的前置元数据字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 至少有 2 个阶段标题
 - [ ] 包含结论关键词：COMPLETE、BLOCKED
 - [ ] 包含 "May I write" 协作协议用语（整套用户故事只批准一次）
@@ -62,7 +62,7 @@ NOT ASSESSED [missing input] → 绝不当作 ADEQUATE 读取：补齐输入并�
 
 除非某个用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有
-`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
+`project.local.yaml`。规则见：`studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 

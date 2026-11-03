@@ -3,13 +3,11 @@ name: art-bible
 description: "撰写美术圣经（Art Bible）——视觉识别是资源生产的质量闸门。请在 /map-systems 之前运行。"
 argument-hint: "[--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, Bash(bash "*/.claude/skills/art-bible/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,workflow,docs.density`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,workflow,docs.density`
 
-以上已解析完成——直接使用；`--review` 会覆盖 `review_mode`。若没有配置块 → 使用 `.claude/docs/config-resolution.md` 中的默认值。
+以上命令的输出已解析完成——直接使用；`--review` 会覆盖 `review_mode`。若没有配置块 → 使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 # Art Bible（美术圣经）
 
@@ -17,14 +15,14 @@ model: sonnet
 ## Phase 0: 解析参数与上下文检查
 
 
-完整的检查模式见 `.claude/docs/director-gates.md`。各个质量闸门（gate）的定义位于 `.claude/docs/director-gates/[gate-id].md`——被生成的 agent 会读取自己的闸门文件；不要在父会话中读取它。
+完整的检查模式见 `.trae/docs/director-gates.md`。各个质量闸门（gate）的定义位于 `.trae/docs/director-gates/[gate-id].md`——被生成的 agent 会读取自己的闸门文件；不要在父会话中读取它。
 
 
-每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`（collaborative 总是询问 · guided 仅询问重大决策 · autonomous 记录并继续；`automation_always_ask` 类别始终提示）。
+每次 `AskUserQuestion` 调用都遵循 `.trae/docs/automation-modes.md`（collaborative 总是询问 · guided 仅询问重大决策 · autonomous 记录并继续；`automation_always_ask` 类别始终提示）。
 
 **`docs.density`**——它控制每个章节的*深度*，而 `workflow` 控制存在哪些章节。`modes.rigor` 会同时设置两者；若只想改变深度，请显式设置 `docs.density`：`terse`（默认值，经由 `rigor: minimal`）= 每个章节为约束 + 参考资料的项目符号列表；`balanced` = 用段落解释每项视觉选择（`rigor: standard`）；`thorough` = 完整行文，包含风格探索、参考资料以及每项选择的理由。请将其应用到你所撰写的每个章节。
 
-**`workflow`**（见 `.claude/docs/workflow-modes.md`）：
+**`workflow`**（见 `.trae/docs/workflow-modes.md`）：
 - `full`——要求全部 9 个美术圣经章节。
 - `standard`——仅当项目中存在视觉资源用户故事时才为必需；为必需时，第 1–4 节即为最低要求。`workflow_overrides.art_bible_strict: true` 会强制要求全部 9 个章节，无论层级如何。
 - `minimal`——非必需。仍可自愿运行。
@@ -70,11 +68,11 @@ Section | Status
   > “在 `design/art/art-bible.md` 发现了现有的美术圣经。[N] 个章节已完成，[M] 个需要补充内容。我将只处理未完成的章节——现有内容不会被改动。”
 - 只处理 Status 为 Empty 或 Placeholder 的章节。不要重新撰写已完成的章节。
 
-如果文件不存在，这是一次全新的撰写会话。第一个获得批准的章节会从 `.claude/docs/templates/art-bible.md` 创建文件，该模板的九个 `## N. Name` 标题正是改造模式所读取的内容——先询问：“我可以基于美术圣经模板创建 `design/art/art-bible.md` 吗？”之后每个获得批准的章节用 `Edit` 替换其自身的 `[To be designed]` 行；保持标题与模板一致。
+如果文件不存在，这是一次全新的撰写会话。第一个获得批准的章节会从 `.trae/docs/templates/art-bible.md` 创建文件，该模板的九个 `## N. Name` 标题正是改造模式所读取的内容——先询问：“我可以基于美术圣经模板创建 `design/art/art-bible.md` 吗？”之后每个获得批准的章节用 `Edit` 替换其自身的 `[To be designed]` 行；保持标题与模板一致。
 
 **章节的批准即代表其写入授权。** 每个章节都通过一次 `AskUserQuestion` 批准，其批准选项为 `[A] Lock this in and write it to design/art/art-bible.md`（第 1 节的完整选项列表见下文）。选择它即表示批准写入该章节；无论全新还是改造，没有它就不会写入任何章节。
 
-提取性能预算与引擎信息以确定资源标准约束：从 `project.yaml` 读取 `performance.*` 和 `engine.name`；对于任何缺失或为空的键（包括 `project.yaml` 没有 `performance` 或 `engine` 块的情况），回退到 `.claude/docs/technical-preferences.md`。
+提取性能预算与引擎信息以确定资源标准约束：从 `project.yaml` 读取 `performance.*` 和 `engine.name`；对于任何缺失或为空的键（包括 `project.yaml` 没有 `performance` 或 `engine` 块的情况），回退到 `.trae/docs/technical-preferences.md`。
 
 ---
 
@@ -110,7 +108,7 @@ Section | Status
 
 > **本阶段的生成策略。** 第 1 节单独委派——它是基础性的，用户需要在任何其他内容建立其上之前，先在锚点方向之间做出选择。随后第 2–4 节在**一次** `art-director` 调用中委派，而不是三次：它们是同一个 agent 接收相同的输入（视觉识别陈述 + 游戏支柱），并且氛围、形状和色彩相互依赖——美术总监会一起定义它们，而不是孤立定义。分开调用会要求 agent 在不知道它刚刚写下的形状语言的情况下推理色彩。
 >
-> **这并不是减少专家参与**——每个章节仍由专家撰写，这正是 `.claude/docs/effects-map.md` 关于美术圣经委派必须执行的观点。只是对同样三个章节用一次调用代替三次。逐章节的用户批准和立即写入文件保持不变。
+> **这并不是减少专家参与**——每个章节仍由专家撰写，这正是 `.trae/docs/effects-map.md` 关于美术圣经委派必须执行的观点。只是对同样三个章节用一次调用代替三次。逐章节的用户批准和立即写入文件保持不变。
 
 ### Section 1: Visual Identity Statement（视觉识别陈述）
 
@@ -216,7 +214,7 @@ Section | Status
 
 **Agent 委派**：并行生成：
 - **`art-director`**：文件格式偏好、命名规范方向、纹理分辨率层级、LOD 级别预期、导出设置理念
-- **`technical-artist`**：引擎特定的硬性约束——每种资源类别的多边形预算、纹理内存限制、材质槽数量、导入器约束、来自性能预算的任何内容（`project.yaml` 中的 `performance.*`，回退到 `.claude/docs/technical-preferences.md`）
+- **`technical-artist`**：引擎特定的硬性约束——每种资源类别的多边形预算、纹理内存限制、材质槽数量、导入器约束、来自性能预算的任何内容（`project.yaml` 中的 `performance.*`，回退到 `.trae/docs/technical-preferences.md`）
 
 如果任何美术偏好与技术约束冲突（例如，art-director 想要 4K 纹理，但性能预算要求移动端使用 2K），请明确呈现冲突及双方立场——理想标准和受约束标准，以及取舍。**不要**静默解决——使用 `AskUserQuestion` 让用户选择（选项：理想标准、受约束标准，或两者都记录并由逐个资源判断）。资源标准中的模糊性正是生产成本滋生的地方。
 
@@ -243,9 +241,9 @@ Section | Status
 
 在任一跳过情况下，询问“我可以把跳过的签核记录在 `design/art/art-bible.md` 的头部吗？”，若同意，则将头部的 `> **Art Director Sign-Off (AD-ART-BIBLE)**: [Not yet reviewed]` 替换为 `> **Art Director Sign-Off (AD-ART-BIBLE)**: SKIPPED [date] — [solo|lean] mode` ——质量闸门接受任一形式作为已记录的签核。
 
-所有章节完成后（或 Phase 1 确定的范围集合完成后），使用质量闸门 **AD-ART-BIBLE**（`.claude/docs/director-gates/ad-art-bible.md`）通过 `Agent` 生成 `art-director`。
+所有章节完成后（或 Phase 1 确定的范围集合完成后），使用质量闸门 **AD-ART-BIBLE**（`.trae/docs/director-gates/ad-art-bible.md`）通过 `Agent` 生成 `art-director`。
 
-传入：美术圣经路径（`design/art/art-bible.md`）；游戏支柱与核心幻想；平台与性能约束（`project.yaml` 中的 `platform.*` 和 `performance.*`，回退到 `.claude/docs/technical-preferences.md`）；以及视觉识别锚点。如果 Phase 0 读取的是一页式简报，则将其提案和“他们感受什么”一行作为游戏支柱与幻想传入，并将其“美术与音频方向”一行作为锚点传入。
+传入：美术圣经路径（`design/art/art-bible.md`）；游戏支柱与核心幻想；平台与性能约束（`project.yaml` 中的 `platform.*` 和 `performance.*`，回退到 `.trae/docs/technical-preferences.md`）；以及视觉识别锚点。如果 Phase 0 读取的是一页式简报，则将其提案和“他们感受什么”一行作为游戏支柱与幻想传入，并将其“美术与音频方向”一行作为锚点传入。
 
 按 `director-gates.md` 中的标准规则处理结论。
 在 `Revise flagged items` 时，或为处理 REJECT，该章节自己的专家——`art-director`，第 7 节加上 `ux-designer`，第 8 节加上 `technical-artist`——会重新草拟每个被标记的章节，随后像任何其他章节一样呈现、批准和写入，然后记录 `REVISED [date]`。
@@ -261,7 +259,7 @@ Section | Status
 
 在呈现下一步之前，检查项目状态：
 - `design/gdd/systems-index.md` 是否存在？→ map-systems 已完成，跳过该选项
-- 是否已配置引擎——`project.yaml` 中存在 `engine.name`，或 `.claude/docs/technical-preferences.md` 中有已配置的 Engine 字段（不是 `[TO BE CONFIGURED]`）？→ setup-engine 已完成，跳过该选项
+- 是否已配置引擎——`project.yaml` 中存在 `engine.name`，或 `.trae/docs/technical-preferences.md` 中有已配置的 Engine 字段（不是 `[TO BE CONFIGURED]`）？→ setup-engine 已完成，跳过该选项
 - `design/gdd/` 中是否包含任何 `*.md` 文件？→ design-system 已运行过，跳过该选项
 - `design/gdd/gdd-cross-review-*.md` 是否存在？→ review-all-gdds 已完成
 - GDD 是否存在（见上方检查）？→ 包含 /consistency-check 选项
@@ -288,7 +286,7 @@ Section | Status
 
 ## 协作协议
 
-**适用于 `collaborative` 模式（默认）。** 对于 `guided` 和 `autonomous` 模式，请参阅 `.claude/docs/automation-modes.md`——下文规则描述的是 collaborative 模式的要求，而非通用行为。
+**适用于 `collaborative` 模式（默认）。** 对于 `guided` 和 `autonomous` 模式，请参阅 `.trae/docs/automation-modes.md`——下文规则描述的是 collaborative 模式的要求，而非通用行为。
 
 每个章节都遵循：**提问 → 选项 → 决定 → 草稿（来自 art-director agent）→ 批准 → 写入文件**
 

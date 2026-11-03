@@ -3,8 +3,6 @@ name: start
 description: "引导首次使用的用户完成上手，并为其选择合适的工作流。当用户是新手、刚克隆或安装本工作室、还没有想法或引擎、询问从何处开始，或想引入现有游戏时使用。"
 argument-hint: "[no arguments]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, AskUserQuestion, Bash(bash .claude/scripts/project-state.sh*), Bash(bash .claude/scripts/set-stage.sh *), Bash(bash .claude/scripts/config-set.sh *)
-model: sonnet
 ---
 
 # 引导式上手
@@ -26,12 +24,12 @@ model: sonnet
 
 Phase 2、4 和 5 中的问题会塑造项目，因此在所有自动化模式下都会提问。
 引擎不属于其中之一：它由 `/setup-engine` 选择。Phase 6 的最后一个问题遵循
-`project.yaml` 中已有的 `modes.automation`，依据 `.claude/docs/automation-modes.md`；
+`project.yaml` 中已有的 `modes.automation`，依据 `.trae/docs/automation-modes.md`；
 若未设置，则直接询问。
 
 ## Phase 1: 读取项目
 
-运行 `bash .claude/scripts/project-state.sh` 并保留其各行。暂时不要展示；它们用于在
+运行 `bash .trae/scripts/project-state.sh` 并保留其各行。暂时不要展示；它们用于在
 Phase 2 中核对用户的回答。
 
 | 行 | 用途 |
@@ -102,7 +100,7 @@ Phase 2 中核对用户的回答。
 
 **严谨度（Rigor）。** 如果 `project.yaml` 中已设置 `modes.rigor`，保留它并说明。否则根据
 用户在 Phase 2 和 3 中的表述，使用
-`.claude/docs/settings-guidance.md` §3 中的信号来推断：
+`.trae/docs/settings-guidance.md` §3 中的信号来推断：
 
 | 用户的表述中提到 | 严谨度 |
 |---|---|
@@ -129,8 +127,8 @@ What I'll set up
 `production/stage.txt`）吗？"选项：`Save them` / `Don't save`。不要就严谨度
 本身提问：卡片已展示它，`/settings` 可以更改它。
 
-- **保存：** 运行 `bash .claude/scripts/set-stage.sh "[stage]"`，然后，仅当严谨度此前
-  未设置时，运行 `bash .claude/scripts/config-set.sh modes.rigor [value]`。检查回读的行
+- **保存：** 运行 `bash .trae/scripts/set-stage.sh "[stage]"`，然后，仅当严谨度此前
+  未设置时，运行 `bash .trae/scripts/config-set.sh modes.rigor [value]`。检查回读的行
   是否匹配。说："已保存。严谨度 `[value]` 会设定另外六项设置；`/settings` 会显示它们并更改
   其中任意一项。"
 - **不保存**，或任何不是明确同意的回答：什么都不写，本次运行保留这些值，
@@ -151,7 +149,7 @@ What I'll set up
 
 映射：`Guided` → `guided`，`Collaborative` → `collaborative`，`Autonomous` → `autonomous`。
 选择即是写入的同意：除非 Phase 4 的保存被拒绝（那就说明未保存），
-否则运行 `bash .claude/scripts/config-set.sh modes.automation [value]`。
+否则运行 `bash .trae/scripts/config-set.sh modes.automation [value]`。
 
 ## Phase 6: 展示路径
 

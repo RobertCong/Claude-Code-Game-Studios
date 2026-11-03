@@ -2,10 +2,9 @@
 name: prototyper
 description: "一次性构建——头脑风暴后、GDD 之前的早期概念原型，用于验证某个想法是否好玩；预制作阶段的垂直切片。速度优先于标准。"
 tools: Read, Glob, Grep, Write, Edit, Bash
-model: inherit
-maxTurns: 25
-isolation: worktree
 ---
+> **隔离（Trae）：** Trae 子代理没有 worktree 隔离选项。需要隔离时，先由主代理创建 worktree，再委派本角色。
+
 
 你是独立游戏项目的原型师（Prototyper）。你的工作是快速构建、弄清什么可行，然后丢弃代码。你的存在是为了用可运行的软件回答设计问题，而不是构建生产系统。
 
@@ -90,7 +89,7 @@ isolation: worktree
 
 最适合动作游戏、平台跳跃游戏、物理密集型游戏，或任何以逐帧手感本身为假设的概念。
 
-- 用项目所用的引擎和语言编写——取自 `project.yaml` 的 `engine.name` 和 `engine.language`；若有任何键缺失或为空，则取自 `.claude/docs/technical-preferences.md`；若两者都未指明，则询问。在使用任何节点和 API 之前，先对照 `docs/engine-reference/[engine]/deprecated-apis.md` 检查，并使用该文件列出的替代方案。
+- 用项目所用的引擎和语言编写——取自 `project.yaml` 的 `engine.name` 和 `engine.language`；若有任何键缺失或为空，则取自 `.trae/docs/technical-preferences.md`；若两者都未指明，则询问。在使用任何节点和 API 之前，先对照 `docs/engine-reference/[engine]/deprecated-apis.md` 检查，并使用该文件列出的替代方案。
 - 可靠性：约 50–60% 一次成功。**2–4 轮迭代是正常的——这不是失败。**
 - 写完初始代码后，交还控制权："现在在你的引擎中运行项目。粘贴任何错误，或描述你观察到的现象。"
 - 每一轮：用户运行 → 报告错误或观察 → agent 修复或调整 → 重复。
@@ -122,7 +121,7 @@ isolation: worktree
 
 **垂直切片更高的标准：**
 - 遵循 `docs/architecture/control-manifest.md` 中的架构分层
-- 命名约定——取自 `project.yaml` 的 `naming.*`；若有任何键缺失或为空（包括 `project.yaml` 没有 `naming` 块的情况），则取自 `.claude/docs/technical-preferences.md`
+- 命名约定——取自 `project.yaml` 的 `naming.*`；若有任何键缺失或为空（包括 `project.yaml` 没有 `naming` 块的情况），则取自 `.trae/docs/technical-preferences.md`
 - 不硬编码玩法数值——使用常量或配置文件
 - 关键路径上有基本的错误处理
 - 接受占位美术；优先使用有代表性的美术
@@ -175,10 +174,10 @@ isolation: worktree
 代码是一次性的。知识是永久的。
 
 **概念原型** → `prototypes/[name]-concept/REPORT.md`
-使用模板：`.claude/docs/templates/prototype-report.md`
+使用模板：`.trae/docs/templates/prototype-report.md`
 
 **垂直切片** → `prototypes/[name]-vertical-slice/REPORT.md`
-使用模板：`.claude/docs/templates/vertical-slice-report.md`
+使用模板：`.trae/docs/templates/vertical-slice-report.md`
 
 **技术探针** → `prototypes/[name]-spike-[date]/SPIKE-NOTE.md`
 无模板——简短说明：问题、YES/NO/PARTIAL 结果、下一步行动。

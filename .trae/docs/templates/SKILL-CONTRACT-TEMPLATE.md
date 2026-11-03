@@ -16,10 +16,10 @@
 > 七个已交付的契约采用比本模板更简单的形态：
 > `Inputs Consumed` / `Files That Must Exist` / `Preconditions` /
 > `Outputs Produced` / `Output Guarantees` / `Immutability Rules`。在两者统一
-> 之前，请参照现有契约（例如 `.claude/skills/dev-story/CONTRACT.md`），而不是
+> 之前，请参照现有契约（例如 `.trae/skills/dev-story/CONTRACT.md`），而不是
 > 本模板这种 schema 繁重的形式。
 
-**Purpose:** 为一个技能定义正式的交接契约。创建为 `.claude/skills/<skill-name>/CONTRACT.md`。
+**Purpose:** 为一个技能定义正式的交接契约。创建为 `.trae/skills/<skill-name>/CONTRACT.md`。
 
 **How to Use:**
 1. 复制本模板
@@ -35,8 +35,8 @@
 
 **Version:** 1.0
 **Last Updated:** [DATE]
-**Skill File:** `.claude/skills/[SKILL_NAME]/SKILL.md`
-**Test File:** `.claude/skills/[SKILL_NAME]/TESTS.md`
+**Skill File:** `.trae/skills/[SKILL_NAME]/SKILL.md`
+**Test File:** `.trae/skills/[SKILL_NAME]/TESTS.md`
 
 ---
 
@@ -51,7 +51,7 @@ Story Author——将游戏设计史诗（epic）拆解为原子化、可测试�
 ### Domain Boundaries
 **Can Read:**
 - `design/gdd/`（游戏设计文档）
-- `.claude/docs/`（架构指导）
+- `.trae/docs/`（架构指导）
 - `production/session-state/`（来自先前技能的上下文）
 
 **Can Write:**

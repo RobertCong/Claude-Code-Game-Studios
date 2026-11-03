@@ -2,7 +2,7 @@
 
 ## 这是什么？
 
-这是一套用于游戏开发的完整 Claude Code agent 架构。它把 49 个专业 AI agent 组织成一套模拟真实游戏开发团队的 studio 层级，配有明确的职责、委派规则和协调协议。它包含针对 Godot、Unity 和 Unreal 的引擎专家 agent —— 每个引擎都有面向主要引擎子系统的专属子专家。所有设计 agent 和模板都建立在成熟的游戏设计理论之上（MDA Framework、Self-Determination Theory、Flow State、Bartle Player Types）。请使用与你项目匹配的引擎集。
+这是一套用于游戏开发的完整 Trae agent 架构。它把 49 个专业 AI agent 组织成一套模拟真实游戏开发团队的 studio 层级，配有明确的职责、委派规则和协调协议。它包含针对 Godot、Unity 和 Unreal 的引擎专家 agent —— 每个引擎都有面向主要引擎子系统的专属子专家。所有设计 agent 和模板都建立在成熟的游戏设计理论之上（MDA Framework、Self-Determination Theory、Flow State、Bartle Player Types）。请使用与你项目匹配的引擎集。
 
 ## 默认路径：Rigor Minimal
 
@@ -33,7 +33,7 @@ agent 分为三个层级：
 - **Tier 3 —— 专家**，在自己的领域内执行
   - 设计师、程序员、美术、编剧、测试、工程师
 
-层级代表角色的资历。大多数 agent 在你的会话模型上运行；agent 文件自己的 `model:` 行会说明哪些不是（`.claude/docs/model-tiers.md`）。
+层级代表角色的资历。大多数 agent 在你的会话模型上运行；agent 文件自己的 `model:` 行会说明哪些不是（`.trae/docs/model-tiers.md`）。
 
 ### 2. 为任务选择合适的 agent
 
@@ -78,7 +78,7 @@ agent 分为三个层级：
 | 为玩家编写补丁说明 | `community-manager` |
 | 头脑风暴一个新的游戏创意 | 使用 `/brainstorm` 技能 |
 
-### 3. 使用斜杠命令处理常见任务
+### 3. 使用技能处理常见任务
 
 | 命令 | 作用 |
 |---------|-------------|
@@ -158,7 +158,7 @@ agent 分为三个层级：
 
 ### 4. 为新文档使用模板
 
-模板位于 `.claude/docs/templates/`：
+模板位于 `.trae/docs/templates/`：
 
 - `game-design-document.md` —— 用于新机制与系统
 - `architecture-decision-record.md` —— 用于技术决策
@@ -219,8 +219,8 @@ agent 分为三个层级：
    - 生成 3 个概念，帮助你选择其中一个，定义核心循环与支柱
    - 产出一份游戏概念文档并推荐引擎
 2. **搭建引擎** —— 运行 `/setup-engine`（使用头脑风暴给出的推荐）
-   - 配置 CLAUDE.md，检测知识缺口，填充参考资料文档
-   - 把引擎、命名约定和性能预算写入 `project.yaml`（事实来源），并镜像到 `.claude/docs/technical-preferences.md`
+   - 配置 AGENTS.md，检测知识缺口，填充参考资料文档
+   - 把引擎、命名约定和性能预算写入 `project.yaml`（事实来源），并镜像到 `.trae/docs/technical-preferences.md`
    - 如果引擎版本比 LLM 的训练数据更新，它会从网络获取当前文档，以便 agent 建议正确的 API
 3. **验证概念** —— 运行 `/design-review design/gdd/game-concept.md`
    （或 `design/game-brief.md`，如果 `/brainstorm` 写入了单页简报）
@@ -263,14 +263,14 @@ agent 分为三个层级：
 ## 文件结构参考
 
 ```
-CLAUDE.md                          -- Master config (read this first, ~80 lines)
+AGENTS.md                          -- Master config (read this first, ~80 lines)
 project.yaml                       -- Machine-readable project config (engine, modes, stage) — source of truth
-.claude/
-  settings.json                    -- Claude Code hooks and project settings
+.trae/
+  hooks.json                       -- Trae hooks (version 1) and project safety wiring
   agents/                          -- 49 agent definitions (YAML frontmatter)
-  skills/                          -- 74 slash command definitions (YAML frontmatter)
-  hooks/                           -- 15 event hooks (.sh, wired by settings.json) + yaml-helper.sh, update-check.sh
-  rules/                           -- 14 path-specific rule files
+  skills/                          -- 74 skill definitions (YAML frontmatter)
+  hooks/                           -- 20 hook scripts (.sh, wired by hooks.json) + helpers
+  rules/                           -- 14 path-specific rule files (globs)
   docs/
     quick-start.md                 -- This file
     technical-preferences.md       -- Legacy fallback for project.yaml config (mirror; see project.yaml at repo root)

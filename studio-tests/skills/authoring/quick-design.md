@@ -14,7 +14,7 @@
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] 具有必填的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 至少包含 2 个阶段标题
 - [ ] 包含结论关键词：`COMPLETE`、`REDIRECTED`
 - [ ] 包含 “May I write” 协作协议用语（针对快速规格文件，以及单独针对任何 GDD 更新）
@@ -26,13 +26,13 @@
 
 ## Director Gate Checks
 
-无。该技能只解析 `automation` 和 `workflow`（不解析 `review_mode`），`allowed-tools` 中没有 `Agent` 工具，也不启动任何总监或专家代理。评审模式设置对它没有影响。
+无。该技能只解析 `automation` 和 `workflow`（不解析 `review_mode`），正文没有委派子代理，也不启动任何总监或专家代理。评审模式设置对它没有影响。
 
 ---
 
 ## Fixture Defaults
 
-除非某个案例自身的 Fixture 另有说明，每个案例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见 `studio-tests/CLAUDE.md` § Fixture defaults。
+除非某个案例自身的 Fixture 另有说明，每个案例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见 `studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 

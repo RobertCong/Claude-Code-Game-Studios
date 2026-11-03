@@ -3,14 +3,14 @@
 > **如何借助 Agent 架构（Agent Architecture）从零开始做出一款已发布的游戏。**
 >
 > 本指南将带你走过游戏开发的每个阶段，使用 49 个 agent 的体系、
-> 74 个斜杠命令和 15 个自动化钩子（hook）。前提是你已安装 Claude Code，
+> 74 个技能和 13 个自动化钩子（hook）。前提是你已安装 Trae CN，
 > 并在项目根目录下工作。
 >
 > 流水线共 7 个阶段。在 `rigor: standard` 和 `full` 下，每个阶段都有一个
 > 正式的质量闸门（`/gate-check`），必须通过才能继续。在
 > `rigor: minimal`（默认值）下，不要求任何闸门；参见
 > [默认路径](#the-default-path-rigor-minimal)。权威的
-> 阶段顺序定义在 `.claude/docs/workflow-catalog.yaml` 中，由 `/help` 读取。
+> 阶段顺序定义在 `.trae/docs/workflow-catalog.yaml` 中，由 `/help` 读取。
 
 ---
 
@@ -39,7 +39,7 @@
 
 在开始之前，请确保你具备：
 
-- 已安装并可用的 **Claude Code**
+- 已安装并可用的 **Trae CN**
 - **Git**（Windows 上为 Git Bash，Mac/Linux 上为标准终端）
 - **jq**（可选但推荐 -- 若缺失，钩子会回退到 `grep`）
 - **Python 3**（必需 -- 每个技能和钩子都通过它读取 `project.yaml`；没有它，每项设置都会静默回退到默认值）
@@ -71,10 +71,10 @@ cd my-game
 
 ### Step 3：验证钩子正常工作
 
-启动一个新的 Claude Code 会话。你应当看到 `session-start.sh` 钩子的输出：
+在 Trae 中打开一个新会话。你应当看到 `session-start.sh` 钩子的输出：
 
 ```
-=== Claude Code Game Studios -- Session Context ===
+=== Claude Code Game Studios -- Session Context (Trae) ===
 Branch: main
 Recent commits:
   abc1234 Initial commit
@@ -82,7 +82,8 @@ Recent commits:
 ```
 
 如果看到这些内容，说明钩子工作正常。如果没有，请检查
-`.claude/settings.json`，确认钩子路径与你的操作系统匹配。
+`.trae/hooks.json`，确认钩子路径与你的操作系统匹配，并在 Trae 的
+**设置 > Hooks** 中确认项目 Hook 已启用。
 
 ### Step 4：随时寻求帮助
 
@@ -265,7 +266,7 @@ production/           # Sprint plans, milestones, releases
 
 - 将引擎、语言、专人（specialist）、命名约定和性能预算写入
   `project.yaml`（唯一事实来源），并同步到
-  `.claude/docs/technical-preferences.md`（人类可读的旧版回退文件）
+  `.trae/docs/technical-preferences.md`（人类可读的旧版回退文件）
 - 检测知识缺口（引擎版本比 LLM 训练数据更新），并建议交叉核对
   `docs/engine-reference/`
 - 在 `docs/engine-reference/` 中创建版本锁定的参考文档
@@ -317,7 +318,7 @@ Godot，`godot-specialist`、`godot-gdscript-specialist` 和
 - 推荐：一份概念原型，其 REPORT.md 结论为 PROCEED
 
 这是 `full` 的清单。`standard` 和 `minimal` 会删减条目；闸门自身的
-文件 `.claude/skills/gate-check/references/gate-systems-design.md` 包含完整
+文件 `.trae/skills/gate-check/references/gate-systems-design.md` 包含完整
 检查清单以及每个档位删减的内容。
 
 **结论：** PASS / CONCERNS / NOT ASSESSED / FAIL。PASS 会推进阶段。
@@ -479,7 +480,7 @@ FAIL 永不推进。NOT ASSESSED 意味着某项必需内容无法被检查。
   也不是 NOT ASSESSED（后者意味着 GDD 无法比较）
 
 这是 `full` 的清单。`standard` 和 `minimal` 会删减条目；闸门自身的
-文件 `.claude/skills/gate-check/references/gate-technical-setup.md` 包含完整
+文件 `.trae/skills/gate-check/references/gate-technical-setup.md` 包含完整
 检查清单以及每个档位删减的内容。
 
 ---
@@ -621,7 +622,7 @@ docs/architecture/control-manifest.md
   （`/ux-design accessibility`、`/ux-design patterns`）
 
 这是 `full` 的清单。`standard` 和 `minimal` 会删减条目；闸门自身的
-文件 `.claude/skills/gate-check/references/gate-pre-production.md` 包含完整
+文件 `.trae/skills/gate-check/references/gate-pre-production.md` 包含完整
 检查清单以及每个档位删减的内容。
 
 ---
@@ -817,7 +818,7 @@ CONCERNS，无人玩过的切片为 NOT ASSESSED，而构建完成但
   构建了但尚未试玩 → NOT ASSESSED
 
 这是 `full` 的清单。`standard` 和 `minimal` 会删减条目；闸门自身的
-文件 `.claude/skills/gate-check/references/gate-production.md` 包含完整
+文件 `.trae/skills/gate-check/references/gate-production.md` 包含完整
 检查清单以及每个档位删减的内容。
 
 ---
@@ -1004,7 +1005,7 @@ BLOCKED / NOT ASSESSED。
 - 没有未解决的 S1 Critical 缺陷，性能在预算之内
 
 这是 `full` 的清单。`standard` 和 `minimal` 会删减条目；闸门自身的
-文件 `.claude/skills/gate-check/references/gate-polish.md` 包含完整
+文件 `.trae/skills/gate-check/references/gate-polish.md` 包含完整
 检查清单以及每个档位删减的内容。
 
 ---
@@ -1188,7 +1189,7 @@ ASSESSED，则闸门的安全条目也为 NOT ASSESSED。
   HIGH 发现，且你发布的每种语言都通过 `/localize qa`
 
 这是 `full` 的清单。`standard` 和 `minimal` 会删减条目；闸门自身的
-文件 `.claude/skills/gate-check/references/gate-release.md` 包含完整
+文件 `.trae/skills/gate-check/references/gate-release.md` 包含完整
 检查清单以及每个档位删减的内容。
 
 ---
@@ -1284,8 +1285,8 @@ git push origin main --tags
 上线稳定后的**复盘（post-mortem）**：
 
 ```
-Ask Claude to create a post-mortem using the template at
-.claude/docs/templates/post-mortem.md
+Ask the agent to create a post-mortem using the template at
+.trae/docs/templates/post-mortem.md
 ```
 
 ---
@@ -1323,7 +1324,7 @@ Ask Claude to create a post-mortem using the template at
 `production/review-mode.txt`，然后是严格度默认值。旧版本遗留的
 `review-mode.txt` 仍会覆盖严格度 —— 如果模式出乎意料，请删除它。
 
-完整的闸门定义和检查模式：`.claude/docs/director-gates.md`
+完整的闸门定义和检查模式：`.trae/docs/director-gates.md`
 
 ---
 
@@ -1403,7 +1404,7 @@ Tier 3 (Specialists):  gameplay-programmer, engine-programmer,
 | `validate-write.sh` | 写入文件之前 | 当写入会违反技能所述的规则时发出警告（绝不阻塞） |
 | `validate-registry.sh` | 写入实体或 TR-ID 注册表之前 | 当条目将被删除或重新编号，或状态不在表头列表中时发出警告 |
 | `validate-assets.sh` | 写入文件之后 | 检查数据文件 JSON，以及 Godot `assets/` 中的资源命名 |
-| `validate-skill-change.sh` | 技能文件被写入 | 建议在 `.claude/skills/` 变更后运行 `/skill-test` |
+| `validate-skill-change.sh` | 技能文件被写入 | 建议在 `.trae/skills/` 变更后运行 `/skill-test` |
 | `log-agent.sh` | Agent 启动 | 记录 agent 调用，形成审计轨迹 |
 | `log-agent-stop.sh` | Agent 停止 | 补全 agent 审计轨迹（启动 + 停止） |
 | `validate-agent-artifact.sh` | Agent 停止 | 当子 agent 停止却未写入其简报指定的文件时发出警告 |

@@ -3,8 +3,6 @@ name: team-polish
 description: "编排打磨团队 — performance-analyst、technical-artist、sound-designer、qa-tester — 优化并加固某个功能或区域。"
 argument-hint: "[feature or area to polish] [--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, TaskCreate, TaskGet, TaskList, TaskUpdate, Bash(bash "*/.claude/skills/team-polish/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 # 打磨团队
 
@@ -21,14 +19,14 @@ model: sonnet
 在 `autonomous` 模式下，流水线端到端运行，并通过
 `log_decision` 记录每个阶段的结果。`automation_always_ask` 类别中的决策
 （`is_always_ask_category` 辅助函数）无论模式如何都会始终提示。参见
-`.claude/docs/automation-modes.md`。
+`.trae/docs/automation-modes.md`。
 
 ## Phase 0: 解析配置
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,team.size,workflow`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,team.size,workflow`
 
-已在上面解析——按原样使用；`--review` 覆盖 `review_mode`。无输出块时 →
-使用 `.claude/docs/config-resolution.md` 中的默认值。
+已在上一步解析——按原样使用；`--review` 覆盖 `review_mode`。无输出块时 →
+使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 `review_mode` 设定总监闸门深度，而本流水线没有总监闸门：
 在任何 `review_mode` 下，下面的阶段都不会派出 CD-、TD-、PR- 或 AD-PHASE-GATE。
@@ -36,7 +34,7 @@ model: sonnet
 在这些决策点上工作的 agent 是团队成员，而不是总监闸门。
 
 `automation` 驱动上面的决策点说明。关于每种模式如何改变流水线行为，
-参见上面的决策点说明和 `.claude/docs/automation-modes.md`。
+参见上面的决策点说明和 `.trae/docs/automation-modes.md`。
 
 **`team.size`**：哪些 agent 处于活动状态（与 review_mode 闸门深度和 workflow 文档正交）。
 - **`individual`**（默认）：`performance-analyst` + `technical-artist`。其他 agent 通过这两个咨询，不单独派出。没有程序员处于活动状态，因此优化列表中的程序员项不会在本次运行中实现——报告会说明该列表已交给 `/dev-story`（Phase 2）。
@@ -78,12 +76,12 @@ model: sonnet
 ## 如何委派
 
 使用 `Agent` 工具将每个团队成员作为子代理派出：
-- `subagent_type: performance-analyst` — 性能分析、内存分析、优化列表
-- `subagent_type: engine-programmer` — 来自优化列表的引擎层面修复：渲染、内存、资源加载
-- `subagent_type: technical-artist` — VFX 打磨、着色器优化、视觉质量
-- `subagent_type: sound-designer` — 音频打磨、混音、环境层
-- `subagent_type: tools-programmer` — 来自优化列表的内容流水线和编辑器工具修复
-- `subagent_type: qa-tester` — 边界情况测试、回归测试、浸泡测试
+- 委派给 `performance-analyst` 子代理 — 性能分析、内存分析、优化列表
+- 委派给 `engine-programmer` 子代理 — 来自优化列表的引擎层面修复：渲染、内存、资源加载
+- 委派给 `technical-artist` 子代理 — VFX 打磨、着色器优化、视觉质量
+- 委派给 `sound-designer` 子代理 — 音频打磨、混音、环境层
+- 委派给 `tools-programmer` 子代理 — 来自优化列表的内容流水线和编辑器工具修复
+- 委派给 `qa-tester` 子代理 — 边界情况测试、回归测试、浸泡测试
 
 **给每个 agent 写简报——不要倾倒上下文。** 只读取一次共享输入，并以内联方式传递提炼后的简报：每个 agent 实际需要的那几行，绝不要为你已经读过的文档传文件路径（拿到路径的 agent 会重新读取整个文件）。只为你尚未读过且只有该 agent 需要的文档传递路径。
 
@@ -113,7 +111,7 @@ model: sonnet
 > **目前没有任何东西读取 `production/polish/`**——在报告时说明这一点，以便用户
 > 知道报告是记录，而不是后续闸门的输入。
 
-> **为什么这不违反协作协议。** `CLAUDE.md` 要求 agent 在 Write/Edit 之前询问“May I write this to [filepath]?”。此处派出的子代理**不询问**即可写入，这是刻意的有界例外，而不是疏忽——与 `consistency-check` 追加到 `active.md` 时已做出的相同决定。该例外仅在以下三项全部成立时适用：（1）路径是**你**在提示中命名的，因此用户在批准该阶段时已批准目标；（2）它是 `production/`、`docs/` 或 `tests/` 下的新产出物，绝不是对现有源码或配置的编辑；（3）产生它的阶段本身在流水线推进前由 `AskUserQuestion` 把关。超出这三项，agent 必须询问。**不要通过按子代理逐个询问来“修复”这一点**——每个阶段每个 agent 一个提示会让编排器无法使用，这正是该例外存在的原因。
+> **为什么这不违反协作协议。** `AGENTS.md` 要求 agent 在 Write/Edit 之前询问“May I write this to [filepath]?”。此处派出的子代理**不询问**即可写入，这是刻意的有界例外，而不是疏忽——与 `consistency-check` 追加到 `active.md` 时已做出的相同决定。该例外仅在以下三项全部成立时适用：（1）路径是**你**在提示中命名的，因此用户在批准该阶段时已批准目标；（2）它是 `production/`、`docs/` 或 `tests/` 下的新产出物，绝不是对现有源码或配置的编辑；（3）产生它的阶段本身在流水线推进前由 `AskUserQuestion` 把关。超出这三项，agent 必须询问。**不要通过按子代理逐个询问来“修复”这一点**——每个阶段每个 agent 一个提示会让编排器无法使用，这正是该例外存在的原因。
 
 在流水线允许的情况下并行启动独立 agent（例如 Phase 3 和 Phase 4 可以同时运行）。
 
@@ -199,7 +197,7 @@ WORK，无论其他还有什么未检查。否则，如果范围内的任何部�
 却什么都没写，这既不是 BLOCKED，也不是错误，也不是“无法完成”，因此下面的触发器
 永远不会触发。以未满足的契约名义恢复它；上下文通常还在。
 
-如果任何派出的 agent 返回 BLOCKED、错误或无法完成：**立即暴露它，不要越过它阻塞的依赖继续推进，并且始终产生部分报告。** 被跳过 agent 的章节保持为已命名的缺口——绝不要用你自己的内容填充它。完整流程见：`.claude/docs/error-recovery-protocol.md`。
+如果任何派出的 agent 返回 BLOCKED、错误或无法完成：**立即暴露它，不要越过它阻塞的依赖继续推进，并且始终产生部分报告。** 被跳过 agent 的章节保持为已命名的缺口——绝不要用你自己的内容填充它。完整流程见：`.trae/docs/error-recovery-protocol.md`。
 
 常见阻塞项：
 - 输入文件缺失（未找到用户故事、缺少 GDD）→ 重定向到创建它的技能

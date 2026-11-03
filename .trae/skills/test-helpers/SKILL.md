@@ -3,15 +3,13 @@ name: test-helpers
 description: "生成引擎专属的测试辅助库 —— 断言工具、工厂函数、Mock，放在引擎的测试文件夹中。减少样板代码。"
 argument-hint: "[system-name | all | scaffold]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Bash(bash "*/.claude/skills/test-helpers/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation`
 
 **自动化模式**：解析 `modes.automation`（`project.local.yaml` →
 `project.yaml` → 默认 `collaborative`）。每次 `AskUserQuestion` 调用和
-每次文件写入都遵循 `.claude/docs/automation-modes.md`
+每次文件写入都遵循 `.trae/docs/automation-modes.md`
 （collaborative 总是询问 · guided 仅重大事项询问 · autonomous 记录后继续；
 `automation_always_ask` 类别始终提示）。
 
@@ -22,7 +20,7 @@ model: sonnet
 语言和系统量身定制 —— 让每位开发者写更少的样板代码、更多的断言。
 
 **输出**：引擎专属的辅助文件，放在引擎的**辅助根目录**中 ——
-这是其测试运行器唯一会编译它们的位置（`.claude/docs/directory-structure.md`）：
+这是其测试运行器唯一会编译它们的位置（`.trae/docs/directory-structure.md`）：
 
 | 引擎 | 辅助根目录 |
 |---|---|
@@ -83,7 +81,7 @@ API 进行断言**，该框架由 `testing.framework` 解析 —— 而不是通
 
 ## 2. 检测引擎与语言
 
-先从 `project.yaml` 读取，对任何缺失或为空的键回退到 `.claude/docs/technical-preferences.md`：
+先从 `project.yaml` 读取，对任何缺失或为空的键回退到 `.trae/docs/technical-preferences.md`：
 - `engine.name`（否则用 `Engine:` 值）
 - `engine.language`（否则用 `Language:` 值）
 - `testing.framework`（否则用 Testing 节的 `Framework:`）

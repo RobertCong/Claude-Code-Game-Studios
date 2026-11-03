@@ -1,6 +1,6 @@
 # Accessibility Requirements
 
-> 编写指引：.claude/docs/templates/guidance/accessibility-requirements-guide.md（编写时按章节加载——不要整体通读）。
+> 编写指引：.trae/docs/templates/guidance/accessibility-requirements-guide.md（编写时按章节加载——不要整体通读）。
 
 > **Status**: [In Design | Committed | Audited | Certified]
 > **Author**: [user + ux-designer]

@@ -3,14 +3,12 @@ name: create-epics
 description: "把游戏设计文档（GDD）和架构转化为史诗（epic），每个架构模块一个。当用户想把游戏拆分为史诗，或在编写用户故事前规划工作时使用。不用于把一个史诗拆成用户故事。"
 argument-hint: "[system-name | layer: foundation|core|feature|presentation | all] [--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, Bash(bash "*/.claude/skills/create-epics/../../hooks/yaml-helper.sh" resolve_config *), Bash(bash .claude/scripts/gdd-structure-check.sh*), Bash(bash .claude/scripts/adr-status.sh*), Bash(bash .claude/scripts/md-section.sh *), Bash(bash .claude/scripts/write-guard.sh overwrite *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,review_gate,automation,workflow,docs.density,engine_values,system_overrides`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,review_gate,automation,workflow,docs.density,engine_values,system_overrides`
 
-上面已解析——按原样使用；`--review` 会覆盖 `review_mode`。没有配置块 →
-使用 `.claude/docs/config-resolution.md` 中的默认值。
+上一步命令的输出已解析——按原样使用；`--review` 会覆盖 `review_mode`。没有配置块 →
+使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 用提问工具询问。没有提问工具时，把选项编号列出并结束本轮
 以等待回答。被跳过或关闭的问题不算回答：用纯文本再问一次。
@@ -26,7 +24,7 @@ model: sonnet
 `production/epics/index.md` 中的行，各自在单独确认后进行。
 **下一步：** 每个史诗运行 `/create-stories [epic-slug]`。本技能绝不编写用户故事。
 
-询问遵循 `.claude/docs/automation-modes.md`（协作模式始终询问，引导模式
+询问遵循 `.trae/docs/automation-modes.md`（协作模式始终询问，引导模式
 对重大选择询问，自主模式记录并继续；`automation_always_ask`
 类别始终询问）。
 
@@ -83,7 +81,7 @@ MVP 功能创建一个史诗。每个史诗都要点明其 slug，因为
 
 ### `standard` 和 `full`：设计与架构
 
-1. **系统 GDD。** `bash .claude/scripts/gdd-structure-check.sh` 列出每个
+1. **系统 GDD。** `bash .trae/scripts/gdd-structure-check.sh` 列出每个
    系统 GDD；游戏概念、系统索引、支柱、交叉评审和其他
    非系统文档已为你排除。它们的数量为 **N**。N 为 0：停下，
    “在 `design/gdd/` 中未找到系统 GDD——请先运行 `/design-system`。”
@@ -96,8 +94,8 @@ MVP 功能创建一个史诗。每个史诗都要点明其 slug，因为
    “没有 `docs/architecture/architecture.md`——请先运行 `/create-architecture`。”绝不要凭空发明模块边界。
 4. **仅对范围内系统**，按章节读取，绝不整份读取：
    - 每份 GDD 的 Overview 和 Acceptance Criteria
-     （`bash .claude/scripts/md-section.sh extract design/gdd/<file>.md "Overview"`）；
-   - `bash .claude/scripts/adr-status.sh` 获取每个 ADR 的状态、层级和缺失
+     （`bash .trae/scripts/md-section.sh extract design/gdd/<file>.md "Overview"`）；
+   - `bash .trae/scripts/adr-status.sh` 获取每个 ADR 的状态、层级和缺失
      章节；然后读取覆盖范围内系统的 ADR 的 GDD Requirements Addressed、Decision 和 Engine
      Compatibility 章节；
    - `docs/architecture/tr-registry.yaml`：其中 `system:` 为
@@ -163,7 +161,7 @@ create it / Skip this epic / Pause — I need to write ADRs first。在此回答
 阅读上面的 `review_gate` 行。`skill-gates=skip`（solo 或 lean）：无代理；在回复和收尾块中注明
 `PR-EPIC skipped — [Solo | Lean] mode`。
 `skill-gates=run`：阅读 `references/pr-epic-gate.md` 和
-`.claude/docs/director-gates.md`，并在现在运行它——在范围内每个史诗都已
+`.trae/docs/director-gates.md`，并在现在运行它——在范围内每个史诗都已
 定义之后、任何写入之前。跳过时，不要加载它。
 
 ## Phase 5: 编写每个史诗
@@ -180,7 +178,7 @@ Overview、Governing ADRs、GDD Requirements、Definition of Done 之外的头�
 **新建：** 询问“我可以写入 `production/epics/[epic-slug]/EPIC.md` 并把其行添加到
 `production/epics/index.md`[, 若不存在则创建它]吗？”这是它自己的询问，每个史诗一次，在
 Phase 3 的“是”之后：那个“是”批准的是史诗，而不是写入。只在对它的明确
-“是”后写入。在写入之前，运行 `bash .claude/scripts/write-guard.sh overwrite
+“是”后写入。在写入之前，运行 `bash .trae/scripts/write-guard.sh overwrite
 production/epics/[epic-slug]/EPIC.md`。它总是打印一行 `checked`；返回
 `OVERWRITE` 行意味着文件毕竟存在，因此什么都不要写，改为询问
 更新问题。

@@ -9,11 +9,11 @@
 
 ## Static Assertions (Structural)
 
-通过读取该代理的 `.claude/agents/technical-director.md` frontmatter 进行验证：
+通过读取该代理的 `.trae/agents/technical-director.md` frontmatter 进行验证：
 
 - [ ] `description:` 字段存在且针对具体领域（提及架构、可行性、ADR——而非泛泛而谈）
 - [ ] `tools:` 为 Read, Glob, Grep, Write, Edit, Bash, WebSearch
-- [ ] 模型档位为 `opus`——frontmatter `model:` 恰为 `opus`（档位：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 代理定义未声称对游戏设计决策或创意方向拥有决定权
 
 ---

@@ -10,7 +10,7 @@
 
 > **此处的 `[date]` 指 ISO 8601 — `YYYY-MM-DD`，例如
 > `gdd-cross-review-2026-08-19.md`。这不是风格偏好。**
-> `.claude/scripts/review-scope.sh` 用 `sort | tail -1` 选取上一次评审，
+> `.trae/scripts/review-scope.sh` 用 `sort | tail -1` 选取上一次评审，
 > 因此只有 ISO 日期下字典序才等于时间序。
 > 若写成 `aug-19-2026` 或 `19-08-2026`，选中的基准文件就是错的，
 > 变更集合会基于它计算，而自真正上一次评审以来被修改的 GDD

@@ -3,8 +3,6 @@ name: team-release
 description: "编排发布团队——release-manager、qa-lead、devops-engineer、producer——执行从候选版本到部署的发布流程。"
 argument-hint: "[version number or 'next'] [--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, TaskCreate, TaskGet, TaskList, TaskUpdate, Bash(bash "*/.claude/skills/team-release/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 # Team Release
 
@@ -22,14 +20,14 @@ model: sonnet
 在 `autonomous` 模式下，它端到端运行，并通过 `log_decision` 记录每个阶段的结果。
 属于 `automation_always_ask` 类别（`is_always_ask_category` 辅助函数）的决策
 无论模式如何都始终询问。参见
-`.claude/docs/automation-modes.md`。
+`.trae/docs/automation-modes.md`。
 
 ## Phase 0: 解析配置
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,team.size,workflow,project.stage`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,team.size,workflow,project.stage`
 
-上面已解析——按原样使用；`--review` 会覆盖 `review_mode`。没有配置块 →
-使用 `.claude/docs/config-resolution.md` 中的默认值。
+上一步命令的输出已解析——按原样使用；`--review` 会覆盖 `review_mode`。没有配置块 →
+使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 **阶段检查——在派生任何东西之前。** 本技能执行发布，而
 `/gate-check release` 是必须先通过的就绪闸门；只有其 PASS
@@ -55,7 +53,7 @@ go/no-go 记录（`go-no-go-[version].md`）和最终报告。覆盖绝不
 在这些决策点上工作的代理是团队成员，而不是总监闸门。
 
 `automation` 驱动上面的决策点说明。关于每种模式如何改变流水线行为，见上面的决策点说明和
-`.claude/docs/automation-modes.md`。
+`.trae/docs/automation-modes.md`。
 
 **`team.size`**：哪些代理处于活动状态（与 review_mode 的闸门深度和工作流文档正交）。
 - **`individual`**（默认）：仅 `release-manager`。其他代理通过 release-manager 咨询，不单独派生。
@@ -100,16 +98,16 @@ go/no-go 记录（`go-no-go-[version].md`）和最终报告。覆盖绝不
 ## 如何委派
 
 使用 `Agent` 工具把每个团队成员作为子代理派生：
-- `subagent_type: release-manager`——发布标签、版本管理、变更日志、补丁说明、部署
-- `subagent_type: qa-lead`——测试签核、回归套件、发布质量闸门
-- `subagent_type: devops-engineer`——构建流水线、产出物、部署自动化
-- `subagent_type: security-engineer`——在线/多人/数据功能的安全审计
-- `subagent_type: analytics-engineer`——遥测事件验证与仪表盘就绪情况
-- `subagent_type: community-manager`——发布沟通，依据补丁说明撰写
-- `subagent_type: producer`——go/no-go 决策、利益相关方沟通
-- `subagent_type: network-programmer`——网络代码稳定性签核（如果游戏有多人功能，则调用）
-- `subagent_type: localization-lead`——翻译完整性签核（Phase 4）
-- `subagent_type: performance-analyst`——对照目标的性能基准（Phase 4）
+- 委派给 `release-manager` 子代理——发布标签、版本管理、变更日志、补丁说明、部署
+- 委派给 `qa-lead` 子代理——测试签核、回归套件、发布质量闸门
+- 委派给 `devops-engineer` 子代理——构建流水线、产出物、部署自动化
+- 委派给 `security-engineer` 子代理——在线/多人/数据功能的安全审计
+- 委派给 `analytics-engineer` 子代理——遥测事件验证与仪表盘就绪情况
+- 委派给 `community-manager` 子代理——发布沟通，依据补丁说明撰写
+- 委派给 `producer` 子代理——go/no-go 决策、利益相关方沟通
+- 委派给 `network-programmer` 子代理——网络代码稳定性签核（如果游戏有多人功能，则调用）
+- 委派给 `localization-lead` 子代理——翻译完整性签核（Phase 4）
+- 委派给 `performance-analyst` 子代理——对照目标的性能基准（Phase 4）
 
 **给每个代理做简报——不要倾倒上下文。** 把共享输入**只读一次**，并内联传递一份提炼过的简报：每个代理真正需要的那几行，绝不要为你已读过的文档传文件路径（拿到路径的代理会重新读取整个文件）。只为你没读过、且只有该代理需要的文档传路径。
 
@@ -144,7 +142,7 @@ go/no-go 记录（`go-no-go-[version].md`）和最终报告。覆盖绝不
 > 并行派生代理；两个代理追加同一个文件会产生竞争，输家的
 > 章节会静默消失。
 
-> **为什么这并不违反协作协议。** `CLAUDE.md` 要求代理在 Write/Edit 之前询问“May I write this to [filepath]?”。此处派生的子代理**不经**询问就写入，这是有意为之的有界例外，而不是疏忽——这与已经为 `consistency-check` 追加到 `active.md` 所做的决定相同。例外只在以下三点全部成立时才适用：(1) 路径是**你**在提示词中指定的，因此用户在批准该阶段时也批准了目标位置；(2) 它是 `production/`、`docs/` 或 `tests/` 下的新产出物，绝不是对现有源码或配置的编辑；(3) 产生它的阶段本身在流水线推进前受 `AskUserQuestion` 闸门约束。三点之外，代理必须询问。**不要通过按子代理逐个询问来“修复”这一点**——每个代理每阶段的提示词会让编排器无法使用，这正是例外存在的原因。
+> **为什么这并不违反协作协议。** `AGENTS.md` 要求代理在 Write/Edit 之前询问“May I write this to [filepath]?”。此处派生的子代理**不经**询问就写入，这是有意为之的有界例外，而不是疏忽——这与已经为 `consistency-check` 追加到 `active.md` 所做的决定相同。例外只在以下三点全部成立时才适用：(1) 路径是**你**在提示词中指定的，因此用户在批准该阶段时也批准了目标位置；(2) 它是 `production/`、`docs/` 或 `tests/` 下的新产出物，绝不是对现有源码或配置的编辑；(3) 产生它的阶段本身在流水线推进前受 `AskUserQuestion` 闸门约束。三点之外，代理必须询问。**不要通过按子代理逐个询问来“修复”这一点**——每个代理每阶段的提示词会让编排器无法使用，这正是例外存在的原因。
 
 在流水线允许的地方并行启动独立代理（例如 Phase 3 的代理可以同时运行）。
 
@@ -255,7 +253,7 @@ go/no-go 记录写 `technical-director sign-off: not run
 这既不是 BLOCKED，也不是错误，也不是“无法完成”，因此下面的触发器
 永远不会触发。点名未满足的契约来恢复它；上下文通常还在。
 
-如果任何派生的代理返回 BLOCKED、报错或无法完成：**立即暴露它，不要越过它所阻塞的依赖继续推进，并且始终产出部分报告。** 完整流程：`.claude/docs/error-recovery-protocol.md`。
+如果任何派生的代理返回 BLOCKED、报错或无法完成：**立即暴露它，不要越过它所阻塞的依赖继续推进，并且始终产出部分报告。** 完整流程：`.trae/docs/error-recovery-protocol.md`。
 
 常见阻塞项：
 - 输入文件缺失（用户故事未找到、GDD 缺失）→ 重定向到创建它的技能

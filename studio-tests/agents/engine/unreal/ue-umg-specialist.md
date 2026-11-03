@@ -11,7 +11,7 @@
 
 - [ ] `description:` 字段存在且限定于本领域（引用 UMG、控件层级、CommonUI）
 - [ ] `tools:` 为 Read、Glob、Grep、Write、Edit、Bash —— 无 `Agent` 工具
-- [ ] 模型档位为 `sonnet` —— frontmatter `model:` 精确为 `sonnet`（档位见：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 代理定义未声称对 UX 流程、导航架构或玩法数据逻辑拥有权限
 
 ---

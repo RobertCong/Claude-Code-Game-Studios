@@ -3,15 +3,13 @@ name: changelog
 description: "从 git 提交与冲刺数据自动生成变更日志。提供内部版本与面向玩家的版本。"
 argument-hint: "[version|sprint-number]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Bash(bash "*/.claude/skills/changelog/../../hooks/yaml-helper.sh" resolve_config *), Bash(git log *), Bash(git tag --list*), Bash(git rev-parse *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation`
 
 **自动化模式**：解析 `modes.automation`（`project.local.yaml` →
 `project.yaml` → 默认 `collaborative`）。每次 `AskUserQuestion` 调用与
-每次文件写入都遵循 `.claude/docs/automation-modes.md`
+每次文件写入都遵循 `.trae/docs/automation-modes.md`
 （collaborative 总是询问 · guided 仅重大事项 · autonomous 记录后继续；
 `automation_always_ask` 类别总是询问）。
 
@@ -21,18 +19,17 @@ model: sonnet
 
 最近提交：
 
-!`git log --oneline -30 2>/dev/null || true`
+**运行并读取输出：** `git log --oneline -30 2>/dev/null || true`
 
 最近标签（最新在前）：
 
-!`git tag --list --sort=-v:refname 2>/dev/null | head -5`
+**运行并读取输出：** `git tag --list --sort=-v:refname 2>/dev/null | head -5`
 
 ## 来源校验 —— 在信任上述历史之前
 
-**上面的提交可能不属于本游戏。** 本技能的历史块是在正文运行*之前*自动解析的，因此读取
-已经发生 —— 这项检查决定的是该输出是否可用，而不是它是否被获取。
+**上面的提交可能不属于本游戏。** 本技能要求你先运行上面的命令，再读取其输出 —— 这项检查决定的是该输出是否可用，而不是它是否被获取。
 
-1. 阅读上方注入的提交主题。**如果没有 —— 日志为空或 git 不可用 —— 跳过此项检查**：没有
+1. 阅读上一步命令输出的提交主题。**如果没有 —— 日志为空或 git 不可用 —— 跳过此项检查**：没有
    可分类的内容，Phase 1 的无历史分支就是正确的停止点。
 2. **逐一分类**为 **Game**（机制、内容、平衡性、美术、音频、UI，或其中某处的缺陷）、
    **Framework / maintenance**（主题涉及技能、钩子、agent、测试计划、CI 或框架自身文档），
@@ -69,7 +66,7 @@ Verdict：**BLOCKED** —— 就此停止，不生成变更日志。
 
 ---
 
-两个块都在本技能运行之前完成解析。把它们作为 Phase 2 的起点，而不是重新运行相同的命令。
+两个块都由上一步命令解析。把它们作为 Phase 2 的起点，而不是重新运行相同的命令。
 
 ---
 

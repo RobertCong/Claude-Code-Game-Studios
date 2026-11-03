@@ -3,14 +3,12 @@ name: create-control-manifest
 description: "根据已接受的 ADR，按系统构建一份简短的必做与禁做编码规则清单。当用户想要面向程序员的规则或基于 ADR 的速查表，或在 ADR 变更后需要重新生成时使用。"
 argument-hint: "[update — regenerate from current ADRs] [--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Agent, AskUserQuestion, Bash(bash "*/.claude/skills/create-control-manifest/../../hooks/yaml-helper.sh" resolve_config *), Bash(bash .claude/scripts/adr-status.sh*), Bash(bash .claude/scripts/md-section.sh *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,review_gate,automation`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,review_gate,automation`
 
-已在上方解析——直接使用；`--review` 在本次运行中覆盖 `review_mode`。若无
-输出块 → 使用 `.claude/docs/config-resolution.md` 中的默认值。
+已在上一步解析——直接使用；`--review` 在本次运行中覆盖 `review_mode`。若无
+输出块 → 使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 用问题工具提问。若没有该工具，则列出编号选项并结束本轮等待。跳过或忽略的问题不算回答：用纯文本再问一次。
 
@@ -21,13 +19,13 @@ model: sonnet
 **写入：** `docs/architecture/control-manifest.md`，在用户同意之后。
 **时机：** 在 `/architecture-review` 通过且 ADR 已被接受之后。每当有 ADR 被接受或修订时重新运行。
 
-询问遵循 `.claude/docs/automation-modes.md`（协作模式总是询问，引导模式仅重大选择询问，自主模式记录后继续；`automation_always_ask` 类别始终询问）。
+询问遵循 `.trae/docs/automation-modes.md`（协作模式总是询问，引导模式仅重大选择询问，自主模式记录后继续；`automation_always_ask` 类别始终询问）。
 
 ## Phase 1: 加载输入
 
 ### ADR
 
-`bash .claude/scripts/adr-status.sh` 一次读取所有 `docs/architecture/adr-*.md`：先输出计数（`adrs`，然后是 `accepted`、`proposed`、`deprecated`、`superseded`、`unfilled`、`other`、`no_status`），然后每条 ADR 一行，含其状态与层。先确定分母：在读取任何 ADR 之前，依据计数做决定：
+`bash .trae/scripts/adr-status.sh` 一次读取所有 `docs/architecture/adr-*.md`：先输出计数（`adrs`，然后是 `accepted`、`proposed`、`deprecated`、`superseded`、`unfilled`、`other`、`no_status`），然后每条 ADR 一行，含其状态与层。先确定分母：在读取任何 ADR 之前，依据计数做决定：
 
 | 计数 | 含义 | 行动 |
 |---|---|---|
@@ -41,9 +39,9 @@ model: sonnet
 ### 项目配置
 
 - `naming.*` 与 `performance.*` 取自 `project.yaml`；对任何缺失或为空的键，
-  取自 `.claude/docs/technical-preferences.md`。
+  取自 `.trae/docs/technical-preferences.md`。
 - 已批准的库与禁止的模式取自
-  `.claude/docs/technical-preferences.md`（尚未迁移到 `project.yaml`）。
+  `.trae/docs/technical-preferences.md`（尚未迁移到 `project.yaml`）。
 
 ### 引擎参考
 
@@ -62,7 +60,7 @@ model: sonnet
 对 **A** 中的每条 ADR，只读取四个章节，绝不读整个文件：
 
 ```
-bash .claude/scripts/md-section.sh extract docs/architecture/[adr-file].md "Decision"
+bash .trae/scripts/md-section.sh extract docs/architecture/[adr-file].md "Decision"
 ```
 
 对 `Alternatives Considered`、`Performance Implications` 与 `Engine
@@ -117,7 +115,7 @@ Unresolved: [engine entries left out because whether they apply is unclear, or "
 **技术评审。** 读取上方的 `review_gate` 行。`skill-gates=skip`
 （solo 或 lean）：不调用代理；注明 `TD-MANIFEST skipped — [Solo | Lean] mode`。
 `skill-gates=run`：将评审交给 `technical-director` 代理，闸门（gate）为
-**TD-MANIFEST**（`.claude/docs/director-gates/td-manifest.md`；该代理会自行读取）。简报：
+**TD-MANIFEST**（`.trae/docs/director-gates/td-manifest.md`；该代理会自行读取）。简报：
 
 - **目标：** 在规则被写入之前检查已提取的规则。
 - **提供：** 上方的预览（含完整规则列表）、所覆盖的 ADR、引擎版本，以及取自技术偏好或引擎参考的规则。
@@ -130,7 +128,7 @@ Unresolved: [engine entries left out because whether they apply is unclear, or "
 - **APPROVE：** 进入 Phase 5。
 - **CONCERNS：** 询问："技术总监提出了关注项。你想如何继续？" 选项：修订被标记的规则 / 接受并继续 / 进一步讨论。
 - **REJECT：** 不写入任何内容；修正被标记的规则并再次展示摘要。
-- **NOT ASSESSED：** 这不是批准（`.claude/docs/director-gates.md`）。说明缺少什么，然后补齐并再次运行评审；或者，当用户选择在不补齐的情况下继续时，进入 Phase 5 并在回复与最终结论行中写明 `TD-MANIFEST: NOT ASSESSED —
+- **NOT ASSESSED：** 这不是批准（`.trae/docs/director-gates.md`）。说明缺少什么，然后补齐并再次运行评审；或者，当用户选择在不补齐的情况下继续时，进入 Phase 5 并在回复与最终结论行中写明 `TD-MANIFEST: NOT ASSESSED —
   [input]`。
 
 ## Phase 5: 写入控制清单

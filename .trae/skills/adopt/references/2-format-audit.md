@@ -29,7 +29,7 @@ workflow 层级**），不仅要检查文件是否存在，还要检查它是否
 结构检查脚本：
 
 ```
-Bash: bash .claude/scripts/gdd-structure-check.sh [path-to-gdd]
+Bash: bash .trae/scripts/gdd-structure-check.sh [path-to-gdd]
 ```
 
 **一次传入一个路径；不要直接裸调用它。** 无参数形式只会扫描
@@ -53,7 +53,7 @@ Phase 1 找到的任何路径。脚本会为每个文件打印 `PRESENT:` 列表
   （速率、曲线、阈值、成本 — 系统的 `Category` 是
   提示，不是判定依据）；Player Fantasy 和 Tuning Knobs 为建议项。
 - **`minimal`** — 不预期存在 GDD；改为审计 `design/game-brief.md`，
-  对照 `.claude/docs/templates/game-brief.md`：六个必填字段
+  对照 `.trae/docs/templates/game-brief.md`：六个必填字段
   均存在且不是占位符；三个一句话项为建议项。任何确实
   存在的 GDD 按 `standard` 标准做建议性检查。
 
@@ -70,7 +70,7 @@ Formulas、Edge Cases、Dependencies、Tuning Knobs、Acceptance Criteria。
   `Implemented`、`Needs Revision`。
 
 > **`>?` 是关键，`Draft`/`Implemented` 同样关键。** 两个生成器
-> 都把该字段写在块引用内 — `.claude/docs/templates/game-design-document.md`
+> 都把该字段写在块引用内 — `.trae/docs/templates/game-design-document.md`
 > 和 `/design-system` 产出 `> **Status**: …` — 因此锚点
 > `^\*\*Status\*\*:` 什么都匹配不到，并会把*每一份*符合模板的 GDD
 > 报告为缺少 Status。模板自身的值列表提供了 `Draft` 和
@@ -135,7 +135,7 @@ Formulas、Edge Cases、Dependencies、Tuning Knobs、Acceptance Criteria。
 
 ### 2f: 项目配置审计
 
-读取 `project.yaml`（主配置存储）和 `.claude/docs/technical-preferences.md`（旧版镜像）。只要任一来源有真实值，该设置就算已配置（在 technical-preferences.md 中，`[TO BE CONFIGURED]` 表示未配置）：
+读取 `project.yaml`（主配置存储）和 `.trae/docs/technical-preferences.md`（旧版镜像）。只要任一来源有真实值，该设置就算已配置（在 technical-preferences.md 中，`[TO BE CONFIGURED]` 表示未配置）：
 - `engine.name`/`version`/`language`/`rendering`/`physics`（或 Engine/Language/Rendering/Physics 字段）→ 若两者均未配置则为 HIGH（ADR 技能会失败）
 - `naming.*`（或 Naming conventions）→ MEDIUM
 - `performance.*`（或 Performance budgets）→ MEDIUM
@@ -146,7 +146,7 @@ Formulas、Edge Cases、Dependencies、Tuning Knobs、Acceptance Criteria。
 当仓库根目录不存在 `project.yaml`，且至少有一个旧版文件存在时，
 项目就是**需要迁移的 v1.0 项目**：`production/stage.txt`、
 `production/review-mode.txt`，或包含
-真实值的 `.claude/docs/technical-preferences.md`。
+真实值的 `.trae/docs/technical-preferences.md`。
 
 “真实值”指转换器实际会迁移的某个键 — Engine、
 Language、Rendering、Physics、命名、平台和性能字段、
@@ -159,7 +159,7 @@ Framework，或 specialists。并非仅仅是“某个条目被填写了”：
 框架自身的测试套件覆盖：
 
 ```bash
-bash .claude/scripts/migrate-v1-config.sh --dry-run
+bash .trae/scripts/migrate-v1-config.sh --dry-run
 ```
 
 试运行不写入任何内容；记录它列出的内容用于报告。审计期间
@@ -174,7 +174,7 @@ bash .claude/scripts/migrate-v1-config.sh --dry-run
 然后告诉用户在运行以下命令前阅读 `production/migration-report.md`：
 
 ```bash
-bash .claude/scripts/migrate-v1-config.sh --finalize
+bash .trae/scripts/migrate-v1-config.sh --finalize
 ```
 
 `--finalize` 只有在证明旧版文件的值已存在于

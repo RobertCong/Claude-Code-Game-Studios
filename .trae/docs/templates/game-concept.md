@@ -301,7 +301,7 @@ MDA 框架的 8 个美学类别：
 ## Next Steps
 
 - [ ] 从 creative-director 处获得概念批准
-- [ ] 根据引擎选择填写 CLAUDE.md 技术栈（`/setup-engine`）
+- [ ] 根据引擎选择填写 AGENTS.md 技术栈（`/setup-engine`）
 - [ ] 创建游戏支柱文档（用 `/design-review` 验证）
 - [ ] **为核心想法做原型**（`/prototype [core-mechanic]`）——在撰写 GDD 之前，先验证这个概念值得设计
 - [ ] 若原型通过：将概念拆解为系统（`/map-systems`）

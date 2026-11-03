@@ -3,8 +3,6 @@ name: settings
 description: "查看或修改项目配置 — 合并后的有效值，或在 project.local.yaml 中本地设置。"
 argument-hint: "[key | key=value | --local key=value]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Bash(bash "*/.claude/skills/settings/../../hooks/yaml-helper.sh" resolve_setting *), Bash(bash "*/.claude/skills/settings/../../hooks/yaml-helper.sh" get_yaml_key *), Bash(bash "*/.claude/skills/settings/../../hooks/yaml-helper.sh" validate_yaml_enum *), Bash(bash "*/.claude/skills/settings/../../hooks/yaml-helper.sh" validate_enum_value *), Bash(bash "*/.claude/skills/settings/../../hooks/yaml-helper.sh" is_locally_overridable *), Bash(bash .claude/scripts/config-set.sh *), Bash(grep -B14 '^> ### RESERVED' .claude/docs/effects-map.md), Bash(grep -E '^## ')
-model: sonnet
 ---
 
 # /settings — 查看或修改项目配置
@@ -15,7 +13,7 @@ model: sonnet
 
 **自动化模式**：解析 `modes.automation`（`project.local.yaml` →
 `project.yaml` → 默认 `collaborative`）。Phase 4 和 Phase 5 中的审批闸门
-遵循 `.claude/docs/automation-modes.md` 中的模式。**注意**：
+遵循 `.trae/docs/automation-modes.md` 中的模式。**注意**：
 写入 `project.yaml` 属于 `schema_changes` 决策（一个默认的
 `automation_always_ask` 类别），因此 `/settings` 即使在
 `autonomous` 模式下也会确认配置写入，除非用户已从
@@ -62,7 +60,7 @@ bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" <helper call>
 不要用 `cd ... &&` 包裹，也不要追加 `; echo $?`。本技能只预先批准
 普通形式，复合命令每次都会询问用户。
 
-如果缺少 `.claude/hooks/yaml-helper.sh`，则这不是 CCGS 项目。
+如果缺少 `.trae/hooks/yaml-helper.sh`，则这不是 CCGS 项目。
 报告错误并退出。
 
 ## Phase 1b: 保留设置检测
@@ -71,14 +69,14 @@ bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" <helper call>
 设置它们不会改变任何东西。**本技能必须说明这一点。**
 返回普通成功会让用户合理地认为该设置所描述的行为现在已被强制执行——
 无障碍等级就是引发此需求的情形。（此处故意不点出该键名；见下文注释。）
-该横幅只存在于 `.claude/docs/effects-map.md` 中，而配置项目的人
+该横幅只存在于 `.trae/docs/effects-map.md` 中，而配置项目的人
 永远不会打开那个文件。一个不起作用的设置绝不能看起来
-和一个有效设置一模一样——`.claude/rules/skill-authoring.md` 义务 3。
+和一个有效设置一模一样——`.trae/rules/skill-authoring.md` 义务 3。
 
 推导该集合；不要硬编码（义务 5）：
 
 ```bash
-grep -B14 '^> ### RESERVED' .claude/docs/effects-map.md | grep -E '^## '
+grep -B14 '^> ### RESERVED' .trae/docs/effects-map.md | grep -E '^## '
 ```
 
 **匹配横幅标题（`> ### RESERVED`），绝不要匹配裸词 "RESERVED"。**
@@ -306,7 +304,7 @@ Schema validation: ERRORS
    要么该键没有枚举约束——继续。
 
 1b. **已知键检查**：按 Phase 1 所述从项目根目录运行
-   `bash .claude/scripts/config-set.sh <key> <value> --dry-run`，读取其
+   `bash .trae/scripts/config-set.sh <key> <value> --dry-run`，读取其
    `known` 行。如果显示 `yes`，继续。如果显示 `no`，则 CCGS 中没有任何东西读取
    该键，因此写入它不会改变任何东西；这通常是拼写错误。先不要写入：
    说明这一点，并通过 `AskUserQuestion` 询问，选项为
@@ -468,6 +466,6 @@ Examples:
 - `project.local.yaml` 已 gitignore。这些
   覆盖永远不会传播给队友。
 - 关于针对给定游戏类型或情况**该选择哪个值**——以及何时
-  建议修改——参见 `.claude/docs/settings-guidance.md`（建议预设
+  建议修改——参见 `.trae/docs/settings-guidance.md`（建议预设
   + 修改触发条件）。`effects-map.md` 说明每个设置的作用；该文档说明
   该选哪个。

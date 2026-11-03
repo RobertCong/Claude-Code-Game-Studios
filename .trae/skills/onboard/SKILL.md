@@ -3,15 +3,13 @@ name: onboard
 description: "面向新贡献者或 agent 的上手引导文档 — 项目状态、约定以及与指定角色相关的优先事项。"
 argument-hint: "[role|area]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Bash(bash "*/.claude/skills/onboard/../../hooks/yaml-helper.sh" resolve_config *)
-model: haiku
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation`
 
 **自动化模式**：解析 `modes.automation`（`project.local.yaml` →
 `project.yaml` → 默认 `collaborative`）。每次 `AskUserQuestion` 调用和
-每次文件写入都遵循 `.claude/docs/automation-modes.md`
+每次文件写入都遵循 `.trae/docs/automation-modes.md`
 （collaborative 每次都询问 · guided 仅重要事项 · autonomous 记录并继续；
 `automation_always_ask` 类别始终询问）。
 
@@ -46,17 +44,17 @@ model: haiku
 
 ## Phase 1: 加载项目上下文
 
-读取 CLAUDE.md 以了解项目概览和标准。
+读取 AGENTS.md 以了解项目概览和标准。
 
-如果指定了具体角色，读取 `.claude/agents/` 中相关的 agent 定义。
+如果指定了具体角色，读取 `.trae/agents/` 中相关的 agent 定义。
 
-`CLAUDE.md` 和 `.claude/agents/` 随框架一同提供 — 没有技能创建它们。如果其中任何一个缺失，报告它是在安装中缺失的。
+`AGENTS.md` 和 `.trae/agents/` 随框架一同提供 — 没有技能创建它们。如果其中任何一个缺失，报告它是在安装中缺失的。
 
 ---
 
 ## Phase 2: 扫描相关领域
 
-- 程序员：扫描代码根目录（按 `.claude/docs/code-root-resolution.md` 解析）以了解架构、模式、关键文件。代码根未解析意味着扫描没有运行：由它提供输入的章节应读作 `NOT ASSESSED — code root unresolved`，绝不要猜测为 `src/`
+- 程序员：扫描代码根目录（按 `.trae/docs/code-root-resolution.md` 解析）以了解架构、模式、关键文件。代码根未解析意味着扫描没有运行：由它提供输入的章节应读作 `NOT ASSESSED — code root unresolved`，绝不要猜测为 `src/`
 - 设计师：扫描 `design/` 中现有的设计文档
 - 叙事：扫描 `design/narrative/` 中的世界观构建和故事文档
 - QA：扫描 `tests/` 中现有的测试覆盖（`/test-setup` 会创建它）
@@ -92,7 +90,7 @@ model: haiku
 |------|---------|--------------|
 
 ## Current Standards and Conventions
-[Summary of conventions relevant to this role from CLAUDE.md and agent definition]
+[Summary of conventions relevant to this role from AGENTS.md and agent definition]
 
 ## Current State of Your Area
 [What has been built, what is in progress, what is planned next. Name what

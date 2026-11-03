@@ -11,7 +11,7 @@
 
 - [ ] `description:` 字段存在且限定于本领域（引用 Blueprint 架构与优化）
 - [ ] `tools:` 列表符合该代理角色（Read/Write/Edit 用于 Blueprint 相关文件；不含服务器或部署工具，Bash 通过 `disallowedTools:` 排除）
-- [ ] 模型档位为 `sonnet` —— frontmatter `model:` 精确为 `sonnet`（档位见：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 代理定义未声称对 C++ 实现决策拥有权限
 
 ---

@@ -11,20 +11,20 @@
 # project, not this one. Resolving to the script's own location first would
 # override them. So, in order:
 #   1. cwd holds project.yaml   -> cwd   (a project root)
-#   2. cwd holds .claude/       -> cwd   (a project root not yet configured),
-#      unless cwd is itself named .claude: a stray .claude/.claude/ would
-#      make .claude/ a root, and the hooks would write .claude/production/
-#   3. CLAUDE_PROJECT_DIR       -> that  (populated in the hook environment),
-#      unless it names a .claude folder, for the same reason as rule 2
-#   4. this script's location   -> <root>/.claude/hooks/../.. by construction
+#   2. cwd holds .trae/       -> cwd   (a project root not yet configured),
+#      unless cwd is itself named .trae: a stray .trae/.trae/ would
+#      make .trae/ a root, and the hooks would write .trae/production/
+#   3. TRAE_PROJECT_DIR       -> that  (populated in the hook environment),
+#      unless it names a .trae folder, for the same reason as rule 2
+#   4. this script's location   -> <root>/.trae/hooks/../.. by construction
 # Rule 4 always works and needs no environment at all; rules 1-2 stop it from
 # overriding a caller that legitimately means somewhere else.
 #
 # NOT an upward search: that resolves a nested project to its parent's config.
-if [ -f "project.yaml" ] || { [ -d ".claude" ] && [ "${PWD##*/}" != ".claude" ]; }; then
+if [ -f "project.yaml" ] || { [ -d ".trae" ] && [ "${PWD##*/}" != ".trae" ]; }; then
   CCGS_ROOT="$PWD"
-elif [ -n "${CLAUDE_PROJECT_DIR:-}" ] && [ -d "${CLAUDE_PROJECT_DIR}" ] && case "${CLAUDE_PROJECT_DIR%/}" in */.claude|*\\.claude) false ;; *) true ;; esac; then
-  CCGS_ROOT="$CLAUDE_PROJECT_DIR"
+elif [ -n "${TRAE_PROJECT_DIR:-}" ] && [ -d "${TRAE_PROJECT_DIR}" ] && case "${TRAE_PROJECT_DIR%/}" in */.trae|*\\.trae) false ;; *) true ;; esac; then
+  CCGS_ROOT="$TRAE_PROJECT_DIR"
 else
   CCGS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." 2>/dev/null && pwd)"
 fi
@@ -191,7 +191,7 @@ COMMIT_SEG=$(git_segment commit "$COMMAND") || exit 0
 # `git -C <dir> commit` commits whatever repository <dir> is in. Only this
 # project's staged files are ours to check; another repository is not. Leave
 # only when <dir> PROVABLY is another repository: a <dir> rev-parse cannot
-# resolve here -- `"$CLAUDE_PROJECT_DIR"`, `~/x`, `"$(pwd)"`, all unexpanded in
+# resolve here -- `"$TRAE_PROJECT_DIR"`, `~/x`, `"$(pwd)"`, all unexpanded in
 # the command text -- is this project as often as not, and skipping it let the
 # commit through unchecked.
 #
@@ -596,7 +596,7 @@ fi
 # Check design documents for the sections REQUIRED AT THIS PROJECT'S TIER.
 #
 # Demanding all 8 sections unconditionally would contradict
-# .claude/docs/coding-standards.md and workflow-modes.md: the required count is
+# .trae/docs/coding-standards.md and workflow-modes.md: the required count is
 # a function of `modes.workflow` -- 8 at `full`, 5 (+ conditional Formulas) at
 # `standard`, and no GDD requirement at all at `minimal`. A jam project on the
 # recommended `minimal` tier was being warned about six sections its own
@@ -611,8 +611,8 @@ fi
 # workflow tier silently stayed at its "standard" fallback, and the GDD section
 # check stopped scaling with the tier.
 _VC_HELPER=0
-if [ -f .claude/hooks/yaml-helper.sh ]; then
-    . .claude/hooks/yaml-helper.sh 2>/dev/null || true
+if [ -f .trae/hooks/yaml-helper.sh ]; then
+    . .trae/hooks/yaml-helper.sh 2>/dev/null || true
     command -v resolve_setting >/dev/null 2>&1 && _VC_HELPER=1
 fi
 
@@ -715,7 +715,7 @@ if out:
     sys.stdout.buffer.write(("\n".join(out) + "\n").encode("utf-8"))
 ' "$REQUIRED" "$WORKFLOW" > "$TMP_DESIGN" 2>/dev/null
         if [ -z "$TMP_DESIGN" ]; then
-            # Obligation 3 of .claude/rules/skill-authoring.md: a skipped step
+            # Obligation 3 of .trae/rules/skill-authoring.md: a skipped step
             # announces itself. Silence here is indistinguishable from a GDD
             # that already has every section its tier requires.
             WARNINGS="$WARNINGS\nSKIPPED: no writable scratch location, so the GDD section check did NOT run on the staged design doc(s)."
@@ -751,7 +751,7 @@ fi
 # --- resolve the code root before either scan below ------------------------
 #
 # Both scans used to be hardcoded to `^src/gameplay/` and `^src/`. Per
-# .claude/docs/directory-structure.md, `src/` is the GODOT row of the code-root
+# .trae/docs/directory-structure.md, `src/` is the GODOT row of the code-root
 # table -- Unity compiles only `Assets/`, Unreal builds only from `Source/`. So
 # on two of the three supported engines both greps matched nothing on every
 # commit, both checks silently did not run, and the hook exited 0. A scan that
@@ -771,7 +771,7 @@ if [ "$_VC_HELPER" = 1 ]; then
     CODE_ROOT_SRC=$(printf '%s' "$_CR" | cut -f2)
 fi
 
-# Obligation 3 of .claude/rules/skill-authoring.md -- a skipped step announces
+# Obligation 3 of .trae/rules/skill-authoring.md -- a skipped step announces
 # itself. Only fires when source code is actually being committed, so a
 # docs-only or config-only commit stays quiet and the notice keeps its meaning.
 if [ -z "$CODE_ROOT" ]; then

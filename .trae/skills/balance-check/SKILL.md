@@ -3,17 +3,15 @@ name: balance-check
 description: "在公式与数据中发现平衡性异常值、断裂的成长曲线、退化策略、经济失衡。'检查游戏平衡性'。"
 argument-hint: "[system-name|path-to-data-file]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, AskUserQuestion, Bash(bash "*/.claude/skills/balance-check/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation`
 
 # 平衡性检查
 
 
 
-每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+每次 `AskUserQuestion` 调用都遵循 `.trae/docs/automation-modes.md`
 （collaborative 总是询问 · guided 仅重大事项 · autonomous 记录后继续；
 `automation_always_ask` 类别总是询问）。
 

@@ -2,7 +2,7 @@
 
 ## Skill Summary
 
-`/perf-profile` 是一个静态分析性能剖析器。它接受系统名或 `full` 作为范围，在产出任何内容之前将其所需的每项输入记录为 `FOUND` 或 `ABSENT`，从注入在其顶部的配置块解析 `performance.enforce`（Phase 0；该块还携带 `automation` 和 `workflow`），并用 `get_effective_yaml_key` 读取已提交的预算键 `performance.target_framerate`、`performance.frame_budget_ms`、`performance.draw_call_limit` 和 `performance.memory_ceiling_mb`，之后才回退到设计文档或 `CLAUDE.md`（Phase 2）。它分析源代码中的 CPU、内存、渲染和 I/O 热点候选（Phase 3）——它不摄入运行时剖析器导出文件。报告将每个有预算的行评为 `OK` / `WARNING` / `OVER`；没有已提交预算的指标为 `NOT ASSESSED`，摘要仅针对已设置的预算给出余量（否则为 `no budget set — headroom not assessed`）。该技能在写入前询问「May I write this profiling report to `production/polish/[scope]-report-[date].md`?」（Phase 4），针对 M 或 L 工作量的热点提供实施 / 削减范围 / 推迟 / 上报四个选项（Phase 5），并交接给 `/architecture-decision`、`/scope-check` 或 `/sprint-plan update`（Phase 6）。不调用任何总监质量闸门。结论为：COMPLETE，或当所有必需输入都缺失时的 NOT ASSESSED — NO DATA。在 `workflow: minimal`（没有冲刺）下，被接受的优化进入简报的构建顺序，且 Phase 6 不指向 `/sprint-plan update`。
+`/perf-profile` 是一个静态分析性能剖析器。它接受系统名或 `full` 作为范围，在产出任何内容之前将其所需的每项输入记录为 `FOUND` 或 `ABSENT`，从注入在其顶部的配置块解析 `performance.enforce`（Phase 0；该块还携带 `automation` 和 `workflow`），并用 `get_effective_yaml_key` 读取已提交的预算键 `performance.target_framerate`、`performance.frame_budget_ms`、`performance.draw_call_limit` 和 `performance.memory_ceiling_mb`，之后才回退到设计文档或 `AGENTS.md`（Phase 2）。它分析源代码中的 CPU、内存、渲染和 I/O 热点候选（Phase 3）——它不摄入运行时剖析器导出文件。报告将每个有预算的行评为 `OK` / `WARNING` / `OVER`；没有已提交预算的指标为 `NOT ASSESSED`，摘要仅针对已设置的预算给出余量（否则为 `no budget set — headroom not assessed`）。该技能在写入前询问「May I write this profiling report to `production/polish/[scope]-report-[date].md`?」（Phase 4），针对 M 或 L 工作量的热点提供实施 / 削减范围 / 推迟 / 上报四个选项（Phase 5），并交接给 `/architecture-decision`、`/scope-check` 或 `/sprint-plan update`（Phase 6）。不调用任何总监质量闸门。结论为：COMPLETE，或当所有必需输入都缺失时的 NOT ASSESSED — NO DATA。在 `workflow: minimal`（没有冲刺）下，被接受的优化进入简报的构建顺序，且 Phase 6 不指向 `/sprint-plan update`。
 
 ---
 
@@ -10,7 +10,7 @@
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需夹具。
 
-- [ ] 具有必需的前置元数据（frontmatter）字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 具有 ≥2 个阶段标题
 - [ ] 包含结论关键词：COMPLETE、NOT ASSESSED — NO DATA，以及逐指标状态 OK / WARNING / OVER
 - [ ] 包含点名 `production/polish/[scope]-report-[date].md` 的「May I write」措辞
@@ -26,7 +26,7 @@
 
 ## Fixture Defaults
 
-除非某个用例自己的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见 `studio-tests/CLAUDE.md` § Fixture defaults。
+除非某个用例自己的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见 `studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 
@@ -39,7 +39,7 @@
   `performance.frame_budget_ms: 16.6`、`performance.draw_call_limit: 200`、
   `performance.memory_ceiling_mb: 2048`；`performance.enforce` 未设置（解析为
   `warn`）；`modes.automation` 未设置（collaborative）
-- 没有任何配置键、设计文档或 `CLAUDE.md` 章节给出加载时间目标
+- 没有任何配置键、设计文档或 `AGENTS.md` 章节给出加载时间目标
 - `src/gameplay/combat/enemy_manager.gd` 有一个 `_process()`，它遍历每个敌人，并在该循环内遍历每个活动弹体，且每帧为每个敌人投射一条射线
 - 将嵌套循环改造为空间分区是一项多日改动
 
@@ -72,13 +72,13 @@
 
 **Fixture:**
 - `project.yaml` 有 `engine.name: godot`，且没有 `performance` 块
-- 没有任何设计文档和 `CLAUDE.md` 章节给出帧率、内存、加载时间或绘制调用目标
+- 没有任何设计文档和 `AGENTS.md` 章节给出帧率、内存、加载时间或绘制调用目标
 - `src/` 包含带 `_process()` 函数的玩法脚本
 
 **Input:** `/perf-profile full`
 
 **Expected behavior:**
-1. `get_effective_yaml_key` 对四个预算键均返回空；设计文档和 `CLAUDE.md` 回退也未找到目标
+1. `get_effective_yaml_key` 对四个预算键均返回空；设计文档和 `AGENTS.md` 回退也未找到目标
 2. 源代码为 FOUND，因此 Phase 3 分析仍然运行并报告热点
 3. Performance Budgets 表的每一行都是 `NOT ASSESSED`——都没有对照模板的 `[16.67ms]` 占位符进行衡量
 4. 摘要不针对无人设置的预算声称余量：它写明 `no budget set — headroom not assessed`
@@ -205,7 +205,7 @@
 
 **Expected behavior:**
 1. Phase 2 将四个 `get_effective_yaml_key` 读取作为单条命令运行，该命令
-   先切换到项目根，并从那里加载 `.claude/hooks/yaml-helper.sh`
+   先切换到项目根，并从那里加载 `.trae/hooks/yaml-helper.sh`
 2. 四个键都返回其已提交值；没有因从子文件夹找不到辅助脚本或 `project.yaml` 而返回空
 3. Performance Budgets 表使用 16.6 ms、2048 MB 和 200 次绘制调用；这些行
    不是 `NOT ASSESSED`
@@ -221,7 +221,7 @@
 ## Protocol Compliance
 
 - [ ] 在产出任何报告之前，将每项输入记录为 FOUND 或 ABSENT
-- [ ] 在回退到设计文档或 `CLAUDE.md` 之前，用 `get_effective_yaml_key` 读取四个 `performance.*` 预算键
+- [ ] 在回退到设计文档或 `AGENTS.md` 之前，用 `get_effective_yaml_key` 读取四个 `performance.*` 预算键
 - [ ] 没有已提交预算的指标为 `NOT ASSESSED`——绝不对照 `[16.67ms]` 占位符衡量——且摘要仅针对已设置的预算声称余量
 - [ ] 应用解析出的配置块中的 `performance.enforce`：`warn` → 发现项，`block` → 阻塞项，`off` → 仅供参考
 - [ ] 在写入前询问「May I write」并点名 `production/polish/[scope]-report-[date].md`，且将 `NOT ASSESSED` 章节保留在写入的文件中

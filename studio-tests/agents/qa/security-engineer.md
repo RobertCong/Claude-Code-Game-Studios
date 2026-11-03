@@ -11,7 +11,7 @@ No gate IDs assigned. Escalates critical vulnerabilities to technical-director.
 
 - [ ] `description:` 字段存在且限定于本领域（引用反作弊 / 安全 / 漏洞评估）
 - [ ] `tools:` 列表包含 Read、Write、Edit、Bash、Glob、Grep
-- [ ] 模型档位为 `inherit` —— frontmatter `model:` 精确为 `inherit`（档位见：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 代理定义未声称对游戏逻辑设计或服务器部署拥有权限
 
 ---

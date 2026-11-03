@@ -16,7 +16,7 @@
 因此，涉及 GDD 与 ADR 审计的 Fixture 会在 `project.yaml` 中设置 `modes.rigor: full`。
 
 v1.0 项目（没有 `project.yaml`，旧版配置含真实值）只能由
-`.claude/scripts/migrate-v1-config.sh` 迁移——先 `--dry-run`，在询问并指明其写入
+`.trae/scripts/migrate-v1-config.sh` 迁移——先 `--dry-run`，在询问并指明其写入
 的文件之后才真正运行，`--finalize` 则留到用户读过迁移报告之后再执行。`/adopt`
 从不写入评审模式；它只报告解析出的评审模式。
 
@@ -31,7 +31,7 @@ v1.0 项目（没有 `project.yaml`，旧版配置含真实值）只能由
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 有 ≥2 个 phase 标题
 - [ ] 包含严重程度层级关键词：BLOCKING、HIGH、MEDIUM、LOW
 - [ ] 在写入采用计划之前包含 "May I write" 或 `AskUserQuestion` 措辞
@@ -48,7 +48,7 @@ v1.0 项目（没有 `project.yaml`，旧版配置含真实值）只能由
 ## Fixture Defaults
 
 除非某个用例自己的 Fixture 另有说明，否则每个用例的 `project.yaml` 都设置
-`modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/CLAUDE.md` §
+`modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/AGENTS.md` §
 Fixture defaults。
 
 ---
@@ -235,7 +235,7 @@ Fixture defaults。
 
 **Fixture:**
 - 仓库根目录没有 `project.yaml`
-- `production/stage.txt` 内容为 `Production`；`.claude/docs/technical-preferences.md`
+- `production/stage.txt` 内容为 `Production`；`.trae/docs/technical-preferences.md`
   含 `- **Engine**: Godot 4.6` 以及已填写的命名章节
 - `design/gdd/` 含 GDD；没有 `production/migration-report.md`
 
@@ -244,13 +244,13 @@ Fixture defaults。
 **Expected behavior:**
 1. Phase 2g 识别出需要迁移的 v1.0 项目（没有 `project.yaml`，
    旧版文件含真实、可迁移的值）
-2. 它在审计期间运行 `bash .claude/scripts/migrate-v1-config.sh --dry-run`
+2. 它在审计期间运行 `bash .trae/scripts/migrate-v1-config.sh --dry-run`
    （试运行不写入任何内容）——它不会手工编写 `project.yaml`
 3. 迁移在 Phase 3 被归类为 BLOCKING 并排在计划首位，计划报告试运行列出的内容
 4. 计划之后，Phase 7 首先提出迁移：它询问 "May I run the
    converter? It writes `project.yaml` and `production/migration-report.md`."，
    并且仅在获批之后才不带 `--dry-run` 运行它
-5. 它告知用户在运行 `bash .claude/scripts/migrate-v1-config.sh --finalize`
+5. 它告知用户在运行 `bash .trae/scripts/migrate-v1-config.sh --finalize`
    之前先阅读 `production/migration-report.md`，且在用户读过报告之前不自行运行
    `--finalize`
 

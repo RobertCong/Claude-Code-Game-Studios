@@ -3,8 +3,6 @@ name: reverse-document
 description: "从现有实现反向生成缺失的设计或架构文档 —— 从代码和原型倒推。"
 argument-hint: "<type> <path> (e.g., 'design src/gameplay/combat' or 'architecture Assets/Scripts/Core')"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Bash(bash "*/.claude/skills/reverse-document/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 # Read-only diagnostic skill — no specialist agent delegation needed
 ---
 
@@ -31,28 +29,28 @@ model: sonnet
 - `concept` → 从原型生成概念文档
 
 **路径**：要分析的目录或文件，位于代码根目录下 —— Godot 为 `src/`，
-Unity 为 `Assets/`，Unreal 为 `Source/<Module>/`（`.claude/docs/code-root-resolution.md`）
+Unity 为 `Assets/`，Unreal 为 `Source/<Module>/`（`.trae/docs/code-root-resolution.md`）
 - `src/gameplay/combat/` → 所有战斗相关代码（Godot）
 - `Assets/Scripts/Core/EventSystem.cs` → 特定文件（Unity）
 - `Source/MyGame/Private/AI/` → 模块文件夹（Unreal）
 - `prototypes/stealth-mech/` → 原型目录
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys workflow,system_overrides,automation`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys workflow,system_overrides,automation`
 
 **自动化模式**：解析 `modes.automation`（`project.local.yaml` →
 `project.yaml` → 默认 `collaborative`）。每次 `AskUserQuestion` 调用和
-每次文件写入都遵循 `.claude/docs/automation-modes.md`
+每次文件写入都遵循 `.trae/docs/automation-modes.md`
 （collaborative 总是询问 · guided 仅重大事项询问 · autonomous 记录后继续；
 `automation_always_ask` 类别始终提示）。
 
-已在上方解析 —— 直接使用。无解析块 → 使用
-`.claude/docs/config-resolution.md` 中的默认值。
+已在上一步解析 —— 直接使用。无解析块 → 使用
+`.trae/docs/config-resolution.md` 中的默认值。
 
 **解析目标系统的工作流层级**：将 `<path>` 映射到系统
 名称，然后如果上面的块列出了该系统，则使用该系统的 `system_overrides` 行，
 否则使用项目的 `workflow` 值。它决定生成多少文档 ——
 见 Phase 5。每个层级的语义见
-`.claude/docs/workflow-modes.md`。
+`.trae/docs/workflow-modes.md`。
 
 > **要解析层级 —— 不要假设它。** `workflow-modes.md` 定义了每个层级
 > *意味着什么*，但它无法说明*本项目*设定的是什么；要从
@@ -207,7 +205,7 @@ Before I draft the design doc, could you clarify these points?
   Dependencies、Acceptance Criteria；当恢复出的系统定义了
   数值规则时 + Formulas）。跳过 Player Fantasy 和 Tuning Knobs。
 - **`minimal`** —— 生成一页格式的**游戏简报**
-  （`.claude/docs/templates/game-brief.md`），而不是 GDD。对于整个游戏
+  （`.trae/docs/templates/game-brief.md`），而不是 GDD。对于整个游戏
   （路径就是代码根目录本身）写 `design/game-brief.md`；对于单个
   反向工程的系统写
   `design/[system-name]-brief.md`。

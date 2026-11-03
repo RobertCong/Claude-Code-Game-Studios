@@ -26,7 +26,7 @@ NOT ASSESSED → PASS WITH CONDITIONS → PASS。其检查基于试玩，因此
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 有 ≥2 个 phase 标题
 - [ ] 包含结论关键词：COMPLETE、FAIL、NOT ASSESSED、PASS WITH CONDITIONS
 - [ ] 在写入字符串表或报告之前包含 "May I write" 协作协议用语
@@ -48,7 +48,7 @@ NOT ASSESSED → PASS WITH CONDITIONS → PASS。其检查基于试玩，因此
 
 除非某个用例自己的 Fixture 另有说明，否则每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。
-规则见：`studio-tests/CLAUDE.md` §
+规则见：`studio-tests/AGENTS.md` §
 Fixture defaults。
 
 ---
@@ -180,7 +180,7 @@ Fixture defaults。
 ### Case 6: 代码根无法解析时的 Scan — NOT ASSESSED，绝不报 "no hardcoded strings"
 
 **Fixture:**
-- `project.yaml` 没有 `engine.name`；`.claude/docs/technical-preferences.md`
+- `project.yaml` 没有 `engine.name`；`.trae/docs/technical-preferences.md`
   内容为 `[TO BE CONFIGURED]`
 - `src/` 与 `Assets/` 都存在，且都含有带硬编码字符串的 UI 代码
   （目录树有歧义）

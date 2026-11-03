@@ -17,7 +17,7 @@ world-builder 和 accessibility-specialist。编排器自行汇编所有团队�
 
 ## Static Assertions (Structural)
 
-- [ ] 具备必需的前置字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 具备 ≥2 个阶段/步骤标题（Step 1 至 Step 5 均存在）
 - [ ] 包含结论关键词：COMPLETE、BLOCKED
 - [ ] File Write Protocol：各代理的产出物由子代理在有界例外之下写入（指定路径、`production/`、
@@ -32,7 +32,7 @@ world-builder 和 accessibility-specialist。编排器自行汇编所有团队�
 - [ ] 结尾有下一步交接（引用 `/design-review`、`/dev-story`、`/qa-plan`）
 - [ ] 存在 Error Recovery Protocol 小节：在把某步骤视为完成前，确认指定产出物已落盘；立即
   上报 BLOCKED；始终产出部分报告；完整流程（surface → assess → options → partial report）
-  见 `.claude/docs/error-recovery-protocol.md`
+  见 `.trae/docs/error-recovery-protocol.md`
 - [ ] 在步骤转换处使用 `AskUserQuestion` 征求用户批准后再继续（`collaborative` 模式）
 - [ ] Phase 0 解析 `team.size`，且技能要求 Step 1 之前有一行活跃集声明
 - [ ] Step 1 明确并行启动 narrative-director、world-builder 和 art-director
@@ -51,7 +51,7 @@ world-builder 和 accessibility-specialist。编排器自行汇编所有团队�
 
 除非用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有
-`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` §
+`project.local.yaml`。规则见：`studio-tests/AGENTS.md` §
 Fixture defaults。
 
 ---
@@ -143,7 +143,7 @@ Fixture defaults。
 - [ ] 缺失的世界构建上下文在最终报告中作为缺口点名
 - [ ] world-builder 仍未解决时，总体结论为 BLOCKED（而非 COMPLETE）
 - [ ] 不代 world-builder 写入任何内容——协议选项是 "skip this agent and note the gap"
-  （`.claude/docs/error-recovery-protocol.md`），而非替代传说
+  （`.trae/docs/error-recovery-protocol.md`），而非替代传说
 
 ---
 

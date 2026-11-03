@@ -6,7 +6,7 @@
 文件*在各版本之间发生了变化，以及是否可以安全覆盖。本
 指南涵盖的是*项目自身的数据*：你在
 `production/stage.txt`、`production/review-mode.txt` 和
-`.claude/docs/technical-preferences.md` 中配置的值。
+`.trae/docs/technical-preferences.md` 中配置的值。
 
 如果你是在 v1.1 上搭建一个**全新**项目，则不需要这份指南 ——
 `/start` 会直接写入 `project.yaml`，所有旧版文件都不适用。
@@ -20,7 +20,7 @@
 
 - `production/stage.txt`
 - `production/review-mode.txt`
-- 含有真实值的 `.claude/docs/technical-preferences.md`（仍是
+- 含有真实值的 `.trae/docs/technical-preferences.md`（仍是
   充满 `[TO BE CONFIGURED]` 占位符的副本是未经改动的模板
   默认值，不是可迁移数据，不计入）
 
@@ -67,11 +67,11 @@ v1.1 计划将迁移过程中的数据丢失评为最高严重度风险，而
 
 ```bash
 # 1. Preview — writes nothing, just reports what it would do
-bash .claude/scripts/migrate-v1-config.sh --dry-run
+bash .trae/scripts/migrate-v1-config.sh --dry-run
 
 # 2. Migrate — writes project.yaml + production/migration-report.md
 #    Every legacy file is left in place, untouched.
-bash .claude/scripts/migrate-v1-config.sh
+bash .trae/scripts/migrate-v1-config.sh
 
 # 3. Read the report before finalizing
 cat production/migration-report.md
@@ -79,7 +79,7 @@ cat production/migration-report.md
 # 4. Finalize — deletes legacy files, ONLY after re-verifying each one's
 #    value made it into project.yaml. Refuses (exit 4) and deletes nothing
 #    on any mismatch.
-bash .claude/scripts/migrate-v1-config.sh --finalize
+bash .trae/scripts/migrate-v1-config.sh --finalize
 ```
 
 第 4 步是可选的，并且有意分开。完全跳过它也没问题 ——
@@ -131,4 +131,4 @@ Forbidden Patterns 和 Allowed Libraries 仍然存放在那里，而且永远如
 
 关于 v1.0 中不存在的新设置（首当其冲的是 `modes.rigor`），
 请参阅 [README 的 Configuration 章节](../README.md#configuration)
-以及 `.claude/docs/effects-map.md` 中的完整规格。
+以及 `.trae/docs/effects-map.md` 中的完整规格。

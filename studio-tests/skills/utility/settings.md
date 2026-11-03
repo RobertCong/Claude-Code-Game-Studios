@@ -16,7 +16,7 @@
 `AskUserQuestion` 批准闸门确认（`[A] Yes, write` / `[B] No, cancel`）。
 对 `project.yaml` 的写入属于 `schema_changes` 决策，因此即使在
 `autonomous` 模式下也会确认。`--local` 会拒绝不在本地覆盖
-白名单中的键。`.claude/docs/effects-map.md` 用
+白名单中的键。`.trae/docs/effects-map.md` 用
 `> ### RESERVED` 横幅标记的设置在被要求时会存储，但每种形式都会说明没有任何东西读取
 它。该技能不给出结论：它打印并写入配置。不适用任何总监
 闸门。
@@ -27,12 +27,12 @@
 
 由 `/skill-test spec` 对照 SKILL.md 检查 —— 无需夹具。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 至少有 2 个阶段标题
 - [ ] 不要求结论关键字：输出是配置，而不是判断（对本次技能，`/skill-test static` 的检查 3 给出 WARN，绝不给出 FAIL）
 - [ ] 两个写入阶段都在 `Edit` 或 `Write` 之前用 `AskUserQuestion` 请求批准
 - [ ] 保留集来自 `effects-map.md` 的 `> ### RESERVED` 标题，而非硬编码
-- [ ] 指向 `.claude/docs/settings-guidance.md` 以了解该选择哪个值
+- [ ] 指向 `.trae/docs/settings-guidance.md` 以了解该选择哪个值
 
 ---
 
@@ -46,7 +46,7 @@
 
 除非用例自身的夹具另有说明，每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有
-`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
+`project.local.yaml`。规则见：`studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 
@@ -218,7 +218,7 @@
 ### Case 7: Reserved setting — stored on request, flagged on every form
 
 **Fixture:**
-- `.claude/docs/effects-map.md` 为现行文件；选择一个其章节
+- `.trae/docs/effects-map.md` 为现行文件；选择一个其章节
   带有 `> ### RESERVED` 横幅的键（本规格编写时为 `accessibility.target` ——
   用技能自身的 grep 重新推导）
 - `project.yaml` 未设置该键；用户回答 `[A] Yes, write`

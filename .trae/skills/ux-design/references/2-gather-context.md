@@ -44,7 +44,7 @@
 > 进行一次玩家旅程会话。”
 
 同时添加到 UX 规格的 Open Questions 小节：
-> “玩家旅程地图尚未创建。请依据 `.claude/docs/templates/player-journey.md` 的模板撰写它，以便为这个屏幕确立玩家上下文。”
+> “玩家旅程地图尚未创建。请依据 `.trae/docs/templates/player-journey.md` 的模板撰写它，以便为这个屏幕确立玩家上下文。”
 
 > **不要告诉用户去“运行 `/ux-design` Phase 2b”来创建它。** Phase 2b
 > 就是这一步 — *读取*该文件的那一步。那种补救是循环的：它
@@ -104,7 +104,7 @@ Glob `design/ux/*.md`，记下哪些屏幕已有规格。对于将链接到当�
 
 读取 `project.yaml` 中的 `platform` 块；如果 `project.yaml` 没有
 `platform` 块，则回退到
-`.claude/docs/technical-preferences.md` 的 `## Input & Platform` 小节。保存这些值供
+`.trae/docs/technical-preferences.md` 的 `## Input & Platform` 小节。保存这些值供
 整个技能使用 — 它们驱动交互映射，并为无障碍
 要求提供依据：
 

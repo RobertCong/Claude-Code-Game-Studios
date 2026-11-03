@@ -3,17 +3,15 @@ name: design-review
 description: "评审一份设计文档的完整性、内部一致性、可实施性与设计标准。在交付给程序员之前使用。"
 argument-hint: "[path-to-design-doc] [--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, Bash(bash "*/.claude/skills/design-review/../../hooks/yaml-helper.sh" resolve_config *), Bash(bash .claude/scripts/review-receipts.sh check *), Bash(bash .claude/scripts/review-receipts.sh hash *), Bash(bash .claude/scripts/gdd-structure-check.sh *), Bash(grep -E '^  - name:' design/registry/entities.yaml), Bash(grep -n -i -E *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,workflow,system_overrides`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,workflow,system_overrides`
 
-上面已解析 — 直接使用；`--review` 覆盖 `review_mode`。`--depth` 是同一标志
+上一步命令的输出已解析 — 直接使用；`--review` 覆盖 `review_mode`。`--depth` 是同一标志
 在 1.1 之前的名称：将 `--depth <mode>` 完全按
 `--review <mode>` 处理，并说明一次它已更名。两者同时给出时，`--review`
 优先，`--depth` 被忽略 — 明确说明这一点。若无解析块 → 使用
-`.claude/docs/config-resolution.md` 中的默认值。
+`.trae/docs/config-resolution.md` 中的默认值。
 
 # 设计评审
 
@@ -21,10 +19,10 @@ model: sonnet
 ## Phase 0: 解析参数
 
 
-完整检查模式见 `.claude/docs/director-gates.md`。各个质量闸门（gate）的定义位于 `.claude/docs/director-gates/[gate-id].md` — 被派生的代理读取自己的闸门文件；不要在父会话中读取它。
+完整检查模式见 `.trae/docs/director-gates.md`。各个质量闸门（gate）的定义位于 `.trae/docs/director-gates/[gate-id].md` — 被派生的代理读取自己的闸门文件；不要在父会话中读取它。
 
 
-每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+每次 `AskUserQuestion` 调用都遵循 `.trae/docs/automation-modes.md`
 （协作模式总是询问 · 引导模式仅重大决策 · 自主模式记录并继续；
 `automation_always_ask` 类别始终提示）。
 
@@ -53,7 +51,7 @@ model: sonnet
 **先做新鲜度检查 — 对未变更文档重新评审会花费全价，并复现相同的结论。** 运行：
 
 ```
-Bash: bash .claude/scripts/review-receipts.sh check "design/gdd/reviews/[doc-name]-review-log.md" "[target-doc-path]" "design/registry/entities.yaml" ".claude/skills/design-review/SKILL.md"
+Bash: bash .trae/scripts/review-receipts.sh check "design/gdd/reviews/[doc-name]-review-log.md" "[target-doc-path]" "design/registry/entities.yaml" ".trae/skills/design-review/SKILL.md"
 ```
 
 注册表被纳入检查，是因为本次评审会查阅它获取跨文档事实 — 一份未变更的
@@ -97,7 +95,7 @@ GDD 对照**已变更**的注册表评审，可能得出不同结论，因此只
 
 完整阅读目标设计文档。此步骤需要整份 GDD：按其标题分段阅读
 （用 Grep 工具查找：模式 `^#`，内容模式），因为超过 40 KB 的整文件
-Read 会被拒绝。阅读 CLAUDE.md 以了解项目上下文和标准。
+Read 会被拒绝。阅读 AGENTS.md 以了解项目上下文和标准。
 
 **对于跨文档事实，优先使用注册表而非同级 GDD。** 如果
 `design/registry/entities.yaml` 存在**且列出了本系统的条目**，
@@ -131,7 +129,7 @@ Grep pattern="design/gdd/[system].md" path="design/registry/entities.yaml" outpu
 **Step 2a — 确定性地收集小节存在情况（不读取文档）：**
 
 ```
-Bash: bash .claude/scripts/gdd-structure-check.sh [target-doc-path]
+Bash: bash .trae/scripts/gdd-structure-check.sh [target-doc-path]
 ```
 
 它会打印 `PRESENT:` 列表，并在适用时打印 `ABSENT:` 列表和
@@ -241,7 +239,7 @@ grep -n -i -E 'goblin[_ ]scout|iron[_ ]sword|health|value[_ ]gold' [target-doc-p
 ### Step 2 — 并行派发所有相关专家
 
 **关键：本技能中的 `Agent` 会派发一个子代理（SUBAGENT）— 一个拥有自己
-上下文窗口的独立 Claude 会话。它不是任务追踪。不要在内部模拟专家
+上下文窗口的独立 Trae 会话。它不是任务追踪。不要在内部模拟专家
 视角。不要自己推演领域观点。你**必须**发出
 实际的 `Agent` 调用。模拟的评审不是专家评审。**
 
@@ -420,7 +418,7 @@ Prior verdict resolved: [Yes / No / First review]
 Findings:
 - [BLOCKING] [section]: [one-line finding]
 - [RECOMMENDED] [section]: [one-line finding]
-[output of: Bash: bash .claude/scripts/review-receipts.sh hash "[target-doc-path]" "design/registry/entities.yaml" ".claude/skills/design-review/SKILL.md" [every other file this review read for cross-document facts: the related GDDs in design/gdd/, design/gdd/game-concept.md or design/game-brief.md, the design/narrative/ files] — a file that does not exist prints `not stamped, no such file` and is left out]
+[output of: Bash: bash .trae/scripts/review-receipts.sh hash "[target-doc-path]" "design/registry/entities.yaml" ".trae/skills/design-review/SKILL.md" [every other file this review read for cross-document facts: the related GDDs in design/gdd/, design/gdd/game-concept.md or design/game-brief.md, the design/narrative/ files] — a file that does not exist prints `not stamped, no such file` and is left out]
 ```
 
 发现规则：每项发现一行，以其所在小节命名；

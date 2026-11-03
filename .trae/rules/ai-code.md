@@ -1,8 +1,6 @@
 ---
-paths:
-  - "src/ai/**"
-  - "Assets/**/{AI,Ai,ai}/**/*.cs"
-  - "Source/**/{AI,Ai,ai}/**/*.{h,cpp}"
+alwaysApply: false
+globs: src/ai/**,Assets/**/AI/**/*.cs,Assets/**/Ai/**/*.cs,Assets/**/ai/**/*.cs,Source/**/AI/**/*.h,Source/**/AI/**/*.cpp,Source/**/Ai/**/*.h,Source/**/Ai/**/*.cpp,Source/**/ai/**/*.h,Source/**/ai/**/*.cpp
 ---
 
 # AI 代码规则

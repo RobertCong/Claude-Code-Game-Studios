@@ -7,11 +7,11 @@
 # folder's .gitkeep, the engine's test folders or assembly definitions, the CI
 # workflow and the smoke-test seed.
 #
-# EMITS OBSERVATIONS, NOT A VERDICT (CLAUDE.md, "Helpers in .claude/scripts/").
+# EMITS OBSERVATIONS, NOT A VERDICT (AGENTS.md, "Helpers in .trae/scripts/").
 # It reports what it did with each path and what is still missing; whether
 # the project may advance a gate on the strength of it is the skill's call.
 #
-# Usage: bash .claude/scripts/test-scaffold.sh ENGINE [--dry-run | --list] [--root DIR]
+# Usage: bash .trae/scripts/test-scaffold.sh ENGINE [--dry-run | --list] [--root DIR]
 #          [--module NAME] [--project NAME] [--date YYYY-MM-DD]
 #   ENGINE          godot, unity or unreal (the engine.name values, in any case;
 #                   UE5 is not one)
@@ -235,7 +235,7 @@ under `tests/`.
 
 ## Test Naming
 
-Names follow the engine's language (`.claude/rules/test-standards.md`):
+Names follow the engine's language (`.trae/rules/test-standards.md`):
 - **Godot**: file `[system]_[feature]_test.gd`, function `test_[scenario]_[expected]`
   — `combat_damage_test.gd` → `test_base_attack_returns_expected_damage()`
 
@@ -314,7 +314,7 @@ run both.
 
 ## Test Naming
 
-Names follow the engine's language (`.claude/rules/test-standards.md`):
+Names follow the engine's language (`.trae/rules/test-standards.md`):
 - **Unity**: class `[System]Tests` in `[System]Tests.cs`, method `[Scenario]_[Expected]`
   — `CombatTests.cs` → `BaseAttack_ReturnsExpectedDamage()`
 
@@ -380,7 +380,7 @@ built or named `@DOCPROJECT@.…`.
 
 ## Test Naming
 
-Names follow the engine's language (`.claude/rules/test-standards.md`):
+Names follow the engine's language (`.trae/rules/test-standards.md`):
 - **Unreal**: class `F[System][Scenario]Test`, test name `@DOCPROJECT@.[System].[Scenario]`
   — `FCombatBaseAttackTest` → `@DOCPROJECT@.Combat.BaseAttack`
 

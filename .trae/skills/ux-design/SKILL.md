@@ -3,20 +3,18 @@ name: ux-design
 description: "为屏幕、流程或 HUD 逐节撰写 UX 规格。读取玩家旅程以提供上下文；也涵盖项目级无障碍要求。"
 argument-hint: "[screen/flow name] or 'hud' or 'patterns' or 'accessibility'"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Agent, Bash(bash "*/.claude/skills/ux-design/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow,docs.density`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow,docs.density`
 
-已在上方解析 — 直接使用。若没有配置块 → 使用
-`.claude/docs/config-resolution.md` 中的默认值。
+已在上一步解析 — 直接使用。若没有配置块 → 使用
+`.trae/docs/config-resolution.md` 中的默认值。
 
 # UX 设计
 
 当此技能被调用时：
 
-每一次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+每一次 `AskUserQuestion` 调用都遵循 `.trae/docs/automation-modes.md`
 （collaborative 总是询问 · guided 仅主要节点询问 · autonomous 记录并继续；
 `automation_always_ask` 类别的提问始终弹出）。
 
@@ -25,14 +23,14 @@ model: sonnet
 
 | 产出 | 指南 |
 |---|---|
-| UX 规格 | `.claude/docs/templates/guidance/ux-spec-guide.md` |
-| HUD 设计 | `.claude/docs/templates/guidance/hud-design-guide.md` |
-| 交互模式 | `.claude/docs/templates/guidance/interaction-pattern-library-guide.md`（会路由到三个主题文件） |
-| 无障碍要求 | `.claude/docs/templates/guidance/accessibility-requirements-guide.md` |
+| UX 规格 | `.trae/docs/templates/guidance/ux-spec-guide.md` |
+| HUD 设计 | `.trae/docs/templates/guidance/hud-design-guide.md` |
+| 交互模式 | `.trae/docs/templates/guidance/interaction-pattern-library-guide.md`（会路由到三个主题文件） |
+| 无障碍要求 | `.trae/docs/templates/guidance/accessibility-requirements-guide.md` |
 
 **按小节加载指南，绝不要整份加载** — 每份指南都按小节组织，模板中的指引会指出需要阅读的确切小节。
 
-**`workflow`**（见 `.claude/docs/workflow-modes.md`）：
+**`workflow`**（见 `.trae/docs/workflow-modes.md`）：
 - `full` — 每个屏幕都需要一份 UX 规格。
 - `standard` — 仅核心屏幕（主菜单、HUD、主游玩循环）。
 - `minimal` — 不要求。也可主动运行。
@@ -57,7 +55,7 @@ model: sonnet
 
 > **`accessibility` 是唯一会写入 `design/ux/` 之外的模式。** 它的
 > 输出是各屏幕规格所参照的项目级标准，而不是针对单一屏幕的规格
-> — `.claude/docs/workflow-catalog.yaml`、Pre-Production 与
+> — `.trae/docs/workflow-catalog.yaml`、Pre-Production 与
 > Polish 质量闸门（gate），以及 `/architecture-review` 都会按该确切路径检查
 > `design/accessibility-requirements.md`。不要把它“整理”到
 > `design/ux/` 下：上述每一项检查都会因此不再匹配，而且
@@ -95,11 +93,11 @@ Phase 4 时，只读取与第 1 节中确定的模式相匹配的那个文件；
 | UX 规格（屏幕或流程） | `references/sections-ux-spec.md` |
 | HUD 设计 | `references/sections-hud.md` |
 | 交互模式库 | `references/sections-patterns.md` |
-| 无障碍要求 | `.claude/docs/templates/guidance/accessibility-requirements-guide.md` |
+| 无障碍要求 | `.trae/docs/templates/guidance/accessibility-requirements-guide.md` |
 
 > 无障碍指导位于 `templates/guidance/` 而不是本技能的 `references/`，
 > 因为它所记录的模板
-> （`.claude/docs/templates/accessibility-requirements.md`）也被
+> （`.trae/docs/templates/accessibility-requirements.md`）也被
 > `/ux-review` 以及各质量闸门文件使用。规则相同：只加载覆盖你正在撰写的那个小节的部分，
 > 绝不要加载整个文件。
 
@@ -149,7 +147,7 @@ Phase 4 时，只读取与第 1 节中确定的模式相匹配的那个文件；
 ## 协作协议
 
 **在 `collaborative` 模式（默认）下适用。** 对于 `guided` 与 `autonomous` 模式，
-见 `.claude/docs/automation-modes.md` 中的各模式规则 — 下面的步骤
+见 `.trae/docs/automation-modes.md` 中的各模式规则 — 下面的步骤
 描述的是 collaborative 模式的要求，而非普遍适用的行为。
 
 此技能在每一步都遵循协作设计原则：

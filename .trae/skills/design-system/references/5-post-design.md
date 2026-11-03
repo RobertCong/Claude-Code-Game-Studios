@@ -57,7 +57,7 @@ GDD：按其标题分段读取（用 Grep 工具找到：模式 `^#`，内容模
 - `lean` → 跳过（不是 PHASE-GATE）。注明："CD-GDD-ALIGN skipped — Lean mode."。继续到 Step 5b。
 - `full` → 照常派生。
 
-在最终确定 GDD 之前，通过 `Agent` 使用质量闸门 **CD-GDD-ALIGN**（`.claude/docs/director-gates/cd-gdd-align.md`）派生 `creative-director`。
+在最终确定 GDD 之前，通过 `Agent` 使用质量闸门 **CD-GDD-ALIGN**（`.trae/docs/director-gates/cd-gdd-align.md`）派生 `creative-director`。
 
 传入：已完成的 GDD 文件路径、游戏支柱（来自 `design/gdd/game-concept.md` 或 `design/gdd/game-pillars.md`；若两者都没有，则用提案和 `design/game-brief.md` 中 "what they feel" 那一行）、MDA 美学目标，以及 GDD 的 Player Fantasy 章节 —— 或者，若本层级未撰写该章节，则说明这一点。
 
@@ -119,7 +119,7 @@ Registry candidates from this GDD:
 若同意：追加新条目并更新 `referenced_by` 数组。未经先将其作为冲突暴露，绝不要修改
 现有的 `value` / 属性字段。
 
-写入后，运行 `bash .claude/scripts/registry.sh validate`，并在继续之前修复所有关于
+写入后，运行 `bash .trae/scripts/registry.sh validate`，并在继续之前修复所有关于
 本次写入新增或修改条目的行（DUPLICATE、STATUS 或 LAYOUT 行，或其点名的路径的
 PATH_MISSING 行）；关于其他条目的行请告知用户，而不是未经请求就去修复。如果脚本
 缺失或没有输出，说明注册表检查未运行，然后对照文件头部的规则重新阅读你写入的条目。
@@ -133,7 +133,7 @@ PATH_MISSING 行）；关于其他条目的行请告知用户，而不是未经�
 > - 临时假设：[list any assumptions about undesigned dependencies]
 > - 发现的跨系统冲突：[list or "none"]
 
-> **要校验此 GDD，请打开一个新的 Claude Code 会话并运行：**
+> **要校验此 GDD，请打开一个新的 Trae 会话并运行：**
 > `/design-review design/gdd/[system-name].md`
 >
 > **绝不要在同一个会话中运行 `/design-review` 和 `/design-system`。** 评审

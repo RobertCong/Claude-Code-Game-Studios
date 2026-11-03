@@ -1,6 +1,6 @@
 # 为 Claude Code Game Studios 做贡献
 
-CCGS 是一个使用 Claude Code 进行独立游戏开发的协作框架。欢迎贡献——bug 修复、填补真实空白的新技能、代理改进和钩子修复。不符合框架方向的 PR 会被关闭，且不会给出冗长解释。
+CCGS 是一个使用 Trae 进行独立游戏开发的协作框架。欢迎贡献——bug 修复、填补真实空白的新技能、代理改进和钩子修复。不符合框架方向的 PR 会被关闭，且不会给出冗长解释。
 
 ## 什么样的 PR 是好 PR
 
@@ -19,9 +19,9 @@ CCGS 是帮助你制作游戏的系统，不是存放你用它制作的游戏的
 以下是你若遗漏就会被拒绝 PR 的事项。
 
 **技能文件**
-- 技能位于 `.claude/skills/<name>/SKILL.md`——必须使用子目录格式。扁平的 `.md` 文件会被 Claude Code 静默忽略。
-- SKILL.md 必须包含 YAML frontmatter：`name`、`description`、`argument-hint`、`allowed-tools` 和 `model`
-- 模型层级：只读状态检查用 `haiku`，多文档综合和阶段闸门用 `opus`，其他一律用 `sonnet`
+- 技能位于 `.trae/skills/<name>/SKILL.md`——必须使用子目录格式。扁平的 `.md` 文件会被 Trae 静默忽略。
+- SKILL.md 必须包含 YAML frontmatter：`name`、`description`、`argument-hint`、`user-invocable`
+- 不要写 `model:` 或 `allowed-tools:`：Trae 的 Skill frontmatter 不支持 `model`，`allowed-tools` 的工具名白名单也容易静默失效。模型选择见 `.trae/docs/model-tiers.md`
 
 **钩子**
 - 使用 `grep -E`——绝不要用 `grep -P`（Perl 正则会在 Windows Git Bash 上出错）
@@ -44,7 +44,7 @@ CCGS 不是自主系统。每个工作流都遵循：
 
 ## 测试你的改动
 
-在 Claude Code 会话中运行并确认端到端可用。对于技能，调用该技能并验证输出符合技能声称的行为。对于钩子，触发相关事件并确认钩子正确触发且干净退出。
+在 Trae 会话中运行并确认端到端可用。对于技能，调用该技能并验证输出符合技能声称的行为。对于钩子，触发相关事件并确认钩子正确触发且干净退出。
 
 在 PR 描述中附一段简短说明，描述你测试了什么以及输出是什么样的。
 

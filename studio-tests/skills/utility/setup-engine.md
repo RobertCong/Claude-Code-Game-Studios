@@ -7,9 +7,9 @@
 参数以进入引导式选择。对 Godot，它在展示 Technology Stack 之前会先询问使用哪种语言
 （GDScript、C# 还是 Both）。随后它：
 
-- 在 "May I write these engine settings to `CLAUDE.md`?" 之后，把 Technology Stack
-  与 `ENGINE-REFERENCE-IMPORT` 行写入 `CLAUDE.md`
-- 在用户批准所展示的默认值之后，填充 `.claude/docs/technical-preferences.md`
+- 在 "May I write these engine settings to `AGENTS.md`?" 之后，把 Technology Stack
+  与 `ENGINE-REFERENCE-IMPORT` 行写入 `AGENTS.md`
+- 在用户批准所展示的默认值之后，填充 `.trae/docs/technical-preferences.md`
   （旧式镜像：命名约定、专家路由表、输入/平台、性能预算）
 - 在 "May I write the `engine`, `specialists`, `naming`, and `commands` blocks to
   `project.yaml`?" 之后，把 `engine`、`specialists`、`naming` 与 `commands` 区块
@@ -27,10 +27,10 @@
 
 由 `/skill-test spec` 对照 SKILL.md 检查 —— 无需夹具。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 至少有 2 个阶段标题
 - [ ] 包含结论关键字：COMPLETE
-- [ ] 在写入 `CLAUDE.md` 与写入 `project.yaml` 区块之前，包含 "May I write" 措辞
+- [ ] 在写入 `AGENTS.md` 与写入 `project.yaml` 区块之前，包含 "May I write" 措辞
 - [ ] 具备下一步交接（第 12 节输出一份与层级匹配的 Next-Steps 清单，例如 `minimal` 下的 `/brainstorm`）
 
 ---
@@ -45,7 +45,7 @@
 
 除非用例自身的夹具另有说明，每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有
-`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
+`project.local.yaml`。规则见：`studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 
@@ -64,7 +64,7 @@
 **Expected behavior:**
 1. 完整规格模式：跳过第 2 节的引导式选择
 2. 技能询问 Godot 语言问题（A GDScript / B C# / C Both）；用户选择 GDScript
-3. 技能展示 Technology Stack 并询问 "May I write these engine settings to `CLAUDE.md`?"
+3. 技能展示 Technology Stack 并询问 "May I write these engine settings to `AGENTS.md`?"
 4. 技术偏好以 GDScript 命名（snake_case 文件与
    变量）和 A3 路由表呈现：`.gd` → godot-gdscript-specialist、
    `.gdshader` → godot-shader-specialist、`.tscn` → godot-specialist
@@ -85,7 +85,7 @@
 - [ ] `naming.variables` 与 `naming.files` 为 `snake_case`
 - [ ] 路由表包含 `.gd`、`.gdshader` 与 `.tscn` 条目；`specialists.code` 为 `godot-gdscript-specialist`
 - [ ] 渲染/物理形态会被询问，而非从引擎名推断
-- [ ] 在写入 `CLAUDE.md` 与 `project.yaml` 之前询问 "May I write"
+- [ ] 在写入 `AGENTS.md` 与 `project.yaml` 之前询问 "May I write"
 - [ ] Knowledge Risk 为 HIGH —— 第 6 节表的截止时间为 2025 年 5 月，其 Godot 行约为 4.3，与随附的 VERSION.md 一致
 - [ ] 结论为 COMPLETE
 
@@ -101,7 +101,7 @@
 
 **Expected behavior:**
 1. 仅引擎模式：查询版本并与用户确认
-2. 不问语言问题（Unity 为 C#）；CLAUDE.md 的 Language 为 `C#`
+2. 不问语言问题（Unity 为 C#）；AGENTS.md 的 Language 为 `C#`
 3. 命名：PascalCase 类/方法、`_camelCase` 私有字段
 4. 路由：`.cs` → unity-specialist、`.shader`/`.shadergraph` → unity-shader-specialist、
    `.unity`/`.prefab` → unity-specialist、`.uxml`/`.uss` → unity-ui-specialist
@@ -129,7 +129,7 @@
 **Input:** `/setup-engine unreal 5.8`
 
 **Expected behavior:**
-1. 主语言问题默认为 C++，因此 CLAUDE.md 的 Language 写为
+1. 主语言问题默认为 C++，因此 AGENTS.md 的 Language 写为
    `C++ (primary), Blueprint (gameplay prototyping)` —— 该行随
    回答而定，若回答以 Blueprint 为主则写入
    `Blueprint (primary), C++ where needed`
@@ -258,10 +258,10 @@
 - 全新项目：未配置引擎，`project.yaml` 无 engine 区块
 - 引擎问题返回为跳过：用户关闭它，或无人值守运行
   把每个问题都返回为跳过
-- 沙箱携带框架的 `CLAUDE.md`。本用例检查的规则
+- 沙箱携带框架的 `AGENTS.md`。本用例检查的规则
   在那里声明（"A skipped or dismissed question is not an answer"），也在
-  `.claude/docs/automation-modes.md` 中，而不在 `/setup-engine` 自己的文件中；由
-  `CLAUDE.md` 加载的规则算作技能自身的规则（`/skill-test` spec 模式，步骤 3），
+  `.trae/docs/automation-modes.md` 中，而不在 `/setup-engine` 自己的文件中；由
+  `AGENTS.md` 加载的规则算作技能自身的规则（`/skill-test` spec 模式，步骤 3），
   因此缺少它的沙箱属于配置错误，而不是技能 FAIL
 
 **Input:** `/setup-engine`
@@ -269,7 +269,7 @@
 **Expected behavior:**
 1. 技能不自行选择引擎、语言或版本
 2. 它以纯文本再次询问，说明正在等待该回答，并等待
-3. 在用户回答之前，不向 `CLAUDE.md`、`project.yaml`、`technical-preferences.md`
+3. 在用户回答之前，不向 `AGENTS.md`、`project.yaml`、`technical-preferences.md`
    或 `VERSION.md` 写入任何内容
 4. 在无人能回答的运行中，它停止并报告正在等待什么
 
@@ -283,7 +283,7 @@
 ## Protocol Compliance
 
 - [ ] 在请求写入之前展示配置草稿
-- [ ] 在写入 `CLAUDE.md` 与 `project.yaml` 区块前询问 "May I write"；技术偏好只有在用户批准所展示的默认值之后才写入
+- [ ] 在写入 `AGENTS.md` 与 `project.yaml` 区块前询问 "May I write"；技术偏好只有在用户批准所展示的默认值之后才写入
 - [ ] 提供引擎参数时尊重它（跳过引导式选择）
 - [ ] 双写 `project.yaml` 与 `technical-preferences.md`，然后回读 `project.yaml` 确认两者一致
 - [ ] 重新运行时，原地编辑已有的 `project.yaml` 区块而不重复它们

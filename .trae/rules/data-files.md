@@ -1,8 +1,6 @@
 ---
-paths:
-  - "assets/data/**/*.json"
-  - "Assets/**/{Data,data}/**/*.json"
-  - "Content/**/{Data,data}/**/*.json"
+alwaysApply: false
+globs: assets/data/**/*.json,Assets/**/Data/**/*.json,Assets/**/data/**/*.json,Content/**/Data/**/*.json,Content/**/data/**/*.json
 ---
 
 # 数据文件规则

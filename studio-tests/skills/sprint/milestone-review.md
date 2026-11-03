@@ -10,7 +10,7 @@
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 具备 ≥2 个 phase 标题
 - [ ] 包含结论关键词：COMPLETE、BLOCKED、NOT ASSESSED
 - [ ] 包含 Go/No-Go 建议取值：GO、CONDITIONAL GO、NO-GO
@@ -25,13 +25,13 @@
 |---------------|------------------------------------------------|---------------------------|
 | PR-MILESTONE  | Before the Go/No-Go recommendation is generated | full only (not lean/solo) |
 
-PR-MILESTONE 结论：ON TRACK / AT RISK / OFF TRACK——或 NOT ASSESSED [missing input]（`.claude/docs/director-gates.md`），在该情况下技能从不建议 GO。
+PR-MILESTONE 结论：ON TRACK / AT RISK / OFF TRACK——或 NOT ASSESSED [missing input]（`.trae/docs/director-gates.md`），在该情况下技能从不建议 GO。
 
 ---
 
 ## Fixture Defaults
 
-除非该用例自己的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
+除非该用例自己的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 
@@ -135,7 +135,7 @@ PR-MILESTONE 结论：ON TRACK / AT RISK / OFF TRACK——或 NOT ASSESSED [miss
 **Expected behavior:**
 1. 技能列出其输入，并把每个记录为 FOUND 或 ABSENT
 2. 每一必需输入都是 ABSENT，因此技能停止并把 `NOT ASSESSED — NO DATA` 作为整体结论报告
-3. 报告指名缺失了什么以及它们来自何处：冲刺报告由 `/sprint-plan` 写入；里程碑定义依据 `.claude/docs/templates/milestone-definition.md` 手工撰写
+3. 报告指名缺失了什么以及它们来自何处：冲刺报告由 `/sprint-plan` 写入；里程碑定义依据 `.trae/docs/templates/milestone-definition.md` 手工撰写
 4. 不臆造里程碑定义，不生成闸门，不写入文件
 
 **Assertions:**

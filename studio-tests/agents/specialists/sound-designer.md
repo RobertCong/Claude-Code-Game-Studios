@@ -11,7 +11,7 @@
 
 - [ ] `description:` 字段存在且与领域特定（提及音效 / 音频事件 / 混音）
 - [ ] `tools:` 列表包含 Read、Write、Edit、Glob、Grep —— 不包含引擎代码执行工具
-- [ ] 模型档位为 `inherit` — frontmatter `model:` 的值恰为 `inherit`（档位说明：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 代理定义未声称对音乐方向或音频代码实现拥有权限，并点名 `audio-director` 为音乐方向与作曲的所有者
 
 ---

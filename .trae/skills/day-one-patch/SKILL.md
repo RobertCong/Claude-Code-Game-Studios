@@ -4,8 +4,6 @@ description: "首发日补丁——针对黄金母盘（gold master）之后发�
 argument-hint: "[scope: known-bugs | cert-feedback | all]"
 user-invocable: true
 disable-model-invocation: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion
-model: sonnet
 ---
 
 # 首发日补丁（Day-One Patch）
@@ -139,7 +137,7 @@ model: sonnet
 
 运行所需的 QA 范围：
 - **Targeted smoke check** —— 运行 `/smoke-check`（它不接受系统参数）
-- **Broader regression** —— 在引擎的测试根（Godot 为 `tests/unit/` 与 `tests/integration/`，Unity 为 `Assets/Tests/`，Unreal 为 `Source/<Module>/Private/Tests/` —— `.claude/docs/directory-structure.md`）运行受影响系统的测试，使用 `project.yaml` 中的 `commands.test`，在运行器允许时收窄到受影响的套件——绝不凭记忆写运行器命令行。若 `commands.test` 未设置，更广泛的回归为 NOT ASSESSED；说明该情况。
+- **Broader regression** —— 在引擎的测试根（Godot 为 `tests/unit/` 与 `tests/integration/`，Unity 为 `Assets/Tests/`，Unreal 为 `Source/<Module>/Private/Tests/` —— `.trae/docs/directory-structure.md`）运行受影响系统的测试，使用 `project.yaml` 中的 `commands.test`，在运行器允许时收窄到受影响的套件——绝不凭记忆写运行器命令行。若 `commands.test` 未设置，更广泛的回归为 NOT ASSESSED；说明该情况。
 
 QA 结论必须为 PASS 或 PASS WITH WARNINGS 才能继续。若为 FAIL：将失败的修复移出首发日补丁范围并延后到 1.1。
 

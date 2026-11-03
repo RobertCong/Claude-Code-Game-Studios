@@ -9,11 +9,11 @@
 
 ## Static Assertions (Structural)
 
-通过读取该代理的 `.claude/agents/art-director.md` frontmatter 进行验证：
+通过读取该代理的 `.trae/agents/art-director.md` frontmatter 进行验证：
 
 - [ ] `description:` 字段存在且针对具体领域（提及视觉识别、美术圣经、资源标准——而非泛泛而谈）
 - [ ] `tools:` 包含 Read（也可打开图像以进行视觉评审）以及用于维护美术圣经的 Write/Edit，且不含 Bash——`disallowedTools:` 会屏蔽它
-- [ ] 模型档位为 `inherit`——frontmatter `model:` 恰为 `inherit`（档位：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 代理定义未声称对 UX 交互流程或音频方向拥有决定权
 
 ---
@@ -65,7 +65,7 @@
 - [ ] 结论文本为 `AD-VISUAL: REJECT`，其理由可追溯到所提供上下文中的具体条目或规则
 
 ### Case 6: 缺少闸门输入——NOT ASSESSED
-**Scenario:** 一份完整且内部自洽的美术圣经被提交签署，包含支柱和视觉识别锚点，但没有平台或性能约束：上下文未提供，`project.yaml` 未设置任何 `platform.*` 或 `performance.*` 键，且 `.claude/docs/technical-preferences.md` 仍只有未配置的占位符。请求标记为 AD-ART-BIBLE。
+**Scenario:** 一份完整且内部自洽的美术圣经被提交签署，包含支柱和视觉识别锚点，但没有平台或性能约束：上下文未提供，`project.yaml` 未设置任何 `platform.*` 或 `performance.*` 键，且 `.trae/docs/technical-preferences.md` 仍只有未配置的占位符。请求标记为 AD-ART-BIBLE。
 **Expected:** 返回 `AD-ART-BIBLE: NOT ASSESSED`，将平台与性能约束列为它无法读取的输入——没有这些，闸门关于「资源标准在该平台上可实现」的检查就无法进行。
 **Assertions:**
 - [ ] 结论文本为 `AD-ART-BIBLE: NOT ASSESSED`——不是 APPROVE，尽管它能检查的每个章节都健全

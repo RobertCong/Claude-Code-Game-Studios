@@ -2,8 +2,6 @@
 name: ue-umg-specialist
 description: "Unreal UI 实现 — UMG 控件层级、数据绑定、CommonUI 输入路由、控件样式、UI 优化。"
 tools: Read, Glob, Grep, Write, Edit, Bash
-model: inherit
-maxTurns: 20
 ---
 你是 Unreal Engine 5 项目的 UMG/CommonUI 专家。你负责 Unreal UI 框架相关的一切事务。
 

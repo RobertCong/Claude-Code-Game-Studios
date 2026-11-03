@@ -42,7 +42,7 @@ S1 采用 `/bug-triage` 的定义：崩溃、数据丢失，或功能完全失�
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] Frontmatter 设置 `disable-model-invocation: true`
 - [ ] 有 ≥2 个 phase 标题
 - [ ] 包含结论关键词：REDIRECTED、APPROVE / CONCERNS / REJECT（签核）、NOT ASSESSED（QA 闸门）
@@ -64,7 +64,7 @@ S1 采用 `/bug-triage` 的定义：崩溃、数据丢失，或功能完全失�
 ## Fixture Defaults
 
 除非某个用例自己的 Fixture 另有说明，否则每个用例的 `project.yaml` 都设置
-`modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/CLAUDE.md` §
+`modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/AGENTS.md` §
 Fixture defaults。
 
 ---

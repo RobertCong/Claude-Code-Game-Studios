@@ -19,7 +19,7 @@ Phase 4 运行 ND-CONSISTENCY 闸门；编排器在一次批准后把最终文�
 
 ## Static Assertions (Structural)
 
-- [ ] 具备必需的前置字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 具备 ≥2 个阶段标题
 - [ ] 包含结论关键词：COMPLETE、BLOCKED
 - [ ] 包含 "File Write Protocol" 小节
@@ -33,7 +33,7 @@ Phase 4 运行 ND-CONSISTENCY 闸门；编排器在一次批准后把最终文�
   声称启动总监
 - [ ] 结尾有下一步交接（引用 `/design-review`、`/localize extract`、`/dev-story`）
 - [ ] 存在 Error Recovery Protocol 小节：确认指定产出物已落盘；立即上报 BLOCKED；始终产出
-  部分报告；完整流程见 `.claude/docs/error-recovery-protocol.md`
+  部分报告；完整流程见 `.trae/docs/error-recovery-protocol.md`
 - [ ] 在阶段转换处使用 `AskUserQuestion` 后才继续（`collaborative` 模式）
 - [ ] Phase 0 解析 `team.size`，且技能要求 Phase 1 之前有一行活跃集声明
 - [ ] Phase 2 明确并行启动 world-builder、writer 和 art-director
@@ -45,7 +45,7 @@ Phase 4 运行 ND-CONSISTENCY 闸门；编排器在一次批准后把最终文�
 
 除非用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有
-`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` §
+`project.local.yaml`。规则见：`studio-tests/AGENTS.md` §
 Fixture defaults。
 
 ---

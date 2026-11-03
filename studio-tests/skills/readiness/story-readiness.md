@@ -25,10 +25,10 @@ BLOCKED / NOT ASSESSED 结论。它是只读的 —— 绝不写入或编辑文�
 
 由 `/skill-test spec` 对照 SKILL.md 检查 —— 无需 fixture。
 
-- [ ] 具备必需的前置字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 具备 ≥2 个阶段标题或编号检查小节
 - [ ] 包含结论关键词：READY、NEEDS WORK、BLOCKED、NOT ASSESSED
-- [ ] 不要求 "May I write" 措辞 —— `allowed-tools` 没有 Write 或 Edit
+- [ ] 不要求 "May I write" 措辞 —— 技能声明为只读
 - [ ] 有下一步交接（结论之后做什么）
 
 ---
@@ -37,7 +37,7 @@ BLOCKED / NOT ASSESSED 结论。它是只读的 —— 绝不写入或编辑文�
 
 除非用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有
-`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
+`project.local.yaml`。规则见：`studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 

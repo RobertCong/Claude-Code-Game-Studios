@@ -19,7 +19,7 @@
 "目录存在并固定了版本"是*每个*新项目的状态，
 而不是边缘情况。下面的两个分支都写着"创建"，若在已预填充的目录上
 照字面执行其中任何一个，要么覆盖精心整理的内容，要么
-让 `project.yaml` 与 CLAUDE.md 导入的参考资料互不一致。
+让 `project.yaml` 与 AGENTS.md 导入的参考资料互不一致。
 
 读取 `docs/engine-reference/<engine>/VERSION.md`，将其
 **Engine Version** 与第 3 节选定的版本比较：

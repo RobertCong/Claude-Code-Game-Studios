@@ -11,20 +11,20 @@
 # project, not this one. Resolving to the script's own location first would
 # override them. So, in order:
 #   1. cwd holds project.yaml   -> cwd   (a project root)
-#   2. cwd holds .claude/       -> cwd   (a project root not yet configured),
-#      unless cwd is itself named .claude: a stray .claude/.claude/ would
-#      make .claude/ a root, and the hooks would write .claude/production/
-#   3. CLAUDE_PROJECT_DIR       -> that  (populated in the hook environment),
-#      unless it names a .claude folder, for the same reason as rule 2
-#   4. this script's location   -> <root>/.claude/hooks/../.. by construction
+#   2. cwd holds .trae/       -> cwd   (a project root not yet configured),
+#      unless cwd is itself named .trae: a stray .trae/.trae/ would
+#      make .trae/ a root, and the hooks would write .trae/production/
+#   3. TRAE_PROJECT_DIR       -> that  (populated in the hook environment),
+#      unless it names a .trae folder, for the same reason as rule 2
+#   4. this script's location   -> <root>/.trae/hooks/../.. by construction
 # Rule 4 always works and needs no environment at all; rules 1-2 stop it from
 # overriding a caller that legitimately means somewhere else.
 #
 # NOT an upward search: that resolves a nested project to its parent's config.
-if [ -f "project.yaml" ] || { [ -d ".claude" ] && [ "${PWD##*/}" != ".claude" ]; }; then
+if [ -f "project.yaml" ] || { [ -d ".trae" ] && [ "${PWD##*/}" != ".trae" ]; }; then
   CCGS_ROOT="$PWD"
-elif [ -n "${CLAUDE_PROJECT_DIR:-}" ] && [ -d "${CLAUDE_PROJECT_DIR}" ] && case "${CLAUDE_PROJECT_DIR%/}" in */.claude|*\\.claude) false ;; *) true ;; esac; then
-  CCGS_ROOT="$CLAUDE_PROJECT_DIR"
+elif [ -n "${TRAE_PROJECT_DIR:-}" ] && [ -d "${TRAE_PROJECT_DIR}" ] && case "${TRAE_PROJECT_DIR%/}" in */.trae|*\\.trae) false ;; *) true ;; esac; then
+  CCGS_ROOT="$TRAE_PROJECT_DIR"
 else
   CCGS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." 2>/dev/null && pwd)"
 fi
@@ -44,15 +44,15 @@ echo "=== Checking for Documentation Gaps ==="
 FRESH_PROJECT=true
 
 # Check if engine is configured (project.yaml first, fall back to technical-preferences.md)
-if [ -f "project.yaml" ] && [ -f ".claude/hooks/yaml-helper.sh" ]; then
-  source .claude/hooks/yaml-helper.sh
+if [ -f "project.yaml" ] && [ -f ".trae/hooks/yaml-helper.sh" ]; then
+  source .trae/hooks/yaml-helper.sh
   ENGINE_NAME=$(get_yaml_key project.yaml engine.name 2>/dev/null)
   if [ -n "$ENGINE_NAME" ]; then
     FRESH_PROJECT=false
   fi
 fi
-if [ "$FRESH_PROJECT" = true ] && [ -f ".claude/docs/technical-preferences.md" ]; then
-  ENGINE_LINE=$(grep -E "^[[:space:]]*-[[:space:]]+\*\*Engine\*\*:" .claude/docs/technical-preferences.md 2>/dev/null)
+if [ "$FRESH_PROJECT" = true ] && [ -f ".trae/docs/technical-preferences.md" ]; then
+  ENGINE_LINE=$(grep -E "^[[:space:]]*-[[:space:]]+\*\*Engine\*\*:" .trae/docs/technical-preferences.md 2>/dev/null)
   if [ -n "$ENGINE_LINE" ] && ! echo "$ENGINE_LINE" | grep -q "TO BE CONFIGURED" 2>/dev/null; then
     FRESH_PROJECT=false
   fi
@@ -76,7 +76,7 @@ fi
 
 # Check if source code exists.
 #
-# All three code roots, not just `src/`. Per .claude/docs/directory-structure.md
+# All three code roots, not just `src/`. Per .trae/docs/directory-structure.md
 # `src/` is the Godot row; Unity builds from `Assets/` and Unreal from
 # `Source/`. Testing only `src/` meant a Unity project with a full codebase
 # could still be greeted with "NEW PROJECT ... Run: /start".
@@ -103,10 +103,10 @@ if [ ! -f "project.yaml" ]; then
   LEGACY_FILES=""
   [ -f "production/stage.txt" ] && LEGACY_FILES="production/stage.txt"
   [ -f "production/review-mode.txt" ] && LEGACY_FILES="${LEGACY_FILES:+$LEGACY_FILES, }production/review-mode.txt"
-  if [ -f ".claude/docs/technical-preferences.md" ]; then
-    TP_ENGINE=$(grep -E "^[[:space:]]*-[[:space:]]+\*\*Engine\*\*:" .claude/docs/technical-preferences.md 2>/dev/null)
+  if [ -f ".trae/docs/technical-preferences.md" ]; then
+    TP_ENGINE=$(grep -E "^[[:space:]]*-[[:space:]]+\*\*Engine\*\*:" .trae/docs/technical-preferences.md 2>/dev/null)
     if [ -n "$TP_ENGINE" ] && ! echo "$TP_ENGINE" | grep -q "TO BE CONFIGURED" 2>/dev/null; then
-      LEGACY_FILES="${LEGACY_FILES:+$LEGACY_FILES, }.claude/docs/technical-preferences.md"
+      LEGACY_FILES="${LEGACY_FILES:+$LEGACY_FILES, }.trae/docs/technical-preferences.md"
     fi
   fi
   if [ -n "$LEGACY_FILES" ]; then
@@ -114,7 +114,7 @@ if [ ! -f "project.yaml" ]; then
     echo ""
     echo "⬆️  v1.0 PROJECT: legacy config ($LEGACY_FILES) but no project.yaml."
     echo "   Run: /adopt — it detects this and drives the migration (non-destructive)."
-    echo "   Preview first: bash .claude/scripts/migrate-v1-config.sh --dry-run"
+    echo "   Preview first: bash .trae/scripts/migrate-v1-config.sh --dry-run"
   fi
 fi
 
@@ -146,8 +146,8 @@ fi
 # Resolved AFTER the fresh-project early-exit above, so a brand-new project
 # never pays for the lookup.
 WORKFLOW="standard"
-if [ -f .claude/hooks/yaml-helper.sh ]; then
-    . .claude/hooks/yaml-helper.sh 2>/dev/null
+if [ -f .trae/hooks/yaml-helper.sh ]; then
+    . .trae/hooks/yaml-helper.sh 2>/dev/null
     W=$(resolve_setting modes.workflow 2>/dev/null | cut -f1)
     [ -n "$W" ] && WORKFLOW="$W"
 fi
@@ -162,7 +162,7 @@ fi
 
 # --- Resolve the engine-specific code root for checks 1, 3 and 4 ------------
 #
-# Checks 1, 3 and 4 were all hardcoded to `src/`, which .claude/docs/directory-
+# Checks 1, 3 and 4 were all hardcoded to `src/`, which .trae/docs/directory-
 # structure.md defines as the GODOT row of the code-root table -- Unity uses
 # `Assets/`, Unreal `Source/`. On those two engines every directory test below
 # failed, the source-file count came back 0, and NONE of the three checks ran.
@@ -183,7 +183,7 @@ fi
 
 # A doc check that cannot locate the code root has not established that there
 # are no gaps -- it has established nothing (obligation 1 and 3 of
-# .claude/rules/skill-authoring.md). Announce it, once, and only when the checks
+# .trae/rules/skill-authoring.md). Announce it, once, and only when the checks
 # would otherwise have had somewhere to look.
 if [ "$DOC_CHECKS" = true ] && [ -z "$CODE_ROOT" ]; then
   if [ -d src ] || [ -d Assets ] || [ -d Source ]; then
@@ -310,7 +310,7 @@ fi
 # keeps reporting `Concept` to the status line, to /help, and to every gate
 # checklist that branches on stage.
 #
-# This is an OBSERVATION, never a write. CLAUDE.md is explicit that the stage
+# This is an OBSERVATION, never a write. AGENTS.md is explicit that the stage
 # advances on a /gate-check PASS (or a CONCERNS whose risks you accepted) with
 # the user confirming, so a hook that advanced it silently would be the worse
 # bug. Say what is inconsistent and name
@@ -321,7 +321,7 @@ fi
 # instead, and /help routes by the brief -- telling the user to run /gate-check
 # contradicted both.
 STAGE=""
-if [ "$WORKFLOW" != "minimal" ] && [ -f .claude/hooks/yaml-helper.sh ]; then
+if [ "$WORKFLOW" != "minimal" ] && [ -f .trae/hooks/yaml-helper.sh ]; then
     # get_yaml_key takes the file first; called with the key alone it returned
     # nothing, and only the legacy stage.txt was ever read.
     STAGE=$(get_yaml_key project.yaml project.stage 2>/dev/null)

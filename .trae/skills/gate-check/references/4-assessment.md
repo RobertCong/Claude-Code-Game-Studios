@@ -60,18 +60,18 @@ MANUAL CHECK NEEDED，第 5 节会把它转为 NOT ASSESSED。
 UX 规格集供其评估的层级。
 
 > **宽度不等于严格度。** 更窄的面板不会软化结论：
-> `.claude/docs/director-gates.md` 中的升级规则不变——
+> `.trae/docs/director-gates.md` 中的升级规则不变——
 > *实际运行者*返回的最严格结论仍然胜出。不要从从未被咨询的
 > 视角推断出 PASS。
 
-在生成最终结论之前，按已解析层级通过 `Agent`，使用 `.claude/docs/director-gates.md` 中的并行闸门协议，把各总监作为**并行子代理**派生。同时发出所有 `Agent` 调用——不要等一个开始后再启动下一个。
+在生成最终结论之前，按已解析层级通过 `Agent`，使用 `.trae/docs/director-gates.md` 中的并行闸门协议，把各总监作为**并行子代理**派生。同时发出所有 `Agent` 调用——不要等一个开始后再启动下一个。
 
 **闸门 ID：**
 
-1. **`creative-director`** —— 闸门 **CD-PHASE-GATE**（`.claude/docs/director-gates/cd-phase-gate.md`）
-2. **`technical-director`** —— 闸门 **TD-PHASE-GATE**（`.claude/docs/director-gates/td-phase-gate.md`）
-3. **`producer`** —— 闸门 **PR-PHASE-GATE**（`.claude/docs/director-gates/pr-phase-gate.md`）
-4. **`art-director`** —— 闸门 **AD-PHASE-GATE**（`.claude/docs/director-gates/ad-phase-gate.md`）
+1. **`creative-director`** —— 闸门 **CD-PHASE-GATE**（`.trae/docs/director-gates/cd-phase-gate.md`）
+2. **`technical-director`** —— 闸门 **TD-PHASE-GATE**（`.trae/docs/director-gates/td-phase-gate.md`）
+3. **`producer`** —— 闸门 **PR-PHASE-GATE**（`.trae/docs/director-gates/pr-phase-gate.md`）
+4. **`art-director`** —— 闸门 **AD-PHASE-GATE**（`.trae/docs/director-gates/ad-phase-gate.md`）
 
 向每位总监传入：目标阶段名称、解析出的 `workflow` 层级、目标
 闸门在该层级下的必需与推荐产出物（即已加载闸门文件经层级削减和

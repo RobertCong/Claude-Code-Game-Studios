@@ -8,11 +8,11 @@
 # /start (engine, concept, code root, counts, origin), /adopt, /onboard,
 # /day-one-patch, /project-stage-detect and /gate-check's read-back of the stage.
 #
-# EMITS OBSERVATIONS, NOT A VERDICT (CLAUDE.md, "Helpers in .claude/scripts/").
+# EMITS OBSERVATIONS, NOT A VERDICT (AGENTS.md, "Helpers in .trae/scripts/").
 # `phase_inferred` is help's artifact ladder applied to the counts, printed with
 # the rule that matched; whether it outranks `stage` is the calling skill's call.
 #
-# Usage: bash .claude/scripts/project-state.sh [--stage] [--root DIR]
+# Usage: bash .trae/scripts/project-state.sh [--stage] [--root DIR]
 #   --stage     print only the four stage rows (no file counts; cheap)
 #   --root DIR  the project to read; defaults to the repo this script is in
 #   -h, --help  this text
@@ -24,9 +24,9 @@
 # `-` means no value. Every row is always printed, so a missing row is a bug,
 # never "nothing found".
 #   engine          engine.name: project.local.yaml, then project.yaml, then
-#                   the legacy `Engine:` line of .claude/docs/technical-preferences.md
+#                   the legacy `Engine:` line of .trae/docs/technical-preferences.md
 #   code_root       the same answer and source label as resolve_code_root in
-#                   .claude/hooks/yaml-helper.sh; never defaults to src
+#                   .trae/hooks/yaml-helper.sh; never defaults to src
 #   source_files    `unknown` when code_root is unset: unknown is not zero
 #   stage_yaml      project.stage in project.yaml as written (even if invalid)
 #   stage_txt       first non-blank line of production/stage.txt as written
@@ -145,7 +145,7 @@ if [ -z "$ENGINE" ] && [ -f project.yaml ]; then
   ENGINE=$(yaml_get project.yaml engine.name)
   [ -n "$ENGINE" ] && { ESRC="project.yaml"; CSRC="engine.name"; }
 fi
-LEGACY=".claude/docs/technical-preferences.md"
+LEGACY=".trae/docs/technical-preferences.md"
 if [ -z "$ENGINE" ] && [ -f "$LEGACY" ]; then
   # The legacy `Engine:` line, bold or bulleted; `[TO BE CONFIGURED]` and any
   # other bracketed placeholder mean unset. The same pipeline as resolve_code_root.
@@ -158,7 +158,7 @@ if [ -z "$ENGINE" ] && [ -f "$LEGACY" ]; then
   [ -n "$ENGINE" ] && { ESRC="$LEGACY"; CSRC="$LEGACY"; }
 fi
 # The code root each engine's own toolchain builds from
-# (.claude/docs/directory-structure.md): Godot src/, Unity Assets/, Unreal Source/.
+# (.trae/docs/directory-structure.md): Godot src/, Unity Assets/, Unreal Source/.
 case "$(printf '%s' "$ENGINE" | tr '[:upper:]' '[:lower:]')" in
   godot) CODE_ROOT="src" ;;
   unity) CODE_ROOT="Assets" ;;

@@ -13,9 +13,9 @@
 
 ## Static Assertions (Structural)
 
-- [ ] 代理文件存在于 `.claude/agents/[name].md`
+- [ ] 代理文件存在于 `.trae/agents/[name].md`
 - [ ] Frontmatter 包含 `name`、`description`、`model`、`tools` 字段
-- [ ] 模型层级为 `[opus | sonnet | haiku | inherit]`——frontmatter 的 `model:` 必须精确写为该别名（层级说明：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 清晰声明负责域
 - [ ] 记录上报路径
 - [ ] 不在其负责域之外做决策

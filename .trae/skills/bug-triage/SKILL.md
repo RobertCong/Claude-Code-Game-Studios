@@ -3,15 +3,13 @@ name: bug-triage
 description: "重新评估未关闭缺陷 —— 优先级与严重程度、分配到冲刺、揭示系统性问题趋势。在数量增长时运行。"
 argument-hint: "[sprint | full | trend]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Bash(bash "*/.claude/skills/bug-triage/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow`
 
 **自动化模式**：解析 `modes.automation`（`project.local.yaml` →
 `project.yaml` → 默认 `collaborative`）。每次 `AskUserQuestion` 调用与
-每次文件写入都遵循 `.claude/docs/automation-modes.md`
+每次文件写入都遵循 `.trae/docs/automation-modes.md`
 （collaborative 总是询问 · guided 仅重大事项 · autonomous 记录后继续；
 `automation_always_ask` 类别总是询问）。
 
@@ -80,7 +78,7 @@ Grep pattern="\*\*(Severity|Priority|Status|System|Category|Reported)\*\*" glob=
 
 ### Step 2c —— 加载严重程度参考
 
-如果存在 `.claude/docs/coding-standards.md`，读取其中严重程度/优先级定义。若不存在，使用
+如果存在 `.trae/docs/coding-standards.md`，读取其中严重程度/优先级定义。若不存在，使用
 第 3 步中的标准定义。
 
 ---

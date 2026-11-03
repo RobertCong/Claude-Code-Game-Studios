@@ -17,7 +17,7 @@ JavaScript 中为 `//`，HTML 与 Markdown 中为 `<!-- -->`），并且有意�
 标准。
 
 在一次只问一个问题的复盘之后，它填写
-`.claude/docs/templates/prototype-report.md`，询问是否写入
+`.trae/docs/templates/prototype-report.md`，询问是否写入
 `prototypes/[concept-name]-concept/REPORT.md` 并把其行添加到
 `prototypes/index.md`（一次询问同时指明两者）。结论为 **PROCEED / PIVOT / KILL**。PIVOT 写入
 `PIVOT-NOTE.md`；KILL 运行包含五项内容的健全性检查，并追加到
@@ -37,7 +37,7 @@ REPORT.md 记录总监的理由。NOT ASSESSED 的回答（总监
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 有 ≥2 个 phase 标题
 - [ ] 包含结论关键词：PROCEED、PIVOT、KILL、NOT ASSESSED（没有人玩过的原型）
 - [ ] 在创建原型目录与报告之前包含 "May I create" / "May I write" 措辞
@@ -67,7 +67,7 @@ REPORT.md 记录总监的理由。NOT ASSESSED 的回答（总监
 ## Fixture Defaults
 
 除非某个用例自己的 Fixture 另有说明，否则每个用例的 `project.yaml` 都设置
-`modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/CLAUDE.md` §
+`modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/AGENTS.md` §
 Fixture defaults。
 
 ---
@@ -100,7 +100,7 @@ Fixture defaults。
    GDScript 文件都以 `# PROTOTYPE - NOT FOR PRODUCTION` 开头（GDScript
    注释使用 `#`；用 `//` 头将无法解析）
 6. 复盘问题逐个提出；报告依据
-   `.claude/docs/templates/prototype-report.md` 起草；询问 "May I write this report to
+   `.trae/docs/templates/prototype-report.md` 起草；询问 "May I write this report to
    `prototypes/grapple-hook-concept/REPORT.md` and add its row to
    `prototypes/index.md`?"；向 `prototypes/index.md` 追加一行
 7. 记录 "CD-PLAYTEST skipped — Solo mode."；PROCEED 路由到 `/design-review`、

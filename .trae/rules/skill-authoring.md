@@ -1,7 +1,6 @@
 ---
-paths:
-  - ".claude/skills/**"
-  - ".claude/agents/**"
+alwaysApply: false
+globs: .trae/skills/**,.trae/agents/**
 ---
 
 # 技能与质量闸门编写规范

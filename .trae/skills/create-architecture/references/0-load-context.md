@@ -76,9 +76,9 @@
 被固化进 ADR 的地方，而在此做出的假设会被下游所有内容
 重新推导，而不是被重新检查。
 3. 项目配置 —— 来自 `project.yaml` 的 `naming.*` 和 `performance.*`（任何
-   缺失或为空的键，回退到 `.claude/docs/technical-preferences.md`）；
+   缺失或为空的键，回退到 `.trae/docs/technical-preferences.md`）；
    允许的库和禁止的模式来自
-   `.claude/docs/technical-preferences.md`（尚未迁移到 project.yaml）
+   `.trae/docs/technical-preferences.md`（尚未迁移到 project.yaml）
 4. **`design/gdd/` 中的每个 GDD** —— 从承载技术需求的章节中提取
    技术需求，**而不是从整个文件**。先确定分母
    （glob `design/gdd/*.md`，计数 **N**），然后：
@@ -117,7 +117,7 @@ ID 格式。这是架构必须覆盖的完整集合。
   与同一系统的 `active` 条目匹配的需求（意图相同，
   措辞可能不同）保留该条目的 ID。跳过 `deprecated` 和
   `superseded-by` 条目；它们是因故退役的。其他所有需求
-  都是**临时的**：从 `bash .claude/scripts/registry.sh next-id tr
+  都是**临时的**：从 `bash .trae/scripts/registry.sh next-id tr
   <system>` 开始编号，这样它不会重用已注册或已退役的 ID，并标记为
   `(provisional)`。`/architecture-review` 会注册它并赋予永久 ID。
 - **注册表缺失，或 `requirements: []`：** 每个 ID 都是临时的。在

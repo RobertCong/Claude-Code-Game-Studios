@@ -22,7 +22,7 @@
 
 1. 从该已解析块中取 `testing.strict.config`。若其值为 `true`（不区分大小写）→ 阻塞；若为 `false` → 建议性；`unset` → 继续下一步。
 2. 否则将 `testing.strict` 作为普通布尔值读取（旧版单值形式）— 若其值为 `true` 或 `false`，则适用。
-3. 否则默认为**阻塞** — 未设置的 `testing.strict.config` 会保持冒烟检查的 FAIL 闸门为阻塞。冒烟检查是构建健康闸门，因此其未设置时的默认值是严格的，即使 `config` 测试类型在其他地方默认为建议性。对应的豁免记录在 `.claude/skills/story-done/SKILL.md` 和 `.claude/docs/coding-standards.md` 中，它们拥有按用户故事的证据表。
+3. 否则默认为**阻塞** — 未设置的 `testing.strict.config` 会保持冒烟检查的 FAIL 闸门为阻塞。冒烟检查是构建健康闸门，因此其未设置时的默认值是严格的，即使 `config` 测试类型在其他地方默认为建议性。对应的豁免记录在 `.trae/skills/story-done/SKILL.md` 和 `.trae/docs/coding-standards.md` 中，它们拥有按用户故事的证据表。
 
 仅 `true` 和 `false`（不区分大小写）在第 1–2 步被识别。一个存在但持有其他任何值的键 — `maybe`、`1`、`yes` 等 — 按未设置处理：继续下一步，并向用户呈现该无法识别的值。
 

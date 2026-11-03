@@ -3,14 +3,12 @@ name: create-architecture
 description: "在编写代码之前撰写架构蓝图。对照锁定的引擎验证决策，标出知识缺口。"
 argument-hint: "[focus-area: full | layers | data-flow | api-boundaries | adr-audit] [--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Agent, Bash(bash "*/.claude/skills/create-architecture/../../hooks/yaml-helper.sh" resolve_config *), Bash(bash .claude/scripts/registry.sh *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,workflow,docs.density`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,workflow,docs.density`
 
-以上为已解析结果——按原样使用；`--review` 会覆盖 `review_mode`。若无输出块 →
-使用 `.claude/docs/config-resolution.md` 中的默认值。
+以上命令的输出即解析结果——按原样使用；`--review` 会覆盖 `review_mode`。若无输出块 →
+使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 # 创建架构
 
@@ -21,9 +19,9 @@ model: sonnet
 **区别于 `/architecture-decision`**：ADR 记录单个点状决策。
 此技能创建为 ADR 提供上下文的整体系统蓝图。
 
-完整的检查模式见 `.claude/docs/director-gates.md`。各个质量闸门（gate）的定义位于 `.claude/docs/director-gates/[gate-id].md` —— 被生成的 agent 会读取自己的闸门文件；不要在父会话中读取它。
+完整的检查模式见 `.trae/docs/director-gates.md`。各个质量闸门（gate）的定义位于 `.trae/docs/director-gates/[gate-id].md` —— 被生成的 agent 会读取自己的闸门文件；不要在父会话中读取它。
 
-每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+每次 `AskUserQuestion` 调用都遵循 `.trae/docs/automation-modes.md`
 （协作模式总是询问 · 引导模式仅询问重大事项 · 自主模式记录并继续；
 `automation_always_ask` 类别始终提示）。
 
@@ -33,7 +31,7 @@ model: sonnet
 （`rigor: standard`）；`thorough` = 完整散文，每层包含理由、取舍和
 考虑过的替代方案。将它应用于你撰写的每个章节。
 
-**`workflow`**（见 `.claude/docs/workflow-modes.md`）：
+**`workflow`**（见 `.trae/docs/workflow-modes.md`）：
 - `full` —— 完整架构：所有层级、模块归属、数据流、API
   边界、完整 ADR 审计。
 - `standard` —— 简化：仅系统层级图 + 关键 ADR 列表。
@@ -87,7 +85,7 @@ model: sonnet
 ## 协作协议
 
 **适用于 `collaborative` 模式（默认）。** 对于 `guided` 和
-`autonomous` 模式，见 `.claude/docs/automation-modes.md` —— 下述规则
+`autonomous` 模式，见 `.trae/docs/automation-modes.md` —— 下述规则
 描述的是协作模式的要求，不是通用行为。
 
 此技能在每个阶段都遵循协作式设计原则：

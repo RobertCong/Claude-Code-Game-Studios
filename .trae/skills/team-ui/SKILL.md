@@ -3,8 +3,6 @@ name: team-ui
 description: "编排 UI 团队走完 UX 流水线——撰写、视觉设计、实现、评审、打磨。使用 /ux-design、/ux-review 和工作室模板。"
 argument-hint: "[UI feature description] [--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, TaskCreate, TaskGet, TaskList, TaskUpdate, Bash(bash "*/.claude/skills/team-ui/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 # Team UI
 
@@ -20,14 +18,14 @@ model: sonnet
 在 `autonomous` 模式下，它端到端运行，并通过 `log_decision` 记录每个阶段的结果。
 属于 `automation_always_ask` 类别（`is_always_ask_category` 辅助函数）的决策
 无论模式如何都始终询问。参见
-`.claude/docs/automation-modes.md`。
+`.trae/docs/automation-modes.md`。
 
 ## Phase 0: 解析配置
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,team.size`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,team.size`
 
-上面已解析——按原样使用；`--review` 会覆盖 `review_mode`。没有配置块 →
-使用 `.claude/docs/config-resolution.md` 中的默认值。
+上一步命令的输出已解析——按原样使用；`--review` 会覆盖 `review_mode`。没有配置块 →
+使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 `review_mode` 设定总监闸门的深度，而本流水线没有总监闸门：
 无论 `review_mode` 为何，下面没有任何阶段会派生 CD-、TD-、PR- 或 AD-PHASE-GATE。
@@ -35,7 +33,7 @@ model: sonnet
 在这些决策点上工作的代理是团队成员，而不是总监闸门。
 
 `automation` 驱动上面的决策点说明。关于每种模式如何改变流水线行为，见上面的决策点说明和
-`.claude/docs/automation-modes.md`。
+`.trae/docs/automation-modes.md`。
 
 **`team.size`**：哪些代理处于活动状态（与 review_mode 的闸门深度和工作流文档正交）。
 - **`individual`**（默认）：`ui-programmer` + `ux-designer`。其他代理通过这两个代理咨询，不单独派生。
@@ -69,7 +67,7 @@ model: sonnet
 - **ux-designer**——用户流程、线框图、无障碍、输入处理
 - **ui-programmer**——UI 框架、屏幕、控件、数据绑定、实现
 - **art-director**——视觉风格、布局打磨、与美术圣经的一致性
-- **引擎 UI 专家**——对照引擎特定的最佳实践验证 UI 实现模式（来自 `project.yaml` 的 `specialists.ui`；若缺失，则取 `.claude/docs/technical-preferences.md` 中 `## Engine Specialists` 的 UI Specialist 行）
+- **引擎 UI 专家**——对照引擎特定的最佳实践验证 UI 实现模式（来自 `project.yaml` 的 `specialists.ui`；若缺失，则取 `.trae/docs/technical-preferences.md` 中 `## Engine Specialists` 的 UI Specialist 行）
 - **accessibility-specialist**——在 Phase 4 审计无障碍合规性
 
 > **`specialists.ui: null` 表示未设置。** 将其视为缺失并跳过引擎
@@ -86,11 +84,11 @@ model: sonnet
 ## 如何委派
 
 使用 `Agent` 工具把每个团队成员作为子代理派生：
-- `subagent_type: ux-designer`——用户流程、线框图、无障碍、输入处理
-- `subagent_type: ui-programmer`——UI 框架、屏幕、控件、数据绑定
-- `subagent_type: art-director`——视觉风格、布局打磨、美术圣经一致性
-- `subagent_type: [UI engine specialist]`——引擎特定的 UI 模式验证（例如 unity-ui-specialist、ue-umg-specialist、godot-specialist）
-- `subagent_type: accessibility-specialist`——无障碍合规性审计
+- 委派给 `ux-designer` 子代理——用户流程、线框图、无障碍、输入处理
+- 委派给 `ui-programmer` 子代理——UI 框架、屏幕、控件、数据绑定
+- 委派给 `art-director` 子代理——视觉风格、布局打磨、美术圣经一致性
+- 委派给 `[UI engine specialist]` 子代理——引擎特定的 UI 模式验证（例如 unity-ui-specialist、ue-umg-specialist、godot-specialist）
+- 委派给 `accessibility-specialist` 子代理——无障碍合规性审计
 
 **给每个代理做简报——不要倾倒上下文。** 把共享输入**只读一次**，并内联传递一份提炼过的简报：每个代理真正需要的那几行，绝不要为你已读过的文档传文件路径（拿到路径的代理会重新读取整个文件）。只为你没读过、且只有该代理需要的文档传路径。
 
@@ -110,7 +108,7 @@ model: sonnet
 UX 规格本身（Phase 1b）以及任何模式库更新都在 `design/` 下，
 在有界例外之外：`/ux-design` 或代理会在写入前询问。
 
-> **为什么这并不违反协作协议。** `CLAUDE.md` 要求代理在 Write/Edit 之前询问“May I write this to [filepath]?”。此处派生的子代理**不经**询问就写入，这是有意为之的有界例外，而不是疏忽——这与已经为 `consistency-check` 追加到 `active.md` 所做的决定相同。例外只在以下三点全部成立时才适用：(1) 路径是**你**在提示词中指定的，因此用户在批准该阶段时也批准了目标位置；(2) 它是 `production/`、`docs/` 或 `tests/` 下的新产出物，绝不是对现有源码或配置的编辑；(3) 产生它的阶段本身在流水线推进前受 `AskUserQuestion` 闸门约束。三点之外，代理必须询问。**不要通过按子代理逐个询问来“修复”这一点**——每个代理每阶段的提示词会让编排器无法使用，这正是例外存在的原因。
+> **为什么这并不违反协作协议。** `AGENTS.md` 要求代理在 Write/Edit 之前询问“May I write this to [filepath]?”。此处派生的子代理**不经**询问就写入，这是有意为之的有界例外，而不是疏忽——这与已经为 `consistency-check` 追加到 `active.md` 所做的决定相同。例外只在以下三点全部成立时才适用：(1) 路径是**你**在提示词中指定的，因此用户在批准该阶段时也批准了目标位置；(2) 它是 `production/`、`docs/` 或 `tests/` 下的新产出物，绝不是对现有源码或配置的编辑；(3) 产生它的阶段本身在流水线推进前受 `AskUserQuestion` 闸门约束。三点之外，代理必须询问。**不要通过按子代理逐个询问来“修复”这一点**——每个代理每阶段的提示词会让编排器无法使用，这正是例外存在的原因。
 
 在流水线允许的地方并行启动独立代理（例如 Phase 4 的评审代理可以同时运行）。
 
@@ -196,7 +194,7 @@ UX 规格本身（Phase 1b）以及任何模式库更新都在 `design/` 下，
 
 ### Phase 3: 实现
 
-在实现开始前，派生**引擎 UI 专家**（来自 `project.yaml` 的 `specialists.ui`；若缺失，则取 `.claude/docs/technical-preferences.md` 中 `## Engine Specialists` 的 UI Specialist 行），对照 UX 规格和视觉设计规格评审引擎特定的实现指导：
+在实现开始前，派生**引擎 UI 专家**（来自 `project.yaml` 的 `specialists.ui`；若缺失，则取 `.trae/docs/technical-preferences.md` 中 `## Engine Specialists` 的 UI Specialist 行），对照 UX 规格和视觉设计规格评审引擎特定的实现指导：
 - 此屏幕应使用哪个引擎 UI 框架？（例如 Unity 中的 UI Toolkit 与 UGUI、Godot 中的 Control 节点与 CanvasLayer、Unreal 中的 UMG 与 CommonUI）
 - 对于提议的布局或交互模式，有哪些引擎特定的坑？
 - 该引擎推荐的控件/节点结构是什么？
@@ -248,7 +246,7 @@ UX 规格本身（Phase 1b）以及任何模式库更新都在 `design/` 下，
 这既不是 BLOCKED，也不是错误，也不是“无法完成”，因此下面的触发器
 永远不会触发。点名未满足的契约来恢复它；上下文通常还在。
 
-如果任何派生的代理返回 BLOCKED、报错或无法完成：**立即暴露它，不要越过它所阻塞的依赖继续推进，并且始终产出部分报告。** 被跳过的代理，其章节应保持为一个具名缺口——绝不要用你自己的内容去填充。完整流程：`.claude/docs/error-recovery-protocol.md`。
+如果任何派生的代理返回 BLOCKED、报错或无法完成：**立即暴露它，不要越过它所阻塞的依赖继续推进，并且始终产出部分报告。** 被跳过的代理，其章节应保持为一个具名缺口——绝不要用你自己的内容去填充。完整流程：`.trae/docs/error-recovery-protocol.md`。
 
 常见阻塞项：
 - 输入文件缺失（用户故事未找到、GDD 缺失）→ 重定向到创建它的技能

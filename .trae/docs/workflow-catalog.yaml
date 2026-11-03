@@ -39,7 +39,7 @@ paths:
           any_of:
             - glob: "project.yaml"
               pattern: 'name:[[:space:]]*"?(Godot|Unity|Unreal)'
-            - glob: ".claude/docs/technical-preferences.md"
+            - glob: ".trae/docs/technical-preferences.md"
               pattern: '\*\*Engine\*\*: [^[]'
         description: "Configure the engine and pin its version"
 
@@ -105,7 +105,7 @@ phases:
             # technical-preferences.md writes "- **Engine**: Godot 4.7", so the
             # pattern must clear the bold markers. The [^[] guard rejects the
             # "[TO BE CONFIGURED]" placeholder.
-            - glob: ".claude/docs/technical-preferences.md"
+            - glob: ".trae/docs/technical-preferences.md"
               pattern: '\*\*Engine\*\*: [^[]'
         description: "Configure engine, pin version, set naming conventions and performance budgets"
 

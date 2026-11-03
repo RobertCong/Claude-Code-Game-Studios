@@ -11,7 +11,7 @@
 
 - [ ] `description:` 字段存在且限定于本领域（引用玩家沟通、补丁说明、社区管理）
 - [ ] `tools:` 为 `Read, Glob, Grep, Write, Edit`，且 `disallowedTools:` 指明 `Bash` —— 仅草稿与文档，不含 shell 或构建工具
-- [ ] 模型档位为 `sonnet` —— frontmatter `model:` 精确为 `sonnet`（档位见：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 代理定义未声称对技术内容、QA 策略或缺陷修复拥有权限
 - [ ] Tone and Voice 声明项目提供的品牌语气或风格指南优先于其默认值（语气、人称、术语表词条）
 - [ ] 对于发布，它基于 release-manager 用 `/patch-notes` 生成的补丁说明工作，而非重新生成

@@ -13,7 +13,7 @@ SCOPE）。随后评审模式决定 QA 覆盖率闸门（QL-TEST-COVERAGE）和�
 注明的跳过）。它产生 COMPLETE / COMPLETE WITH NOTES / NOT ASSESSED / BLOCKED
 结论，并且只在一次 `AskUserQuestion` 选择之后更新用户故事文件、可选地向
 `docs/tech-debt-register.md` 追加内容，并展示下一个用户故事 —— 没有冲刺计划时，
-来自 `bash .claude/scripts/story-status.sh`，即 `/help` 和 `/sprint-status` 读取的
+来自 `bash .trae/scripts/story-status.sh`，即 `/help` 和 `/sprint-status` 读取的
 列表，且在用户故事文件写入之后运行。它只在打开截图后才说明截图显示了什么，
 并就行为标准提问，而不是从代码中读出来。
 
@@ -23,10 +23,10 @@ SCOPE）。随后评审模式决定 QA 覆盖率闸门（QL-TEST-COVERAGE）和�
 
 由 `/skill-test spec` 对照 SKILL.md 检查 —— 无需 fixture。
 
-- [ ] 具备必需的前置字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 具备 ≥5 个阶段标题（复杂多阶段技能）
 - [ ] 包含结论关键词：COMPLETE、COMPLETE WITH NOTES、NOT ASSESSED、BLOCKED
-- [ ] `allowed-tools` 包含 Write/Edit，因此存在先询问后写入的措辞（"Use `AskUserQuestion` before writing anything" —— 覆盖用户故事文件和技术债注册表）
+- [ ] 正文承诺写入文件，因此存在先询问后写入的措辞（"Use `AskUserQuestion` before writing anything" —— 覆盖用户故事文件和技术债注册表）
 - [ ] 有下一步交接（从冲刺展示下一个用户故事）
 
 ---
@@ -35,7 +35,7 @@ SCOPE）。随后评审模式决定 QA 覆盖率闸门（QL-TEST-COVERAGE）和�
 
 除非用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有
-`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
+`project.local.yaml`。规则见：`studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 
@@ -249,14 +249,14 @@ SCOPE）。随后评审模式决定 QA 覆盖率闸门（QL-TEST-COVERAGE）和�
    可追溯性）；Phase 5 注明 "LP-CODE-REVIEW skipped — Solo mode."
 4. 结论 COMPLETE；在 Phase 7 批准后，用户故事被标记为 Complete
 5. Phase 8 走无冲刺分支：它在用户故事文件写入后运行
-   `bash .claude/scripts/story-status.sh`；`story-003` 在其第一行 `TODO` 上 →
+   `bash .trae/scripts/story-status.sh`；`story-003` 在其第一行 `TODO` 上 →
    "Run `/dev-story [path]`"
 
 **断言：**
 - [ ] UI 截图检查在 `qa.level: minimal` 下运行，且仅凭保留的图像即满足 —— UI 用户故事不要求证据文档或签署
 - [ ] 结论为 COMPLETE，不会因缺少签署而 BLOCKED
 - [ ] Phase 8 点名 `story-003` 并直接推荐 `/dev-story` —— `minimal` 下没有 `/story-readiness` 行，也没有 Sprint Close-Out Sequence
-- [ ] 下一个用户故事来自 `bash .claude/scripts/story-status.sh`，且在本用户故事的 `Status: Complete` 写入之后运行 —— 不是来自对某个史诗文件夹的 grep
+- [ ] 下一个用户故事来自 `bash .trae/scripts/story-status.sh`，且在本用户故事的 `Status: Complete` 写入之后运行 —— 不是来自对某个史诗文件夹的 grep
 - [ ] 变体 —— `production/epics/combat/story-001-arena.md` 写着 `**Status:** In Review`：它是 Next Up（脚本在每个史诗文件夹中首先列出 `IN_REVIEW`），且 Next Up 行推荐用 `/story-done [path]` 关闭它，而不是 `/dev-story`
 - [ ] 变体 —— `production/qa/evidence/` 下没有图像也没有 `Run result:` 行：在 `qa.level: minimal` 下 UI 闸门仍然是 BLOCKING，因此结论为 BLOCKED
 - [ ] 变体 —— `story-003` 为 `Blocked`，点名其阻塞项，且没有其他未完成的用户故事：Phase 8 不打印 Next Up，点名 `story-003` 及其阻塞项，建议清除它，且绝不说 build order 已完成

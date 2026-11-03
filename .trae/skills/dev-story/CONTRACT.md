@@ -15,7 +15,7 @@
 | `docs/architecture/adr-NNNN-[slug].md`（引用的 ADR） | `## Status`、`## Last Verified`（否则 `## Date`）——来自 `adr-status.sh`；`## Decision`（及其 `### Implementation Guidelines`）、`## Engine Compatibility`、`## ADR Dependencies`——仅在版本不匹配且回答“Re-read the changed ADR”时读取 | 是——ADR 绝不被编辑；不匹配时更新故事的戳记，而不是 ADR |
 | `docs/architecture/control-manifest.md` | `Manifest Version:` 头部、层规则（必需模式、禁止模式、性能护栏） | 是 |
 | `project.yaml` | `engine.name`、`engine.version`、`naming.*`、`performance.*`——这些字段各自的主要来源 | 是 |
-| `.claude/docs/technical-preferences.md` | 上述任何字段在 `project.yaml` 中缺失或为空时的旧版回退；禁止模式和允许库的**唯一**来源（有意从未迁移），外加 `Engine Specialists` 章节 | 是——仅在字段从 `project.yaml` 缺失时需要，禁止模式则始终需要 |
+| `.trae/docs/technical-preferences.md` | 上述任何字段在 `project.yaml` 中缺失或为空时的旧版回退；禁止模式和允许库的**唯一**来源（有意从未迁移），外加 `Engine Specialists` 章节 | 是——仅在字段从 `project.yaml` 缺失时需要，禁止模式则始终需要 |
 | `docs/engine-reference/[engine]/VERSION.md` | 引擎版本、LLM 知识截止时间、截止后风险等级 | 是 |
 | `production/session-state/active.md` | （在未给参数时读取以查找活动故事；不存在则创建） | 否 |
 
@@ -33,7 +33,7 @@
   都是如此
 - 故事文件的 `## Dependencies` 中列出的所有故事都必须已经具有 `Status: Complete`（或 `Status: Done`）
 - 必须配置引擎——`project.yaml` 中的 `engine.name`，或作为旧版回退，
-  `.claude/docs/technical-preferences.md` 中不为 `[TO BE CONFIGURED]` 的 `**Engine**:` 值
+  `.trae/docs/technical-preferences.md` 中不为 `[TO BE CONFIGURED]` 的 `**Engine**:` 值
 - 在 `full` 下，`docs/architecture/tr-registry.yaml` 必须包含故事的 TR-ID（在 `standard` 下可选，在 `minimal` 下不要求）
 - `docs/architecture/control-manifest.md` 存在时提供层规则；缺失时仅警告，绝不停止本技能
 
@@ -42,28 +42,28 @@
 ### 写入的文件
 | 文件 | 保证的字段 / 章节 | 备注 |
 |------|------------------------------|-------|
-| `<code root>/[system]/[file].[ext]` | 带文档注释的公共 API；无硬编码玩法数值；遵循 ADR Implementation Guidelines 和 control-manifest 必需模式 | 由程序员 agent 创建或修改；代码根目录按 `.claude/docs/code-root-resolution.md` 解析 |
-| `tests/unit/[system]/[story-slug]_test.[ext]` 或 `tests/integration/[system]/[story-slug]_test.[ext]` | 每个验收标准一个测试函数（仅 Logic/Integration 故事）；按引擎命名（`.claude/rules/test-standards.md`）；无随机种子；无外部 I/O | 由程序员 agent 创建；路径与故事中的 `## Test Evidence` 匹配 |
+| `<code root>/[system]/[file].[ext]` | 带文档注释的公共 API；无硬编码玩法数值；遵循 ADR Implementation Guidelines 和 control-manifest 必需模式 | 由程序员 agent 创建或修改；代码根目录按 `.trae/docs/code-root-resolution.md` 解析 |
+| `tests/unit/[system]/[story-slug]_test.[ext]` 或 `tests/integration/[system]/[story-slug]_test.[ext]` | 每个验收标准一个测试函数（仅 Logic/Integration 故事）；按引擎命名（`.trae/rules/test-standards.md`）；无随机种子；无外部 I/O | 由程序员 agent 创建；路径与故事中的 `## Test Evidence` 匹配 |
 | 故事文件的 `## Files` 章节 | 程序员 agent 创建或修改的代码和测试文件，每行一个 | 通过 `md-section.sh replace` 替换（故事没有该节时在末尾添加）；在唯一的 In Progress 询问中点明，该询问被拒绝时跳过。`/story-done` 依据它检查范围 |
-| `production/session-state/active.md` | `<!-- CHECKPOINT -->` 块：当前任务（故事路径）、下一步、阻塞项、进行中的文件、运行结果 | 在每种结果下由 `session-state.sh checkpoint` 写入：该块被替换，绝不追加（文件不存在时从 `.claude/docs/templates/session-state.md` 创建） |
+| `production/session-state/active.md` | `<!-- CHECKPOINT -->` 块：当前任务（故事路径）、下一步、阻塞项、进行中的文件、运行结果 | 在每种结果下由 `session-state.sh checkpoint` 写入：该块被替换，绝不追加（文件不存在时从 `.trae/docs/templates/session-state.md` 创建） |
 
 ### 输出保证
-- 所有源文件遵循 `project.yaml` 中的命名约定（`naming.*`），其中缺失的任何约定回退到 `.claude/docs/technical-preferences.md`
+- 所有源文件遵循 `project.yaml` 中的命名约定（`naming.*`），其中缺失的任何约定回退到 `.trae/docs/technical-preferences.md`
 - 测试文件路径与故事 `## Test Evidence` 章节中声明的路径完全一致
 - 每个验收标准在实现总结中映射到测试函数（Logic/Integration）、一张 `OBSERVED` 保留截图
   （Visual/Feel 和 UI 的*外观*那一半），或标记为 `DEFERRED`（仅*手感*那一半——时机、重量、响应性）
 - 未经先向用户呈现冲突，不会在故事的 `## Out of Scope` 边界之外写入任何文件
 - 会话状态记录变更的文件和下一次推荐的调用（`/story-done`；在 `standard`/`full` 下先 `/code-review`）——INCOMPLETE 时，用 `/dev-story` 恢复；BLOCKED 时，记录解除阻塞的操作
-- 实现总结说明一项**验证**结果——对编写的代码运行了什么（Godot：对变更脚本运行 `.claude/scripts/godot-parse-check.gd`；Unity：`commands.smoke`；Unreal：编辑器目标构建）及其退出码。当引擎可执行文件不可用时，这必须是 **`NOT VERIFIED — <reason>`**，绝不因为代码读起来正确就推断它没问题
-- 实现总结说明一项**运行结果**——`OBSERVED — <what was on screen>` 并附 `production/qa/evidence/[story-slug]/` 下的保留截图、`NOT VERIFIED — <reason>`，或 `N/A — <reason>`（仅用于确实没有可观察内容的故事）。在默认闸门级别下，`NOT VERIFIED` 对 Visual/Feel 和 UI 故事是阻塞项。运行在 **`qa.level: minimal` 下不豁免**——测试可豁免，外观不可。流程：`.claude/docs/run-and-observe.md`
+- 实现总结说明一项**验证**结果——对编写的代码运行了什么（Godot：对变更脚本运行 `.trae/scripts/godot-parse-check.gd`；Unity：`commands.smoke`；Unreal：编辑器目标构建）及其退出码。当引擎可执行文件不可用时，这必须是 **`NOT VERIFIED — <reason>`**，绝不因为代码读起来正确就推断它没问题
+- 实现总结说明一项**运行结果**——`OBSERVED — <what was on screen>` 并附 `production/qa/evidence/[story-slug]/` 下的保留截图、`NOT VERIFIED — <reason>`，或 `N/A — <reason>`（仅用于确实没有可观察内容的故事）。在默认闸门级别下，`NOT VERIFIED` 对 Visual/Feel 和 UI 故事是阻塞项。运行在 **`qa.level: minimal` 下不豁免**——测试可豁免，外观不可。流程：`.trae/docs/run-and-observe.md`
 - 在 `qa.level: minimal` 下不写测试文件，对于 Logic 或 Integration 故事，总结会明确说明（`Test evidence: waived at qa.level: minimal`）；UI 和 Visual/Feel 故事没有豁免行，因为它们的截图仍然适用。豁免的运行与忘记写测试的运行绝不应产生相同的产出物
 - **`NOT ASSESSED` 是故事 `Risk` 字段可接受的入站值**（当 `VERSION.md` 未分配等级时由 `/create-stories` 发出）。引擎专家检查每个代码故事，因此任何 Risk 值都无法跳过该检查
 - **不假定完成。** 如果程序员 agent 提前停止或其输出无法解析，故事会报告为 **INCOMPLETE**，并点名具体破损处，且不会输出 `Implementation Complete`
 
 ## 不可变性规则
-- 读取但**不**修改：`project.yaml`、`docs/architecture/tr-registry.yaml`、`docs/architecture/adr-NNNN-[slug].md`、`design/gdd/` 中的所有 GDD 文件、`docs/architecture/control-manifest.md`、`.claude/docs/technical-preferences.md`（旧版回退）、`docs/engine-reference/[engine]/VERSION.md`
-- 通过程序员 agent 修改：`<code root>/**`（新增/更新的源文件；代码根目录按 `.claude/docs/code-root-resolution.md` 解析）以及引擎的测试根目录（新测试文件；Godot 上为 `tests/`）
-- 由本技能自身修改，每次都在点明该文件的问题之后（在 `collaborative` 模式下；其他模式由 `.claude/docs/automation-modes.md` 管辖）：故事文件的 `Status:`、`Last Updated:`、`## Files`、`ADR Version`、`**ADR Decision Summary**`、`## Implementation Notes`、`Manifest Version:` 和 `Manifest-Note:`（见上方故事行）；故事在 `production/sprint-status.yaml` 中的条目（`status: in-progress`、顶层 `updated`）；依赖故事的 `Status:`（仅该依赖回答）；Config/Data 故事的数据文件；在 Unity 上，为 `Assets/Scripts/ScreenshotOnArg.cs`，当项目没有时从 `.claude/docs/run-and-observe.md` 原样写入
+- 读取但**不**修改：`project.yaml`、`docs/architecture/tr-registry.yaml`、`docs/architecture/adr-NNNN-[slug].md`、`design/gdd/` 中的所有 GDD 文件、`docs/architecture/control-manifest.md`、`.trae/docs/technical-preferences.md`（旧版回退）、`docs/engine-reference/[engine]/VERSION.md`
+- 通过程序员 agent 修改：`<code root>/**`（新增/更新的源文件；代码根目录按 `.trae/docs/code-root-resolution.md` 解析）以及引擎的测试根目录（新测试文件；Godot 上为 `tests/`）
+- 由本技能自身修改，每次都在点明该文件的问题之后（在 `collaborative` 模式下；其他模式由 `.trae/docs/automation-modes.md` 管辖）：故事文件的 `Status:`、`Last Updated:`、`## Files`、`ADR Version`、`**ADR Decision Summary**`、`## Implementation Notes`、`Manifest Version:` 和 `Manifest-Note:`（见上方故事行）；故事在 `production/sprint-status.yaml` 中的条目（`status: in-progress`、顶层 `updated`）；依赖故事的 `Status:`（仅该依赖回答）；Config/Data 故事的数据文件；在 Unity 上，为 `Assets/Scripts/ScreenshotOnArg.cs`，当项目没有时从 `.trae/docs/run-and-observe.md` 原样写入
 - 无需询问即修改：`production/session-state/active.md`——其 `<!-- CHECKPOINT -->` 块被覆盖，绝不追加
 - 仅将故事文件自身的 `Status` 字段设为 `In Progress`（Phase 3，在任何 agent 运行前）。
   关闭正在实现的故事是 `/story-done` 的专属职责；本技能写入的唯一其他 `Status` 是在

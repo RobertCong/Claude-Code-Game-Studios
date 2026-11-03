@@ -3,18 +3,16 @@ name: perf-profile
 description: "性能剖析 —— 发现瓶颈、对照预算进行测量、产出按优先级排序的优化建议。"
 argument-hint: "[system-name or 'full']"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Bash(bash "*/.claude/skills/perf-profile/../../hooks/yaml-helper.sh" resolve_config *), Bash(bash "*/.claude/skills/perf-profile/../../hooks/yaml-helper.sh" get_effective_yaml_key *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys performance.enforce,automation,workflow`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys performance.enforce,automation,workflow`
 
-以上已解析 —— 直接使用。没有对应配置块 → 使用
-`.claude/docs/config-resolution.md` 中的默认值。
+以上命令的输出已解析 —— 直接使用。没有对应配置块 → 使用
+`.trae/docs/config-resolution.md` 中的默认值。
 
 # 性能剖析
 
-每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+每次 `AskUserQuestion` 调用都遵循 `.trae/docs/automation-modes.md`
 （collaborative 总是询问 · guided 仅重大事项 · autonomous 记录后继续；
 `automation_always_ask` 类别总是询问）。
 
@@ -56,7 +54,7 @@ model: sonnet
 只有 `warn`、`block` 与 `off` 会被识别。任何其他取值都要向用户指出，并回退到 `warn`，而不是
 猜测。
 
-> 该值可在本地覆盖（`/settings --local performance.enforce=block`），因此请使用上方解析出的
+> 该值可在本地覆盖（`/settings --local performance.enforce=block`），因此请使用上一步命令输出中解析出的
 > 配置块，而不是直接读取 `project.yaml` —— 队友更严格的本地设置只应在其自己的机器上生效。
 
 ## Phase 1: 确定范围
@@ -85,10 +83,10 @@ bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" get_effective_yaml_key per
 询问用户）。输出为空意味着该预算未设置。
 
 > **从 `project.yaml` 解析这些预算，不要从散文描述中解析。** 上方的 Phase 0 声明这四项预算
-> "在每一层级都以相同方式剖析"。如果改为从设计文档或 CLAUDE.md 读取预算，那么用户在
+> "在每一层级都以相同方式剖析"。如果改为从设计文档或 AGENTS.md 读取预算，那么用户在
 > `project.yaml` 中设置的 `performance.target_framerate: 60` 就会被忽略。
 
-然后，对配置未承载的任何内容，回退到设计文档或 CLAUDE.md：
+然后，对配置未承载的任何内容，回退到设计文档或 AGENTS.md：
 
 - 目标帧率（例如 60fps = 16.67ms 帧预算）
 - 内存预算（总量与按系统）

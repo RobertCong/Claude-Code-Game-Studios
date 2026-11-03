@@ -3,14 +3,12 @@ name: architecture-decision
 description: "创建记录技术决策的 ADR：背景、考虑过的替代方案、后果。"
 argument-hint: "[title | retrofit <path> | accept <ADR-id>] [--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, Bash(wc -c *), Bash(bash "*/.claude/skills/architecture-decision/../../hooks/yaml-helper.sh" resolve_config *), Bash(bash .claude/scripts/registry.sh *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,workflow,docs.density,team.size`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,workflow,docs.density,team.size`
 
-以上为已解析结果——按原样使用；`--review` 会覆盖 `review_mode`。若无输出块 →
-使用 `.claude/docs/config-resolution.md` 中的默认值。
+以上命令的输出即解析结果——按原样使用；`--review` 会覆盖 `review_mode`。若无输出块 →
+使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 # 架构决策
 
@@ -18,9 +16,9 @@ model: sonnet
 
 ## 0. 解析参数 — 检测改造 / 接受模式
 
-完整的检查模式见 `.claude/docs/director-gates.md`。各个质量闸门（gate）的定义位于 `.claude/docs/director-gates/[gate-id].md` —— 被生成的 agent 会读取自己的闸门文件；不要在父会话中读取它。
+完整的检查模式见 `.trae/docs/director-gates.md`。各个质量闸门（gate）的定义位于 `.trae/docs/director-gates/[gate-id].md` —— 被生成的 agent 会读取自己的闸门文件；不要在父会话中读取它。
 
-每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+每次 `AskUserQuestion` 调用都遵循 `.trae/docs/automation-modes.md`
 （协作模式总是询问 · 引导模式仅询问重大事项 · 自主模式记录并继续；
 `automation_always_ask` 类别始终提示）。
 
@@ -38,7 +36,7 @@ model: sonnet
 将它应用于散文段落；Engine Compatibility、ADR Dependencies 和 GDD Requirements
 三张表格是结构性的，在任何密度下都保持完整。
 
-**`workflow`**（见 `.claude/docs/workflow-modes.md`）：
+**`workflow`**（见 `.trae/docs/workflow-modes.md`）：
 - `full` —— 必需 ADR 列表中的所有 ADR 都必须完成。
 - `standard` —— 仅关键 ADR（Foundation 层系统）。
 - `minimal` —— 非必需。仍可自愿运行。
@@ -107,7 +105,7 @@ ADR-[NNNN] written and registry updated. What would you like to do next?
 
 **务必在收尾输出中包含这段固定通知（不要省略）：**
 
-> 要对照你的 GDD 验证 ADR 覆盖率，请打开一个 **全新的 Claude Code 会话**
+> 要对照你的 GDD 验证 ADR 覆盖率，请打开一个 **全新的 Trae 会话**
 > 并运行 `/architecture-review`。
 >
 > **绝不要在 `/architecture-decision` 的同一会话中运行 `/architecture-review`。**

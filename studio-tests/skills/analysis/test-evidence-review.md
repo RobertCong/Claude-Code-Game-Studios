@@ -10,7 +10,7 @@
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需夹具。
 
-- [ ] 具有必需的前置元数据（frontmatter）字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 具有 ≥2 个阶段标题
 - [ ] 包含结论关键词：ADEQUATE、INCOMPLETE、MISSING、NOT ASSESSED，以及运行级 COMPLETE / CONCERNS
 - [ ] 包含针对可选的 `production/qa/evidence-review-[date].md` 的「May I write」措辞
@@ -27,7 +27,7 @@
 
 ## Fixture Defaults
 
-除非某个用例自己的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见 `studio-tests/CLAUDE.md` § Fixture defaults。
+除非某个用例自己的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见 `studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 

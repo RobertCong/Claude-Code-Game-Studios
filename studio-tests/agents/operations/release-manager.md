@@ -12,7 +12,7 @@
 - [ ] `description:` 字段存在且限定于本领域（引用发布流水线、认证、商店提交）
 - [ ] `tools:` 为 `Read, Glob, Grep, Write, Edit, Bash` —— Bash 用于发布打标签（「Version tags must be applied to the git repository at every release point」）
 - [ ] `skills:` 预加载 `release-checklist`、`changelog` 和 `patch-notes`
-- [ ] 模型档位为 `inherit` —— frontmatter `model:` 精确为 `inherit`（档位见：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 代理定义未声称对 QA 策略、游戏设计或构建基础设施拥有权限
 - [ ] 其下一步提议会自行运行 `/patch-notes [version]`，并将结果交给 community-manager 用于公告 —— 绝不会给 community-manager 一份简报让它来写补丁说明
 - [ ] 流水线的 Test 步骤采用发布质量闸门（gate）的档位：`workflow: full` 时需 QA 签署（`standard` 时建议），任何档位都不得有未解决的 S1，`full` 档位还不得有未解决的 S2 或 S3

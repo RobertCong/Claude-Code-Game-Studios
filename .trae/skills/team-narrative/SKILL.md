@@ -3,8 +3,6 @@ name: team-narrative
 description: "编排叙事团队——narrative-director、writer、world-builder、level-designer——负责故事、世界传说、叙事驱动的关卡。"
 argument-hint: "[narrative content description] [--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, TaskCreate, TaskGet, TaskList, TaskUpdate, Bash(bash "*/.claude/skills/team-narrative/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 # 叙事团队（Team Narrative）
 
@@ -21,14 +19,14 @@ model: sonnet
 在 `autonomous` 模式下，它端到端运行，并通过
 `log_decision` 记录每个阶段的结果。`automation_always_ask` 类别中的决策
 （`is_always_ask_category` 辅助函数）无论何种模式都会始终提示。参见
-`.claude/docs/automation-modes.md`。
+`.trae/docs/automation-modes.md`。
 
 ## Phase 0: 解析配置
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,team.size`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,team.size`
 
-以上已解析——直接使用；`--review` 覆盖 `review_mode`。无配置块 →
-使用 `.claude/docs/config-resolution.md` 中的默认值。
+以上命令的输出已解析——直接使用；`--review` 覆盖 `review_mode`。无配置块 →
+使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 `review_mode` 设定总监闸门（director gate）的深度，而本流水线没有总监闸门：
 无论 `review_mode` 为何，下面的任何阶段都不会生成 CD-、TD-、PR- 或 AD-PHASE-GATE。
@@ -40,7 +38,7 @@ Phase 4 的 ND-CONSISTENCY 在每种模式下都是例外：它是本流水线�
 仍然决定由谁来执行——见 Phase 4）。
 
 `automation` 驱动上面的决策点说明。关于每种模式如何改变流水线行为，参见上面的决策点说明和
-`.claude/docs/automation-modes.md`。
+`.trae/docs/automation-modes.md`。
 
 **`team.size`**：哪些代理处于活动状态（与 review_mode 的闸门深度和工作流文档相互正交）。
 - **`individual`**（默认）：仅 `writer`；`narrative-director` 仅在明确出现游戏支柱冲突时被调用。其他代理通过 writer 咨询，不单独生成。
@@ -81,12 +79,12 @@ Phase 4 的 ND-CONSISTENCY 在每种模式下都是例外：它是本流水线�
 ## 如何委派
 
 使用 `Agent` 工具把每位团队成员生成为子代理：
-- `subagent_type: narrative-director` —— 故事弧线、角色设计、叙事愿景
-- `subagent_type: writer` —— 对话撰写、传说条目、游戏内文本
-- `subagent_type: world-builder` —— 世界规则、阵营设计、历史、地理
-- `subagent_type: art-director` —— 角色视觉设定、环境视觉叙事、影片基调
-- `subagent_type: level-designer` —— 服务于叙事的关卡布局、节奏
-- `subagent_type: localization-lead` —— 本地化就绪度——标记不可本地化的字符串、文化假设和 i18n 缺口
+- 委派给 `narrative-director` 子代理 —— 故事弧线、角色设计、叙事愿景
+- 委派给 `writer` 子代理 —— 对话撰写、传说条目、游戏内文本
+- 委派给 `world-builder` 子代理 —— 世界规则、阵营设计、历史、地理
+- 委派给 `art-director` 子代理 —— 角色视觉设定、环境视觉叙事、影片基调
+- 委派给 `level-designer` 子代理 —— 服务于叙事的关卡布局、节奏
+- 委派给 `localization-lead` 子代理 —— 本地化就绪度——标记不可本地化的字符串、文化假设和 i18n 缺口
 
 **先读正典（canon）。** 在 Phase 1 之前，读取存在的共享输入——叙事圣经或基调指南、
 `design/narrative/` 下的角色与阵营文件，以及世界规则。绝不要让代理凭空发明正典：
@@ -119,7 +117,7 @@ Phase 4 的 ND-CONSISTENCY 在每种模式下都是例外：它是本流水线�
 > 具体去向的技能，会让每次运行都去自行发明一个，从而使契约失效。`/team-qa` Phase 4 出于同样的原因
 > 也有同样的要求。
 
-> **为什么这不算违反协作协议。** `CLAUDE.md` 要求代理在 Write/Edit 之前询问"我可以把它写入 [filepath] 吗？"。在这里生成的子代理写入时**不**询问，这是有意为之的受限例外，而不是疏忽——与 `consistency-check` 追加到 `active.md` 时已有的处理相同。该例外仅在以下三者同时成立时才适用：（1）路径是**你**在提示词中点名的，因此用户在批准该阶段时已批准了目标位置；（2）它是位于 `production/`、`docs/` 或 `tests/` 下的新产出物，绝不是对现有源码或配置的修改；（3）产生它的阶段本身在流水线推进之前由 `AskUserQuestion` 把关。超出这三条，代理必须询问。**不要通过逐个子代理询问来"修复"这件事**——每个代理每个阶段都提示一次会让编排器无法使用，这正是该例外存在的原因。
+> **为什么这不算违反协作协议。** `AGENTS.md` 要求代理在 Write/Edit 之前询问"我可以把它写入 [filepath] 吗？"。在这里生成的子代理写入时**不**询问，这是有意为之的受限例外，而不是疏忽——与 `consistency-check` 追加到 `active.md` 时已有的处理相同。该例外仅在以下三者同时成立时才适用：（1）路径是**你**在提示词中点名的，因此用户在批准该阶段时已批准了目标位置；（2）它是位于 `production/`、`docs/` 或 `tests/` 下的新产出物，绝不是对现有源码或配置的修改；（3）产生它的阶段本身在流水线推进之前由 `AskUserQuestion` 把关。超出这三条，代理必须询问。**不要通过逐个子代理询问来"修复"这件事**——每个代理每个阶段都提示一次会让编排器无法使用，这正是该例外存在的原因。
 
 在流水线允许的地方并行启动相互独立的代理（例如 Phase 2 的代理可以同时运行）。
 
@@ -153,7 +151,7 @@ Phase 4 的 ND-CONSISTENCY 在每种模式下都是例外：它是本流水线�
 
 ### Phase 4: 评审与一致性
 使用闸门 **ND-CONSISTENCY** 通过 `Agent` 生成 `narrative-director`
-（`.claude/docs/director-gates/nd-consistency.md`）。本阶段在每种评审
+（`.trae/docs/director-gates/nd-consistency.md`）。本阶段在每种评审
 模式下都会运行——它是本流水线自身的评审，而不是可选的总监闸门。传入该闸门列出的
 上下文（Phase 2–3 草稿路径、叙事圣经或基调
 指南、世界规则、受影响的角色与阵营档案）——此处已点名，
@@ -166,7 +164,7 @@ Phase 4 的 ND-CONSISTENCY 在每种模式下都是例外：它是本流水线�
 代理）还是接受。**REJECT** → 不要开始 Phase 5；先修复矛盾。
 **NOT ASSESSED [missing input]** → 指出缺失的输入，补齐后重新运行该闸门，
 或把 `ND-CONSISTENCY: NOT ASSESSED — [input]` 带入报告的
-一致性评审结果；它绝不能被读作 APPROVE（`.claude/docs/director-gates.md`）。
+一致性评审结果；它绝不能被读作 APPROVE（`.trae/docs/director-gates.md`）。
 
 **在 `team.size: individual` 下**，narrative-director 不在活动集中，因此不会生成该
 闸门。writer 按同样的标准检查草稿，
@@ -196,7 +194,7 @@ Phase 4 的 ND-CONSISTENCY 在每种模式下都是例外：它是本流水线�
 通常还在。
 
 如果任何生成的代理返回 BLOCKED、报错或无法完成：**立即呈现出来，不要越过它阻塞的依赖继续推进，并始终产出
-部分报告。** 被跳过代理的章节保持为具名缺口——绝不要用自己的内容填充。完整流程：`.claude/docs/error-recovery-protocol.md`。
+部分报告。** 被跳过代理的章节保持为具名缺口——绝不要用自己的内容填充。完整流程：`.trae/docs/error-recovery-protocol.md`。
 
 常见阻塞项：
 - 输入文件缺失（找不到用户故事、缺少 GDD）→ 引导到创建它的技能

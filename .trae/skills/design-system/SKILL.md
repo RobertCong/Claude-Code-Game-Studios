@@ -3,13 +3,11 @@ name: design-system
 description: "针对单个系统逐节撰写 GDD（游戏设计文档）——逐一走完每个必需章节，并交叉引用依赖关系。"
 argument-hint: "<system-name> [--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, TaskCreate, TaskGet, TaskList, TaskUpdate, Bash(bash "*/.claude/skills/design-system/../../hooks/yaml-helper.sh" resolve_config *), Bash(bash .claude/scripts/registry.sh *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,workflow,docs.density,system_overrides`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,workflow,docs.density,system_overrides`
 
-以上已解析完成——直接使用；`--review` 会覆盖 `review_mode`。若没有配置块 → 使用 `.claude/docs/config-resolution.md` 中的默认值。
+以上命令的输出已解析完成——直接使用；`--review` 会覆盖 `review_mode`。若没有配置块 → 使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 # Design System（设计系统）
 
@@ -94,7 +92,7 @@ model: sonnet
 
 ## 协作协议
 
-**在 `collaborative` 模式下（默认）。** 对于 `guided` 和 `autonomous` 模式，请参阅 `.claude/docs/automation-modes.md` 中各模式的规则——下文的“绝不”描述的是 collaborative 模式的要求，而非普遍适用的规则。
+**在 `collaborative` 模式下（默认）。** 对于 `guided` 和 `autonomous` 模式，请参阅 `.trae/docs/automation-modes.md` 中各模式的规则——下文的“绝不”描述的是 collaborative 模式的要求，而非普遍适用的规则。
 
 此技能在每一步都遵循协作式设计原则：
 
@@ -119,7 +117,7 @@ model: sonnet
 
 这是一个长时间运行的技能。每写完一个章节后，检查状态栏显示的上下文占用是否达到或超过 70%。若达到，请在回复后追加以下提示：
 
-> **上下文正接近上限（≥70%）。** 你的进度已保存——所有已批准的章节都已写入 `design/gdd/[system-name].md`。准备好继续时，请打开一个新的 Claude Code 会话并运行 `/design-system [system-name]`——它会检测哪些章节已完成，并从下一个章节继续。
+> **上下文正接近上限（≥70%）。** 你的进度已保存——所有已批准的章节都已写入 `design/gdd/[system-name].md`。准备好继续时，请打开一个新的 Trae 会话并运行 `/design-system [system-name]`——它会检测哪些章节已完成，并从下一个章节继续。
 
 ---
 

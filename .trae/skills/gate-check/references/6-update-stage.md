@@ -25,7 +25,7 @@
 在用户同意后，用一条命令写入两个阶段文件（两个词的阶段名要加引号）：
 
 ```bash
-bash .claude/scripts/set-stage.sh "<new-stage>"
+bash .trae/scripts/set-stage.sh "<new-stage>"
 ```
 
 它会设置 `project.yaml` 中的 `project.stage`：编辑 `stage:` 行，
@@ -50,7 +50,7 @@ bash .claude/scripts/set-stage.sh "<new-stage>"
 ### 6.3 严格度匹配检查（建议性——绝不影响结论）
 
 在确认阶段推进后，应用
-`.claude/docs/settings-guidance.md § 4` 中的提升触发条件：如果新阶段是 **Production**（或更晚），
+`.trae/docs/settings-guidance.md § 4` 中的提升触发条件：如果新阶段是 **Production**（或更晚），
 而已解析的 `modes.workflow` 是 `minimal`（即上文配置块中的 `rigor: minimal`
 态势），则添加一行：
 

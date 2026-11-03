@@ -27,7 +27,7 @@
 # Not framework.version itself: that is the project's file, and an upgrade
 # that keeps your project.yaml leaves it on the old number (UPGRADING.md says
 # so), which would announce the release you already have. This file is replaced
-# with the rest of .claude/hooks/ on every upgrade, so its number is the
+# with the rest of .trae/hooks/ on every upgrade, so its number is the
 # framework actually installed.
 UPDATE_CHECK_VERSION="1.2.0"
 UPDATE_CHECK_REPO="Donchitos/Claude-Code-Game-Studios"
@@ -168,12 +168,12 @@ update_check_refresh() {
 
 if [ "${BASH_SOURCE[0]}" = "$0" ]; then
   # Run directly, work from the project root, in session-start.sh's order: a
-  # cwd that is a project root wins, then CLAUDE_PROJECT_DIR, then this file's
+  # cwd that is a project root wins, then TRAE_PROJECT_DIR, then this file's
   # own location. Sourced, it leaves the caller's directory alone.
-  if [ -f "project.yaml" ] || { [ -d ".claude" ] && [ "${PWD##*/}" != ".claude" ]; }; then
+  if [ -f "project.yaml" ] || { [ -d ".trae" ] && [ "${PWD##*/}" != ".trae" ]; }; then
     CCGS_ROOT="$PWD"
-  elif [ -n "${CLAUDE_PROJECT_DIR:-}" ] && [ -d "${CLAUDE_PROJECT_DIR}" ] && case "${CLAUDE_PROJECT_DIR%/}" in */.claude|*\\.claude) false ;; *) true ;; esac; then
-    CCGS_ROOT="$CLAUDE_PROJECT_DIR"
+  elif [ -n "${TRAE_PROJECT_DIR:-}" ] && [ -d "${TRAE_PROJECT_DIR}" ] && case "${TRAE_PROJECT_DIR%/}" in */.trae|*\\.trae) false ;; *) true ;; esac; then
+    CCGS_ROOT="$TRAE_PROJECT_DIR"
   else
     CCGS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." 2>/dev/null && pwd)"
   fi

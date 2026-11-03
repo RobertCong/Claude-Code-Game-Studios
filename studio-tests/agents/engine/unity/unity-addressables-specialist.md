@@ -11,7 +11,7 @@
 
 - [ ] `description:` 字段存在且与领域相关（提及 Addressables / 资源加载 / 内容目录 / 远程分发）
 - [ ] `tools:` 列表包含 Read、Write、Edit、Bash、Glob、Grep
-- [ ] 模型层级为 `sonnet` — frontmatter `model:` 的内容恰好为 `sonnet`（层级说明：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 代理定义未声明对渲染系统或使用已加载资源的玩法代码的权限
 
 ---

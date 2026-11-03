@@ -26,7 +26,7 @@
 >
 > **此提示依据的是项目层级，而非本系统的生效层级。**
 > 当 `workflow_overrides.system_overrides` 把某个系统提升到 `minimal` 项目之上时，
-> 两者就会不同 —— 这正是 `.claude/docs/settings-guidance.md` 所称该覆盖存在的理由
+> 两者就会不同 —— 这正是 `.trae/docs/settings-guidance.md` 所称该覆盖存在的理由
 > （"提升一个深层系统"）。那两个文件之所以缺失，是因为*项目*是 `minimal`；把*本系统*
 > 提升到 `standard` 或 `full` 并不会创建它们。因此在一个 `minimal` 项目上，
 > **即使系统被覆盖也走这个分支**，并读取简报。
@@ -65,7 +65,7 @@
 - **实体注册表**：若 `design/registry/entities.yaml` 存在，列出本系统拥有的条目
   以及引用它的条目，每个条目完整列出：
   ```
-  bash .claude/scripts/registry.sh slice design/gdd/[system-name].md
+  bash .trae/scripts/registry.sh slice design/gdd/[system-name].md
   ```
   `referenced_by:` 是块列表（键与其路径分行存放），因此按路径 grep 只能找到那一行，
   找不到拥有它的条目；`slice` 会打印拥有它的条目，无论其列表有多长。把这些作为
@@ -155,13 +155,13 @@ Grep pattern="^## ([0-9]+\. )?(Dependencies|Formulas|Edge Cases|Tuning Knobs)" g
 > 的那个引擎域。
 
 **第 2 步 —— 读取引擎上下文（如可用）：**
-- 识别引擎与版本：从 `project.yaml` 读取 `engine.name` 与 `engine.version`。独立解析每个字段 —— 如果其键缺失或为空（包括 `project.yaml` 没有 `engine:` 块的情况），回退到 `.claude/docs/technical-preferences.md`（`[TO BE CONFIGURED]` 值表示未设置）
+- 识别引擎与版本：从 `project.yaml` 读取 `engine.name` 与 `engine.version`。独立解析每个字段 —— 如果其键缺失或为空（包括 `project.yaml` 没有 `engine:` 块的情况），回退到 `.trae/docs/technical-preferences.md`（`[TO BE CONFIGURED]` 值表示未设置）
 - 如果引擎已配置，读取 `docs/engine-reference/[engine]/VERSION.md`
 - 若存在则读取 `docs/engine-reference/[engine]/modules/[domain].md`。
   **如果它不存在，请点名说明** —— *"no engine reference for `[domain]`
   under `docs/engine-reference/[engine]/modules/`; feasibility not checked against
   the pinned engine"* —— 并把它带入 §5-pre。此处静默跳过，与运行了可行性检查并
-  未发现问题无法区分，而这正是 `.claude/rules/skill-authoring.md` 义务 3 要阻止的
+  未发现问题无法区分，而这正是 `.trae/rules/skill-authoring.md` 义务 3 要阻止的
   失败模式。
 
   > **这不是罕见分支。** 上面的域表为九个类别中的五个指定了 `Scripting` 和

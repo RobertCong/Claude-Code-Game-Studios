@@ -30,7 +30,7 @@ input changing."*
 则把那两个引擎参考路径排除在外。
 
 ```
-Bash: bash .claude/scripts/review-receipts.sh check "[latest-report]" docs/architecture/adr-*.md design/gdd/*.md docs/architecture/tr-registry.yaml docs/architecture/architecture.md docs/engine-reference/[engine]/*.md docs/engine-reference/[engine]/modules/*.md project.yaml .claude/docs/technical-preferences.md docs/consistency-failures.md .claude/skills/architecture-review/SKILL.md .claude/skills/architecture-review/references/*.md
+Bash: bash .trae/scripts/review-receipts.sh check "[latest-report]" docs/architecture/adr-*.md design/gdd/*.md docs/architecture/tr-registry.yaml docs/architecture/architecture.md docs/engine-reference/[engine]/*.md docs/engine-reference/[engine]/modules/*.md project.yaml .trae/docs/technical-preferences.md docs/consistency-failures.md .trae/skills/architecture-review/SKILL.md .trae/skills/architecture-review/references/*.md
 ```
 
 Phase 8 会将同一份列表写入本次运行的报告；保持两处完全一致，并把任何阶段开始读取的
@@ -155,7 +155,7 @@ ADR 的决定，不是一刀切的全量加载。
 
 ### 项目标准
 - `project.yaml` —— `naming.*` 与 `performance.*`；另外当这些键缺失时读取
-  `.claude/docs/technical-preferences.md`，以及禁止的模式 / 允许的库
+  `.trae/docs/technical-preferences.md`，以及禁止的模式 / 允许的库
 
 报告数量："Loaded [N] GDDs, [M] ADRs, engine: [name + version]."
 

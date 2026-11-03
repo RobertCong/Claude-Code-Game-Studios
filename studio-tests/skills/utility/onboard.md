@@ -3,7 +3,7 @@
 ## Skill Summary
 
 `/onboard [role|area]` 为新贡献者或代理生成一份上手引导文档。它读取
-`CLAUDE.md`；当给出角色时，读取 `.claude/agents/` 中匹配的代理定义；扫描该角色
+`AGENTS.md`；当给出角色时，读取 `.trae/agents/` 中匹配的代理定义；扫描该角色
 工作的领域（程序员为代码根目录，设计师为 `design/`，叙事为 `design/narrative/`，
 QA 为 `tests/`，制作人为 `production/`），并读取最近的 git 历史。
 
@@ -23,7 +23,7 @@ write this to `production/onboarding/onboard-[role]-[date].md`?"。结论为
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 有 ≥2 个 phase 标题
 - [ ] 包含结论关键词：COMPLETE、NOT ASSESSED
 - [ ] 在保存上手引导文档之前包含 "May I write" 措辞
@@ -41,7 +41,7 @@ write this to `production/onboarding/onboard-[role]-[date].md`?"。结论为
 ## Fixture Defaults
 
 除非某个用例自己的 Fixture 另有说明，否则每个用例的 `project.yaml` 都设置
-`modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/CLAUDE.md` §
+`modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/AGENTS.md` §
 Fixture defaults。
 
 ---
@@ -51,16 +51,16 @@ Fixture defaults。
 ### Case 1: Happy Path — Godot 项目上的程序员角色
 
 **Fixture:**
-- `CLAUDE.md` 存在
+- `AGENTS.md` 存在
 - `project.yaml` 含 `engine.name: Godot`，因此代码根目录为 `src/`
-- `src/` 含游戏代码；`.claude/agents/gameplay-programmer.md` 存在
+- `src/` 含游戏代码；`.trae/agents/gameplay-programmer.md` 存在
 - `production/sprints/sprint-005.md` 存在；git log 有近期提交
 - `modes.automation` 未设置（默认为 `collaborative`）
 
 **Input:** `/onboard gameplay-programmer`
 
 **Expected behavior:**
-1. 技能读取 `CLAUDE.md` 与 `.claude/agents/gameplay-programmer.md`
+1. 技能读取 `AGENTS.md` 与 `.trae/agents/gameplay-programmer.md`
 2. 技能扫描代码根目录 `src/` 以了解架构、模式与关键文件，并读取最近的 git 历史
 3. 技能生成一份标题为 `# Onboarding: gameplay-programmer` 的文档，包含
    模板各节（Project Summary、Your Role、Project Architecture、Current
@@ -83,14 +83,14 @@ Fixture defaults。
 ### Case 2: Designer Role — 扫描 design/，而非代码根目录
 
 **Fixture:**
-- `CLAUDE.md` 存在；`.claude/agents/game-designer.md` 存在
+- `AGENTS.md` 存在；`.trae/agents/game-designer.md` 存在
 - `design/gdd/` 含三份系统 GDD
 - `src/` 也含代码
 
 **Input:** `/onboard game-designer`
 
 **Expected behavior:**
-1. 技能读取 `CLAUDE.md` 与 `.claude/agents/game-designer.md`
+1. 技能读取 `AGENTS.md` 与 `.trae/agents/game-designer.md`
 2. Phase 2 走设计师分支，扫描 `design/` 中已有的设计文档
 3. "Current State of Your Area" 反映找到的三份 GDD
 4. 呈现文档，并就 `production/onboarding/onboard-game-designer-[date].md` 询问
@@ -107,8 +107,8 @@ Fixture defaults。
 ### Case 3: Every Input Absent — NOT ASSESSED，无文档
 
 **Fixture:**
-- `CLAUDE.md` 不存在
-- `.claude/agents/` 不存在，因此无法读取任何代理定义
+- `AGENTS.md` 不存在
+- `.trae/agents/` 不存在，因此无法读取任何代理定义
 - `tests/` 不存在；该目录不是 git 仓库
 
 **Input:** `/onboard qa-tester`
@@ -118,7 +118,7 @@ Fixture defaults。
 2. 由于所有必需输入均为 ABSENT，它停止并把
    `NOT ASSESSED — NO DATA` 作为整个结论报告
 3. 报告指明缺失了什么以及由什么产生：`tests/` 由 `/test-setup` 产生；
-   `CLAUDE.md` 与 `.claude/agents/` 随框架本身提供——没有技能会创建它们——
+   `AGENTS.md` 与 `.trae/agents/` 随框架本身提供——没有技能会创建它们——
    因此它们被报告为安装中缺失，而不归因于某个技能
 4. 不生成任何上手引导文档，也不写入任何文件
 
@@ -126,7 +126,7 @@ Fixture defaults。
 - [ ] 在产出任何报告之前，把各输入记为 FOUND 或 ABSENT
 - [ ] 结论为 `NOT ASSESSED — NO DATA`，而不是 COMPLETE
 - [ ] 指明缺失的输入；`tests/` 指向 `/test-setup`
-- [ ] 不把任何技能命名为 `CLAUDE.md` 或 `.claude/agents/` 的产出者——没有技能创建它们
+- [ ] 不把任何技能命名为 `AGENTS.md` 或 `.trae/agents/` 的产出者——没有技能创建它们
 - [ ] 不填写任何模板，也不出现 "May I write" 询问
 
 ---
@@ -134,7 +134,7 @@ Fixture defaults。
 ### Case 4: Edge Case — 程序员角色遇到未解析的代码根目录
 
 **Fixture:**
-- `CLAUDE.md` 存在；`.claude/agents/gameplay-programmer.md` 存在
+- `AGENTS.md` 存在；`.trae/agents/gameplay-programmer.md` 存在
 - `project.yaml` 没有 `engine.name`，technical-preferences 中为
   `[TO BE CONFIGURED]`，且 `src/` 与 `Assets/` 都存在（目录树有歧义）
 
@@ -160,7 +160,7 @@ Fixture defaults。
 ### Case 5: Director Gate Check — 无；不生成代理
 
 **Fixture:**
-- 任何存在 `CLAUDE.md` 的项目状态
+- 任何存在 `AGENTS.md` 的项目状态
 - 任意评审模式
 
 **Input:** `/onboard producer`
@@ -182,7 +182,7 @@ Fixture defaults。
 
 ## Protocol Compliance
 
-- [ ] 生成之前读取 `CLAUDE.md`，并在给出角色时读取其代理定义
+- [ ] 生成之前读取 `AGENTS.md`，并在给出角色时读取其代理定义
 - [ ] 只扫描与角色匹配的领域
 - [ ] 把每项输入记为 FOUND 或 ABSENT；由 ABSENT 支撑的章节写作 `NOT ASSESSED — NO DATA`
 - [ ] 在询问 "May I write" 写入 `production/onboarding/onboard-[role]-[date].md` 之前呈现文档

@@ -31,7 +31,7 @@ Found [N] GDDs. Summaries:
 对于 `since-last-review` 模式，以确定性的方式计算范围，而不是靠推理 git 历史：
 
 ```
-Bash: bash .claude/scripts/review-scope.sh
+Bash: bash .trae/scripts/review-scope.sh
 ```
 
 它会打印 `PRIOR_REVIEW:`、一个 `CHANGED:` 列表，以及每个被修改 GDD 所声明依赖的 `DEPS ...:` 列表。将这些列表作为范围 — 依赖行已经是"Key deps"的展开，无需再跑一遍。如果 `PRIOR_REVIEW: NONE`，则需要进行完整评审；回退到 `full` 模式。

@@ -4,13 +4,11 @@ description: "关闭已完成的用户故事：逐条验证验收标准，检查
 argument-hint: "[story-file-path] [--review full|lean|solo]"
 user-invocable: true
 disable-model-invocation: true
-allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Agent, Bash(bash "*/.claude/skills/story-done/../../hooks/yaml-helper.sh" resolve_config *), Bash(bash .claude/scripts/story-facts.sh *), Bash(bash .claude/scripts/story-status.sh*), Bash(bash .claude/scripts/adr-status.sh *), Bash(bash .claude/scripts/md-section.sh *), Bash(bash .claude/scripts/review-receipts.sh check *), Bash(bash .claude/scripts/session-state.sh *), Bash(git status --porcelain*)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,review_gate,automation,automation_always_ask,workflow,qa.level,gate_level,system_overrides`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,review_gate,automation,automation_always_ask,workflow,qa.level,gate_level,system_overrides`
 
-以上为解析结果 — 直接使用；`--review` 会覆盖 `review_mode`。无块 → 使用 `.claude/docs/config-resolution.md` 中的默认值。
+以上命令的输出即解析结果 — 直接使用；`--review` 会覆盖 `review_mode`。无块 → 使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 用提问工具询问。没有提问工具时，将选项编号列出并结束回合等待。跳过或忽略的提问不是回答：用纯文本再问一次。
 
@@ -21,7 +19,7 @@ model: sonnet
 **写入（在用户确认"是"之后）：** 用户故事文件（`Status`、`Last Updated`、一个 `## Completion Notes` 章节）及其 `production/sprint-status.yaml` 条目；仅当用户选择该选项时才写入 `docs/tech-debt-register.md`。会话检查点会在每次运行结束时写入，无论结论如何。
 **下一步：** 下一个用户故事（Phase 8）。
 
-询问遵循 `.claude/docs/automation-modes.md`（collaborative 始终询问，guided 仅在重大选择时询问，autonomous 记录后继续；`automation_always_ask` 类别始终询问）。
+询问遵循 `.trae/docs/automation-modes.md`（collaborative 始终询问，guided 仅在重大选择时询问，autonomous 记录后继续；`automation_always_ask` 类别始终询问）。
 
 检查清单（复制它并随进度勾选）：
 
@@ -41,15 +39,15 @@ model: sonnet
 **哪个用户故事。** 在技能名之后输入的文本，移除任何 `--review <mode>` 对之后，就是用户故事路径。若什么都没输入：
 
 1. `production/session-state/active.md` 中的检查点：其 **Current task** 行，当其指明某个用户故事时。
-2. 否则是进行中的用户故事：`bash .claude/scripts/story-facts.sh --all`，状态为 `IN_REVIEW` 或 `IN_PROGRESS` 的行。若有多个：询问"Which story are we closing?"，每个用户故事一个选项。
+2. 否则是进行中的用户故事：`bash .trae/scripts/story-facts.sh --all`，状态为 `IN_REVIEW` 或 `IN_PROGRESS` 的行。若有多个：询问"Which story are we closing?"，每个用户故事一个选项。
 3. 没有：询问路径。当 `production/epics/` 完全没有用户故事文件时，停止：
    "No stories found in `production/epics/` — run `/create-stories [epic-slug]` to make them (at `standard` and `full`, run `/create-epics` first if there is no epic yet)."
 
-**其事实。** `bash .claude/scripts/story-facts.sh <story-path>` 给出状态、类型、层级、TR-ID、ADR、标准数量、测试证据状态和依赖。然后完整读取用户故事：标准文本、Test Evidence 路径、`## Files`、Out of Scope。
+**其事实。** `bash .trae/scripts/story-facts.sh <story-path>` 给出状态、类型、层级、TR-ID、ADR、标准数量、测试证据状态和依赖。然后完整读取用户故事：标准文本、Test Evidence 路径、`## Files`、Out of Scope。
 
 **层级。** 用户故事所属系统的 `workflow`，以其 `GDD:` 路径的 GDD 文件名主干为键（`design/gdd/<stem>.md` → `<stem>`；仅当没有 GDD 路径时，才用其 TR-ID 的 `[system]`）：若存在该系统的 `system_overrides` 行则用该行，否则用项目值。
 
-**`qa.level` 要求什么**（`.claude/docs/coding-standards.md` 的证据行）。从上面的 `qa.level` 行取值，绝不从 `workflow` 或 `rigor` 取值：两者是分开设置的，因此 `workflow: minimal` 搭配 `qa.level: standard` 仍然要求 Logic 用户故事的单元测试。
+**`qa.level` 要求什么**（`.trae/docs/coding-standards.md` 的证据行）。从上面的 `qa.level` 行取值，绝不从 `workflow` 或 `rigor` 取值：两者是分开设置的，因此 `workflow: minimal` 搭配 `qa.level: standard` 仍然要求 Logic 用户故事的单元测试。
 
 | 检查项 | `qa.level: minimal` | `qa.level: standard` | `qa.level: full` |
 |---|---|---|---|
@@ -64,7 +62,7 @@ model: sonnet
 
 按层级。按章节读取每个文档，绝不整篇读取。
 
-- **`full`：** 每个 TR-ID 的当前需求文本：在 `docs/architecture/tr-registry.yaml` 中匹配 `id: <TR-ID>\s*$` 的行及其下的条目文本（锚点可防止 `TR-combat-001` 匹配到 `TR-combat-0010`；`\s*` 兼容 Windows 行尾）。绝不要使用用户故事中引用的文本；GDD 的 Acceptance Criteria 与 Detailed Design（`bash .claude/scripts/md-section.sh extract design/gdd/<file>.md "Acceptance Criteria"`，然后对 `"Detailed Design"` 做同样操作；退出 3：改试 `"Detailed Rules"`，即设计标准对同一章节的命名）；每个 ADR 的状态用 `bash .claude/scripts/adr-status.sh <ADR ids>` 获取，然后读取其 Decision 与 Consequences 章节。
+- **`full`：** 每个 TR-ID 的当前需求文本：在 `docs/architecture/tr-registry.yaml` 中匹配 `id: <TR-ID>\s*$` 的行及其下的条目文本（锚点可防止 `TR-combat-001` 匹配到 `TR-combat-0010`；`\s*` 兼容 Windows 行尾）。绝不要使用用户故事中引用的文本；GDD 的 Acceptance Criteria 与 Detailed Design（`bash .trae/scripts/md-section.sh extract design/gdd/<file>.md "Acceptance Criteria"`，然后对 `"Detailed Design"` 做同样操作；退出 3：改试 `"Detailed Rules"`，即设计标准对同一章节的命名）；每个 ADR 的状态用 `bash .trae/scripts/adr-status.sh <ADR ids>` 获取，然后读取其 Decision 与 Consequences 章节。
 - **`standard`：** 相同的 GDD 章节；仅对关键 ADR 读取 ADR 章节（`adr-status.sh` 的 layer 列显示为 Foundation，或没有 layer）。
 - **`minimal`：** 无。用户故事自己的标准就是规格。
 
@@ -74,7 +72,7 @@ model: sonnet
 
 依次处理每条验收标准：
 
-- **通过查看核实：** 标准所指名的文件存在；它所指的测试文件存在（报告"test file present"，绝不报告"test passes"：此处不运行任何东西）；属于数据文件却出现在玩法代码中的数字字面量；属于本地化文件却出现在代码根目录中的面向玩家字符串（按 `.claude/docs/code-root-resolution.md` 解析代码根；无法解析时报告 `NOT ASSESSED — code root unresolved`，绝不要报零命中）。
+- **通过查看核实：** 标准所指名的文件存在；它所指的测试文件存在（报告"test file present"，绝不报告"test passes"：此处不运行任何东西）；属于数据文件却出现在玩法代码中的数字字面量；属于本地化文件却出现在代码根目录中的面向玩家字符串（按 `.trae/docs/code-root-resolution.md` 解析代码根；无法解析时报告 `NOT ASSESSED — code root unresolved`，绝不要报零命中）。
 - **通过询问核实：** 行为类标准（"玩家在……时受到伤害"）、手感类标准和性能类标准。绝不要通过阅读代码就把一条标记为通过：代码说明应该发生什么，而不是构建实际做了什么。每次询问最多四条："Does [criterion]?" 选项：Yes — passes / No — fails / Not tested yet。`Not tested yet` 是 UNTESTED，会让结论最多停留在 NOT ASSESSED，直到有人核实。
 - **通过屏幕查看核实：** 关于可见内容的标准，由 `production/qa/evidence/[story-slug]/` 下你打开并实际看到其中内容的保留图片来覆盖（`[story-slug]`：用户故事文件名去掉 `.md`）。绝不要描述你没打开过的图片；检查点的 `Run result: OBSERVED — <text>` 是 `/dev-story` 的描述，引用时须如此注明。
 - **需要完整试玩测试：** `DEFERRED — requires playtest session`。它不阻塞。
@@ -104,7 +102,7 @@ model: sonnet
 
 缺失的项就是该闸门级别下的缺口：BLOCKING 阻止 COMPLETE，ADVISORY 写入注释。指出缺失什么以及它应放在哪里。旁边没有图片的证据文档不是证据：被描述的检查只是断言。
 
-**证据是否比其代码更旧？** 对保留图片运行 `bash .claude/scripts/review-receipts.sh check production/qa/evidence/[story-slug]/stamp.txt`。每个 `CHANGED:` 或 `GONE:` 文件："[file] changed after the evidence was captured — re-capture it." `RECEIPT: NONE`："no stamp — whether the evidence is older than the code cannot be told"。报告这些行；它们绝不改变结论。
+**证据是否比其代码更旧？** 对保留图片运行 `bash .trae/scripts/review-receipts.sh check production/qa/evidence/[story-slug]/stamp.txt`。每个 `CHANGED:` 或 `GONE:` 文件："[file] changed after the evidence was captured — re-capture it." `RECEIPT: NONE`："no stamp — whether the evidence is older than the code cannot be told"。报告这些行；它们绝不改变结论。
 
 **运行结果，适用于所有其他类型。** 从 `/dev-story` 检查点（仅当其 **Current task** 指明本用户故事时）或用户故事的 Completion Notes 中取 `Run result:` 行。`OBSERVED` 且带路径：注明它。`N/A — <reason>`：只接受说明为何没有任何可观察内容的理由（"it's a Logic story"不是理由）。`NOT VERIFIED` 出现在标准涉及屏幕上内容的用户故事上：该闸门级别下的缺口。没有该行：建议性，"confirm the build was launched and looked at"。用户对屏幕类标准回答"Yes — passes"却没有保留图片，那是断言而非观察：该闸门级别下的缺口。
 
@@ -125,7 +123,7 @@ model: sonnet
 读取上面的 `review_gate` 行。
 
 - **`skill-gates=skip`：** 不使用代理。注明 `QL-TEST-COVERAGE skipped — [Solo | Lean] mode` 和 `LP-CODE-REVIEW skipped — [Solo | Lean] mode`。在 `lean` 模式下，询问："Did you run `/code-review` on the implemented files?" 选项：Yes — it passed or was approved with suggestions / No — skipping review for this story / No — I'll run it before the sprint close-out。该回答设定 Reviewed by。
-- **`skill-gates=run`：** 读取 `references/review-gates.md` 和 `.claude/docs/director-gates.md`，并立即运行两个闸门。若为跳过，不要加载它。
+- **`skill-gates=run`：** 读取 `references/review-gates.md` 和 `.trae/docs/director-gates.md`，并立即运行两个闸门。若为跳过，不要加载它。
 
 **Reviewed by** 永远不为空：LP-CODE-REVIEW 运行时为 `lead-programmer`；lean 模式选 Yes 时为 `/code-review (you said you ran it; not verified here)`；solo 模式、任一 No 以及尚无实现文件时为 `self, no independent review`。
 
@@ -167,7 +165,7 @@ model: sonnet
 
 **关闭时：**
 
-1. `bash .claude/scripts/md-section.sh set-field <story> Status Complete`，然后 `set-field <story> "Last Updated" <YYYY-MM-DD> --after Status`。
+1. `bash .trae/scripts/md-section.sh set-field <story> Status Complete`，然后 `set-field <story> "Last Updated" <YYYY-MM-DD> --after Status`。
 2. 在用户故事末尾添加内容，使用文件编辑，绝不用 shell 命令（shell 写入会跳过项目的写入检查）：
    ```markdown
    ## Completion Notes
@@ -185,7 +183,7 @@ model: sonnet
 
 ## Phase 8: 下一个用户故事、检查点、收尾
 
-**下一个用户故事。** 若 `production/sprints/` 中没有冲刺计划（在 `workflow: minimal` 下总是如此）：在关闭之后运行 `bash .claude/scripts/story-status.sh`，使本用户故事的新状态被包含在内。它会按路线顺序打印未完成的用户故事；不要重新排序。第一个 `In Review` 用户故事是下一个（第一个 `IN_REVIEW` 行），否则是第一个 `In Progress`，否则是第一个 `Ready` 或 `Not Started`（`TODO`）：
+**下一个用户故事。** 若 `production/sprints/` 中没有冲刺计划（在 `workflow: minimal` 下总是如此）：在关闭之后运行 `bash .trae/scripts/story-status.sh`，使本用户故事的新状态被包含在内。它会按路线顺序打印未完成的用户故事；不要重新排序。第一个 `In Review` 用户故事是下一个（第一个 `IN_REVIEW` 行），否则是第一个 `In Progress`，否则是第一个 `Ready` 或 `Not Started`（`TODO`）：
 
 ```
 ### Next Up
@@ -201,7 +199,7 @@ Run `/story-done [path]` to close it (In Review) — else `/dev-story [path]` to
 
 若有冲刺计划：读取 `references/sprint-next.md`。
 
-**检查点**，在每次运行、每个结论下都要写，无论是否关闭。将该块通过管道传给 `bash .claude/scripts/session-state.sh checkpoint`，它会替换旧块：
+**检查点**，在每次运行、每个结论下都要写，无论是否关闭。将该块通过管道传给 `bash .trae/scripts/session-state.sh checkpoint`，它会替换旧块：
 
 ```
 **Updated:** [date]

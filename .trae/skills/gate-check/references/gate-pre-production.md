@@ -7,13 +7,13 @@
 # 质量闸门：Technical Setup → Pre-Production
 
 **必需产出物：**
-- [ ] 已选定引擎（CLAUDE.md 技术栈不是 `[CHOOSE]`）
-- [ ] 项目配置已填充（`project.yaml` 已设置 engine/naming/performance，或旧版 `.claude/docs/technical-preferences.md` 已填充）
+- [ ] 已选定引擎（AGENTS.md 技术栈不是 `[CHOOSE]`）
+- [ ] 项目配置已填充（`project.yaml` 已设置 engine/naming/performance，或旧版 `.trae/docs/technical-preferences.md` 已填充）
 - [ ] 美术圣经存在于 `design/art/art-bible.md`，且至少包含第 1–4 节（视觉识别基础）
 - [ ] `docs/architecture/` 中至少有 3 份架构决策记录，覆盖
       Foundation 层系统（场景管理、事件架构、存档/读档）
 - [ ] 引擎参考文档存在于 `docs/engine-reference/[engine]/`
-- [ ] 测试框架已初始化：引擎的测试根存在——`tests/unit/` 与 `tests/integration/`（Godot）、`Assets/Tests/EditMode/` 与 `Assets/Tests/PlayMode/`（Unity），或 `Source/<Module>/Private/Tests/`（Unreal）；见 `.claude/docs/directory-structure.md`
+- [ ] 测试框架已初始化：引擎的测试根存在——`tests/unit/` 与 `tests/integration/`（Godot）、`Assets/Tests/EditMode/` 与 `Assets/Tests/PlayMode/`（Unity），或 `Source/<Module>/Private/Tests/`（Unreal）；见 `.trae/docs/directory-structure.md`
 - [ ] CI/CD 测试工作流存在于 `.github/workflows/tests.yml`（或等价物）
 - [ ] 至少存在一个示例测试文件，以确认框架可用
 - [ ] 主架构文档存在于 `docs/architecture/architecture.md`
@@ -57,7 +57,7 @@ ADR，因此两者在此都不算数。若没有任何报告的模式检查过�
 手工阅读每一份 ADR 来追踪依赖图——手工追踪十几份 ADR
 最终总会漏掉一条边；脚本不会：
 ```
-Bash: bash .claude/scripts/adr-dep-graph.sh
+Bash: bash .trae/scripts/adr-dep-graph.sh
 ```
 它会打印 `ADRS`、`EDGES`（每条 Depends-On 引用一行 `adr-A -> adr-B`）、
 `NO_DEPS_SECTION`（没有 Depends On 的 ADR）、`UNFILLED_DEPS`（仍为模板占位符的

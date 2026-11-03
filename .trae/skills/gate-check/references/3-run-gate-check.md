@@ -25,14 +25,14 @@
 **确定性地解析存在性与计数——不要靠打开文件去判断存在什么：**
 
 ```
-Bash: bash .claude/scripts/artifact-check.sh --phase [source-phase]
+Bash: bash .trae/scripts/artifact-check.sh --phase [source-phase]
 ```
 
 传入被推进*离开*的阶段（它的步骤就是必须完成的工作）：Systems Design → Technical Setup 闸门传 `systems-design`，
 Pre-Production → Production 传 `pre-production`，以此类推。
 
 在 `workflow: minimal` 下，还要运行
-`bash .claude/scripts/artifact-check.sh --path minimal`：简报与用户故事
+`bash .trae/scripts/artifact-check.sh --path minimal`：简报与用户故事
 位于该路径上，而不属于任何阶段，它的 `game-brief` 与 `create-stories`
 行就是该层级的底线。
 
@@ -125,7 +125,7 @@ NOT ASSESSED，绝不标记为通过。
   为了统计标题而读取 GDD：
 
   ```
-  Bash: bash .claude/scripts/gdd-structure-check.sh
+  Bash: bash .trae/scripts/gdd-structure-check.sh
   ```
 
   它会为每个 GDD 打印一对 `PRESENT:` / `ABSENT:`，外加一行 `PLACEHOLDER:`
@@ -153,7 +153,7 @@ NOT ASSESSED，绝不标记为通过。
 
   只识别这三个值。把其他任何值呈现给用户，并
   回退到 `warn`，而不是猜测。
-- 对于本地化检查：在**代码根**中 `Grep` 硬编码字符串（按 `.claude/docs/code-root-resolution.md` 解析）。**如果代码根无法解析，报告 `NOT ASSESSED — code root unresolved`，而不是零命中。**
+- 对于本地化检查：在**代码根**中 `Grep` 硬编码字符串（按 `.trae/docs/code-root-resolution.md` 解析）。**如果代码根无法解析，报告 `NOT ASSESSED — code root unresolved`，而不是零命中。**
 
 ### 交叉引用检查
 - 将 `design/gdd/` 文档与**代码根**中的实现进行对比

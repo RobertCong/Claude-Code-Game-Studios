@@ -2,7 +2,7 @@
 
 所有总监与主管评审闸门的索引。技能从本索引引用闸门 ID，而不是把提示词内联 —
 这样提示词需要更新时不会出现漂移。每个闸门的完整定义（Trigger、Context to pass、
-Prompt、Verdicts）位于 `.claude/docs/director-gates/` 下一组独立文件中，文件名即
+Prompt、Verdicts）位于 `.trae/docs/director-gates/` 下一组独立文件中，文件名即
 闸门 ID 的小写形式。
 
 **范围**：全部 7 个制作阶段（Concept → Release），全部 3 位 Tier 1 总监，
@@ -19,7 +19,7 @@ Prompt、Verdicts）位于 `.claude/docs/director-gates/` 下一组独立文件�
 按前缀识别代理：`CD-` creative-director · `TD-` technical-director ·
 `PR-` producer · `AD-` art-director · `LP-` lead-programmer · `QL-` qa-lead ·
 `ND-` narrative-director。下列定义文件位于
-`.claude/docs/director-gates/`；每个文件的头部注明其所属代理的模型层级。
+`.trae/docs/director-gates/`；每个文件的头部注明其所属代理的模型层级。
 
 | 闸门 ID | 用途 | 定义文件 |
 |---------|---------|-----------------|
@@ -82,13 +82,13 @@ Prompt、Verdicts）位于 `.claude/docs/director-gates/` 下一组独立文件�
 
 **强制要求：每次派生闸门之前都要应用评审模式。**
 
-该值已经解析完成 — 技能调用
-`` !`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode` ``
-（并授予对应的 `allowed-tools` 权限 — 见 `config-resolution.md`），
+该值必须先用下面的命令解析：
+`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode`
+（Trae 不会自动预执行；技能里要把它写成「运行并读取输出」步骤 — 见 `config-resolution.md`），
 然后从输出的块中读取 `review_mode`。不要在技能里重新推导它。完整链路
 （`project.local.yaml` → `project.yaml` → `production/review-mode.txt`
 → `modes.rigor` 展开，`standard`→`lean`）、其默认值及失败模式在
-`.claude/docs/config-resolution.md` 中说明，并由配置测试套件覆盖。
+`.trae/docs/config-resolution.md` 中说明，并由配置测试套件覆盖。
 
 若技能接受内联 `--review [mode]` 参数，则该参数覆盖本次运行解析出的值。
 
@@ -107,7 +107,7 @@ Prompt、Verdicts）位于 `.claude/docs/director-gates/` 下一组独立文件�
 # Apply mode check, then:
 Spawn `[agent-name]` via `Agent`:
 - Gate: [GATE-ID] — `Agent` prompt instructs the agent to read
-  `.claude/docs/director-gates/[gate-id].md` FIRST (parent must not read it)
+  `.trae/docs/director-gates/[gate-id].md` FIRST (parent must not read it)
 - Context: [fields under that gate's **Context to pass**]
 - Await the verdict before proceeding.
 ```

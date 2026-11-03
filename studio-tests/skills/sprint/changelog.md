@@ -10,7 +10,7 @@
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 具备 ≥2 个 phase 标题
 - [ ] 包含结论关键词：CHANGELOG WRITTEN、COMPLETE、BLOCKED
 - [ ] 包含 "May I write" 措辞（技能会写入变更日志）
@@ -26,7 +26,7 @@
 
 ## Fixture Defaults
 
-除非该用例自己的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
+除非该用例自己的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 
@@ -204,7 +204,7 @@
 - [ ] 写入变更日志之前始终询问“May I write”
 - [ ] 不调用任何总监闸门
 - [ ] 写入后结论为 CHANGELOG WRITTEN，拒绝写入时为 COMPLETE，没有历史记录或没有 Game 提交时为 BLOCKED
-- [ ] 声明 `model: sonnet`——它撰写面向玩家的文案
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 
 ---
 

@@ -1,6 +1,6 @@
 ---
-paths:
-  - "prototypes/**"
+alwaysApply: false
+globs: prototypes/**
 ---
 
 # 原型代码标准（放宽）

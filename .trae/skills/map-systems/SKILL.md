@@ -3,14 +3,12 @@ name: map-systems
 description: "将概念拆解为各个系统、映射依赖关系、确定设计顺序优先级、创建系统索引。"
 argument-hint: "[next | system-name] [--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, TaskCreate, TaskGet, TaskList, TaskUpdate, Agent, Bash(bash "*/.claude/skills/map-systems/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,workflow,docs.density,project.stage`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,workflow,docs.density,project.stage`
 
-上面已解析 — 直接使用；`--review` 覆盖 `review_mode`。若无解析块 →
-使用 `.claude/docs/config-resolution.md` 中的默认值。
+上一步命令的输出已解析 — 直接使用；`--review` 覆盖 `review_mode`。若无解析块 →
+使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 # 映射系统
 
@@ -27,10 +25,10 @@ model: sonnet
   并交接给 `/design-system`（Phase 6）。
 
 
-完整检查模式见 `.claude/docs/director-gates.md`。各个质量闸门（gate）的定义位于 `.claude/docs/director-gates/[gate-id].md` — 被派生的代理读取自己的闸门文件；不要在父会话中读取它。
+完整检查模式见 `.trae/docs/director-gates.md`。各个质量闸门（gate）的定义位于 `.trae/docs/director-gates/[gate-id].md` — 被派生的代理读取自己的闸门文件；不要在父会话中读取它。
 
 
-每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+每次 `AskUserQuestion` 调用都遵循 `.trae/docs/automation-modes.md`
 （协作模式总是询问 · 引导模式仅重大决策 · 自主模式记录并继续；
 `automation_always_ask` 类别始终提示）。在协作模式下，系统列表、
 依赖、优先级和写入批准是分开的问题：
@@ -49,7 +47,7 @@ model: sonnet
 > 每个系统一段简短文字，在 `thorough` 下再加关系分析 —
 > 以及 `## Dependency Map` 的分层说明中。**不要给
 > 枚举表增加列** — 它是
-> `.claude/docs/templates/systems-index.md` 中的固定契约，其使用方
+> `.trae/docs/templates/systems-index.md` 中的固定契约，其使用方
 > （`/design-system` §6 和 §7、`/create-epics`）是针对它
 > 定义的列编写的。加宽它是模式变更，不是格式选择。
 >
@@ -63,7 +61,7 @@ model: sonnet
 > 编写的。
 > 在 `terse` 下，该表加上一段 `## Overview` 就是全部输出。
 
-**`workflow`**（见 `.claude/docs/workflow-modes.md`）：
+**`workflow`**（见 `.trae/docs/workflow-modes.md`）：
 - `full` / `standard` — `/design-system` 之前的必需项（必须先映射系统，
   才能撰写逐系统 GDD）。
 - `minimal` — 非必需（游戏简报取代系统索引）。仍可
@@ -199,7 +197,7 @@ model: sonnet
 - `lean` → 跳过（不是 PHASE-GATE）。注明：“TD-SYSTEM-BOUNDARY 已跳过 — Lean 模式。” 继续优先级分配。
 - `full` → 照常派发。
 
-**依赖映射获得批准后，在进入优先级分配之前，通过 `Agent` 使用闸门 TD-SYSTEM-BOUNDARY（`.claude/docs/director-gates/td-system-boundary.md`）派发 `technical-director`。**
+**依赖映射获得批准后，在进入优先级分配之前，通过 `Agent` 使用闸门 TD-SYSTEM-BOUNDARY（`.trae/docs/director-gates/td-system-boundary.md`）派发 `technical-director`。**
 
 传递：依赖图（每个系统 → 它依赖什么）、分层分配、瓶颈系统，以及任何循环依赖及其提议的解决方案。
 
@@ -259,7 +257,7 @@ Est. Effort`。理由存在于上方对话中，以及对于用户在
 - `lean` → 跳过（不是 PHASE-GATE）。注明：“PR-SCOPE 已跳过 — Lean 模式。” 继续 Step 4c。
 - `full` → 照常派发。
 
-**优先级获得批准后，在写入索引之前，通过 `Agent` 使用闸门 PR-SCOPE（`.claude/docs/director-gates/pr-scope.md`）派发 `producer`。**
+**优先级获得批准后，在写入索引之前，通过 `Agent` 使用闸门 PR-SCOPE（`.trae/docs/director-gates/pr-scope.md`）派发 `producer`。**
 
 从索引传递闸门字段：完整愿景范围（索引中的每个系统）、MVP 定义（MVP 层级的系统）、范围层级（每个里程碑层级的系统数量，附估算实现体量 — 系统数量 × 平均复杂度）、所述项目时间线作为时间线估算，以及团队规模。
 
@@ -288,7 +286,7 @@ Est. Effort`。理由存在于上方对话中，以及对于用户在
 
 ### Step 5a: 起草文档
 
-使用 `.claude/docs/templates/systems-index.md` 中的模板，用 Phase 2-4 的所有数据
+使用 `.trae/docs/templates/systems-index.md` 中的模板，用 Phase 2-4 的所有数据
 填充系统索引：
 - 填充枚举表
 - 填充依赖图
@@ -309,7 +307,7 @@ Est. Effort`。理由存在于上方对话中，以及对于用户在
 在回答“是”后写入文件。
 
 **在 `automation: guided` 下** — **新**索引会收到同样的“我可以写入……吗？”
-问题，因为 `.claude/docs/automation-modes.md` 规定 `guided` 对新文件询问
+问题，因为 `.trae/docs/automation-modes.md` 规定 `guided` 对新文件询问
 “我可以写入吗？”。当索引已存在时，呈现上方摘要，
 说明目标位置（`design/gdd/systems-index.md`），并在不等待
 明确“是”的情况下写入更新。之后说明你写了什么。
@@ -319,7 +317,7 @@ Est. Effort`。理由存在于上方对话中，以及对于用户在
 - `lean` → 跳过（不是 PHASE-GATE）。注明：“CD-SYSTEMS 已跳过 — Lean 模式。” 继续 Step 5c。
 - `full` → 照常派发。
 
-**系统索引写入后，通过 `Agent` 使用闸门 CD-SYSTEMS（`.claude/docs/director-gates/cd-systems.md`）派发 `creative-director`。**
+**系统索引写入后，通过 `Agent` 使用闸门 CD-SYSTEMS（`.trae/docs/director-gates/cd-systems.md`）派发 `creative-director`。**
 
 传递：系统索引路径；游戏支柱和核心幻想 — 来自 `design/gdd/game-concept.md`，或在 `minimal` 下来自 `design/game-brief.md` 的提案和“他们感受如何”一行（该文件没有支柱）；每个层级（MVP / Vertical Slice / Alpha / Full Vision）的优先级分配；以及依赖图中的高风险和瓶颈系统。
 
@@ -329,7 +327,7 @@ Est. Effort`。理由存在于上方对话中，以及对于用户在
 `templates/systems-index.md` 有一个 Priority Tiers *定义表*，而不是
 每个层级一个小节，因此没有“层级小节顶部”可写入 — 不要
 引导写入者去那里。如果为 NOT ASSESSED [missing input]，它不是 APPROVE
-（`.claude/docs/director-gates.md`）：指出缺失了什么，然后补充并
+（`.trae/docs/director-gates.md`）：指出缺失了什么，然后补充并
 重新运行闸门，或在同一位置记录 `> **Creative Director Note**:
 CD-SYSTEMS NOT ASSESSED — [input]` 之前先询问。
 
@@ -413,7 +411,7 @@ CD-SYSTEMS NOT ASSESSED — [input]` 之前先询问。
 ## 协作协议
 
 **适用于 `collaborative` 模式（默认）。** 对于 `guided` 和
-`autonomous` 模式，见 `.claude/docs/automation-modes.md` — 以下规则
+`autonomous` 模式，见 `.trae/docs/automation-modes.md` — 以下规则
 描述协作模式的要求，而非普遍行为。
 
 本技能在每个阶段都遵循协作设计原则：
@@ -441,7 +439,7 @@ CD-SYSTEMS NOT ASSESSED — [input]` 之前先询问。
 如果上下文在任何时候达到或超过 70%，追加此提示：
 
 > **上下文接近上限（≥70%）。** 系统索引已保存到
-> `design/gdd/systems-index.md`。打开新的 Claude Code 会话以继续
+> `design/gdd/systems-index.md`。打开新的 Trae 会话以继续
 > 设计各个 GDD — 运行 `/map-systems next` 从中断处继续。
 
 ---

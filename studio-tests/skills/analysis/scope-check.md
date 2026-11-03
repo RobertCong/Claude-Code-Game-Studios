@@ -23,10 +23,10 @@ Cut / Defer / Keep / Flag 建议。结论随净范围
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 有 ≥2 个 phase 标题
 - [ ] 包含结论关键词：PASS、CONCERNS、NOT ASSESSED、FAIL
-- [ ] 不要求 "May I write" 措辞（技能声明为只读，且 `allowed-tools` 没有 Write/Edit）
+- [ ] 不要求 "May I write" 措辞（只读：技能声明不写入文件）
 - [ ] 有下一步交接（Phase 5：按结论给出后续动作）
 
 ---
@@ -41,7 +41,7 @@ Cut / Defer / Keep / Flag 建议。结论随净范围
 
 除非某个用例自己的 Fixture 另有说明，否则每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。
-规则见：`studio-tests/CLAUDE.md` §
+规则见：`studio-tests/AGENTS.md` §
 Fixture defaults。
 
 ---
@@ -200,7 +200,7 @@ Fixture defaults。
 - [ ] 当基线没有条目或当前状态无法读取时，发出 NOT ASSESSED 而非百分比
 - [ ] 不写入任何文件
 - [ ] 不调用任何总监闸门
-- [ ] 声明 `model: haiku`（当使用声明的层级时：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 
 ---
 

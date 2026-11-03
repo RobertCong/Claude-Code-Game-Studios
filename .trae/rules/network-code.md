@@ -1,8 +1,6 @@
 ---
-paths:
-  - "src/networking/**"
-  - "Assets/**/{Networking,networking,Network,network}/**/*.cs"
-  - "Source/**/{Networking,networking,Network,network}/**/*.{h,cpp}"
+alwaysApply: false
+globs: src/networking/**,Assets/**/Networking/**/*.cs,Assets/**/networking/**/*.cs,Assets/**/Network/**/*.cs,Assets/**/network/**/*.cs,Source/**/Networking/**/*.h,Source/**/Networking/**/*.cpp,Source/**/networking/**/*.h,Source/**/networking/**/*.cpp,Source/**/Network/**/*.h,Source/**/Network/**/*.cpp,Source/**/network/**/*.h,Source/**/network/**/*.cpp
 ---
 
 # 网络代码规则

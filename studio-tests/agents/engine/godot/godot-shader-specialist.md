@@ -11,7 +11,7 @@
 
 - [ ] `description:` 字段存在且与领域相关（提及 Godot 着色语言 / 材质 / 后处理）
 - [ ] `tools:` 列表包含 Read、Write、Edit、Glob、Grep
-- [ ] 模型层级为 `sonnet` — frontmatter `model:` 的内容恰好为 `sonnet`（层级说明：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 代理定义引用 `docs/engine-reference/godot/VERSION.md` 作为 Godot 着色器 API 变更的权威来源
 
 ---

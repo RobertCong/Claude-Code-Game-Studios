@@ -1,6 +1,6 @@
 # [System Name]
 
-> Authoring guidance: .claude/docs/templates/guidance/game-design-document-guide.md（撰写时按小节加载——不要整篇通读）。
+> Authoring guidance: .trae/docs/templates/guidance/game-design-document-guide.md（撰写时按小节加载——不要整篇通读）。
 
 > **Status**: [In Design | Designed | In Review | Needs Revision | Approved | Implemented]
 > **Author**: [user + agents]

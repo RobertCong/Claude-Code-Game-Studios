@@ -8,7 +8,7 @@
 `studio-tests/catalog.yaml` 中有 `category:` 时，用 `/skill-test category [name]` 记录
 类别基线。如果两个基线都干净，它以 "No improvements needed." 停止。否则它展示
 诊断、提出前后对比的修复、询问 "May I write this improved
-version to `.claude/skills/[name]/SKILL.md`?"（同时点名修复所改动的每个
+version to `.trae/skills/[name]/SKILL.md`?"（同时点名修复所改动的每个
 `references/` 文件 —— 某个阶段的修复写在其 `references/` 文件中）、写入、
 重新运行相同的测试，
 并展示每个维度的 前 → 后 对比，外加一行合并行
@@ -17,7 +17,7 @@ version to `.claude/skills/[name]/SKILL.md`?"（同时点名修复所改动的�
 阶段 6 比较合并计数（静态 FAIL + 类别 FAIL + 静态
 WARN + 类别 WARN）。低于基线 → "Score improved. Changes kept."
 相同或更差 → "Combined score did not improve."，随后询问 "May I restore
-`.claude/skills/[name]/SKILL.md` to the content it had before this run?"（点名阶段 5 写入的每个文件）——
+`.trae/skills/[name]/SKILL.md` to the content it had before this run?"（点名阶段 5 写入的每个文件）——
 回退仅在回答 yes 时运行，并写回阶段 5 记录的副本（绝不用
 `git checkout`，那也会丢弃此前未提交的编辑）。不适用任何总监闸门。
 
@@ -27,7 +27,7 @@ WARN + 类别 WARN）。低于基线 → "Score improved. Changes kept."
 
 由 `/skill-test spec` 对照 SKILL.md 检查 —— 无需夹具。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 至少有 2 个阶段标题
 - [ ] 阶段 6 同时说明两种结果："Score improved. Changes kept." 与 "Combined score did not improve."
 - [ ] 在应用修复之前包含 "May I write" 协作协议措辞
@@ -45,7 +45,7 @@ WARN + 类别 WARN）。低于基线 → "Score improved. Changes kept."
 
 除非用例自身的夹具另有说明，每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有
-`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
+`project.local.yaml`。规则见：`studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 
@@ -54,7 +54,7 @@ WARN + 类别 WARN）。低于基线 → "Score improved. Changes kept."
 ### Case 1: Happy Path — Check 4 FAIL and Check 5 WARN fixed, changes kept
 
 **Fixture:**
-- `.claude/skills/some-skill/SKILL.md` 的 `allowed-tools` 中有 `Write`，但没有
+- `.trae/skills/some-skill/SKILL.md` 的 正文提到 `Write`，但没有
   写前询问措辞（检查 4 FAIL），也没有下一步章节（检查 5 WARN）
 - catalog 给 `some-skill` 设定 `category: utility`；其类别基线为
   1 个 FAIL（U1，因为静态检查失败）
@@ -68,7 +68,7 @@ WARN + 类别 WARN）。低于基线 → "Score improved. Changes kept."
 2. 显示类别基线："Category baseline: 1 failures, 0 warnings (utility rubric)"
 3. 在提出任何改动之前展示完整诊断
 4. 只为失败部分提出前/后区块；技能询问
-   "May I write this improved version to `.claude/skills/some-skill/SKILL.md`?"
+   "May I write this improved version to `.trae/skills/some-skill/SKILL.md`?"
 5. 写入文件；重新运行两项测试；对比显示
    `Static: Before 1 failures, 1 warnings → After 0 failures, 0 warnings`、类别行
    以及一行合并行 `Combined: 3 → 0 (improved)`
@@ -86,7 +86,7 @@ WARN + 类别 WARN）。低于基线 → "Score improved. Changes kept."
 ### Case 2: Fix Causes Regression — revert offered, runs only on yes
 
 **Fixture:**
-- `.claude/skills/some-skill/SKILL.md` 的静态基线为 0 个 FAIL、
+- `.trae/skills/some-skill/SKILL.md` 的静态基线为 0 个 FAIL、
   1 个 WARN（检查 5，无交接）
 - 应用的修复新增了交接，但删除了承载结论
   关键字与写前询问行的章节：静态重测显示 2 个 FAIL
@@ -105,7 +105,7 @@ WARN + 类别 WARN）。低于基线 → "Score improved. Changes kept."
    重测如此说明）
 3. 技能报告 "Combined score did not improve."，并展示变更内容与
    它为何可能没有帮助
-4. 技能询问 "May I restore `.claude/skills/some-skill/SKILL.md` to the content it had before this run?"
+4. 技能询问 "May I restore `.trae/skills/some-skill/SKILL.md` to the content it had before this run?"
 5. 回答 yes 时：用 Write 写回阶段 5 的副本 —— 不运行 `git checkout`
 
 **Assertions:**
@@ -141,7 +141,7 @@ WARN + 类别 WARN）。低于基线 → "Score improved. Changes kept."
 3. 检查 1 的修复写在 `SKILL.md`；G2 与 G4 的修复写在
    `references/4-assessment.md`，而不是放回 `SKILL.md`
 4. 写入询问点名两个文件："May I write this improved version to
-   `.claude/skills/gate-check/SKILL.md` and `.claude/skills/gate-check/references/4-assessment.md`?"
+   `.trae/skills/gate-check/SKILL.md` and `.trae/skills/gate-check/references/4-assessment.md`?"
 5. 重新运行 `/skill-test static gate-check` 与 `/skill-test category gate-check`
 6. 对比以 `Combined: 3 → 0 (improved)` 结尾："Score improved. Changes kept."
 
@@ -159,10 +159,10 @@ WARN + 类别 WARN）。低于基线 → "Score improved. Changes kept."
 ### Case 4: Skill Already Clean — No improvements needed
 
 **Fixture:**
-- `.claude/skills/some-skill/SKILL.md` 为使本用例通过而编写，通过全部 7 项
+- `.trae/skills/some-skill/SKILL.md` 为使本用例通过而编写，通过全部 7 项
   静态检查且无 WARN：五个 frontmatter 字段、一个与其记载模式一致的 `argument-hint`、
   三个 `## Phase N` 标题、一个 `PASS` /
-  `FAIL` 结论、`allowed-tools` 中的 `Write` 并附前置 "May I write"、
+  `FAIL` 结论、正文承诺写入并附前置 "May I write"、
   一个点名 `/skill-test` 的结尾下一步章节，且无 `context: fork`
 - catalog 给 `some-skill` 设定 `category: utility`；U1 与 U2 均通过
 - 专门编写的技能，而非 `brainstorm` 之类的现行技能：现行技能今天是否干净
@@ -188,7 +188,7 @@ WARN + 类别 WARN）。低于基线 → "Score improved. Changes kept."
 ### Case 5: Director Gate Check — No gate; skill-improve is a meta utility
 
 **Fixture:**
-- `.claude/skills/some-skill/SKILL.md` 至少 1 个静态失败；用户
+- `.trae/skills/some-skill/SKILL.md` 至少 1 个静态失败；用户
   批准写入
 
 **Input:** `/skill-improve some-skill`
@@ -208,7 +208,7 @@ WARN + 类别 WARN）。低于基线 → "Score improved. Changes kept."
 ### Case 6: Equal Score — "no change" does not keep the fix as an improvement
 
 **Fixture:**
-- `.claude/skills/some-skill/SKILL.md` 的静态基线为 0 个 FAIL、
+- `.trae/skills/some-skill/SKILL.md` 的静态基线为 0 个 FAIL、
   1 个 WARN（检查 7，参数提示与记载的模式不一致）
 - catalog 未给 `some-skill` 设定 `category:`，因此跳过类别检查
 - 应用的修复纠正了提示，但删除了结尾下一步章节：
@@ -221,7 +221,7 @@ WARN + 类别 WARN）。低于基线 → "Score improved. Changes kept."
 1. 显示 "Category: not yet assigned — skipping category checks."
 2. 对比的合并行显示 `Combined: 1 → 1 (no change)`
 3. 相等计数走 "did not improve" 分支："Combined score did not
-   improve."，随后 "May I restore `.claude/skills/some-skill/SKILL.md` to the
+   improve."，随后 "May I restore `.trae/skills/some-skill/SKILL.md` to the
    content it had before this run?"
 4. 回答 no 时，文件保持写入后的样子，不恢复任何内容
 
@@ -236,7 +236,7 @@ WARN + 类别 WARN）。低于基线 → "Score improved. Changes kept."
 ### Case 7: Split Skill Regression — every file named, recorded and restored
 
 **Fixture:**
-- 专门编写的技能 `.claude/skills/split-skill/`，含 `SKILL.md` 与
+- 专门编写的技能 `.trae/skills/split-skill/`，含 `SKILL.md` 与
   `references/` 中的两个文件：`1-gather.md` 与 `2-report.md`。`references/`
   文件承载各阶段步骤；`SKILL.md` 承载 frontmatter 与
   阶段清单
@@ -267,8 +267,8 @@ WARN + 类别 WARN）。低于基线 → "Score improved. Changes kept."
 5. 重新运行测量新分数；对比以
    `Combined: 2 → 3 (worse)` 结尾，技能报告 "Combined score did not improve."
 6. 恢复询问点名阶段 5 写入的每个文件："May I restore
-   `.claude/skills/split-skill/SKILL.md` and
-   `.claude/skills/split-skill/references/2-report.md` to the content they had
+   `.trae/skills/split-skill/SKILL.md` and
+   `.trae/skills/split-skill/references/2-report.md` to the content they had
    before this run?"
 7. 回答 yes 时：用 Write 写回每个文件记录的文本；不用
    `git checkout`；不触碰 `1-gather.md`

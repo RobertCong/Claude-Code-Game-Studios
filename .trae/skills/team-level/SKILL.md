@@ -3,8 +3,6 @@ name: team-level
 description: "编排关卡团队 — level-designer、narrative-director、world-builder、art-director、systems-designer、qa-tester — 完成完整区域创建。"
 argument-hint: "[level name or area to design] [--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, TaskCreate, TaskGet, TaskList, TaskUpdate, Bash(bash "*/.claude/skills/team-level/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
 # 关卡团队
@@ -22,14 +20,14 @@ model: sonnet
 在 `autonomous` 模式下，流水线端到端运行，并通过
 `log_decision` 记录每个步骤的结果。`automation_always_ask` 类别中的决策
 （`is_always_ask_category` 辅助函数）无论模式如何都会始终提示。参见
-`.claude/docs/automation-modes.md`。
+`.trae/docs/automation-modes.md`。
 
 ## Phase 0: 解析配置
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,team.size`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,team.size`
 
-已在上面解析——按原样使用；`--review` 覆盖 `review_mode`。无输出块时 →
-使用 `.claude/docs/config-resolution.md` 中的默认值。
+已在上一步解析——按原样使用；`--review` 覆盖 `review_mode`。无输出块时 →
+使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 `review_mode` 设定总监闸门深度，而本流水线没有总监闸门：
 在任何 `review_mode` 下，下面的阶段都不会派出 CD-、TD-、PR- 或 AD-PHASE-GATE。
@@ -37,7 +35,7 @@ model: sonnet
 在这些决策点上工作的 agent 是团队成员，而不是总监闸门。
 
 `automation` 驱动上面的决策点说明。关于每种模式如何改变流水线行为，
-参见上面的决策点说明和 `.claude/docs/automation-modes.md`。
+参见上面的决策点说明和 `.trae/docs/automation-modes.md`。
 
 **`team.size`**：哪些 agent 处于活动状态（与 review_mode 闸门深度和 workflow 文档正交）。
 - **`individual`**（默认）：仅 `level-designer`。其他 agent 通过 level-designer 咨询，不单独派出。
@@ -84,13 +82,13 @@ model: sonnet
 ## 如何委派
 
 使用 `Agent` 工具将每个团队成员作为子代理派出：
-- `subagent_type: narrative-director` — 叙事目的、角色、情感弧线
-- `subagent_type: world-builder` — 世界观上下文、环境叙事、世界规则
-- `subagent_type: level-designer` — 空间布局、节奏、遭遇、导航
-- `subagent_type: systems-designer` — 敌人组合、战利品表、难度平衡性
-- `subagent_type: art-director` — 视觉主题、色彩调色板、光照、资源需求
-- `subagent_type: accessibility-specialist` — 导航清晰度、色盲安全性、认知负荷
-- `subagent_type: qa-tester` — 测试用例、边界测试、试玩测试清单
+- 委派给 `narrative-director` 子代理 — 叙事目的、角色、情感弧线
+- 委派给 `world-builder` 子代理 — 世界观上下文、环境叙事、世界规则
+- 委派给 `level-designer` 子代理 — 空间布局、节奏、遭遇、导航
+- 委派给 `systems-designer` 子代理 — 敌人组合、战利品表、难度平衡性
+- 委派给 `art-director` 子代理 — 视觉主题、色彩调色板、光照、资源需求
+- 委派给 `accessibility-specialist` 子代理 — 导航清晰度、色盲安全性、认知负荷
+- 委派给 `qa-tester` 子代理 — 测试用例、边界测试、试玩测试清单
 
 **给每个 agent 写简报——不要倾倒上下文。** 只读取一次共享输入，并以内联方式传递提炼后的简报：每个 agent 实际需要的那几行，绝不要为你已经读过的文档传文件路径（拿到路径的 agent 会重新读取整个文件）。只为你尚未读过且只有该 agent 需要的文档传递路径。
 
@@ -114,7 +112,7 @@ model: sonnet
 这些是工作草稿；持久记录是你根据它们编译的关卡设计文档
 （`design/levels/[level-name].md`）。
 
-> **为什么这不违反协作协议。** `CLAUDE.md` 要求 agent 在 Write/Edit 之前询问“May I write this to [filepath]?”。此处派出的子代理**不询问**即可写入，这是刻意的有界例外，而不是疏忽——与 `consistency-check` 追加到 `active.md` 时已做出的相同决定。该例外仅在以下三项全部成立时适用：（1）路径是**你**在提示中命名的，因此用户在批准该阶段时已批准目标；（2）它是 `production/`、`docs/` 或 `tests/` 下的新产出物，绝不是对现有源码或配置的编辑；（3）产生它的阶段本身在流水线推进前由 `AskUserQuestion` 把关。超出这三项，agent 必须询问。**不要通过按子代理逐个询问来“修复”这一点**——每个阶段每个 agent 一个提示会让编排器无法使用，这正是该例外存在的原因。
+> **为什么这不违反协作协议。** `AGENTS.md` 要求 agent 在 Write/Edit 之前询问“May I write this to [filepath]?”。此处派出的子代理**不询问**即可写入，这是刻意的有界例外，而不是疏忽——与 `consistency-check` 追加到 `active.md` 时已做出的相同决定。该例外仅在以下三项全部成立时适用：（1）路径是**你**在提示中命名的，因此用户在批准该阶段时已批准目标；（2）它是 `production/`、`docs/` 或 `tests/` 下的新产出物，绝不是对现有源码或配置的编辑；（3）产生它的阶段本身在流水线推进前由 `AskUserQuestion` 把关。超出这三项，agent 必须询问。**不要通过按子代理逐个询问来“修复”这一点**——每个阶段每个 agent 一个提示会让编排器无法使用，这正是该例外存在的原因。
 
 3. **编排关卡设计团队**，按顺序：
 
@@ -243,7 +241,7 @@ level-designer 应：
 仅仅为了写入编排器已经持有的文本而重新派出 agent 纯属额外开销。
 
 结论（Verdict）：**COMPLETE** — 关卡设计文档已产出，所有团队输出已编译。
-结论（Verdict）：**BLOCKED** — 一个或多个 agent 阻塞，或有 agent 被跳过（`.claude/docs/error-recovery-protocol.md` 第 5 步）；已产生部分报告并列出未解决项。
+结论（Verdict）：**BLOCKED** — 一个或多个 agent 阻塞，或有 agent 被跳过（`.trae/docs/error-recovery-protocol.md` 第 5 步）；已产生部分报告并列出未解决项。
 
 ## 后续步骤
 
@@ -259,7 +257,7 @@ level-designer 应：
 却什么都没写，这既不是 BLOCKED，也不是错误，也不是“无法完成”，因此下面的触发器
 永远不会触发。以未满足的契约名义恢复它；上下文通常还在。
 
-如果任何派出的 agent 返回 BLOCKED、错误或无法完成：**立即暴露它，不要越过它阻塞的依赖继续推进，并且始终产生部分报告。** 被跳过 agent 的章节保持为已命名的缺口——绝不要用你自己的内容填充它。完整流程见：`.claude/docs/error-recovery-protocol.md`。
+如果任何派出的 agent 返回 BLOCKED、错误或无法完成：**立即暴露它，不要越过它阻塞的依赖继续推进，并且始终产生部分报告。** 被跳过 agent 的章节保持为已命名的缺口——绝不要用你自己的内容填充它。完整流程见：`.trae/docs/error-recovery-protocol.md`。
 
 常见阻塞项：
 - 输入文件缺失（未找到用户故事、缺少 GDD）→ 重定向到创建它的技能

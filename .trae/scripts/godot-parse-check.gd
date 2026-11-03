@@ -4,7 +4,7 @@ extends SceneTree
 ## Usage, from the project root, after `godot --headless --path . --import`
 ## (which builds the class cache that `class_name` lookups need):
 ##
-##   godot --headless --path . -s res://.claude/scripts/godot-parse-check.gd -- res://src/a.gd res://src/b.gd
+##   godot --headless --path . -s res://.trae/scripts/godot-parse-check.gd -- res://src/a.gd res://src/b.gd
 ##
 ## Prints `ok: <path>` or `PARSE FAIL: <path>` per script, with Godot's own
 ## error lines above each failure. Exit 0 when every script loads, 1 when any

@@ -3,8 +3,6 @@ name: team-live-ops
 description: "编排长线运营（Live Ops）团队——live-ops-designer、economy-designer、analytics-engineer、community-manager、writer——负责一个赛季或运营活动。"
 argument-hint: "[season name or event description] [--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, TaskCreate, TaskGet, TaskList, TaskUpdate, Bash(bash "*/.claude/skills/team-live-ops/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 # 长线运营团队（Team Live Ops）
 
@@ -22,14 +20,14 @@ model: sonnet
 在 `autonomous` 模式下，它端到端运行，并通过
 `log_decision` 记录每个阶段的结果。`automation_always_ask` 类别中的决策
 （`is_always_ask_category` 辅助函数）无论何种模式都会始终提示。参见
-`.claude/docs/automation-modes.md`。
+`.trae/docs/automation-modes.md`。
 
 ## Phase 0: 解析配置
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,team.size,workflow`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,team.size,workflow`
 
-以上已解析——直接使用；`--review` 覆盖 `review_mode`。无配置块 →
-使用 `.claude/docs/config-resolution.md` 中的默认值。
+以上命令的输出已解析——直接使用；`--review` 覆盖 `review_mode`。无配置块 →
+使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 `review_mode` 设定总监闸门（director gate）的深度，而本流水线没有总监闸门：
 无论 `review_mode` 为何，下面的任何阶段都不会生成 CD-、TD-、PR- 或 AD-PHASE-GATE。
@@ -37,7 +35,7 @@ model: sonnet
 而在这些点上工作的代理是团队成员，不是总监闸门。
 
 `automation` 驱动上面的决策点说明。关于每种模式如何改变流水线行为，参见上面的决策点说明和
-`.claude/docs/automation-modes.md`。
+`.trae/docs/automation-modes.md`。
 
 **`team.size`**：哪些代理处于活动状态（与 review_mode 的闸门深度和工作流文档相互正交）。
 - **`individual`**（默认）：`live-ops-designer` + `economy-designer`。其他代理通过这两者咨询，不单独生成。
@@ -78,12 +76,12 @@ model: sonnet
 ## 如何委派
 
 使用 `Agent` 工具把每位团队成员生成为子代理：
-- `subagent_type: live-ops-designer` —— 赛季/活动结构与留存机制
-- `subagent_type: economy-designer` —— 运营经济平衡与奖励定价
-- `subagent_type: analytics-engineer` —— 成功指标、A/B 测试、事件埋点
-- `subagent_type: community-manager` —— 面向玩家的沟通与消息
-- `subagent_type: narrative-director` —— 赛季主题与叙事框架
-- `subagent_type: writer` —— 所有面向玩家的文本：活动描述、物品名称、文案
+- 委派给 `live-ops-designer` 子代理 —— 赛季/活动结构与留存机制
+- 委派给 `economy-designer` 子代理 —— 运营经济平衡与奖励定价
+- 委派给 `analytics-engineer` 子代理 —— 成功指标、A/B 测试、事件埋点
+- 委派给 `community-manager` 子代理 —— 面向玩家的沟通与消息
+- 委派给 `narrative-director` 子代理 —— 赛季主题与叙事框架
+- 委派给 `writer` 子代理 —— 所有面向玩家的文本：活动描述、物品名称、文案
 
 **为每个代理写简报——不要倾倒上下文。** 把共享输入**只读一次**，并以内联方式传递提炼后的简报：只给每个代理真正需要的那些行，绝不要把你已经读过的文档以文件路径形式发给它（拿到路径的代理会重新读取整个文件）。只有当你未读过、且只有该代理需要的文档，才传路径。
 
@@ -107,7 +105,7 @@ slug——小写、空格 → 连字符。每个代理一个文件，所以并�
 这些是工作草稿；`design/live-ops/seasons/` 下的最终文档
 由它们汇编而成（见输出文档）。
 
-> **为什么这不算违反协作协议。** `CLAUDE.md` 要求代理在 Write/Edit 之前询问"我可以把它写入 [filepath] 吗？"。在这里生成的子代理写入时**不**询问，这是有意为之的受限例外，而不是疏忽——与 `consistency-check` 追加到 `active.md` 时已有的处理相同。该例外仅在以下三者同时成立时才适用：（1）路径是**你**在提示词中点名的，因此用户在批准该阶段时已批准了目标位置；（2）它是位于 `production/`、`docs/` 或 `tests/` 下的新产出物，绝不是对现有源码或配置的修改；（3）产生它的阶段本身在流水线推进之前由 `AskUserQuestion` 把关。超出这三条，代理必须询问。**不要通过逐个子代理询问来"修复"这件事**——每个代理每个阶段都提示一次会让编排器无法使用，这正是该例外存在的原因。
+> **为什么这不算违反协作协议。** `AGENTS.md` 要求代理在 Write/Edit 之前询问"我可以把它写入 [filepath] 吗？"。在这里生成的子代理写入时**不**询问，这是有意为之的受限例外，而不是疏忽——与 `consistency-check` 追加到 `active.md` 时已有的处理相同。该例外仅在以下三者同时成立时才适用：（1）路径是**你**在提示词中点名的，因此用户在批准该阶段时已批准了目标位置；（2）它是位于 `production/`、`docs/` 或 `tests/` 下的新产出物，绝不是对现有源码或配置的修改；（3）产生它的阶段本身在流水线推进之前由 `AskUserQuestion` 把关。超出这三条，代理必须询问。**不要通过逐个子代理询问来"修复"这件事**——每个代理每个阶段都提示一次会让编排器无法使用，这正是该例外存在的原因。
 
 在流水线允许的地方并行启动相互独立的代理（Phase 3 和 Phase 4 可以同时运行）。
 
@@ -205,7 +203,7 @@ slug——小写、空格 → 连字符。每个代理一个文件，所以并�
 通常还在。
 
 如果任何生成的代理返回 BLOCKED、报错或无法完成：**立即呈现出来，不要越过它阻塞的依赖继续推进，并始终产出
-部分报告。** 被跳过代理的章节保持为具名缺口——绝不要用自己的内容填充。完整流程：`.claude/docs/error-recovery-protocol.md`。
+部分报告。** 被跳过代理的章节保持为具名缺口——绝不要用自己的内容填充。完整流程：`.trae/docs/error-recovery-protocol.md`。
 
 如果 BLOCKED 状态无法解决，以结论：**BLOCKED** 而不是 COMPLETE 结束。
 

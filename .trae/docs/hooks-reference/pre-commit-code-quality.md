@@ -4,7 +4,7 @@
 
 在任何修改代码根目录下文件的提交之前运行——`src/`
 （Godot）、`Assets/`（Unity）或 `Source/`（Unreal）；参见
-`.claude/docs/code-root-resolution.md`。
+`.trae/docs/code-root-resolution.md`。
 
 ## Purpose（目的）
 
@@ -21,7 +21,7 @@
 
 # The code root depends on the engine; resolve it the way the shipped commit
 # check does. An unresolved root is reported, never guessed as src/.
-. "$(git rev-parse --show-toplevel)/.claude/hooks/yaml-helper.sh"
+. "$(git rev-parse --show-toplevel)/.trae/hooks/yaml-helper.sh"
 CODE_ROOT=$(resolve_code_root | cut -f1)
 if [ -z "$CODE_ROOT" ]; then
     echo "SKIPPED: no code root (set engine.name in project.yaml) — code checks did not run."

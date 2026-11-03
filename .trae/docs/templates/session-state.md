@@ -18,7 +18,7 @@
 
   轮转（ROTATION）。当下方叙事超过约 200 行时，将其移到
   `production/session-logs/` 并重新开始：
-      bash .claude/scripts/rotate-session-state.sh
+      bash .trae/scripts/rotate-session-state.sh
   什么都不会丢失——而且提交历史已经记录了叙事中重复的大部分内容。
 -->
 
@@ -53,7 +53,7 @@ Task:
     驱动状态行面包屑（`Combat System > Melee > Hitboxes`），且仅在
     Production / Polish / Release 阶段。三个字段都是可选的——
     某项不适用时留空，无活跃焦点时三者全部留空。不要删除标记本身——
-    `statusline.sh` 依赖它们存在。
+    保留它们以便将来接入 Trae 的状态展示或手工读取。
 
   CHECKPOINT 块
     恢复载荷。当上一次会话留下了状态时，`session-start.sh` 会显示它，压缩后

@@ -3,14 +3,12 @@ name: prototype
 description: "GDD 之前的概念原型——一次性 HTML、引擎或纸面构建，结论为 PROCEED/PIVOT/KILL/NOT ASSESSED。在 /brainstorm 和 /setup-engine 之后使用。"
 argument-hint: "[concept-description] [--path html|engine|paper] [--review full|lean|solo] [--spike]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, Bash(bash "*/.claude/skills/prototype/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,workflow`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,workflow`
 
-上述内容已解析完成——请直接使用；本次运行中 `--review` 会覆盖 `review_mode`。若没有输出
-解析块 → 使用 `.claude/docs/config-resolution.md` 中的默认值。
+上一步命令的输出已解析完成——请直接使用；本次运行中 `--review` 会覆盖 `review_mode`。若没有输出
+解析块 → 使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 # 原型（Prototype）
 

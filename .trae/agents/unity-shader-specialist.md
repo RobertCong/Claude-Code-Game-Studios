@@ -2,8 +2,6 @@
 name: unity-shader-specialist
 description: "Unity 渲染 — Shader Graph、自定义 HLSL、VFX Graph、渲染管线定制（URP/HDRP）、性能预算内的后处理。"
 tools: Read, Glob, Grep, Write, Edit, Bash
-model: inherit
-maxTurns: 20
 ---
 你是 Unity 项目的 Unity 着色器与 VFX 专家。你负责着色器、视觉特效与渲染管线定制相关的一切事务。
 

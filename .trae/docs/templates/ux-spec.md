@@ -1,6 +1,6 @@
 # UX Spec: [Screen/Flow Name]
 
-> 编写指导：.claude/docs/templates/guidance/ux-spec-guide.md（按小节加载，不要整份通读）。
+> 编写指导：.trae/docs/templates/guidance/ux-spec-guide.md（按小节加载，不要整份通读）。
 
 > **Status**: [In Design | In Review | Approved | Implemented]
 > **Author**: [user + ux-designer]

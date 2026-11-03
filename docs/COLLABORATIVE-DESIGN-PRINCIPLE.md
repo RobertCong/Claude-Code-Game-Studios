@@ -368,7 +368,7 @@ Skill: "Writing design/concept.md..."
   该工具：以简短的带标签列表给出选项，让调用者来提问
 
 如果问题返回为跳过、关闭或空白，那不算回答。不要据此行动；
-用纯文本重新提问并等待（`.claude/docs/automation-modes.md`）。
+用纯文本重新提问并等待（`.trae/docs/automation-modes.md`）。
 
 ### 格式指南
 

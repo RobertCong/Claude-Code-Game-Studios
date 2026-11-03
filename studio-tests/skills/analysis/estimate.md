@@ -2,7 +2,7 @@
 
 ## Skill Summary
 
-`/estimate [task-description]` 估算单个任务的工作量。它从参数中读取任务描述（如果描述过于模糊、无法估算，则先请求澄清），从 `CLAUDE.md` 读取项目上下文，并从 `design/gdd/` 读取任何相关游戏设计文档（GDD）（Phase 1）。它扫描受影响的代码以评估复杂度、集成点和测试覆盖率，并读取 `production/sprints/` 中类似已完成任务和历史速度（Phase 2）。它分析代码复杂度、范围和风险（Phase 3），然后输出估算（Phase 4）：一张复杂度评估（Complexity Assessment）表、按乐观（Optimistic）/ 预期（Expected）/ 悲观（Pessimistic）三种情景给出的天数工作量估算、一个等于预期数值的推荐预算、一个带驱动因素的高 / 中 / 低置信度、风险因素、依赖、带合计的建议拆分，以及备注与假设——随后是一行摘要和 `Verdict: COMPLETE — estimate generated.`。估算值按半天取整。该技能为只读，不调用任何总监质量闸门（gate）。
+`/estimate [task-description]` 估算单个任务的工作量。它从参数中读取任务描述（如果描述过于模糊、无法估算，则先请求澄清），从 `AGENTS.md` 读取项目上下文，并从 `design/gdd/` 读取任何相关游戏设计文档（GDD）（Phase 1）。它扫描受影响的代码以评估复杂度、集成点和测试覆盖率，并读取 `production/sprints/` 中类似已完成任务和历史速度（Phase 2）。它分析代码复杂度、范围和风险（Phase 3），然后输出估算（Phase 4）：一张复杂度评估（Complexity Assessment）表、按乐观（Optimistic）/ 预期（Expected）/ 悲观（Pessimistic）三种情景给出的天数工作量估算、一个等于预期数值的推荐预算、一个带驱动因素的高 / 中 / 低置信度、风险因素、依赖、带合计的建议拆分，以及备注与假设——随后是一行摘要和 `Verdict: COMPLETE — estimate generated.`。估算值按半天取整。该技能为只读，不调用任何总监质量闸门（gate）。
 
 ---
 
@@ -10,7 +10,7 @@
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需夹具。
 
-- [ ] 具有必需的前置元数据（frontmatter）字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 具有 ≥2 个阶段标题
 - [ ] 包含乐观 / 预期 / 悲观情景、高 / 中 / 低置信度，以及 `COMPLETE` 结论
 - [ ] 不要求「May I write」措辞（只读；明确说明不写入任何文件）
@@ -26,7 +26,7 @@
 
 ## Fixture Defaults
 
-除非某个用例自己的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见 `studio-tests/CLAUDE.md` § Fixture defaults。
+除非某个用例自己的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见 `studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 

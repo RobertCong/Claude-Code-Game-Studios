@@ -1,7 +1,7 @@
 <p align="center">
   <h1 align="center">Claude Code Game Studios</h1>
   <p align="center">
-    把一个 Claude Code 会话变成完整的游戏开发工作室。
+    把一个 Trae 会话变成完整的游戏开发工作室。
     <br />
     49 个代理，74 个技能，一支协同工作的 AI 团队。
   </p>
@@ -9,11 +9,11 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
-  <a href=".claude/agents"><img src="https://img.shields.io/badge/agents-49-blueviolet" alt="49 Agents"></a>
-  <a href=".claude/skills"><img src="https://img.shields.io/badge/skills-74-green" alt="74 Skills"></a>
-  <a href=".claude/hooks"><img src="https://img.shields.io/badge/hooks-15-orange" alt="15 Hooks"></a>
-  <a href=".claude/rules"><img src="https://img.shields.io/badge/rules-14-red" alt="14 Rules"></a>
-  <a href="https://code.claude.com/docs"><img src="https://img.shields.io/badge/built%20for-Claude%20Code-f5f5f5?logo=anthropic" alt="Built for Claude Code"></a>
+  <a href=".trae/agents"><img src="https://img.shields.io/badge/agents-49-blueviolet" alt="49 Agents"></a>
+  <a href=".trae/skills"><img src="https://img.shields.io/badge/skills-74-green" alt="74 Skills"></a>
+  <a href=".trae/hooks.json"><img src="https://img.shields.io/badge/hooks-14-orange" alt="14 Active Hooks"></a>
+  <a href=".trae/rules"><img src="https://img.shields.io/badge/rules-14-red" alt="14 Rules"></a>
+  <a href="https://docs.trae.cn"><img src="https://img.shields.io/badge/built%20for-Trae-f5f5f5" alt="Built for Trae"></a>
   <a href="https://www.buymeacoffee.com/donchitos3"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support%20this%20project-FFDD00?logo=buymeacoffee&logoColor=black" alt="Buy Me a Coffee"></a>
   <a href="https://github.com/sponsors/Donchitos"><img src="https://img.shields.io/badge/GitHub%20Sponsors-Support%20this%20project-ea4aaa?logo=githubsponsors&logoColor=white" alt="GitHub Sponsors"></a>
 </p>
@@ -24,7 +24,7 @@
 
 - [包含内容](#whats-included)
 - [工作室层级](#studio-hierarchy)
-- [斜杠命令](#slash-commands)
+- [技能调用](#slash-commands)
 - [它产出游戏，还是文档？](#does-it-produce-games-or-documents)
 - [快速开始](#getting-started)
 - [配置](#configuration)
@@ -57,8 +57,8 @@
 | 类别 | 数量 | 说明 |
 |----------|-------|-------------|
 | **代理** | 49 | 覆盖设计、程序、美术、音频、叙事、QA 和制作的专业子代理 |
-| **技能** | 74 | 覆盖每个工作流阶段的斜杠命令（`/start`、`/design-system`、`/create-epics`、`/create-stories`、`/dev-story`、`/story-done` 等） |
-| **钩子** | 15 | 在提交、推送、资源变更、设计文档读取、写入与注册表、会话生命周期、代理审计轨迹和缺口检测时自动校验 |
+| **技能** | 74 | 覆盖每个工作流阶段的技能（`start`、`design-system`、`create-epics`、`create-stories`、`dev-story`、`story-done` 等） |
+| **钩子** | 14 | 在提交、推送、危险命令、受保护路径、资源变更、设计文档读取、写入与注册表、会话生命周期和缺口检测时自动校验 |
 | **规则** | 14 | 按路径生效的编码标准，在编辑玩法、引擎、AI、UI、网络代码、场景和资源文件等时强制执行 |
 | **模板** | 62 | GDD、UX 规格、ADR、冲刺计划、HUD 设计、无障碍等文档模板 |
 
@@ -100,9 +100,9 @@ Tier 3 — Specialists
 | **Unreal Engine 5** | `unreal-specialist` | GAS、蓝图、复制、UMG/CommonUI |
 
 <a id="slash-commands"></a>
-## 斜杠命令
+## 技能调用
 
-在 Claude Code 中输入 `/` 即可访问全部 74 个技能：
+Trae 没有 Claude Code 的斜杠命令入口；下表中的 `/name` 是**技能名**。在 Trae 中直接说「用 `name` 技能……」即可调用，Agent 也会根据 `description` 自动加载相关技能。
 
 **上手与导航**
 `/start` `/help` `/project-stage-detect` `/setup-engine` `/adopt` `/settings`
@@ -164,10 +164,12 @@ Tier 3 — Specialists
 ### 前置条件
 
 - [Git](https://git-scm.com/)
-- [Claude Code](https://code.claude.com/docs/en/setup)——推荐原生安装器（`npm install -g @anthropic-ai/claude-code` 也可以，需要 Node.js 22+）
+- [Trae CN](https://docs.trae.cn/)——建议使用支持 Skills / Subagents / Hooks 的版本
 - [Python 3](https://www.python.org/)——每个技能和钩子都会读取 `project.yaml`；没有它，所有设置都会静默回退到默认值
 - Bash——运行所有钩子；macOS 和 Linux 内置，Windows 上随 [Git for Windows](https://git-scm.com/downloads/win) 提供
 - **推荐**：[jq](https://jqlang.github.io/jq/)（用于钩子校验）
+
+首次使用请在 Trae 中完成几项设置：**设置 > Beta > Subagents** 打开「启用 Subagents 目录」；**设置 > Hooks** 启用项目 Hook（`.trae/hooks.json`），并把运行方式设为「本地自动运行」以便钩子写入 `production/session-state/`；**设置 > 规则** 确认「将 AGENTS.md 包含在上下文中」已打开。
 
 缺少可选工具时钩子会优雅失败——你只会失去校验——但有一个刻意的例外：当没有 Python 可验证时，暂存数据 JSON 的提交会被阻止。
 
@@ -179,18 +181,14 @@ Tier 3 — Specialists
    cd my-game
    ```
 
-2. **在项目根文件夹中打开 Claude Code**（即包含 `CLAUDE.md` 和 `project.yaml` 的文件夹）并启动会话：
-   ```bash
-   claude
-   ```
-   在 `src/` 之类的子文件夹中启动会跳过项目的钩子、拒绝规则和先询问权限模式。
+2. **在 Trae 中打开项目根文件夹**（即包含 `AGENTS.md` 和 `project.yaml` 的文件夹）。在 `src/` 之类的子文件夹中打开会跳过 `.trae/rules`、`.trae/hooks.json` 和先询问权限模式。
 
-3. **运行 `/start`**——系统会询问你从哪里开始（毫无头绪、模糊概念、清晰设计、已有工作），并引导你进入正确的工作流。不做任何假设。
+3. **调用 `start` 技能**——系统会询问你从哪里开始（毫无头绪、模糊概念、清晰设计、已有工作），并引导你进入正确的工作流。不做任何假设。
 
-   如果你已经知道自己需要什么，也可以直接跳到特定技能：
-   - `/brainstorm`——从零探索游戏创意
-   - `/setup-engine godot 4.7`——如果你已经知道，直接配置引擎
-   - `/project-stage-detect`——分析现有项目
+   如果你已经知道自己需要什么，也可以直接调用特定技能：
+   - `brainstorm`——从零探索游戏创意
+   - `setup-engine`（参数 `godot 4.7`）——如果你已经知道，直接配置引擎
+   - `project-stage-detect`——分析现有项目
 
 <a id="configuration"></a>
 ## 配置
@@ -218,7 +216,7 @@ Tier 3 — Specialists
 /settings --local modes.review_mode=solo   # write to project.local.yaml (just you)
 ```
 
-完整 schema 与每项设置的行为：`.claude/docs/effects-map.md`。
+完整 schema 与每项设置的行为：`.trae/docs/effects-map.md`。
 
 <a id="upgrading"></a>
 ## 升级
@@ -229,16 +227,14 @@ Tier 3 — Specialists
 ## 项目结构
 
 ```
-CLAUDE.md                           # Master configuration
-.claude/
-  settings.json                     # Hooks, permissions, safety rules
+AGENTS.md                           # Master configuration (Trae entry point)
+.trae/
+  hooks.json                        # Hook registrations (Trae schema, version 1)
   agents/                           # 49 agent definitions (markdown + YAML frontmatter)
-  skills/                           # 74 slash commands (subdirectory per skill)
-  hooks/                            # 18 scripts (bash) — 15 event hooks, two helpers they
-                                    #   source (yaml-helper.sh, update-check.sh), and one
-                                    #   opt-in diagnostic you wire yourself
-  rules/                            # 14 path-scoped coding standards
-  statusline.sh                     # Status line script (context%, model, stage, epic breadcrumb)
+  skills/                           # 74 skills (subdirectory per skill)
+  hooks/                            # 20 scripts (bash) — 14 registered hooks,
+                                    #   3 helpers, and 3 unregistered subagent hooks
+  rules/                            # 14 path-scoped coding standards (globs)
   docs/
     workflow-catalog.yaml           # 7-phase pipeline definition (read by /help)
     templates/                      # 62 document templates (+ per-section guidance)
@@ -294,7 +290,7 @@ CCGS 是一个供你编辑的模板。`studio-tests/` 是你检查编辑过或�
 
 控制权始终在你手中。代理提供结构和专业知识，而不是自主权。
 
-这是从项目根目录启动终端会话时的开箱行为。`guided` 和 `autonomous` 自动化设置，以及 Claude Code 自身的自动模式，会用其中一些提示换取速度；进入自动模式的路径见 [setup-requirements.md](.claude/docs/setup-requirements.md)。
+这是从项目根目录打开 Trae 时的开箱行为。`guided` 和 `autonomous` 自动化设置，以及 Trae 自身的自动模式，会用其中一些提示换取速度；进入自动模式的路径见 [setup-requirements.md](.trae/docs/setup-requirements.md)。
 
 ### 自动安全
 
@@ -302,25 +298,24 @@ CCGS 是一个供你编辑的模板。`studio-tests/` 是你检查编辑过或�
 
 | 钩子 | 触发时机 | 作用 |
 |------|---------|--------------|
-| `validate-commit.sh` | PreToolUse（Bash、PowerShell） | 检查硬编码值、TODO 格式、JSON 合法性、设计文档章节——如果命令不是 `git commit` 则提前退出 |
-| `validate-push.sh` | PreToolUse（Bash、PowerShell） | 对推送到受保护分支发出警告，并对 `git tag`、`git merge`、`gh release`、`butler push` 和 `steamcmd +run_app_build` 发出警告——其他命令提前退出 |
+| `validate-deny.sh` | PreToolUse（RunCommand） | 执行迁移后的 130 条 deny 规则；命中即拒绝并说明原因 |
+| `validate-protected.sh` | PreToolUse（Read/Write/Edit） | 阻止读取 `.env`，以及写入 `.env`、`.uasset`、`.umap` |
+| `validate-commit.sh` | PreToolUse（RunCommand） | 检查硬编码值、TODO 格式、JSON 合法性、设计文档章节——如果命令不是 `git commit` 则提前退出 |
+| `validate-push.sh` | PreToolUse（RunCommand） | 对推送到受保护分支发出警告，并对 `git tag`、`git merge`、`gh release`、`butler push` 和 `steamcmd +run_app_build` 发出警告——其他命令提前退出 |
 | `validate-read.sh` | PreToolUse（Read） | 拒绝整文件读取超过 40 KB 的设计文档，并返回其标题，使重试只读一个章节（`features.read_guard`） |
 | `validate-write.sh` | PreToolUse（Write/Edit） | 当写入会破坏技能声明的规则时发出警告，绝不阻塞：技能从不覆盖的文件、配置守卫、原型边界、本地化冻结 |
 | `validate-registry.sh` | PreToolUse（Write/Edit） | 当对实体或 TR-ID 注册表的写入会删除或重新编号条目，或设置其头部未列出的状态时发出警告 |
 | `validate-assets.sh` | PostToolUse（Write/Edit） | 检查 `assets/`、`Assets/` 或 `Content/` 下的数据文件 JSON，以及仅 Godot `assets/` 中的资源命名——如果文件不在这些路径下则提前退出 |
-| `session-start.sh` | 会话打开 | 显示当前分支和最近提交，用于定位 |
-| `detect-gaps.sh` | 会话打开 | 检测全新项目（建议 `/start`），以及代码或原型存在时缺失的设计文档 |
-| `pre-compact.sh` | 压缩前 | 记录压缩（其输出不会到达 Claude——之后由 `session-start.sh` 恢复上下文） |
-| `notify.sh` | 权限提示，或空闲约一分钟 | 通过 PowerShell 显示 Windows 通知 |
-| `session-stop.sh` | 每次回复结束，后台 | 把 `active.md` 归档到会话日志并记录 git 活动 |
-| `log-agent.sh` | 代理启动 | 审计轨迹开始——记录子代理调用 |
-| `log-agent-stop.sh` | 代理停止 | 审计轨迹结束——补全子代理记录 |
-| `validate-agent-artifact.sh` | 代理停止 | 当子代理停止时未写入其简报指定的文件，发出警告 |
-| `validate-skill-change.sh` | PostToolUse（Write/Edit） | 建议在任何 `.claude/skills/` 变更后运行 `/skill-test` |
+| `session-start.sh` | SessionStart | 显示当前分支和最近提交，用于定位 |
+| `detect-gaps.sh` | SessionStart | 检测全新项目（建议 `start` 技能），以及代码或原型存在时缺失的设计文档 |
+| `pre-compact.sh` | PreCompact（视 Trae 版本） | 记录压缩；压缩后的上下文由下一次 `session-start.sh` 恢复 |
+| `notify.sh` | Notification | 通过 PowerShell 显示 Windows 通知 |
+| `session-stop.sh` | Stop | 把 `active.md` 归档到会话日志并记录 git 活动 |
+| `validate-skill-change.sh` | PostToolUse（Write/Edit） | 建议在任何 `.trae/skills/` 变更后运行 `skill-test` 技能 |
 
-> **注意**：`validate-commit.sh`、`validate-push.sh`、`validate-read.sh`、`validate-write.sh`、`validate-registry.sh`、`validate-assets.sh` 和 `validate-skill-change.sh` 会在每次 Bash、PowerShell、Read、Write 或 Edit 工具调用时触发，并在命令或文件路径不相关时立即退出（exit 0）。这是正常的钩子行为——不是性能问题。
+> **注意**：`validate-commit.sh`、`validate-push.sh`、`validate-read.sh`、`validate-write.sh`、`validate-registry.sh`、`validate-assets.sh` 和 `validate-skill-change.sh` 会在每次 RunCommand、Read、Write 或 Edit 工具调用时触发，并在命令或文件路径不相关时立即退出（exit 0）。这是正常的钩子行为——不是性能问题。Trae 不支持 `SubagentStart` / `SubagentStop`，因此 `log-agent.sh`、`log-agent-stop.sh` 和 `validate-agent-artifact.sh` 未注册。
 
-`settings.json` 中的**权限规则**会在 Bash 和 PowerShell 工具中自动允许测试运行，并阻止危险操作（force push、`rm -rf`、读取 `.env` 文件）。`git status`、`git log` 和 `ls` 等只读命令不需要规则：Claude Code 会直接运行而不询问。`git` 规则在 `git` 之后的任意位置匹配，因此一条 git 命令的文本只要提到 `push` 且其后出现 ` +` 或 ` -f`、`clean` 且其后出现 ` -f`、或 `reset` 且其后出现 `--hard`——包括 `git commit -m "push + pull"` 这样的提交信息——也会被拒绝：请改写信息。
+`.trae/hooks/deny-rules.json` 中的**安全规则**由 `validate-deny.sh` 在每次 RunCommand 前执行，阻止危险操作（force push、`rm -rf`、读取 `.env` 文件）。`git` 规则在 `git` 之后的任意位置匹配，因此一条 git 命令的文本只要提到 `push` 且其后出现 ` +` 或 ` -f`、`clean` 且其后出现 ` -f`、或 `reset` 且其后出现 `--hard`——包括 `git commit -m "push + pull"` 这样的提交信息——也会被拒绝：请改写信息。
 
 ### 按路径生效的规则
 
@@ -368,7 +363,7 @@ CCGS 是一个供你编辑的模板。`studio-tests/` 是你检查编辑过或�
 <a id="platform-support"></a>
 ## 平台支持
 
-主要开发环境是 **Windows 10** 配 Git Bash。钩子和脚本也在 **macOS**（自带的 bash 3.2 和 BSD 工具，含或不含 `jq`）以及 **Linux** 上测试过。所有钩子都使用 POSIX 兼容模式（`grep -E`，不是 `grep -P`），并为缺失工具提供回退。`notify.sh` 钩子在 Windows 上使用 PowerShell 显示通知，在其他平台上不执行任何操作——macOS/Linux 的桌面通知尚未接入。请为任何平台特定的故障提交 issue。
+主要开发环境是 **macOS** + **Trae CN**。钩子和脚本使用 POSIX 兼容模式（`grep -E`，不是 `grep -P`），并为缺失工具提供回退。Trae 只保证 `SessionStart`、`UserPromptSubmit`、`PreToolUse`、`PostToolUse`、`Stop`、`Notification` 六类事件；`PreCompact` 视版本而定，`SubagentStart` / `SubagentStop` 不支持，因此子代理审计日志不再自动记录。`notify.sh` 在 Windows 上使用 PowerShell 显示通知，在其他平台上不执行任何操作。请为任何平台特定的故障提交 issue。
 
 <a id="community"></a>
 ## 社区
@@ -392,11 +387,11 @@ Claude Code Game Studios 是免费开源的。如果它节省了你的时间或�
 - **[Buy Me a Coffee](https://www.buymeacoffee.com/donchitos3)**——一次性支持
 - **[GitHub Sponsors](https://github.com/sponsors/Donchitos)**——通过 GitHub 的定期支持
 
-赞助有助于资助维护技能、添加新代理、跟进 Claude Code 和引擎 API 变化以及回应社区问题的时间。
+赞助有助于资助维护技能、添加新代理、跟进 Trae 和引擎 API 变化以及回应社区问题的时间。
 
 ---
 
-*为 Claude Code 构建。持续维护与扩展——欢迎通过 [GitHub Discussions](https://github.com/Donchitos/Claude-Code-Game-Studios/discussions) 贡献。*
+*为 Trae 构建。持续维护与扩展——欢迎通过 [GitHub Discussions](https://github.com/Donchitos/Claude-Code-Game-Studios/discussions) 贡献。*
 
 <a id="license"></a>
 ## 许可证

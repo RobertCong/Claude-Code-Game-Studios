@@ -3,14 +3,12 @@ name: milestone-review
 description: "里程碑进度评审 —— 完整性、质量指标、风险、继续/停止建议。在检查点或截止日期前使用。"
 argument-hint: "[milestone-name|current] [--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Agent, AskUserQuestion, Bash(bash "*/.claude/skills/milestone-review/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,workflow`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,workflow`
 
-以上已解析 —— 直接使用；本次运行中 `--review` 会覆盖 `review_mode`。没有对应配置块 →
-使用 `.claude/docs/config-resolution.md` 中的默认值。
+以上命令的输出已解析 —— 直接使用；本次运行中 `--review` 会覆盖 `review_mode`。没有对应配置块 →
+使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 # 里程碑评审
 
@@ -43,12 +41,12 @@ model: sonnet
 
 提取里程碑名称（`current` 或具体名称）。
 
-完整的检查模式见 `.claude/docs/director-gates.md`。各个质量闸门的定义位于
-`.claude/docs/director-gates/[gate-id].md` —— 被派生的 agent 会读取自己的闸门文件；
+完整的检查模式见 `.trae/docs/director-gates.md`。各个质量闸门的定义位于
+`.trae/docs/director-gates/[gate-id].md` —— 被派生的 agent 会读取自己的闸门文件；
 不要在父会话中读取它。
 
 
-每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+每次 `AskUserQuestion` 调用都遵循 `.trae/docs/automation-modes.md`
 （collaborative 总是询问 · guided 仅重大事项 · autonomous 记录后继续；
 `automation_always_ask` 类别总是询问）。
 
@@ -60,7 +58,7 @@ model: sonnet
 修改的里程碑文件。
 
 > **没有任何技能会写入 `production/milestones/`** —— 其中的定义是依据
-> `.claude/docs/templates/milestone-definition.md` 手工编写的，因此多数项目并没有这些文件。
+> `.trae/docs/templates/milestone-definition.md` 手工编写的，因此多数项目并没有这些文件。
 > 当该目录不存在或为空时，如实说明，并仅依据冲刺报告进行评审；不要虚构一份定义。使用
 > `current` 时要小心：本技能会把自己的输出写为 `[milestone-name]-review.md`，所以"最近
 > 修改"的匹配可能是上一次*评审*而非定义。选择时跳过以 `-review.md` 结尾的文件。
@@ -103,7 +101,7 @@ Grep pattern="^> \*\*Status\*\*: Blocked|BLOCKED:" glob="production/epics/**/sto
   `**Status**` 行做一次 grep，与 `/bug-triage` 的做法相同）；若没有缺陷文件，缺陷相关行即为
   `NOT ASSESSED — NO DATA`，而不是零
 - 如果 `production/risk-register/` 存在，检查风险登记册（依据
-  `.claude/docs/templates/risk-register-entry.md` 手工编写；没有技能会写入它，因此不存在
+  `.trae/docs/templates/risk-register-entry.md` 手工编写；没有技能会写入它，因此不存在
   属于常态 —— 如实记录，而不是悄悄跳过风险评估）
 
 ---
@@ -202,7 +200,7 @@ the count moved.
 - `full` → 照常派生。
 
 在生成 Go/No-Go 建议之前，通过 `Agent` 以质量闸门 **PR-MILESTONE** 派生 `producer`
-（`.claude/docs/director-gates/pr-milestone.md`）。
+（`.trae/docs/director-gates/pr-milestone.md`）。
 
 传入：里程碑名称与目标日期、当前完成百分比、被阻塞用户故事计数、来自冲刺报告的速率数据
 （若有）、候选裁减项清单。
@@ -227,7 +225,7 @@ the count moved.
 
 如果为 NOT ASSESSED：指出缺失的输入 —— 它不等于 ON TRACK，绝不要据此建议 GO。补齐输入并
 重新运行 PR-MILESTONE，或建议 NOT ASSESSED —— 或在评审自身发现需要时给出 CONDITIONAL GO /
-NO-GO（见 `.claude/docs/director-gates.md` 中的排序）。
+NO-GO（见 `.trae/docs/director-gates.md` 中的排序）。
 
 不要针对 OFF TRACK 的结论给出 GO；只有当用户明确选择上方 [B] 时才给出 CONDITIONAL GO。
 

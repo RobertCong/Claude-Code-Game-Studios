@@ -1,6 +1,6 @@
 # HUD Design
 
-> 编写指引：.claude/docs/templates/guidance/hud-design-guide.md（编写时按章节加载——不要整体通读）。
+> 编写指引：.trae/docs/templates/guidance/hud-design-guide.md（编写时按章节加载——不要整体通读）。
 
 > **Status**: [In Design | In Review | Approved | Implemented]
 > **Author**: [user + ux-designer]

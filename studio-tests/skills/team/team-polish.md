@@ -27,7 +27,7 @@ Phase 2 并行）→ 加固（qa-tester）→ 签核（编排器收集所有结�
 
 ## Static Assertions (Structural)
 
-- [ ] 具备必需的前置元数据（frontmatter）字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 至少包含 2 个 Phase 标题
 - [ ] 包含结论关键词：READY FOR RELEASE、NOT ASSESSED、NEEDS MORE WORK —— 并说明 NOT ASSESSED 排在 READY FOR RELEASE 之上、NEEDS MORE WORK 之下
 - [ ] 包含 "File Write Protocol" 章节
@@ -37,7 +37,7 @@ Phase 2 并行）→ 加固（qa-tester）→ 签核（编排器收集所有结�
 - [ ] `small` 与 `studio` 集合包含 `engine-programmer`；在 `individual` 下没有程序员活动，报告会将优化清单记为已交接给 `/dev-story`
 - [ ] 将阶段闸门定义为流水线自身列出的决策点，无论 `automation` 模式如何，且不声称总监在阶段闸门处启动
 - [ ] 结尾具备后续步骤交接（引用 `/release-checklist`、`/sprint-plan update`、`/gate-check`）
-- [ ] 存在 Error Recovery Protocol 章节：核实指定产出物在磁盘上、立即呈现 BLOCKED、始终产出部分报告，完整流程见 `.claude/docs/error-recovery-protocol.md`
+- [ ] 存在 Error Recovery Protocol 章节：核实指定产出物在磁盘上、立即呈现 BLOCKED、始终产出部分报告，完整流程见 `.trae/docs/error-recovery-protocol.md`
 - [ ] 在继续之前的阶段转换处使用 `AskUserQuestion`（`collaborative` 模式）
 - [ ] Phase 0 解析 `team.size`，且技能要求在 Phase 1 之前有一行活动集公告
 - [ ] 明确说明 Phase 3（视觉打磨）与 Phase 4（音频打磨）与 Phase 2 并行运行
@@ -51,7 +51,7 @@ Phase 2 并行）→ 加固（qa-tester）→ 签核（编排器收集所有结�
 ## Fixture Defaults
 
 除非某个用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 与
-`modes.automation: collaborative`，且不含 `project.local.yaml`。规则见：`studio-tests/CLAUDE.md` §
+`modes.automation: collaborative`，且不含 `project.local.yaml`。规则见：`studio-tests/AGENTS.md` §
 Fixture defaults。
 
 ---

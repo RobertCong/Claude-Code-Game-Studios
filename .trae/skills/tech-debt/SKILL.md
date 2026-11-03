@@ -3,17 +3,15 @@ name: tech-debt
 description: "跟踪、分类并排定整个代码库中的技术债 —— 扫描技术债指标，并维护登记册。"
 argument-hint: "[scan|add|prioritize|report]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Bash(bash "*/.claude/skills/tech-debt/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow`
 
 # 技术债
 
 
 
-每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+每次 `AskUserQuestion` 调用都遵循 `.trae/docs/automation-modes.md`
 （collaborative 总是询问 · guided 仅重大事项 · autonomous 记录后继续；
 `automation_always_ask` 类别总是询问）。
 
@@ -32,7 +30,7 @@ model: sonnet
 
 ## Phase 2A: 扫描模式
 
-在**代码根目录**中搜索技术债指标（按 `.claude/docs/code-root-resolution.md` 解析：依引擎为
+在**代码根目录**中搜索技术债指标（按 `.trae/docs/code-root-resolution.md` 解析：依引擎为
 `src/`、`Assets/` 或 `Source/`）：
 
 - `TODO` 注释（计数并分类）

@@ -11,7 +11,7 @@
 
 - [ ] `description:` 字段存在且与领域特定（提及 UX 流程 / 交互设计 / 信息架构）
 - [ ] `tools:` 列表包含 Read、Write、Edit、Glob、Grep
-- [ ] 模型档位为 `inherit` — frontmatter `model:` 的值恰为 `inherit`（档位说明：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 代理定义未声称对视觉美术方向或 UI 实现代码拥有权限
 
 ---

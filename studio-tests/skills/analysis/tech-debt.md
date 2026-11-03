@@ -31,7 +31,7 @@ this entry to `docs/tech-debt-register.md`?"。`prioritize` 根据每个注册�
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 有 ≥2 个 phase 标题
 - [ ] 包含结论关键词：COMPLETE、BLOCKED、FAIL、NOT ASSESSED
 - [ ] 包含 "May I write" 措辞（写入 `docs/tech-debt-register.md`）
@@ -50,7 +50,7 @@ this entry to `docs/tech-debt-register.md`?"。`prioritize` 根据每个注册�
 
 除非某个用例自己的 Fixture 另有说明，否则每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。
-规则见：`studio-tests/CLAUDE.md` §
+规则见：`studio-tests/AGENTS.md` §
 Fixture defaults。
 
 ---
@@ -137,14 +137,14 @@ Fixture defaults。
 ### Case 3b: Code Root Unresolved — NOT ASSESSED，不凭猜测扫描任何内容
 
 **Fixture:**
-- `project.yaml` 没有 `engine.name`；`.claude/docs/technical-preferences.md` 显示 `[TO BE CONFIGURED]`
+- `project.yaml` 没有 `engine.name`；`.trae/docs/technical-preferences.md` 显示 `[TO BE CONFIGURED]`
 - `src/` 与 `Source/` 都存在且包含源文件，因此目录树无法决定根
 - `docs/tech-debt-register.md` 存在，含 3 个条目
 
 **Input:** `/tech-debt scan`
 
 **Expected behavior:**
-1. 无法按 `.claude/docs/code-root-resolution.md` 解析代码根
+1. 无法按 `.trae/docs/code-root-resolution.md` 解析代码根
 2. 技能报告 `NOT ASSESSED — code root unresolved` 并停止
 3. 两个目录都不凭猜测扫描；没有 "May I write" 提示、不写注册表、无 COMPLETE 结论
 

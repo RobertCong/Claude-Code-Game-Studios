@@ -11,7 +11,7 @@
 
 - [ ] `description:` 字段存在且限定于本领域（引用遥测、A/B 测试、事件埋点、分析）
 - [ ] `tools:` 为 `Read, Glob, Grep, Write, Edit, Bash, WebSearch` —— Bash 服务于 `description:` 所述的数据流水线工作；游戏代码中的埋点由正文的「What This Agent Must NOT Do」清单排除，而非工具清单
-- [ ] 模型档位为 `inherit` —— frontmatter `model:` 精确为 `inherit`（档位见：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 代理定义未声称对游戏实现、经济系统设计或长线运营排期拥有权限
 
 ---

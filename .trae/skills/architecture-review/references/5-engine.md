@@ -53,9 +53,9 @@ Post-Cutoff API Conflicts:
 ### 引擎专家咨询
 
 完成上述引擎审计后，通过 `Agent` 派生**主引擎专家**以获取领域专家的第二意见：
-- 解析主专家：`<engine>-specialist`，由 `project.yaml` 中的 `engine.name` 推导（Godot→`godot-specialist`，Unity→`unity-specialist`，Unreal→`unreal-specialist`）；若 `engine.name` 缺失或为空，读取 `.claude/docs/technical-preferences.md` 中 `## Engine Specialists` 章节的 Primary 行
+- 解析主专家：`<engine>-specialist`，由 `project.yaml` 中的 `engine.name` 推导（Godot→`godot-specialist`，Unity→`unity-specialist`，Unreal→`unreal-specialist`）；若 `engine.name` 缺失或为空，读取 `.trae/docs/technical-preferences.md` 中 `## Engine Specialists` 章节的 Primary 行
 - 若未配置引擎（两个来源都得不到引擎），跳过本次咨询，**在本次运行的输出中记录 ``Engine validation: NOT ASSESSED — no engine configured (`engine.name` unset in `project.yaml`)``。** 静默跳过的检查与通过的检查无法区分；读者无法得知从未寻求过引擎指导。
-- 以 `subagent_type: [primary specialist]` 派生，并提供：所有包含引擎特定决策或 `Post-Cutoff APIs Used` 字段的 ADR、引擎参考资料，以及 Phase 5 审计发现。请他们：
+- 委派给 `[primary specialist]` 子代理 派生，并提供：所有包含引擎特定决策或 `Post-Cutoff APIs Used` 字段的 ADR、引擎参考资料，以及 Phase 5 审计发现。请他们：
   1. 确认或质疑每项审计发现 —— 专家可能了解参考资料未捕获的引擎细节
   2. 识别 ADR 中审计可能遗漏的引擎特定反模式（例如使用错误的 Godot 节点类型、Unity 组件耦合、Unreal 子系统误用）
   3. 标记那些对引擎行为的假设与实际固定版本不符的 ADR

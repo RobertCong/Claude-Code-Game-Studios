@@ -3,13 +3,11 @@ name: vertical-slice
 description: "预制作阶段验证——端到端构建，以确认在全力投入制作（Production）之前整条循环是可达的。在游戏设计文档（GDD）、架构、UX 规格之后使用。"
 argument-hint: "[--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, Bash(bash "*/.claude/skills/vertical-slice/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,workflow`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,workflow`
 
-上面已解析——按原样使用；`--review` 会覆盖本次运行的 `review_mode`。没有配置块 → 使用 `.claude/docs/config-resolution.md` 中的默认值。
+上一步命令的输出已解析——按原样使用；`--review` 会覆盖本次运行的 `review_mode`。没有配置块 → 使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 # 垂直切片
 
@@ -41,17 +39,17 @@ model: sonnet
 ## Phase 1: 解析评审模式并加载上下文
 
 
-完整的检查模式见 `.claude/docs/director-gates.md`。各质量闸门（gate）的定义位于 `.claude/docs/director-gates/[gate-id].md`——被派生的代理会读取自己的闸门文件；不要在本父会话中读取它。
+完整的检查模式见 `.trae/docs/director-gates.md`。各质量闸门（gate）的定义位于 `.trae/docs/director-gates/[gate-id].md`——被派生的代理会读取自己的闸门文件；不要在本父会话中读取它。
 
 
-每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+每次 `AskUserQuestion` 调用都遵循 `.trae/docs/automation-modes.md`
 （协作模式始终询问 · 引导模式仅询问重大决策 · 自主模式记录并继续；
 `automation_always_ask` 类别始终询问）。
 
 读取以下文件以理解完整的设计意图。按章节读取每份 GDD、ADR
 和控制清单：先用 Grep 工具（模式 `^#`，内容模式）找到你需要的标题，
 再用 offset 和 limit 读取相应范围。
-- `CLAUDE.md`——技术栈与引擎
+- `AGENTS.md`——技术栈与引擎
 - `design/gdd/game-concept.md`——核心幻想与游戏支柱（或在
   `rigor: minimal` 时代替它的一页简报 `design/game-brief.md`——
   即提案、核心循环和“他们的感受”那一行；它没有支柱）
@@ -133,7 +131,7 @@ Markdown 中用 `<!-- … -->`。用其他语言语法写的头部是解析错�
 **品质标准**——高于概念原型，但未达完整制作级：
 - 遵循 `docs/architecture/control-manifest.md` 中的架构分层
 - 命名约定——来自 `project.yaml` 的 `naming.*`；任何缺失或为空键（包括
-  `project.yaml` 没有 `naming` 块的情况），来自 `.claude/docs/technical-preferences.md`
+  `project.yaml` 没有 `naming` 块的情况），来自 `.trae/docs/technical-preferences.md`
 - 没有硬编码的玩法数值——使用常量或配置文件
 - 关键路径上有基本的错误处理
 - 占位美术可接受；代表性美术更佳
@@ -248,7 +246,7 @@ Markdown 中用 `<!-- … -->`。用其他语言语法写的头部是解析错�
 跳过。它直接输入到冲刺规划中（在 `workflow: minimal` 下，该层级没有
 冲刺，则输入到简报的构建顺序中）。
 
-阅读 `.claude/docs/templates/vertical-slice-report.md` 获取报告结构。
+阅读 `.trae/docs/templates/vertical-slice-report.md` 获取报告结构。
 如果找不到该模板文件，使用以下后备结构：
 - `## Vertical Slice Report — [Game Title] — [Date]`
 - `### Executive Summary`（PROCEED / PIVOT / KILL / NOT ASSESSED 判定 + 2 句话的理由）
@@ -285,7 +283,7 @@ NOT ASSESSED，并附原因。
 - `solo` → 跳过。注明：“CD-PLAYTEST 已跳过——Solo 模式。”
 - `lean` → 跳过（不是 PHASE-GATE）。注明：“CD-PLAYTEST 已跳过——Lean 模式。”
 - `full` → 通过 `Agent` 派生 `creative-director`，使用闸门 **CD-PLAYTEST**
-  （`.claude/docs/director-gates/cd-playtest.md`）——除非该切片的判定是
+  （`.trae/docs/director-gates/cd-playtest.md`）——除非该切片的判定是
   NOT ASSESSED：没有通关就没有可评审的内容，因此注明
   “CD-PLAYTEST 已跳过——该切片尚未被游玩。”
 
@@ -305,7 +303,7 @@ CONCERNS 或 REJECT。将其应用到建议上：
   成立。使用 `AskUserQuestion` 请用户选择 `PIVOT` 或 `KILL`，并针对该选择运行
   Phase 8。PIVOT 或 KILL 建议成立。
 - **NOT ASSESSED** [missing input] → 总监未做判断，因此它既不
-  支持也不推翻建议（`.claude/docs/director-gates.md`）：点明
+  支持也不推翻建议（`.trae/docs/director-gates.md`）：点明
   缺失了什么，然后补充并重新运行闸门，或者记录
   `CD-PLAYTEST: NOT ASSESSED — [input]` 到报告中。
 

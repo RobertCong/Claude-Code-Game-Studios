@@ -18,7 +18,7 @@ ux-designer，`small` 增加 accessibility-specialist + art-director，`studio` 
 
 ## Static Assertions (Structural)
 
-- [ ] 具备必需的前置字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 具备 ≥2 个阶段标题（Phase 1a 至 Phase 5 均存在）
 - [ ] 包含结论关键词：COMPLETE、BLOCKED
 - [ ] File Write Protocol：子代理在有界例外之下写入（指定路径、`production/`、`docs/` 或
@@ -33,7 +33,7 @@ ux-designer，`small` 增加 accessibility-specialist + art-director，`studio` 
 - [ ] 结尾有下一步交接（引用 `/ux-review`、`/code-review`、`/team-polish`）
 - [ ] 存在 Error Recovery Protocol 小节：确认指定产出物已落盘；立即上报 BLOCKED；始终产出
   部分报告；完整流程（surface → assess → options → partial report）见
-  `.claude/docs/error-recovery-protocol.md`
+  `.trae/docs/error-recovery-protocol.md`
 - [ ] 在阶段转换处使用 `AskUserQuestion` 征求用户批准后再继续（`collaborative` 模式）
 - [ ] Phase 0 解析 `team.size`，且技能要求启动任何代理之前有一行活跃集声明
 - [ ] Phase 4 明确标记为并行（ux-designer、art-director、accessibility-specialist）
@@ -42,7 +42,7 @@ ux-designer，`small` 增加 accessibility-specialist + art-director，`studio` 
 - [ ] Team Composition 列出全部五个角色（ux-designer、ui-programmer、art-director、
   引擎 UI 专家、accessibility-specialist）
 - [ ] 引擎 UI 专家从 `project.yaml` 中的 `specialists.ui` 读取（回退到
-  `.claude/docs/technical-preferences.md`），且 `specialists.ui: null` 视为未设置
+  `.trae/docs/technical-preferences.md`），且 `specialists.ui: null` 视为未设置
 - [ ] 引用交互模式库（`design/ux/interaction-patterns.md`）——ui-programmer 必须使用既有模式
 - [ ] Phase 1a 在设计开始之前读取 `design/accessibility-requirements.md`
 
@@ -52,7 +52,7 @@ ux-designer，`small` 增加 accessibility-specialist + art-director，`studio` 
 
 除非用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有
-`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` §
+`project.local.yaml`。规则见：`studio-tests/AGENTS.md` §
 Fixture defaults。
 
 ---

@@ -20,7 +20,7 @@ Phase 7 依据 `design/live-ops/ethics-policy.md` 检查经济设计。子代理
 
 ## Static Assertions (Structural)
 
-- [ ] 具备必需的前置元数据（frontmatter）字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 至少包含 2 个 Phase 标题
 - [ ] 包含结论关键词：COMPLETE、BLOCKED
 - [ ] Output Documents 章节：编排器在写入之前通过 `AskUserQuestion` 询问 "May I write the season plan to `design/live-ops/…`?"，因为 `design/` 位于有界写入例外之外
@@ -39,7 +39,7 @@ Phase 7 依据 `design/live-ops/ethics-policy.md` 检查经济设计。子代理
 ## Fixture Defaults
 
 除非某个用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 与
-`modes.automation: collaborative`，且不含 `project.local.yaml`。规则见：`studio-tests/CLAUDE.md` §
+`modes.automation: collaborative`，且不含 `project.local.yaml`。规则见：`studio-tests/AGENTS.md` §
 Fixture defaults。
 
 ---

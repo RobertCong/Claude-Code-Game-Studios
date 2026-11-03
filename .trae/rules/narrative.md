@@ -1,6 +1,6 @@
 ---
-paths:
-  - "design/narrative/**"
+alwaysApply: false
+globs: design/narrative/**
 ---
 
 # 叙事规则

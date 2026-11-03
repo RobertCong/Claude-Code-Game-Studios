@@ -3,18 +3,16 @@ name: release-checklist
 description: "发布前检查清单 —— 构建验证、认证要求、商店元数据、上线就绪度。"
 argument-hint: "[platform: pc|console|mobile|all]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Bash(bash "*/.claude/skills/release-checklist/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys rigor,workflow,project.stage,cert_tier,automation`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys rigor,workflow,project.stage,cert_tier,automation`
 
 **自动化模式**：解析 `modes.automation`（`project.local.yaml` →
 `project.yaml` → 默认 `collaborative`）。每次 `AskUserQuestion` 调用和
-每次文件写入都遵循 `.claude/docs/automation-modes.md`
+每次文件写入都遵循 `.trae/docs/automation-modes.md`
 （collaborative 总是询问 · guided 仅重大事项询问 · autonomous 记录后继续；
 `automation_always_ask` 类别始终提示）。
 
-已在上方解析 —— 直接使用。无解析块 → 使用 `.claude/docs/config-resolution.md` 中的默认值。
+已在上一步解析 —— 直接使用。无解析块 → 使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 # 发布检查清单
 
@@ -32,7 +30,7 @@ model: sonnet
   **`NOT ASSESSED — cert tier unknown`**。**未设置不是 `none`：** `none` 是一个
   决定，未设置是缺失的决定，二者绝不能产生相同输出。
   按**该键的四个取值**分支 —— `none | itch | steam | console` ——
-  而不是按平台名称。完整要求表是 `.claude/docs/effects-map.md` 的
+  而不是按平台名称。完整要求表是 `.trae/docs/effects-map.md` 的
   `## platform.cert_tier` 节 —— **只读该节**（Grep 其
   标题，然后做有边界的 Read）；整个文件不是运行时输入。
   - `none` —— **完全不输出认证节。** 内部发布、alpha 或
@@ -76,7 +74,7 @@ model: sonnet
 
 ## Phase 2: 加载项目上下文
 
-- 读取 `CLAUDE.md` 以获取项目上下文、版本信息和平台目标。
+- 读取 `AGENTS.md` 以获取项目上下文、版本信息和平台目标。
 - 从 `production/milestones/` 读取当前里程碑，以了解本次发布应包含哪些功能与内容。
 - 从 `production/qa/bugs/` 读取未关闭的缺陷：Grep `production/qa/bugs/*.md` 的 `**Severity**` 和 `**Status**` 行，与 `/bug-triage` 的做法一致。除非其 Status 为 `Closed` 或 `Verified Fixed`，否则该缺陷即为未关闭。缺陷条目使用 `/gate-check release` 针对已解析 `workflow` 应用的阈值：在 `full` 下，未关闭的 S1、S2 或 S3 缺陷会使该条目失败；在 `standard` 和 `minimal` 下，只有未关闭的 S1 会，未关闭的 S2 或 S3 会在 Rationale 中列为风险。每个失败的缺陷都会在 Rationale 中作为阻塞项列出。**`production/qa/bugs/` 中没有缺陷文件** → 缺陷条目读作 `NOT ASSESSED — no bug records` —— 绝不是零，也绝不勾选，因为缺失的记录与干净的记录绝不能产生相同的清单；缺陷通过 `/bug-report` 登记。
 
@@ -89,7 +87,7 @@ model: sonnet
 > 而在发布闸门上这是两种相反的发现。报告
 > `scanned [N] source files: [M] TODO, [M] FIXME, [M] HACK` —— 或者，当代码
 > 根目录（`src/`、`Assets/` 或 `Source/`；按
-> `.claude/docs/code-root-resolution.md` 解析）无法解析时，
+> `.trae/docs/code-root-resolution.md` 解析）无法解析时，
 > 报告 **`NOT ASSESSED — code root unresolved`**；当它不存在或不含任何
 > 源文件时，报告 **`NOT ASSESSED — no source files found to scan`**。光秃秃的 `0` 不是
 > 结果。

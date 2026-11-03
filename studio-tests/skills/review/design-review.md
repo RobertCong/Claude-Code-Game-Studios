@@ -6,7 +6,7 @@
 Formulas、Edge Cases、Dependencies、Tuning Knobs、Acceptance Criteria）评审一份
 游戏设计文档（GDD）。哪些小节是 REQUIRED 取决于为该系统的解析出的工作流层级：
 `full` 下全部 8 个；`standard` 下 5 个（当系统定义数值规则时再加 Formulas）。
-它通过 `.claude/scripts/gdd-structure-check.sh` 收集小节是否存在，校验声明的
+它通过 `.trae/scripts/gdd-structure-check.sh` 收集小节是否存在，校验声明的
 依赖图，检查内部一致性、可实现性和跨系统契合度，并产生 APPROVED、
 NEEDS REVISION、MAJOR REVISION NEEDED 或 NOT ASSESSED 的结论。
 
@@ -23,10 +23,10 @@ NEEDS REVISION、MAJOR REVISION NEEDED 或 NOT ASSESSED 的结论。
 
 由 `/skill-test spec` 对照 SKILL.md 检查 —— 无需 fixture。
 
-- [ ] 具备必需的前置字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 具备 ≥2 个阶段标题或编号步骤
 - [ ] 包含结论关键词：APPROVED、NEEDS REVISION、MAJOR REVISION NEEDED、NOT ASSESSED
-- [ ] `allowed-tools` 包含 Write/Edit，因此存在 "May I" 写入批准措辞（systems-index 更新、review-log 追加）
+- [ ] 正文承诺写入文件，因此存在 "May I" 写入批准措辞（systems-index 更新、review-log 追加）
 - [ ] 有文档化的输出格式（技能正文中展示了评审模板）
 
 ---
@@ -35,7 +35,7 @@ NEEDS REVISION、MAJOR REVISION NEEDED 或 NOT ASSESSED 的结论。
 
 除非用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有
-`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
+`project.local.yaml`。规则见：`studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 
@@ -56,8 +56,8 @@ NEEDS REVISION、MAJOR REVISION NEEDED 或 NOT ASSESSED 的结论。
 
 **预期行为：**
 1. 新鲜度检查（`review-receipts.sh check …`）未找到回执 → 完整评审
-2. 技能完整读取目标文档并读取 CLAUDE.md
-3. 技能运行 `bash .claude/scripts/gdd-structure-check.sh design/gdd/light-manipulation.md`
+2. 技能完整读取目标文档并读取 AGENTS.md
+3. 技能运行 `bash .trae/scripts/gdd-structure-check.sh design/gdd/light-manipulation.md`
 4. 技能对每个声明的依赖在 `design/gdd/` 中执行 Glob
 5. 技能检查内部一致性、可实现性和跨系统契合度
 6. 不启动任何代理（lean）

@@ -3,17 +3,17 @@
 ## Agent Summary
 **Domain owned:** 故事架构、角色设计方向、世界构建监督、ND-CONSISTENCY 闸门、对话策略。
 **Does NOT own:** 视觉美术风格（art-director）、技术系统或代码（lead-programmer）、制作排期（producer）、游戏机制规则（game-designer）。
-**Gate IDs handled:** ND-CONSISTENCY（结论为 APPROVE / CONCERNS / REJECT，定义于 `.claude/docs/director-gates/nd-consistency.md`）。
+**Gate IDs handled:** ND-CONSISTENCY（结论为 APPROVE / CONCERNS / REJECT，定义于 `.trae/docs/director-gates/nd-consistency.md`）。
 
 ---
 
 ## Static Assertions (Structural)
 
-通过读取该代理的 `.claude/agents/narrative-director.md` frontmatter 进行验证：
+通过读取该代理的 `.trae/agents/narrative-director.md` frontmatter 进行验证：
 
 - [ ] `description:` 字段存在且针对具体领域（提及故事、角色、世界构建、一致性——而非泛泛而谈）
 - [ ] `tools:` 为 Read, Glob, Grep, Write, Edit, WebSearch，且 `disallowedTools:` 列出 Bash
-- [ ] 模型档位为 `inherit`——frontmatter `model:` 恰为 `inherit`（档位：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 代理定义未声称对视觉风格、技术系统或制作排期拥有决定权
 
 ---
@@ -21,7 +21,7 @@
 ## Test Cases
 
 ### Case 1: 领域内请求——适当的输出格式
-**Scenario:** 一份关于「沉没档案馆」地点的新设定文档被提交。该文档确立档案馆在大崩塌期间于 200 年前被淹没，与世界圣经中既定的时间线一致。文中引用的所有具名角色都与其既定档案一致，语气符合叙事圣经的语气指南。闸门上下文传入了 `.claude/docs/director-gates/nd-consistency.md` 指定的每一项输入：文档路径、语气指南、世界圣经的时间线规则，以及它所引用角色的档案。请求标记为 ND-CONSISTENCY。
+**Scenario:** 一份关于「沉没档案馆」地点的新设定文档被提交。该文档确立档案馆在大崩塌期间于 200 年前被淹没，与世界圣经中既定的时间线一致。文中引用的所有具名角色都与其既定档案一致，语气符合叙事圣经的语气指南。闸门上下文传入了 `.trae/docs/director-gates/nd-consistency.md` 指定的每一项输入：文档路径、语气指南、世界圣经的时间线规则，以及它所引用角色的档案。请求标记为 ND-CONSISTENCY。
 **Expected:** 返回 `APPROVE`，理由确认时间线对齐、角色一致性和语气。
 **Assertions:**
 - [ ] 结论恰为 APPROVE / CONCERNS / REJECT 之一（ND-CONSISTENCY 闸门的词汇）——此处为 APPROVE

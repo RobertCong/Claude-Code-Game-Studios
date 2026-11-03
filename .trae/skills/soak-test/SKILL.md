@@ -3,15 +3,13 @@ name: soak-test
 description: "针对长时间游玩的浸泡测试（soak test）协议——观察并记录缓慢泄漏、疲劳感以及后期出现的边界情况。"
 argument-hint: "[duration: 30m | 1h | 2h | 4h] [focus: memory | stability | balance | all]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Bash(bash "*/.claude/skills/soak-test/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow`
 
 **自动化模式**：解析 `modes.automation`（`project.local.yaml` →
 `project.yaml` → 默认 `collaborative`）。每次 `AskUserQuestion` 调用与
-每次文件写入都遵循 `.claude/docs/automation-modes.md`
+每次文件写入都遵循 `.trae/docs/automation-modes.md`
 （协作模式总是询问 · 引导模式仅大项询问 · 自主模式记录后继续；
 `automation_always_ask` 类别始终提示）。
 
@@ -58,7 +56,7 @@ model: sonnet
 - `project.yaml` —— `engine.name`（用于引擎特定的内存监控
   指引）与 `performance.*` 预算（内存上限、目标 FPS）；对任何
   缺失或为空键（包括 `project.yaml` 没有 `performance` 或
-  `engine` 块的情况），回退到 `.claude/docs/technical-preferences.md`
+  `engine` 块的情况），回退到 `.trae/docs/technical-preferences.md`
 - `design/gdd/game-concept.md` —— 预期会话时长（用于与
   浸泡时长对比）、核心循环描述（或 `design/game-brief.md`，即在 `rigor: minimal` 下替代它的一页简报——核心循环，以及仅当其中 "Who it's for" 一行说明时才取会话时长）。按章节读取：用 Grep 工具查找需要的标题（pattern `^#`，content 模式），再用 offset 与 limit 读取相应范围。
 - `production/qa/playtests/` 中最新文件——既往试玩测试发现
@@ -66,7 +64,7 @@ model: sonnet
 - `production/qa/qa-plan-*.md` 中最新文件——当前冲刺测试覆盖
   （用于了解哪些已被正式测试、哪些由浸泡测试覆盖）
 
-记下任何性能预算目标（`performance.*` 取自 `project.yaml`，否则 `.claude/docs/technical-preferences.md`）：
+记下任何性能预算目标（`performance.*` 取自 `project.yaml`，否则 `.trae/docs/technical-preferences.md`）：
 - 内存上限：[N MB，或 "not set"]
 - 目标 FPS：[N，或 "not set"]
 - 帧预算：[N ms，或 "not set"]

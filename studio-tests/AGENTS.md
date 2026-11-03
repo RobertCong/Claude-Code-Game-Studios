@@ -1,4 +1,4 @@
-# Studio Tests —— Claude 指令
+# Studio Tests —— Trae 指令
 
 本文件夹是 Claude Code Game Studios 技能/代理框架的质量保证层。它自成一体，与任何游戏项目分离。
 
@@ -74,9 +74,9 @@ qa             → qa-tester, security-engineer, accessibility-specialist
 
 1. 读取 `catalog.yaml` 获取 `spec:` 路径和 `category:` —— 技能从
    `skills:` 条目读取，代理从 `agents:` 条目读取
-2. 读取技能 `.claude/skills/[name]/SKILL.md` 及其 `references/` 文件夹中的
-   每个文件，或读取代理 `.claude/agents/[name].md`
-3. 读取项目 `CLAUDE.md` 及它用 `@` 导入的文件：每个子代理都会收到它们，
+2. 读取技能 `.trae/skills/[name]/SKILL.md` 及其 `references/` 文件夹中的
+   每个文件，或读取代理 `.trae/agents/[name].md`
+3. 读取项目 `AGENTS.md` 及它按路径引用的标准文件：每个子代理都会收到它们，
    因此其中陈述的规则（例如 `coordination-rules.md` 中的重定向）算作
    技能或代理自身的规则
 4. 读取 `spec:` 路径下的规格
@@ -98,7 +98,7 @@ modes:
 
 - 用例 Fixture 中指定的设置优先于该块，显式的子开关（`modes.workflow`、
   `modes.review_mode`、`qa.level` 等）优先于 `rigor` 预设
-  （`.claude/docs/config-resolution.md` § Defaults）。
+  （`.trae/docs/config-resolution.md` § Defaults）。
 - 若用例声明 `project.yaml` 未设置任何 `modes` 键，或不存在
   `project.yaml`，则运行时不带该块：它测试的是未设置的默认值。
 - 除非用例点名，否则不存在 `project.local.yaml`。
@@ -124,7 +124,7 @@ modes:
 
 ## 此文件夹可删除
 
-`.claude/` 中没有任何东西从这里导入，其他所有 CCGS 技能和代理也能在没有
+`.trae/` 中没有任何东西从这里导入，其他所有 CCGS 技能和代理也能在没有
 它的情况下工作 —— 但 `/skill-test` 和 `/skill-improve` 会按路径读取它。
 没有它时：`/skill-test static` 仍然可用，`/skill-test spec` 和
 `/skill-test category` 停止工作，`/skill-test audit` 会报告不存在目录，

@@ -3,14 +3,12 @@ name: gate-check
 description: "准备好推进到下一个开发阶段了吗？给出 PASS/CONCERNS/NOT ASSESSED/FAIL 结论，并列出阻塞项与所需产出物。『可以进入制作阶段了吗？』"
 argument-hint: "[target-phase: systems-design | technical-setup | pre-production | production | polish | release] [--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, Bash(bash "*/.claude/skills/gate-check/../../hooks/yaml-helper.sh" resolve_config *), Bash(bash .claude/scripts/artifact-check.sh *), Bash(bash .claude/scripts/gdd-structure-check.sh*), Bash(bash .claude/scripts/adr-dep-graph.sh*), Bash(bash .claude/scripts/set-stage.sh *)
-model: opus
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,workflow,qa.level,testing.strict,performance.enforce,team.size,project.stage,system_overrides`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,workflow,qa.level,testing.strict,performance.enforce,team.size,project.stage,system_overrides`
 
-以上为解析结果——直接使用；`--review` 会覆盖 `review_mode`。若无解析块，则采用
-`.claude/docs/config-resolution.md` 中的默认值。
+以上命令的输出即解析结果——直接使用；`--review` 会覆盖 `review_mode`。若无解析块，则采用
+`.trae/docs/config-resolution.md` 中的默认值。
 
 # 阶段质量闸门校验
 
@@ -41,7 +39,7 @@ model: opus
 
 注意：在 `solo` 模式下，会跳过总监派生（CD-PHASE-GATE、TD-PHASE-GATE、PR-PHASE-GATE、AD-PHASE-GATE）——gate-check 退化为仅检查产出物是否存在。在 `lean` 模式下，阶段闸门总监仍会运行（阶段闸门正是 lean 模式的目的）；运行多少位由下文的 `workflow` 决定。
 
-**`workflow`**（参见 `.claude/docs/workflow-modes.md`）：
+**`workflow`**（参见 `.trae/docs/workflow-modes.md`）：
 
 `gate-check` 是项目级运行的，因此它使用项目级 `workflow` 来决定闸门整体的产出物清单（即加载的闸门文件），并在校验 MVP GDD 时，按系统查阅 `workflow_overrides.system_overrides.<system>`——被钉在更高层级的系统，必须先满足该层级的章节数，闸门才能通过，无论项目级工作流如何（见第 2b 节“按系统覆盖”）。
 

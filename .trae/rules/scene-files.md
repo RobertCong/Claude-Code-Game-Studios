@@ -1,10 +1,6 @@
 ---
-paths:
-  - "**/*.tscn"
-  - "**/*.tres"
-  - "**/*.unity"
-  - "**/*.prefab"
-  - "Assets/**/*.asset"
+alwaysApply: false
+globs: Assets/**/*.asset,**/*.tscn,**/*.tres,**/*.unity,**/*.prefab
 ---
 
 # 场景与资源文件规则

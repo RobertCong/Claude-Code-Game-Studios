@@ -1,0 +1,129 @@
+{
+  "version": 1,
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$TRAE_PROJECT_DIR/.trae/hooks/session-start.sh\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash \"$TRAE_PROJECT_DIR/.trae/hooks/detect-gaps.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Read|Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$TRAE_PROJECT_DIR/.trae/hooks/validate-protected.sh\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "RunCommand",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$TRAE_PROJECT_DIR/.trae/hooks/validate-deny.sh\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash \"$TRAE_PROJECT_DIR/.trae/hooks/validate-commit.sh\"",
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "bash \"$TRAE_PROJECT_DIR/.trae/hooks/validate-push.sh\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$TRAE_PROJECT_DIR/.trae/hooks/validate-registry.sh\"",
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "bash \"$TRAE_PROJECT_DIR/.trae/hooks/validate-write.sh\"",
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$TRAE_PROJECT_DIR/.trae/hooks/validate-read.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$TRAE_PROJECT_DIR/.trae/hooks/validate-assets.sh\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash \"$TRAE_PROJECT_DIR/.trae/hooks/validate-skill-change.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "permission_prompt|idle_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$TRAE_PROJECT_DIR/.trae/hooks/notify.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$TRAE_PROJECT_DIR/.trae/hooks/pre-compact.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$TRAE_PROJECT_DIR/.trae/hooks/session-stop.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -15,13 +15,13 @@
 #
 # EXPLICIT INVOCATION ONLY. No hook calls this. session-start.sh observes that
 # the file is large and names this script; the user decides whether to run it.
-# Helpers here emit observations, never verdicts (CLAUDE.md) -- and silently
+# Helpers here emit observations, never verdicts (AGENTS.md) -- and silently
 # moving a user's working notes would be a verdict.
 #
 # Usage:
-#   bash .claude/scripts/rotate-session-state.sh            # rotate
-#   bash .claude/scripts/rotate-session-state.sh --dry-run  # show, change nothing
-#   bash .claude/scripts/rotate-session-state.sh --help
+#   bash .trae/scripts/rotate-session-state.sh            # rotate
+#   bash .trae/scripts/rotate-session-state.sh --dry-run  # show, change nothing
+#   bash .trae/scripts/rotate-session-state.sh --help
 
 set -u
 cd "$(dirname "$0")/../.." || exit 1
@@ -55,7 +55,7 @@ if ! grep -q "$MARKER" "$STATE"; then
   echo "REFUSED: $STATE has no <!-- /CHECKPOINT --> marker."
   echo "  Rotation splits the file at that marker, so without it this script"
   echo "  cannot tell the checkpoint from the narrative and would move both."
-  echo "  Re-create the file from .claude/docs/templates/session-state.md first."
+  echo "  Re-create the file from .trae/docs/templates/session-state.md first."
   exit 3
 fi
 

@@ -9,11 +9,11 @@
 
 ## Static Assertions (Structural)
 
-通过读取该代理的 `.claude/agents/producer.md` frontmatter 进行验证：
+通过读取该代理的 `.trae/agents/producer.md` frontmatter 进行验证：
 
 - [ ] `description:` 字段存在且针对具体领域（提及范围、冲刺、里程碑、制作——而非泛泛而谈）
 - [ ] `tools:` 包含 Write 和 Edit（它按 Output Format 编写冲刺计划并维护风险登记册），并且只有在预加载技能需要时才包含 Bash（`skills:` 包含 `scope-check`，后者会读取 `git log`）
-- [ ] 模型档位为 `opus`——frontmatter `model:` 恰为 `opus`（档位：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 代理定义未声称对设计决策或技术架构拥有决定权
 
 ---

@@ -2,7 +2,7 @@
 
 任何读取、扫描、统计或写入游戏源代码文件的技能都共用此流程。**代码根目录未解析，就意味着检查没有运行。** 本文件给出解析顺序。
 
-`.claude/docs/directory-structure.md` 是判定哪个目录存放代码的权威依据。本文件是应用该依据的流程。
+`.trae/docs/directory-structure.md` 是判定哪个目录存放代码的权威依据。本文件是应用该依据的流程。
 
 ## 各根目录
 
@@ -17,15 +17,15 @@
 ## 解析顺序
 
 1. 从 `project.local.yaml` 读取 `engine.name`，再读 `project.yaml`。
-2. 兼容镜像：`.claude/docs/technical-preferences.md` 中的 `Engine:` 行。值为 `[TO BE CONFIGURED]` 时不算数。
+2. 兼容镜像：`.trae/docs/technical-preferences.md` 中的 `Engine:` 行。值为 `[TO BE CONFIGURED]` 时不算数。
 3. 从目录树推导，但**仅在其明确无歧义时**才这样做。`src/`、`Assets/`、`Source/` 中恰好存在一个，就说明它是根目录。存在两个或更多，则项目确实无法判定 —— 不要猜测。按目录列表的拼写精确比较名称：在 Windows 和默认 macOS 上，对 `Assets/` 的存在性检测在 Godot 自带的 `assets/` 上也会成功，这会使 `src/` + `assets/` 看起来有歧义，而单独的 `assets/` 看起来像 Unity。
 4. 否则：**未解析。**
 
-钩子已经在 `.claude/hooks/yaml-helper.sh` 中以 `resolve_code_root()` 精确实现了这一点。技能必须与它的语义保持一致，这样钩子和技能就不会在代码位置的问题上产生分歧。
+钩子已经在 `.trae/hooks/yaml-helper.sh` 中以 `resolve_code_root()` 精确实现了这一点。技能必须与它的语义保持一致，这样钩子和技能就不会在代码位置的问题上产生分歧。
 
 ## 未解析不会默认回退到 `src/`
 
-这正是本文件存在的意义所在，它也是 `.claude/rules/skill-authoring.md` 中第 2 条义务：缺失值不得默认取宽松的那一个。
+这正是本文件存在的意义所在，它也是 `.trae/rules/skill-authoring.md` 中第 2 条义务：缺失值不得默认取宽松的那一个。
 
 **对于读取或扫描：** 报告 `NOT ASSESSED — code root unresolved`，并说明是哪项检查没有运行。绝不要报告零命中。
 

@@ -3,14 +3,12 @@ name: regression-suite
 description: "将测试覆盖率映射到 GDD 关键路径，找出缺少回归测试的已修复缺陷，标记新功能带来的覆盖率漂移。"
 argument-hint: "[update | audit | report]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Bash(bash "*/.claude/skills/regression-suite/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow,qa.level,system_overrides`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow,qa.level,system_overrides`
 
-已在上方解析 —— 直接使用。若无输出块 → 使用
-`.claude/docs/config-resolution.md` 中的默认值。
+已在上一步解析 —— 直接使用。若无输出块 → 使用
+`.trae/docs/config-resolution.md` 中的默认值。
 
 
 # 回归套件（Regression Suite）
@@ -28,17 +26,17 @@ model: sonnet
 
 ---
 
-每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+每次 `AskUserQuestion` 调用都遵循 `.trae/docs/automation-modes.md`
 （协作模式总是询问 · 引导模式仅大项询问 · 自主模式记录后继续；
 `automation_always_ask` 类别始终提示）。
 
-**工作流层级**：`modes.workflow` 按上方解析结果——除非显式设置，否则由 `modes.rigor` 提供——详见 `.claude/docs/workflow-modes.md`；在 `audit` 模式下，每读取一份 GDD 时都应考虑按系统查看 `workflow_overrides.system_overrides.<system>`。它决定是映射 GDD 关键路径，还是仅做冒烟级覆盖——见 Step 2c。
+**工作流层级**：`modes.workflow` 按上一步命令的输出——除非显式设置，否则由 `modes.rigor` 提供——详见 `.trae/docs/workflow-modes.md`；在 `audit` 模式下，每读取一份 GDD 时都应考虑按系统查看 `workflow_overrides.system_overrides.<system>`。它决定是映射 GDD 关键路径，还是仅做冒烟级覆盖——见 Step 2c。
 
 **`qa.level`**：决定是否生成套件。在 `minimal` 下，回归套件**不生成**（报告该情况并停止）；在 `standard` 下，于 Polish 阶段入口生成；在 `full` 下，于 Production 阶段入口生成。这是与 `workflow` 不同的维度。
 
 ## 1. 解析参数
 
-**早期 `qa.level` 守卫（已在上方解析）：** 若 `qa.level: minimal`，回归套件**不生成**——报告"在 qa.level minimal 下不生成回归套件"，并在所有模式（`update` / `audit` / `report`）下**在此停止，先于任何扫描**。这是 `qa.level` 维度；它与 Step 2c 中 `workflow` 层级的 `minimal` 分支不同（后者只改变关键路径的*来源*，不改变套件*是否*运行）。不要因为 `qa.level` 而进入 Step 2c 的 `minimal` 分支。本次停止的结论为 **NOT ASSESSED**（Section 7）——该层级不要求测试，且未扫描任何内容。
+**早期 `qa.level` 守卫（已在上一步解析）：** 若 `qa.level: minimal`，回归套件**不生成**——报告"在 qa.level minimal 下不生成回归套件"，并在所有模式（`update` / `audit` / `report`）下**在此停止，先于任何扫描**。这是 `qa.level` 维度；它与 Step 2c 中 `workflow` 层级的 `minimal` 分支不同（后者只改变关键路径的*来源*，不改变套件*是否*运行）。不要因为 `qa.level` 而进入 Step 2c 的 `minimal` 分支。本次停止的结论为 **NOT ASSESSED**（Section 7）——该层级不要求测试，且未扫描任何内容。
 
 **模式：**
 - `/regression-suite update` —— 扫描本冲刺新的缺陷修复，检查是否存在回归测试；将新测试加入套件清单
@@ -78,7 +76,7 @@ tests/regression/**/*
 
 ### Step 2c —— 加载 GDD 关键路径
 
-针对 `audit` 模式：读取 `design/gdd/systems-index.md` 获取所有系统，然后按各系统的工作流层级（已在上方解析）限定扫描范围：
+针对 `audit` 模式：读取 `design/gdd/systems-index.md` 获取所有系统，然后按各系统的工作流层级（已在上一步解析）限定扫描范围：
 - **`full`** —— 读取 GDD，并从所有章节映射关键路径。
 - **`standard`** —— 同上，但仅从必需章节（验收标准、边界情况，以及系统定义数值规则的公式）映射。通过 `system_overrides` 固定为更高层级的系统，按其更高层级映射。
 - **`minimal`** —— **跳过 GDD 关键路径扫描**。改为读取 `production/qa/smoke-*.md` 中最新的冒烟检查报告，并将其覆盖的关键路径作为回归范围（Step 3 将覆盖率映射到这些冒烟路径，而非 GDD 验收标准）。若不存在冒烟报告，则停止，结论为：**NOT ASSESSED — no smoke report to take critical paths from**——在 minimal 下若没有冒烟报告，就没有关键路径来源；请先运行 `/smoke-check`。
@@ -273,7 +271,7 @@ Tests that are flaky or disabled (do not run in CI):
 ## 协作协议（Collaborative Protocol）
 
 **适用于 `collaborative` 模式（默认）。** 对于 `guided` 与
-`autonomous` 模式，参见 `.claude/docs/automation-modes.md`——以下规则描述的是协作模式的要求，而非普适行为。
+`autonomous` 模式，参见 `.trae/docs/automation-modes.md`——以下规则描述的是协作模式的要求，而非普适行为。
 
 - **未经用户明确批准，绝不从清单中删除已有回归测试**——删除一个刻意编写的测试，本身就是一种回归风险
 - **缺口是建议性的，不是阻塞性的**——清晰呈现，但不阻止其他工作推进（除 `qa.level: full` 下阶段质量闸门（gate）要求回归套件外）

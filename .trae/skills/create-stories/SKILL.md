@@ -3,14 +3,12 @@ name: create-stories
 description: "把一个史诗（epic）拆解为可实现的用户故事，并附带验收标准。当用户想要某个史诗的用户故事或下一批要构建的工作时使用。不用于把整个设计转成史诗。"
 argument-hint: "[epic-slug | epic-path] [--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, Bash(bash "*/.claude/skills/create-stories/../../hooks/yaml-helper.sh" resolve_config *), Bash(bash .claude/scripts/adr-status.sh *), Bash(bash .claude/scripts/md-section.sh extract *), Bash(bash .claude/scripts/md-section.sh list *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,review_gate,automation,workflow,docs.density,story_granularity,qa.level,system_overrides`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,review_gate,automation,workflow,docs.density,story_granularity,qa.level,system_overrides`
 
-上述内容已解析完成——请直接使用；`--review` 会覆盖 `review_mode`。若没有解析块 →
-使用 `.claude/docs/config-resolution.md` 中的默认值。
+上一步命令的输出已解析完成——请直接使用；`--review` 会覆盖 `review_mode`。若没有解析块 →
+使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 使用提问工具提问。若没有提问工具，就把选项编号列出并结束本轮
 以等待回答。被跳过或忽略的问题不算回答：请用纯文本再次询问。
@@ -27,7 +25,7 @@ model: sonnet
 **下一步：** 在 `workflow: minimal` 下 `/dev-story [story-path]`；否则
 `/story-readiness [story-path]`，然后 `/dev-story`。
 
-询问遵循 `.claude/docs/automation-modes.md`（协作模式总是询问，引导模式
+询问遵循 `.trae/docs/automation-modes.md`（协作模式总是询问，引导模式
 在重大选择时询问，自主模式记录并继续；`automation_always_ask`
 类别总是询问）。
 
@@ -109,12 +107,12 @@ model: sonnet
 1. **史诗：** 完整阅读 `production/epics/[epic-slug]/EPIC.md`（其层、GDD、
    治理 ADR，以及带 TR-ID 的 GDD Requirements 表）。
 2. **GDD：** 按标题读取其章节，绝不读整个文件：
-   `bash .claude/scripts/md-section.sh extract design/gdd/[file].md "Acceptance Criteria"`，
+   `bash .trae/scripts/md-section.sh extract design/gdd/[file].md "Acceptance Criteria"`，
    对 `Formulas`、`Edge Cases` 和 `Detailed Design` 同样处理（退出码 3：尝试
    `Detailed Rules`，即设计标准中同一章节的名称）；在 `full` 下
    还需要其他必需章节（`list` 显示标题）。
 3. **控制清单：** 仅史诗所在层，以及版本：
-   `bash .claude/scripts/md-section.sh extract docs/architecture/control-manifest.md "[Layer] Layer Rules"`，
+   `bash .trae/scripts/md-section.sh extract docs/architecture/control-manifest.md "[Layer] Layer Rules"`，
    加上其 `Manifest Version` 行。
 4. **TR 注册表：** 仅本系统的条目：在
    `docs/architecture/tr-registry.yaml` 中，匹配 `system: <slug>\s*$` 的行，
@@ -123,7 +121,7 @@ model: sonnet
 5. **ADR**，史诗点名的每一个（治理 ADR，或在其需求表中的，
    包括 Proposed 的），在一次调用中：
    ```
-   bash .claude/scripts/adr-status.sh ADR-0001 ADR-0003 ...
+   bash .trae/scripts/adr-status.sh ADR-0001 ADR-0003 ...
    ```
    每一行给出状态、层、`version`（故事的 ADR Version 戳记）、
    `depends_on` 以及缺失的章节。然后用
@@ -202,7 +200,7 @@ UI 最后。对每个故事：
 阅读上面的 `review_gate` 行。`skill-gates=skip`（solo 或 lean）：不评审；
 在 Phase 6 列表和收尾块中注明“QL-STORY-READY skipped — [Solo | Lean] mode”。
 `skill-gates=run`：阅读 `references/qa-lead-gate.md` 和
-`.claude/docs/director-gates.md`，并在 Phase 6 询问之前立即运行它。跳过时，
+`.trae/docs/director-gates.md`，并在 Phase 6 询问之前立即运行它。跳过时，
 不要加载它。
 
 ## Phase 6: 展示故事，询问一次
@@ -241,7 +239,7 @@ adjust first；调整可以改变任何估算。点明 Phase 7 触及的每个�
 ### 故事文件
 
 **每个故事**为 `production/epics/[epic-slug]/story-[NNN]-[slug].md`，按
-`.claude/docs/templates/story.md` 布局。绝不重复使用故事编号。每个文件
+`.trae/docs/templates/story.md` 布局。绝不重复使用故事编号。每个文件
 都以文件方式写入，绝不通过 shell 命令：shell 写入会跳过项目的写入
 检查。
 

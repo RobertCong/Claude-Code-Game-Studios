@@ -14,7 +14,7 @@ Phase 1–4（分层图、模块归属、数据流、API 边界）均逐项呈�
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] 具有必填的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 至少包含 2 个阶段标题
 - [ ] 包含质量闸门（gate）原话中的签核结论关键词：`APPROVE`、`CONCERNS`、`FEASIBLE`，以及 `REVISED after …` 记录
 - [ ] 包含写入前询问用语：通过 `AskUserQuestion` 请求写入审批（“May I write the master architecture document?”、“May I update the Document Status section…”）
@@ -30,7 +30,7 @@ Phase 1–4（分层图、模块归属、数据流、API 边界）均逐项呈�
 
 评审模式取自解析后的 `review_mode`（`project.yaml` 中的 `modes.review_mode`）；`--review full|lean|solo` 可对单次运行进行覆盖。
 
-在 `full` 模式下：`docs/architecture/architecture.md` 写入后，由 TD-ARCHITECTURE（`technical-director`）和 LP-FEASIBILITY（`lead-programmer`）评审。两者都是被启动的代理，各自读取自己的闸门文件（`.claude/docs/director-gates/td-architecture.md`、`lp-feasibility.md`）；它们的输入相互独立，因此会一起启动，并在 Step 3 呈现之前收集双方结论。父会话从不读取这些文件：它把文档路径、技术需求基线（TR-ID 及数量）、带状态的 ADR 清单以及引擎知识缺口清单传给 TD-ARCHITECTURE。
+在 `full` 模式下：`docs/architecture/architecture.md` 写入后，由 TD-ARCHITECTURE（`technical-director`）和 LP-FEASIBILITY（`lead-programmer`）评审。两者都是被启动的代理，各自读取自己的闸门文件（`.trae/docs/director-gates/td-architecture.md`、`lp-feasibility.md`）；它们的输入相互独立，因此会一起启动，并在 Step 3 呈现之前收集双方结论。父会话从不读取这些文件：它把文档路径、技术需求基线（TR-ID 及数量）、带状态的 ADR 清单以及引擎知识缺口清单传给 TD-ARCHITECTURE。
 
 在 `lean` 模式下：两者都不是 PHASE-GATE，因此都被跳过。输出注明 “TD-ARCHITECTURE and LP-FEASIBILITY skipped — Lean mode.”
 
@@ -40,7 +40,7 @@ Phase 1–4（分层图、模块归属、数据流、API 边界）均逐项呈�
 
 ## Fixture Defaults
 
-除非某个案例自身的 Fixture 另有说明，每个案例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见 `studio-tests/CLAUDE.md` § Fixture defaults。
+除非某个案例自身的 Fixture 另有说明，每个案例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见 `studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 

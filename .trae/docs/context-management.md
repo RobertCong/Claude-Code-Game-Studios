@@ -1,6 +1,6 @@
 # 上下文管理
 
-上下文是 Claude Code 会话中最关键的资源。要主动管理它。
+上下文是 Trae 会话中最关键的资源。要主动管理它。
 
 ## 文件承载状态（主要策略）
 
@@ -15,14 +15,14 @@
 - 达到实现里程碑
 - 已获得测试结果
 
-**从 `.claude/docs/templates/session-state.md` 创建它**——该文件有
+**从 `.trae/docs/templates/session-state.md` 创建它**——该文件有
 schema，且钩子依赖它。
 
 分为两个区域，这一区分是承重设计：
 
 | 区域 | 谁读取它 | 规则 |
 |--------|--------------|------|
-| `<!-- STATUS -->` … `<!-- /STATUS -->` | `statusline.sh`（面包屑，仅 Production+） | 即使为空也保留标记 |
+| `<!-- STATUS -->` … `<!-- /STATUS -->` | 会话状态说明（Trae 没有状态栏脚本） | 即使为空也保留标记 |
 | `<!-- CHECKPOINT -->` … `<!-- /CHECKPOINT -->` | `session-start.sh`（每次启动，包括压缩之后） | **覆盖，绝不追加。** 约 25 行以内——逐字显示 |
 | `<!-- /CHECKPOINT -->` 之后的所有内容 | 人类，以及想了解细节的 agent | 自由格式；没有钩子注入它 |
 
@@ -38,7 +38,7 @@ schema，且钩子依赖它。
 `production/session-logs/`：
 
 ```bash
-bash .claude/scripts/rotate-session-state.sh            # --dry-run to preview
+bash .trae/scripts/rotate-session-state.sh            # --dry-run to preview
 ```
 
 检查点保留，叙事被追加到带日期的日志中，不删除任何内容。`session-start.sh` 会观察何时需要轮转，但从不执行轮转。
@@ -96,7 +96,7 @@ Task: Implement hitbox detection
 - 中等（实现功能）：约 8k token
 - 重量（多系统重构）：约 15k token
 
-## 确定性辅助脚本——`.claude/scripts/`
+## 确定性辅助脚本——`.trae/scripts/`
 
 最便宜的上下文节省不是总结文档，而是**根本不读它**。当问题有确定性答案时，应由脚本回答，模型则应把预算花在判断上。
 
@@ -104,8 +104,8 @@ Task: Implement hitbox detection
 
 | 目录 | 用途 | 调用方式 |
 |---|---|---|
-| `.claude/hooks/` | 事件驱动——接入 `settings.json` 并由 Claude Code 触发 | 执行框架 |
-| `.claude/scripts/` | 从技能正文手动调用 | `bash .claude/scripts/<name>.sh` |
+| `.trae/hooks/` | 事件驱动——注册在 `.trae/hooks.json` 中，由 Trae 触发 | 执行框架 |
+| `.trae/scripts/` | 从技能正文手动调用 | `bash .trae/scripts/<name>.sh` |
 
 当前辅助脚本：
 
@@ -117,11 +117,9 @@ Task: Implement hitbox detection
 
 辅助脚本的两条规则：
 
-1. **按 `.claude/docs/config-resolution.md` 展示的方式授予权限。** `allowed-tools`
-   预批准命令；它不限制命令——没有授权的技能
-   仍会在权限提示后运行脚本。正文中注入的 `` !`cmd` `` 更严格：
-   未获批准时，它会中止整个调用，因此需要该文档给出的
-   精确授权。
+1. **命令必须实际运行，而不是假定已运行。** 技能正文里的「运行并读取输出」
+   步骤要求模型用 RunCommand 执行脚本；Trae 不会自动预执行。脚本的路径使用
+   `${CLAUDE_SKILL_DIR}/../../scripts/...` 或项目根相对路径，二者都指向 `.trae/scripts`。
 2. **输出观察结果，而非结论。** 一个打分或评判的脚本最终会
    与它不知道的层级、模式或按系统覆盖相矛盾。报告磁盘上的内容，
    让调用方决定其含义。

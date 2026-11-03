@@ -11,7 +11,7 @@
 
 - [ ] `description:` 字段存在且与领域特定（提及一次性构建 / 概念原型 / 速度优先于标准）
 - [ ] `tools:` 读取 Read、Glob、Grep、Write、Edit、Bash（它编写并运行一次性构建），且 `isolation:` 读取 `worktree` —— frontmatter 无法将写入限定到某个目录，因此 `prototypes/` 的边界由正文的 Isolation Requirements（下一条断言）承担
-- [ ] 模型档位为 `sonnet` — frontmatter `model:` 的值恰为 `sonnet`（档位说明：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 代理定义明确说明原型代码不是生产代码，且不得复制到生产代码根目录
 
 ---
@@ -66,7 +66,7 @@
 - 不适用生产编码标准（无需测试覆盖率、无需文档注释，允许全局状态）
 - 将输出写入 `prototypes/grid-movement-concept/` 而非 `src/`
 - 写入后将控制权交回：请用户运行项目并粘贴任何错误或描述其观察，而不是假定其已正常工作
-- 如果某个 Godot 4.6 API 不确定，标记具体 API 并注明需对照 Godot 4.6 文档核实——`docs/engine-reference/godot/VERSION.md` 通过 `CLAUDE.md` 的导入到达代理，其 Knowledge Gap Warning 要求在建议 Godot API 调用前交叉核对该目录
+- 如果某个 Godot 4.6 API 不确定，标记具体 API 并注明需对照 Godot 4.6 文档核实——`docs/engine-reference/godot/VERSION.md` 通过 `AGENTS.md` 的导入到达代理，其 Knowledge Gap Warning 要求在建议 Godot API 调用前交叉核对该目录
 
 ---
 
@@ -76,13 +76,13 @@
 - [ ] 拒绝生产实现请求，说明生产代码需从零编写，并指出原型的 REPORT.md 作为交接
 - [ ] 在原型评估后产出结构化 REPORT.md，给出由证据支撑的 PROCEED / PIVOT / KILL 建议
 - [ ] 不在没有明确警告的情况下建议以生产形式保留原型代码
-- [ ] 使用项目配置的引擎与脚本语言；按 `CLAUDE.md` 导入的 `VERSION.md` 中的 Knowledge Gap Warning 标记版本不确定性
+- [ ] 使用项目配置的引擎与脚本语言；按 `AGENTS.md` 导入的 `VERSION.md` 中的 Knowledge Gap Warning 标记版本不确定性
 
 ---
 
 ## Coverage Notes
 - Case 2（生产重定向）至关重要——原型代码泄漏进 src/ 是常见质量问题
 - Case 4（放弃的诚实性）测试代理是否避免沉没成本偏差——失败的原型应被干净地放弃
-- Case 5 要求 `project.yaml` 已配置 `engine.name` 与 `engine.language`；若未配置则测试不完整。若 `project.yaml` 与 `.claude/docs/technical-preferences.md` 都未指明，预期输出是询问引擎与语言，而不是猜测
+- Case 5 要求 `project.yaml` 已配置 `engine.name` 与 `engine.language`；若未配置则测试不完整。若 `project.yaml` 与 `.trae/docs/technical-preferences.md` 都未指明，预期输出是询问引擎与语言，而不是猜测
 - 有意放宽编码标准是一种特性而非缺陷——不要把原型输出中缺少测试或文档注释标为失败
 - 无自动化运行器；请手动评审或通过 `/skill-test` 评审

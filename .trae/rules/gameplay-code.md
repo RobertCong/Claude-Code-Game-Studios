@@ -1,8 +1,6 @@
 ---
-paths:
-  - "src/gameplay/**"
-  - "Assets/**/{Gameplay,gameplay}/**/*.cs"
-  - "Source/**/{Gameplay,gameplay}/**/*.{h,cpp}"
+alwaysApply: false
+globs: src/gameplay/**,Assets/**/Gameplay/**/*.cs,Assets/**/gameplay/**/*.cs,Source/**/Gameplay/**/*.h,Source/**/Gameplay/**/*.cpp,Source/**/gameplay/**/*.h,Source/**/gameplay/**/*.cpp
 ---
 
 # 玩法代码规则

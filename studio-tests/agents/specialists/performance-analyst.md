@@ -11,7 +11,7 @@
 
 - [ ] `description:` 字段存在且与领域特定（提及剖析 / 瓶颈分析 / 性能指标）
 - [ ] `tools:` 列表包含 Read、Write、Edit、Bash、Glob、Grep
-- [ ] 模型档位为 `inherit` — frontmatter `model:` 的值恰为 `inherit`（档位说明：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 代理定义未声称对实现任何优化拥有权限——明确自述仅为分析/建议角色
 
 ---

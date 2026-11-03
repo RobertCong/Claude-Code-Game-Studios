@@ -3,14 +3,12 @@ name: playtest-report
 description: "结构化的试玩测试报告模板，或把现有的试玩测试记录整理成结构化反馈。"
 argument-hint: "[new|analyze path-to-notes] [--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Agent, AskUserQuestion, Bash(bash "*/.claude/skills/playtest-report/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation`
 
-以上为解析结果——直接使用；`--review` 会覆盖本次运行的 `review_mode`。若无
-解析块，则采用 `.claude/docs/config-resolution.md` 中的默认值。
+以上命令的输出即解析结果——直接使用；`--review` 会覆盖本次运行的 `review_mode`。若无
+解析块，则采用 `.trae/docs/config-resolution.md` 中的默认值。
 
 # 试玩测试报告
 
@@ -19,10 +17,10 @@ model: sonnet
 ## Phase 1: 解析参数
 
 
-完整的检查模式见 `.claude/docs/director-gates.md`。各闸门定义位于 `.claude/docs/director-gates/[gate-id].md`——派生出的代理会读取自己的闸门文件；不要在父会话中读取它。
+完整的检查模式见 `.trae/docs/director-gates.md`。各闸门定义位于 `.trae/docs/director-gates/[gate-id].md`——派生出的代理会读取自己的闸门文件；不要在父会话中读取它。
 
 
-每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+每次 `AskUserQuestion` 调用都遵循 `.trae/docs/automation-modes.md`
 （collaborative 始终询问 · guided 仅重要事项 · autonomous 记录并继续；
 `automation_always_ask` 类别始终提示）。
 
@@ -141,7 +139,7 @@ Pain points 用于描述游戏玩起来的感觉。
 - `lean` → 跳过（非 PHASE-GATE）。注明：“已跳过 CD-PLAYTEST——Lean 模式。”继续到 Phase 4（保存报告）。
 - `full` → 照常派生。
 
-完成发现归类后，通过 `Agent` 使用闸门 **CD-PLAYTEST**（`.claude/docs/director-gates/cd-playtest.md`）派生 `creative-director`。
+完成发现归类后，通过 `Agent` 使用闸门 **CD-PLAYTEST**（`.trae/docs/director-gates/cd-playtest.md`）派生 `creative-director`。
 
 传入：结构化报告内容、游戏支柱与核心幻想（来自
 `design/gdd/game-concept.md`）、正在检验的具体假设。**如果
@@ -152,7 +150,7 @@ Pain points 用于描述游戏玩起来的感觉。
 *“没有可用的游戏支柱——仅依据假设进行评估。”* 对支柱闭口不谈的总监闸门
 会自行编造支柱。
 
-在保存报告前呈现创意总监的评估。如果为 CONCERNS 或 REJECT，在报告中加入 `## Creative Director Assessment` 一节，记录结论与反馈。如果为 APPROVE，在报告中注明已批准。如果为 NOT ASSESSED（总监缺少某项输入——见 `.claude/docs/director-gates.md`），加入同样的一节并指出缺失的内容；这不等于批准。
+在保存报告前呈现创意总监的评估。如果为 CONCERNS 或 REJECT，在报告中加入 `## Creative Director Assessment` 一节，记录结论与反馈。如果为 APPROVE，在报告中注明已批准。如果为 NOT ASSESSED（总监缺少某项输入——见 `.trae/docs/director-gates.md`），加入同样的一节并指出缺失的内容；这不等于批准。
 
 ---
 

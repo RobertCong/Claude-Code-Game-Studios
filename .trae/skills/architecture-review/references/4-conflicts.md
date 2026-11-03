@@ -35,7 +35,7 @@ Resolution options:
 **以确定性的方式构建图 —— 不要手动追踪：**
 
 ```
-Bash: bash .claude/scripts/adr-dep-graph.sh
+Bash: bash .trae/scripts/adr-dep-graph.sh
 ```
 
 它收集每条 `Depends On` 边，找出环与顺序，并输出

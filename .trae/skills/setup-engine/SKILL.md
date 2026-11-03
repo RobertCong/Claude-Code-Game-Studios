@@ -1,19 +1,17 @@
 ---
 name: setup-engine
-description: "配置引擎与版本。将其固定写入 CLAUDE.md；当版本超出 LLM 训练数据范围时，由 WebSearch 填充参考资料。"
+description: "配置引擎与版本。将其固定写入 AGENTS.md；当版本超出 LLM 训练数据范围时，由 WebSearch 填充参考资料。"
 argument-hint: "[engine] | [engine version] | refresh | upgrade [old-version] [new-version] | no args for guided selection"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, WebSearch, WebFetch, Agent, AskUserQuestion, Bash(bash "*/.claude/skills/setup-engine/../../hooks/yaml-helper.sh" resolve_config *), Bash(godot --version), Bash(godot --headless --path . --import), Bash(command -v godot), Bash(uname -s), Bash(bash .claude/scripts/project-coherence.sh*)
-model: sonnet
 ---
 
 # 引擎配置
 
 当本技能被调用时：
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys workflow`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys workflow`
 
-**层级感知。** 上面解析出的 `workflow` 层级决定本技能期望哪一份设计产出物，以及它在 §12 中推荐的收尾路径：
+**层级感知。** 上一步命令输出中解析出的 `workflow` 层级决定本技能期望哪一份设计产出物，以及它在 §12 中推荐的收尾路径：
 - **`minimal`** — 设计产出物是单页的 `design/game-brief.md`
   （该层级没有 GDD、系统拆解或逐系统设计）。
   在 minimal 路径中 `/setup-engine` *最先*运行，因此此处缺少简报是
@@ -43,7 +41,7 @@ model: sonnet
 
 **现在读取 `references/3-version.md` 并遵循它** — 本阶段的步骤在该文件中，不在此处。如果本阶段期间对话被压缩或恢复，请重新读取它。
 
-## 4. 更新 CLAUDE.md 技术栈
+## 4. 更新 AGENTS.md 技术栈
 
 **现在读取 `references/4-claude-md-stack.md` 并遵循它** — 本阶段的步骤在该文件中，不在此处。如果本阶段期间对话被压缩或恢复，请重新读取它。
 
@@ -67,7 +65,7 @@ model: sonnet
 
 **现在读取 `references/7.5-scaffold.md` 并遵循它** — 本阶段的步骤在该文件中，不在此处。如果本阶段期间对话被压缩或恢复，请重新读取它。
 
-## 8. 校验 CLAUDE.md 的导入
+## 8. 校验 AGENTS.md 的导入
 
 **现在读取 `references/8-verify.md` 并遵循它** — 本阶段的步骤在该文件中，不在此处。如果本阶段期间对话被压缩或恢复，请重新读取它。
 
@@ -119,10 +117,10 @@ model: sonnet
   两处。如果两者出现分歧，以 `project.yaml` 为准。
 - 未经询问，绝不要覆盖现有参考资料 — 应追加或更新
 - 如果已存在针对其他引擎的参考资料，替换前先询问
-- 在编辑 CLAUDE.md 之前，始终先向用户展示你将要更改的内容
+- 在编辑 AGENTS.md 之前，始终先向用户展示你将要更改的内容
 - 如果 WebSearch 返回含糊的结果，展示给用户并由他们决定
 - 当用户选择 **GDScript** 时：原样复制 `references/godot-language-config.md`
-  中 **A1** 的 GDScript CLAUDE.md 模板。绝不要向 Language 字段添加
+  中 **A1** 的 GDScript AGENTS.md 模板。绝不要向 Language 字段添加
   "C++ via GDExtension"。GDScript 项目可以使用 GDExtension，但它不是
   项目的主要语言。路由表中的 `godot-gdextension-specialist` 在需要原生扩展时
   可用 — 这并不使 C++ 成为项目语言。
@@ -137,7 +135,7 @@ model: sonnet
 `references/godot-language-config.md`
 并使用所选语言对应的子节：
 
-- **A1** — CLAUDE.md 技术栈模板（GDScript / C# / Both）
+- **A1** — AGENTS.md 技术栈模板（GDScript / C# / Both）
 - **A2** — 命名约定
 - **A3** — 引擎专家路由与文件扩展名表
 

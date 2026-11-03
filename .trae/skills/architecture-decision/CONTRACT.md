@@ -19,7 +19,7 @@
 | `docs/architecture/`（现有 ADR） | 扫描以确定下一个顺序 ADR 编号 | 是 |
 | `design/gdd/[system].md`（与决策相关的 GDD） | 促使该决策的具体规则、公式、性能约束或集成点 | 是 |
 | `project.yaml` | `engine.name` —— 推导出用于验证（第 5.5 步）要生成的 primary specialist（`<engine>-specialist`） | 是 |
-| `.claude/docs/technical-preferences.md` | `Engine Specialists` 章节——遗留回退，仅当 `project.yaml` 中 `engine.name` 缺失或为空时使用 | 是——仅当 `engine.name` 缺失时才需要 |
+| `.trae/docs/technical-preferences.md` | `Engine Specialists` 章节——遗留回退，仅当 `project.yaml` 中 `engine.name` 缺失或为空时使用 | 是——仅当 `engine.name` 缺失时才需要 |
 
 ### 前置条件
 - 必须已配置引擎（`docs/engine-reference/[engine]/VERSION.md` 必须存在）——若未配置，技能会提示先运行 `/setup-engine`
@@ -44,7 +44,7 @@
 - 如果配置了引擎专家，则在写入文件之前运行引擎专家验证（第 5.5 步）；专家发现的阻塞问题会导致 Decision 章节在保存前被修订
 
 ## 不可变性规则
-- 读取但不修改：`docs/architecture/` 中所有现有 ADR 文件（包括改造模式——现有章节绝不被触碰）、`design/gdd/` 中所有 GDD 文件、`docs/engine-reference/**`、`project.yaml`、`.claude/docs/technical-preferences.md`（遗留回退）
+- 读取但不修改：`docs/architecture/` 中所有现有 ADR 文件（包括改造模式——现有章节绝不被触碰）、`design/gdd/` 中所有 GDD 文件、`docs/engine-reference/**`、`project.yaml`、`.trae/docs/technical-preferences.md`（遗留回退）
 - 修改：`docs/architecture/adr-NNNN-[slug].md`（创建新文件；或在改造模式中追加缺失章节）、`docs/registry/architecture.yaml`（仅追加；现有条目获得 `status: superseded_by` 标注，绝不删除或重写）
 - 改造模式下：只追加缺失的章节——绝不修改目标 ADR 文件中已存在的任何章节
 
@@ -86,6 +86,6 @@
 - 如果 ADR 编号扫描漏掉某个文件（例如 `docs/architecture/` 子目录中的文件，或命名模式非标准的文件），就可能分配重复编号——所有 ADR 文件必须位于 `docs/architecture/` 顶层并遵循 `adr-NNNN-[slug].md` 命名约定
 - 只有当 `production/epics/` 下的用户故事文件包含 `/create-stories` 会写入的任一形式（`> **Status**: Blocked`、`**Status:** Blocked`、`Status: Blocked`）的 Blocked Status 行，并且包含此 ADR 的 id 时，接受模式才会把用户故事从 `Blocked` 移到 `Ready`。一个因等待此 ADR 而阻塞却从不写明其 id 的用户故事不会被找到，且会一直保持 `Blocked`，直到被手工更新
 - `## GDD Requirements Addressed` 表格根据用户在协作会话中告诉技能的信息填充；如果用户不知道哪些 GDD 促使了该决策，此表格可能不完整——`/create-epics` 和 `/gate-check` 都依赖此链接实现可追溯性
-- 只有**两个**来源都未设置时，才会跳过引擎专家验证（第 5.5 步）——`project.yaml` 中 `engine.name` 缺失或为空，**并且** `.claude/docs/technical-preferences.md` 仍为 `[TO BE CONFIGURED]`。仅通过 `project.yaml` 配置的项目**确实**会获得专家验证。当两者都未设置时，截止后引擎 API 风险不会在 ADR 写入前被捕获
+- 只有**两个**来源都未设置时，才会跳过引擎专家验证（第 5.5 步）——`project.yaml` 中 `engine.name` 缺失或为空，**并且** `.trae/docs/technical-preferences.md` 仍为 `[TO BE CONFIGURED]`。仅通过 `project.yaml` 配置的项目**确实**会获得专家验证。当两者都未设置时，截止后引擎 API 风险不会在 ADR 写入前被捕获
 - `docs/registry/architecture.yaml` 按设计仅可追加；如果某条立场条目永久失效（未被其他 ADR 取代），必须手动删除——没有清理机制
 - 改造模式下，如果现有 ADR 的章节存在但为空（例如 `## Status` 标题没有值），技能会将该章节视为存在且不会填充——空的 Status 对 `/story-readiness` 等下游技能实际上不可见

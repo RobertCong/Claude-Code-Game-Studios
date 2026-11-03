@@ -32,7 +32,7 @@ BLOCKED 后为解除阻塞的操作。它从不关闭自己实现的用户故事
 
 由 `/skill-test spec` 针对 SKILL.md 检查 —— 无需 fixture。
 
-- [ ] 具有必需的前置元数据字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 至少有 2 个阶段标题
 - [ ] 包含状态关键词：BLOCKED、INCOMPLETE、In Progress、NOT VERIFIED
 - [ ] 包含 "May I write" 协作协议用语（针对它写入的文件自行询问；源代码和测试委托给子代理）
@@ -54,7 +54,7 @@ BLOCKED 后为解除阻塞的操作。它从不关闭自己实现的用户故事
 
 除非某个用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有
-`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
+`project.local.yaml`。规则见：`studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 
@@ -323,7 +323,7 @@ BLOCKED 后为解除阻塞的操作。它从不关闭自己实现的用户故事
 3. 验证运行 `commands.smoke` 并报告其退出码
 4. 启动之前，Glob `Assets/**/ScreenshotOnArg.cs`，未找到则询问
    "May I write `Assets/Scripts/ScreenshotOnArg.cs`?"；确认后按
-   `.claude/docs/run-and-observe.md` 原样写入该脚本
+   `.trae/docs/run-and-observe.md` 原样写入该脚本
 5. 以 `--scene`/`--screenshot` 启动构建后的玩家程序，并打印
    `Run result: OBSERVED — …` 及保留路径
 
@@ -339,7 +339,7 @@ BLOCKED 后为解除阻塞的操作。它从不关闭自己实现的用户故事
 ### Case 7: 引擎未设置 —— 代码根目录无法解析，不写入任何内容
 
 **Fixture:**
-- `project.yaml` 没有 `engine` 块；`.claude/docs/technical-preferences.md`
+- `project.yaml` 没有 `engine` 块；`.trae/docs/technical-preferences.md`
   内容为 `Engine: [TO BE CONFIGURED]`
 - 项目没有 `src/`、`Assets/` 或 `Source/` 中的任何一个
 - `modes.workflow: minimal`；用户故事为 Type Logic
@@ -347,7 +347,7 @@ BLOCKED 后为解除阻塞的操作。它从不关闭自己实现的用户故事
 **Input:** `/dev-story production/epics/[slug]/story-001-[slug].md`
 
 **Expected behavior:**
-1. 代码根目录无法解析（`.claude/docs/code-root-resolution.md`：没有
+1. 代码根目录无法解析（`.trae/docs/code-root-resolution.md`：没有
    `engine.name`、没有旧的 `Engine:` 值、目录树中没有唯一明确根目录）
 2. 不写入任何源文件，输出说明代码根目录未解析
 

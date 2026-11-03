@@ -9,11 +9,11 @@
 
 ## Static Assertions (Structural)
 
-通过读取该代理的 `.claude/agents/lead-programmer.md` frontmatter 进行验证：
+通过读取该代理的 `.trae/agents/lead-programmer.md` frontmatter 进行验证：
 
 - [ ] `description:` 字段存在且针对具体领域（提及代码架构、可行性、代码评审、编码标准——而非泛泛而谈）
 - [ ] `tools:` 包含用于源文件的 Read 以及用于静态分析或测试运行的 Bash；Write/Edit 在正文中受限——每次写入都等待用户的「yes」，编排运行的例外仅涵盖 `production/`、`docs/` 或 `tests/` 下的新产出物
-- [ ] 模型档位为 `sonnet`——frontmatter `model:` 恰为 `sonnet`（档位：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 代理定义未声称对游戏设计、创意方向或制作排期拥有决定权
 
 ---

@@ -9,11 +9,11 @@
 
 ## Static Assertions (Structural)
 
-通过读取该代理的 `.claude/agents/game-designer.md` frontmatter 进行验证：
+通过读取该代理的 `.trae/agents/game-designer.md` frontmatter 进行验证：
 
 - [ ] `description:` 字段存在且针对具体领域（提及核心循环、成长、战斗规则、经济、面向玩家的设计——而非泛泛而谈）
 - [ ] `tools:` 为 Read, Glob, Grep, Write, Edit, WebSearch，且 `disallowedTools:` 列出 Bash
-- [ ] 模型档位为 `inherit`——frontmatter `model:` 恰为 `inherit`（档位：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 代理定义未声称对代码实现、视觉美术风格或独立的叙事设定决策拥有决定权
 
 ---

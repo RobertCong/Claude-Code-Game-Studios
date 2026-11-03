@@ -11,7 +11,7 @@
 
 - [ ] `description:` 字段存在且与领域特定（提及世界设定、派系、历史、世界规则、生态）
 - [ ] `tools:` 读取 Read、Glob、Grep、Write、Edit，且 `disallowedTools:` 列出 Bash —— 仅文档编写，无 shell 或代码执行
-- [ ] 模型档位为 `inherit` — frontmatter `model:` 的值恰为 `inherit`（档位说明：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 代理定义未声称对对话写作、机制设计或叙事弧线结构拥有权限
 
 ---

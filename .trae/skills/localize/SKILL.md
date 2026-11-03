@@ -3,11 +3,9 @@ name: localize
 description: "本地化流水线 — 查找硬编码字符串、提取字符串表、文化审查、VO、RTL、执行字符串冻结。"
 argument-hint: "[scan|extract|validate|status|brief|cultural-review|vo-pipeline|rtl-check|freeze|qa]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Agent, AskUserQuestion, Bash(bash "*/.claude/skills/localize/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation`
 
 
 
@@ -31,13 +29,13 @@ model: sonnet
 
 ---
 
-每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+每次 `AskUserQuestion` 调用都遵循 `.trae/docs/automation-modes.md`
 （collaborative 总是询问 · guided 仅重大问题 · autonomous 记录日志后继续；
 `automation_always_ask` 类别总是提示）。
 
 ## Phase 2A: 扫描模式
 
-在**代码根目录**（按 `.claude/docs/code-root-resolution.md` 解析）中搜索硬编码的面向用户的字符串。**如果代码根目录无法解析，报告 `NOT ASSESSED — code root unresolved`，而不是零命中。** 从无法解析的根目录得出零命中会被读作“没有需要本地化的内容”，而这正是本检查要防范的失败情形：
+在**代码根目录**（按 `.trae/docs/code-root-resolution.md` 解析）中搜索硬编码的面向用户的字符串。**如果代码根目录无法解析，报告 `NOT ASSESSED — code root unresolved`，而不是零命中。** 从无法解析的根目录得出零命中会被读作“没有需要本地化的内容”，而这正是本检查要防范的失败情形：
 
 - 用户界面（UI）代码中未包裹在本地化函数（`tr()`、`Tr()`、`NSLocalizedString`、`GetText` 等）中的字符串字面量
 - 本应参数化的拼接字符串
@@ -289,7 +287,7 @@ BLOCKING = 在该语言地区发布前必须修复。ADVISORY = 建议修改。N
 从右到左的语言（阿拉伯语、希伯来语、波斯语、乌尔都语）需要布局镜像，
 而不仅仅是翻译文本。此模式校验实现情况。
 
-确定引擎：从 `project.yaml` 读取 `engine.name`；如果该键缺失或为空（包括 `project.yaml` 没有 `engine:` 块的情况），则回退到 `.claude/docs/technical-preferences.md`。然后检查：
+确定引擎：从 `project.yaml` 读取 `engine.name`；如果该键缺失或为空（包括 `project.yaml` 没有 `engine:` 块的情况），则回退到 `.trae/docs/technical-preferences.md`。然后检查：
 
 **布局镜像**
 - 引擎中是否启用了 RTL 布局？（Godot：`Control.layout_direction`，Unity：`RTL Support` 包，Unreal：文本方向标志）

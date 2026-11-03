@@ -3,8 +3,6 @@ name: team-qa
 description: "编排 QA 团队完成完整测试周期 — qa-lead 制定策略与测试计划，qa-tester 编写用例、执行、签署验收。"
 argument-hint: "[sprint | feature: system-name] [--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Agent, AskUserQuestion, Bash(bash "*/.claude/skills/team-qa/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
 # Team QA
@@ -20,18 +18,18 @@ model: sonnet
 `log_decision` 记录每个阶段的结果。`automation_always_ask` 类别
 （`is_always_ask_category` 辅助函数）中的决策无论何种模式
 始终提示。参见
-`.claude/docs/automation-modes.md`。
+`.trae/docs/automation-modes.md`。
 
 ## Phase 0: 解析配置
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,team.size,qa.level`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,team.size,qa.level`
 
-上文已解析 — 直接使用；`--review` 覆盖 `review_mode`。无配置块 →
-使用 `.claude/docs/config-resolution.md` 中的默认值。
+上一步命令的输出已解析 — 直接使用；`--review` 覆盖 `review_mode`。无配置块 →
+使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 `qa.level` 决定 Logic、Integration 或 Config/Data 用户故事需要什么证据：
 在 `standard` 和 `full` 下是其自动化测试；在 `minimal` 下测试被豁免
-（`.claude/docs/coding-standards.md`），则由 Phase 5 的验收标准走查作为证据 —
+（`.trae/docs/coding-standards.md`），则由 Phase 5 的验收标准走查作为证据 —
 此时没有测试的用户故事记为 WAIVED，而不是缺少证据。UI 和
 Visual/Feel 截图在每个层级都是必需的。
 
@@ -42,7 +40,7 @@ Visual/Feel 截图在每个层级都是必需的。
 
 `automation` 驱动上方的决策点说明。关于每种模式如何改变流水线行为，
 参见上方的决策点说明以及
-`.claude/docs/automation-modes.md`。
+`.trae/docs/automation-modes.md`。
 
 **`team.size`**：哪些 agent 处于活动状态（与 review_mode 闸门深度和工作流文档正交）。
 - **`individual`**（默认）：仅 `qa-tester`；`qa-lead` 仅在阶段闸门处被调用。
@@ -83,14 +81,14 @@ agent 来填写 — 而不是照抄示例。两个集合因编排器而异。
 ## 如何委派
 
 使用 `Agent` 工具将每个团队成员作为子 agent 派生：
-- `subagent_type: qa-lead` — 策略、规划、分类、签署
-- `subagent_type: qa-tester` — 测试用例编写和缺陷报告编写
+- 委派给 `qa-lead` 子代理 — 策略、规划、分类、签署
+- 委派给 `qa-tester` 子代理 — 测试用例编写和缺陷报告编写
 
 **为每个 agent 提供简报 — 不要倾倒上下文。** 只读取共享输入**一次**，并以内联方式传递提炼后的简报：只给每个 agent 真正需要的行，绝不给你已经读过的文档传文件路径（接到路径的 agent 会重新读取整个文件）。只为你尚未读过且只有该 agent 需要的文档传路径。
 
 **在每个 agent 提示的末尾加上返回契约：** “Write your full output to `[path]` — 这个被指定的路径就是下方有界例外中的写入授权，因此无需单独的批准提示即可写入。只返回 (1) 已写入的路径，(2) 决策要点 ≤5 条的摘要，(3) 任何 BLOCKED/CONCERNS 条目，每条一行。不要复述你读过的文档。” 没有它，agent 会把它读过的一切都回传到本会话。
 
-> **为什么这不违反协作协议。** `CLAUDE.md` 要求 agent 在 Write/Edit 前询问“May I write this to [filepath]？”。此处派生的子 agent **无需**询问即可写入，这是有意为之的有界例外，而非疏漏 — 与 `consistency-check` 追加到 `active.md` 时已做出的相同决定。仅当以下三点全部成立时，该例外才成立：(1) 路径是**你**在提示中指定的，因此用户批准阶段时已批准了目标位置；(2) 它是 `production/`、`docs/` 或 `tests/` 下的新产出物，绝不是对现有源码或配置的编辑；(3) 产出它的阶段是上文定义的阶段闸门 — 流水线列出的、在推进前以 `AskUserQuestion` 结尾的阶段，无论自动化模式为何。这三点之外，agent 必须询问。**不要通过逐个询问子 agent 来“修复”这一点** — 每个阶段每个 agent 一次提示会让编排器无法使用，这正是该例外存在的原因。
+> **为什么这不违反协作协议。** `AGENTS.md` 要求 agent 在 Write/Edit 前询问“May I write this to [filepath]？”。此处派生的子 agent **无需**询问即可写入，这是有意为之的有界例外，而非疏漏 — 与 `consistency-check` 追加到 `active.md` 时已做出的相同决定。仅当以下三点全部成立时，该例外才成立：(1) 路径是**你**在提示中指定的，因此用户批准阶段时已批准了目标位置；(2) 它是 `production/`、`docs/` 或 `tests/` 下的新产出物，绝不是对现有源码或配置的编辑；(3) 产出它的阶段是上文定义的阶段闸门 — 流水线列出的、在推进前以 `AskUserQuestion` 结尾的阶段，无论自动化模式为何。这三点之外，agent 必须询问。**不要通过逐个询问子 agent 来“修复”这一点** — 每个阶段每个 agent 一次提示会让编排器无法使用，这正是该例外存在的原因。
 
 在 `team.size: studio` 下，Phase 4 为每个用户故事并行派生一个 qa-tester；低于该规模时，一次派生覆盖整组。
 
@@ -236,7 +234,7 @@ options:
 由这些截图关闭；Visual/Feel 用户故事还需要主管签署。
 然后每组用户故事询问一次：“May I write the evidence for [story titles] to
 `production/qa/evidence/`?”，并根据
-`.claude/docs/templates/test-evidence.md` 写入证据产出物
+`.trae/docs/templates/test-evidence.md` 写入证据产出物
 `production/qa/evidence/[story-slug]-evidence.md`，完整保留签署表
 并引用截图。若未保存任何截图，则在
 Phase 5 摘要中指明该用户故事缺少保留证据，而不是写一份暗示
@@ -309,7 +307,7 @@ Phase 5 摘要中指明该用户故事缺少保留证据，而不是写一份暗
 
 **顺序。** 先检查 **NOT APPROVED**：范围内任何未关闭的 S1/S2 缺陷 — 既包括已归档的（Phase 1），也包括 Phase 5 新归档的 — 或某个用户故事在没有记录变通方案的情况下
 FAIL，都会使结论成为 NOT APPROVED，无论其他什么未执行 — 已知失败优先于未知，把它降级为
-NOT ASSESSED 只会将其掩埋（`.claude/rules/skill-authoring.md`，义务 1）。
+NOT ASSESSED 只会将其掩埋（`.trae/rules/skill-authoring.md`，义务 1）。
 
 **然后是前提条件。** APPROVED 和 APPROVED WITH CONDITIONS 都要求
 **范围内每个用户故事都产出了已执行的证据** — 运行过的测试，或
@@ -359,7 +357,7 @@ agent 可能耗尽整个阶段并返回一段看似合理的前言，却什么�
 
 如果任何派生的 agent 返回 BLOCKED、报错或无法完成：**立即
 呈现它，不要越过它阻塞的依赖，并始终产出
-部分报告。** 完整流程：`.claude/docs/error-recovery-protocol.md`。
+部分报告。** 完整流程：`.trae/docs/error-recovery-protocol.md`。
 
 常见阻塞项：
 - 输入文件缺失（未找到用户故事、GDD 缺失）→ 重定向到创建它的技能

@@ -12,10 +12,10 @@
 - 检测改造模式（retrofit）
 - 本系统的 `workflow`，以及每个层级都需要的 `## Summary`
 
-完整检查模式见 `.claude/docs/director-gates.md`。各个质量闸门（gate）的定义位于 `.claude/docs/director-gates/[gate-id].md` —— 被派生的代理读取自己的闸门文件；不要在父会话中读取它。
+完整检查模式见 `.trae/docs/director-gates.md`。各个质量闸门（gate）的定义位于 `.trae/docs/director-gates/[gate-id].md` —— 被派生的代理读取自己的闸门文件；不要在父会话中读取它。
 
 
-每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+每次 `AskUserQuestion` 调用都遵循 `.trae/docs/automation-modes.md`
 （协作模式始终询问 · 引导模式仅询问重大项 · 自主模式记录后继续；
 `automation_always_ask` 类别始终提示）。
 
@@ -70,7 +70,7 @@
 若非改造模式，则将系统名称规范化为 kebab-case 作为文件名（例如 "combat system"
 变为 `combat-system`）。
 
-本系统的 **`workflow`**（依据 `.claude/docs/workflow-modes.md`）—— 如果该配置块中
+本系统的 **`workflow`**（依据 `.trae/docs/workflow-modes.md`）—— 如果该配置块中
 列出了本系统的 `system_overrides` 行，则使用它，否则使用项目值。
 
 解析出的层级决定哪些 GDD 章节是**必需的**（在 §4 中应用）。

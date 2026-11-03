@@ -14,7 +14,7 @@ implementation?"。每个切片文件都以
 
 在一次一问的复盘（debrief）之后，它写入
 `prototypes/[concept-name]-vertical-slice/REPORT.md`（依据
-`.claude/docs/templates/vertical-slice-report.md`）和一行
+`.trae/docs/templates/vertical-slice-report.md`）和一行
 `prototypes/index.md`，一次询问同时点名两者。结论为
 **PROCEED / PIVOT / KILL**，当没有人从头到尾玩过该循环时另有
 **NOT ASSESSED** —— 其排序高于 PROCEED、低于 PIVOT 和 KILL，且绝不会被记录为
@@ -35,7 +35,7 @@ KILL 运行五项健全性检查（soundness check）并追加到 `prototypes/GR
 
 由 `/skill-test spec` 针对 SKILL.md 检查 —— 无需 fixture。
 
-- [ ] 具有必需的前置元数据字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 至少有 2 个阶段标题
 - [ ] 包含结论关键词：PROCEED、PIVOT、KILL、NOT ASSESSED
 - [ ] 在创建切片目录之前、在写入 REPORT.md、PIVOT-NOTE.md 和 GRAVEYARD.md 之前包含 "May I" 用语
@@ -66,7 +66,7 @@ KILL 运行五项健全性检查（soundness check）并追加到 `prototypes/GR
 
 除非某个用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有
-`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
+`project.local.yaml`。规则见：`studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 
@@ -96,7 +96,7 @@ KILL 运行五项健全性检查（soundness check）并追加到 `prototypes/GR
    `prototypes/ember-trail-vertical-slice/` and begin implementation?"；它写入的
    每个 GDScript 文件都以 `# VERTICAL SLICE - NOT FOR PRODUCTION` 开头
 4. 与用户迭代直至循环可玩，然后请求从头试玩，并一次一问地提出六个复盘问题
-5. 依据 `.claude/docs/templates/vertical-slice-report.md` 起草报告，含
+5. 依据 `.trae/docs/templates/vertical-slice-report.md` 起草报告，含
    逐日速度日志；询问 "May I write this report to
    `prototypes/ember-trail-vertical-slice/REPORT.md` and add its row to
    `prototypes/index.md`?"；写入两者
@@ -125,7 +125,7 @@ KILL 运行五项健全性检查（soundness check）并追加到 `prototypes/GR
 **Expected behavior:**
 1. 技能不记录 PROCEED：`/gate-check production` 会让任何 Vertical Slice
    Validation 项中有 NO 的已构建切片 FAIL
-   （`.claude/skills/gate-check/references/gate-production.md`）
+   （`.trae/skills/gate-check/references/gate-production.md`）
 2. 它要求用户选择 PIVOT 或 KILL，并以问题 1 的答案为理由点名
 3. 用户选择 PIVOT；REPORT.md 在其询问之后写入，结论为 PIVOT，
    并点名该 NO

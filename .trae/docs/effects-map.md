@@ -8,7 +8,7 @@
 > **所以整篇打开的成本是你实际所需的许多倍。** 要查询某个设置，请这样做：
 >
 > ```
-> Grep pattern="^## modes.review_mode" path=".claude/docs/effects-map.md" -A 40
+> Grep pattern="^## modes.review_mode" path=".trae/docs/effects-map.md" -A 40
 > ```
 >
 > 读取你所需键对应的那一节，然后停下。技能们对自己的参考文件早已应用同一条规则——
@@ -18,6 +18,10 @@
 > 引用本文档的某一节，绝不要引用整篇。诸如"参见 effects-map.md 了解完整 schema"
 > 这类指引会诱使对方完整读取如此体量的文件，而接受这一邀请的代价是无声的。请改为
 > 指名你需要的 `## <key>` 小节。
+
+> **Trae 适配说明：** 本文部分条目写于 Claude Code 时代。`statusline.sh`、
+> `SubagentStart` / `SubagentStop`、`settings.json` 权限等条目在 Trae 中不适用；
+> 实际行为以 `.trae/hooks.json` 和 `AGENTS.md` 为准。
 
 本文档说明每个 `project.yaml` 设置在读取它的所有技能中实际起什么作用。它是纳入
 版本跟踪的权威参考。
@@ -421,7 +425,7 @@ CI 环境通常没有 `project.local.yaml`（被 gitignore，不在克隆中）�
 
 **控制：** 项目整体承载多少流程——`/start` 提出的那个设置下方六个开关的单一问题
 **取值：** `minimal` | `standard` | `full`
-**默认：** `minimal`——理由见 `.claude/hooks/yaml-helper.sh` 中
+**默认：** `minimal`——理由见 `.trae/hooks/yaml-helper.sh` 中
 `_yaml_helper_defaults` 上方的说明块。简版：更重的档位要花更多成本才能达到可运行
 代码，却并不会产生更好的结果。
 **设置方式：** `/start`（Phase 4：根据用户描述推断、展示、确认后保存）、`/settings`
@@ -667,7 +671,7 @@ Acceptance Criteria。
 > **`workflow_overrides.system_overrides` 不是标志，也不是叠加式——它会双向替换档位。**
 > 该规则不适用于它。在 `full` 项目中，`system_overrides.inventory: minimal` 确实会把
 > 该系统的必需章节降为零。这是有意的——见
-> `.claude/docs/workflow-modes.md § workflow_overrides`。把叠加规则套在整个键上是
+> `.trae/docs/workflow-modes.md § workflow_overrides`。把叠加规则套在整个键上是
 > 错误的：该保证从未适用于 `system_overrides`，因此不要依赖它作为安全网。
 
 ---
@@ -1480,7 +1484,7 @@ workflow_overrides:
 > **未设置不是零，也不是默认值。** 没人设置过的预算不等于已经达成的预算——
 > 对于没有承诺目标的指标，`/perf-profile` 必须报告 `NOT ASSESSED`，而不是拿占位值
 > 去测量。基于臆造预算、背后没有任何剖析数据算出的余量数值，读起来像是通过，
-> 实际并非通过；见 `.claude/rules/skill-authoring.md` 中的义务 1 与义务 2。
+> 实际并非通过；见 `.trae/rules/skill-authoring.md` 中的义务 1 与义务 2。
 
 ## performance.enforce
 
@@ -1530,7 +1534,7 @@ workflow_overrides:
 > `production/stage.txt`，最后是产出物自动检测。当 `/gate-check` 推进阶段时，它会同时
 > 双写 `project.yaml` 与 `production/stage.txt`，因此尚未迁移的钩子仍能正确解析。
 > `/start` 也会双写初始阶段。历史 `.txt` 文件在
-> `.claude/scripts/migrate-v1-config.sh --finalize` 时退役。
+> `.trae/scripts/migrate-v1-config.sh --finalize` 时退役。
 
 ---
 
@@ -1715,7 +1719,7 @@ commands:
 |-------|---------|
 | `build` | 供 CI 或发布使用的完整项目构建。`/smoke-check` 仅在 `commands.smoke` 未设置时把它作为 WAIVED 路径的构建检查来运行；`project-coherence.sh`（`/smoke-check` 首先运行它）会检查它命名的导出预设，而 `/launch-checklist` 只询问构建是否产出有效产物。 |
 | `test` | 运行完整测试套件。由 `/smoke-check` 运行，并由 `/hotfix`、`/bug-report`（verify 模式）与 `/day-one-patch` 缩小到受影响的测试套件后运行；`project-coherence.sh` 会检查它命名的测试运行器。`/regression-suite` **不**运行它。 |
-| `run` | 以固定分辨率窗口化启动**游戏**——而非编辑器。由 `/dev-story` Phase 6 步骤 4 用来观察功能并留存截图；逐引擎追加的捕获标志见 `.claude/docs/run-and-observe.md`。 |
+| `run` | 以固定分辨率窗口化启动**游戏**——而非编辑器。由 `/dev-story` Phase 6 步骤 4 用来观察功能并留存截图；逐引擎追加的捕获标志见 `.trae/docs/run-and-observe.md`。 |
 | `smoke` | 最小化的「能否启动？」检查。由 `/dev-story` 作为 Unity 解析检查（Phase 6 步骤 2）运行，也由 `/smoke-check` 在 `qa.level: minimal` 豁免测试时作为构建检查运行。 |
 
 ---
@@ -1758,7 +1762,7 @@ macOS 上只写入 `build`，把 `test`、`run` 与 `smoke` 留为未设置，�
 | **smoke-check** | 运行 `commands.test`，未设置时使用引擎默认值；在 Unreal 上会先构建编辑器目标。这是 QA 交接的关键路径。 |
 | **launch-checklist** | 输出一个清单**项**，询问构建是否产出有效产物。它**不**运行 `commands.build`；验证是一个人工步骤。 |
 | **validate-push.sh** | **不**读取 `commands.*`。它会对推送到受保护分支（`main`/`master`/`release/*`）发出警告，且不运行任何构建或冒烟命令——其中的阻塞路径已被注释掉，因此它永远不会让推送失败。 |
-| **dev-story** | Phase 6 步骤 2 是解析检查：Godot 上运行 `.claude/scripts/godot-parse-check.gd`，Unity 上运行 `commands.smoke`，Unreal 上构建编辑器目标。Phase 6 步骤 4 运行 `commands.run`——窗口化启动游戏——以观察功能并留存截图（`.claude/docs/run-and-observe.md`）。 |
+| **dev-story** | Phase 6 步骤 2 是解析检查：Godot 上运行 `.trae/scripts/godot-parse-check.gd`，Unity 上运行 `commands.smoke`，Unreal 上构建编辑器目标。Phase 6 步骤 4 运行 `commands.run`——窗口化启动游戏——以观察功能并留存截图（`.trae/docs/run-and-observe.md`）。 |
 | **regression-suite** | 通过 **glob 匹配测试文件名**来映射覆盖率。它**不**调用 `commands.test`，因此这里的覆盖率意味着「存在测试文件」，而绝不是「测试通过」。 |
 
 ---
@@ -1847,7 +1851,7 @@ macOS 上只写入 `build`，把 `test`、`run` 与 `smoke` 留为未设置，�
 > 技能不读取它：无论其取值如何，`/dev-story` 与 `/story-done` 都会更新
 > `active.md` 中的检查点。
 
-> **默认值刻意设为 `on`。** `.claude/docs/context-management.md` 让你把
+> **默认值刻意设为 `on`。** `.trae/docs/context-management.md` 让你把
 > `production/session-state/active.md` 当作崩溃恢复检查点来依赖，因此把此项默认
 > 关闭会悄悄夺走恢复能力、会话归档与子代理计数。`off` 所节省的——检查点预览，
 > 每次会话开始最多约 750 个 token——属于显式退出
@@ -1928,7 +1932,7 @@ macOS 上只写入 `build`，把 `test`、`run` 与 `smoke` 留为未设置，�
 | 技能 | 输出文件 | 骨架写入时机 |
 |-------|-------------|----------------------|
 | **design-system** | `design/gdd/[system].md` | Phase 1（章节讨论）之前 |
-| **art-bible** | `design/art/art-bible.md` | 从 `.claude/docs/templates/art-bible.md` 生成，在询问之后、章节 1 获批时写入 |
+| **art-bible** | `design/art/art-bible.md` | 从 `.trae/docs/templates/art-bible.md` 生成，在询问之后、章节 1 获批时写入 |
 | **create-architecture** | `docs/architecture/architecture.md` | 非骨架优先：在 Phase 7 完成询问后一次性写入（对既有文档就地更新） |
 | **ux-design** | `design/ux/[screen].md` | 屏幕讨论之前 |
 | **create-stories** | `production/epics/[epic-slug]/story-NNN-[slug].md` | 非骨架优先：在步骤 6 写入，此时询问已列出每个文件 |
@@ -2048,7 +2052,7 @@ SESSION EXTRACT。
 **取值：** `on` | `off`；`true` 与 `false` 同样有效  
 **默认：** `on`  
 **设置方式：** `/settings`  
-**读取方：** `validate-read.sh`（PreToolUse Read），经由 `.claude/scripts/read-guard.sh check`
+**读取方：** `validate-read.sh`（PreToolUse Read），经由 `.trae/scripts/read-guard.sh check`
 
 > **优先级链：** `project.local.yaml` 中的 `features.read_guard` →
 > `project.yaml` → 默认 **`on`**。
@@ -2067,7 +2071,7 @@ SESSION EXTRACT。
 **取值：** 整数 KB（1 KB = 1,024 字节）  
 **默认：** `40`  
 **设置方式：** `/settings`  
-**读取方：** `validate-read.sh`，经由 `.claude/scripts/read-guard.sh check`
+**读取方：** `validate-read.sh`，经由 `.trae/scripts/read-guard.sh check`
 
 > **优先级链：** `project.local.yaml` 中的 `features.read_guard_kb` →
 > `project.yaml` → 默认 **`40`**。不是整数的取值会被忽略，`read-guard.sh check`
@@ -2187,7 +2191,7 @@ framework:
 - 存在一个或多个旧式文件：
   - `production/stage.txt`
   - `production/review-mode.txt`
-  - `.claude/docs/technical-preferences.md`
+  - `.trae/docs/technical-preferences.md`
 
 ### Preservation
 
@@ -2195,7 +2199,7 @@ framework:
 |---------------|-------------|
 | `production/stage.txt`（单行） | `project.stage` |
 | `production/review-mode.txt`（单行） | `modes.review_mode` |
-| `.claude/docs/technical-preferences.md` → "Engine & Language" 章节 | `engine.name`、`engine.version`、`engine.language`、`engine.rendering`、`engine.physics` |
+| `.trae/docs/technical-preferences.md` → "Engine & Language" 章节 | `engine.name`、`engine.version`、`engine.language`、`engine.rendering`、`engine.physics` |
 | `technical-preferences.md` → "Input & Platform" 章节 | `platform.targets`、`platform.primary_input`、`platform.gamepad_support`、`platform.touch_support` |
 | `technical-preferences.md` → "Naming Conventions" 章节 | `naming.classes`、`naming.variables`、`naming.constants`、`naming.signals`、`naming.files`、`naming.scenes` |
 | `technical-preferences.md` → "Performance Budgets" 章节 | `performance.target_framerate`、`performance.frame_budget_ms`、`performance.draw_call_limit`、`performance.memory_ceiling_mb` |
@@ -2221,7 +2225,7 @@ framework:
 `project.yaml` 并保留旧式文件。钩子与技能优先读取 `project.yaml`；若某个特定键
 缺失，则回退到旧式文件。
 
-只有当用户运行 `.claude/scripts/migrate-v1-config.sh --finalize`（由 `/adopt`
+只有当用户运行 `.trae/scripts/migrate-v1-config.sh --finalize`（由 `/adopt`
 驱动，后者在 Phase 2g 自动检测 v1.0 项目）时，旧式文件才会被删除。清理步骤会在
 删除前验证每个旧式文件的内容都已保留在 `project.yaml` 中。
 

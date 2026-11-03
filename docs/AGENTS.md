@@ -4,7 +4,7 @@
 
 ## 架构决策记录（`docs/architecture/`）
 
-使用 ADR 模板：`.claude/docs/templates/architecture-decision-record.md`
+使用 ADR 模板：`.trae/docs/templates/architecture-decision-record.md`
 
 **必需章节：** Title、Status、Context、Decision、Consequences、
 ADR Dependencies、Engine Compatibility、GDD Requirements Addressed

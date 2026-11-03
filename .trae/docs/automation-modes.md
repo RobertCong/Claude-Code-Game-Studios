@@ -4,7 +4,7 @@
 
 **范围**：68 个技能，涵盖创作、评审、团队编排、实现和工具类。任何通过 `AskUserQuestion` 对决策进行质量闸门（gate）控制、或写文件的技能，都应遵循此模式。
 
-**配套规格**：`.claude/docs/effects-map.md` 的 `modes.automation` 节是行为的唯一事实来源。本文档是实现模式。
+**配套规格**：`.trae/docs/effects-map.md` 的 `modes.automation` 节是行为的唯一事实来源。本文档是实现模式。
 
 > **不要在技能运行期间阅读 `effects-map.md`** —— 它是一个非常大的文件，是编写规格的参考资料，而非运行时输入，并且**本文档自给自足**，足以决定该问什么、该继续做什么。
 > 如果某个情况确实未在此覆盖，只读它的 `modes.automation` 节，绝不要读整个文件。
@@ -23,7 +23,7 @@ Resolve automation mode (once, store for the run):
 2. Else read `modes.automation` from `project.yaml` → use that value
 3. Else → default to `collaborative`
 
-Pattern reference: `.claude/docs/automation-modes.md`.
+Pattern reference: `.trae/docs/automation-modes.md`.
 ```
 
 该解析通过 `get_effective_yaml_key modes.automation` 自动完成——该辅助函数会把 project.local.yaml 深度合并到 project.yaml 之上。

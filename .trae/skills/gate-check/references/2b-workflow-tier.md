@@ -28,12 +28,12 @@
 > **它放宽的是测试，不是观感。** 只要闸门文件要求用户故事证据，
 > UI 用户故事的留存截图，以及 Visual/Feel 用户故事的截图加主管签核，
 > 在每个 `qa.level` 下都是必需的
-> （`.claude/docs/coding-standards.md`：测试在 `minimal` 下被豁免，但观感
+> （`.trae/docs/coding-standards.md`：测试在 `minimal` 下被豁免，但观感
 > 不是）。
 >
 > **冒烟检查不在该放宽范围内，它就是底线。**
 > `qa.level` 放宽的是*逐故事的测试证据*；冒烟检查是**构建健康度**，
-> 不是用户故事证据，二者在 `.claude/docs/coding-standards.md` 中正是依据这一
+> 不是用户故事证据，二者在 `.trae/docs/coding-standards.md` 中正是依据这一
 > 区别被分开的（“`/smoke-check` 是构建健康度闸门，不是
 > 逐故事证据闸门……这种差异是有意为之”）。因此，要求冒烟报告的闸门文件
 > 在每个 `qa.level` 下都继续要求它。
@@ -48,7 +48,7 @@
 > 零，就报告 **NOT ASSESSED**，并同时点名两个削减机制和该闸门——
 > *“`workflow: minimal` + `qa.level: minimal` 下的 Production → Polish
 > 没有留下任何必需产出物；本闸门未核实任何内容”*——而不是让
-> 一个因为无可检查而得的 PASS 通过。按照 `.claude/rules/skill-authoring.md`
+> 一个因为无可检查而得的 PASS 通过。按照 `.trae/rules/skill-authoring.md`
 > 的第 1 条义务，无法评估自身范围的运行并未确认范围良好，而第 3 条义务
 > 要求这种空无必须在输出中可见，而不是从一个沉默的绿灯中推断出来。
 >
@@ -81,7 +81,7 @@ GDD 完整性检查）。对每个系统，解析其有效层级：
 
 **在应用其中任何一项之前，请反过来检查这个块：每个 KEY 都对应一个系统吗？**
 `<system>` 是 GDD 的文件名主干
-（`.claude/docs/workflow-modes.md`），因此对 `system_overrides` 中的每个键，
+（`.trae/docs/workflow-modes.md`），因此对 `system_overrides` 中的每个键，
 在 `design/gdd/<key>.md` 中查找。任何找不到匹配主干的键都会被报告，
 并点名该键及实际存在的主干列表：
 
@@ -91,7 +91,7 @@ GDD 完整性检查）。对每个系统，解析其有效层级：
 闸门，但一个用户以为生效、实际并未生效的覆盖，正是
 有文档记录的兜底出口悄悄失效的方式。
 
-这就是 `.claude/docs/workflow-modes.md` 中的规则：匹配不到任何系统的键
+这就是 `.trae/docs/workflow-modes.md` 中的规则：匹配不到任何系统的键
 是错误，而不是空操作。用户故事类的技能只按系统 → 覆盖的方向解析，
 因此孤儿键对它们不可见；`/gate-check` 会解析整个块，所以它是
 发现该问题的地方。
@@ -105,7 +105,7 @@ GDD 完整性检查）。对每个系统，解析其有效层级：
 - 被钉在**较低**层级的系统（例如 `inventory: minimal`）只放宽该系统
   ——其 GDD 按较低层级检查；其他所有系统仍保持项目
   层级。被钉为 **`minimal` 的系统完全不施加 GDD 章节要求**
-  （`minimal` = “游戏简报取代 GDD”——`.claude/docs/workflow-modes.md`）：
+  （`minimal` = “游戏简报取代 GDD”——`.trae/docs/workflow-modes.md`）：
   它绝不会因 GDD 缺失或不完整而阻塞闸门。不要为它发明一个
   “仅验收标准”的底线——并不存在这样的底线。
 

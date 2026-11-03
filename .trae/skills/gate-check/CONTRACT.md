@@ -11,7 +11,7 @@
 | `project.yaml`（`project.stage`，回退 `production/stage.txt`） | 阶段名（未提供参数时用于自动检测当前阶段） | 是 |
 | `project.yaml`（`modes.workflow`，它跟随 `modes.rigor`——默认 `minimal`；`workflow_overrides.system_overrides.*`、`workflow_overrides.art_bible_strict`） | 工作流层级——选择逐闸门的产出物清单（第 2b 节）；在校验 MVP GDD 时解析按系统覆盖 | 是 |
 | `docs/engine-reference/[engine]/VERSION.md` | 引擎版本、cutoff 之后的风险等级（在引擎校验检查中读取） | 是 |
-| `.claude/docs/technical-preferences.md` | 当 `project.yaml` 中这些键缺失或为空时，作为 `engine.*`、`naming.*` 和 `performance.*` 的旧版回退；禁用模式的唯一来源（从未迁移）。在质量检查中被引用 | 是——仅在 `project.yaml` 缺少相应键时必需 |
+| `.trae/docs/technical-preferences.md` | 当 `project.yaml` 中这些键缺失或为空时，作为 `engine.*`、`naming.*` 和 `performance.*` 的旧版回退；禁用模式的唯一来源（从未迁移）。在质量检查中被引用 | 是——仅在 `project.yaml` 缺少相应键时必需 |
 | `docs/consistency-failures.md` | 带领域标记的条目，作为提高审查力度的上下文呈现（存在则读取；缺失则跳过） | 是 |
 
 ### 阶段特定输入（视目标闸门读取子集）
@@ -21,7 +21,7 @@
 | Systems Design → Technical Setup | `design/gdd/systems-index.md`、`design/gdd/` 中所有 MVP GDD、跨 GDD 评审报告 |
 | Technical Setup → Pre-Production | `docs/architecture/` 中的 ADR（≥3）、`docs/engine-reference/[engine]/deprecated-apis.md`、`docs/architecture/architecture.md`、`docs/architecture/requirements-traceability.md`、`design/accessibility-requirements.md`、`design/ux/interaction-patterns.md` |
 | Pre-Production → Production | `production/sprints/`（首个冲刺计划）、`docs/architecture/control-manifest.md`、`production/epics/`（Foundation + Core 层史诗）、`design/ux/hud.md`、`design/ux/` 关键界面规格；推荐但非阻塞：`prototypes/*-vertical-slice/REPORT.md` 及其位于 `production/qa/playtests/` 的试玩测试——在 `minimal` 层级，只需一份填写完整的 `design/game-brief.md`（含其构建顺序）以及 `production/epics/` 下的用户故事（无冲刺计划；其余项取消，包括垂直切片项——改用对当前构建的两项检查替代：核心循环有趣，且能端到端跑通） |
-| Production → Polish | 代码根下的子系统（按 `.claude/docs/code-root-resolution.md` 解析）、引擎的测试根——`tests/unit/` + `tests/integration/`（Godot）、`Assets/Tests/`（Unity）、`Source/<Module>/Private/Tests/`（Unreal）——且所有 Logic 用户故事均被覆盖、`production/qa/smoke-*.md`（PASS 或 PASS WITH WARNINGS）、`production/qa/playtests/`（≥3 次会话） |
+| Production → Polish | 代码根下的子系统（按 `.trae/docs/code-root-resolution.md` 解析）、引擎的测试根——`tests/unit/` + `tests/integration/`（Godot）、`Assets/Tests/`（Unity）、`Source/<Module>/Private/Tests/`（Unreal）——且所有 Logic 用户故事均被覆盖、`production/qa/smoke-*.md`（PASS 或 PASS WITH WARNINGS）、`production/qa/playtests/`（≥3 次会话） |
 | Polish → Release | 所有 Must Have 用户故事的完整测试证据、QA 签核报告、本地化检查、`production/qa/` QA 计划、发布清单输出、变更日志、最新一份全范围 `production/security/security-audit-*.md`（外加之后任何一次 `quick` 重跑） |
 
 ### 前置条件
@@ -42,7 +42,7 @@
 - 任何无法自动核实的事项都标记为 `MANUAL CHECK NEEDED`，并在最终确定结论前询问用户
 
 ## 不可变规则
-- 读取但不修改：`design/gdd/` 中所有 GDD、`docs/architecture/` 中所有 ADR、`docs/architecture/control-manifest.md`、`docs/architecture/tr-registry.yaml`、`.claude/docs/technical-preferences.md`（旧版回退）、`docs/engine-reference/[engine]/VERSION.md`、`docs/engine-reference/[engine]/deprecated-apis.md`、`production/epics/` 中所有用户故事文件、`production/sprints/` 中所有冲刺文件、`production/qa/playtests/` 中所有试玩测试文件、代码根下的源文件（仅 Grep）、引擎测试根下的测试文件（通过 Bash 运行）
+- 读取但不修改：`design/gdd/` 中所有 GDD、`docs/architecture/` 中所有 ADR、`docs/architecture/control-manifest.md`、`docs/architecture/tr-registry.yaml`、`.trae/docs/technical-preferences.md`（旧版回退）、`docs/engine-reference/[engine]/VERSION.md`、`docs/engine-reference/[engine]/deprecated-apis.md`、`production/epics/` 中所有用户故事文件、`production/sprints/` 中所有冲刺文件、`production/qa/playtests/` 中所有试玩测试文件、代码根下的源文件（仅 Grep）、引擎测试根下的测试文件（通过 Bash 运行）
 - 修改：`project.yaml`（仅 `project.stage`）+ 旧版 `production/stage.txt`（两者仅在确认的 PASS 或被接受的 CONCERNS 覆盖时）、`production/gate-checks/[report].md`（新文件，需用户批准）
 - 不修改用户故事文件、ADR、GDD 或任何源码/测试代码
 

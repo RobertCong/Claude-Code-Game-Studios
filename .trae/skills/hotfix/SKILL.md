@@ -4,8 +4,6 @@ description: "绕过常规冲刺流程的紧急修复——建立热修复分支
 argument-hint: "[bug-id or description]"
 user-invocable: true
 disable-model-invocation: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, Bash(git rev-parse *), Bash(git tag --list*), Bash(git branch --list *)
-model: sonnet
 ---
 
 # 热修复（Hotfix）
@@ -110,9 +108,9 @@ Status: IN PROGRESS
 
 使用 `Agent` 工具并行请求签核：
 
-- `subagent_type: lead-programmer` —— 评审修复的正确性与副作用
-- `subagent_type: qa-tester` —— 对受影响的系统运行定向回归测试
-- `subagent_type: producer` —— 批准部署时机与沟通计划
+- 委派给 `lead-programmer` 子代理 —— 评审修复的正确性与副作用
+- 委派给 `qa-tester` 子代理 —— 对受影响的系统运行定向回归测试
+- 委派给 `producer` 子代理 —— 批准部署时机与沟通计划
 
 三者都必须返回 APPROVE 才能继续。若任一返回 CONCERNS 或 REJECT，不要部署——先暴露问题并解决它。
 
@@ -211,7 +209,7 @@ Next: /bug-report verify [BUG-ID] after deploy to confirm resolution
 若为 CANNOT VERIFY：修复未获确认——不要关闭缺陷；在已部署构建中按复现步骤游玩一遍，然后再次运行 `/bug-report verify [BUG-ID]`，回答其手动游玩问题以确定结果。
 
 在 48 小时内安排事后复盘。`/retrospective` 回顾的是冲刺或里程碑，不是事故：使用
-`.claude/docs/templates/incident-response.md` 记录该复盘，并在下一次
+`.trae/docs/templates/incident-response.md` 记录该复盘，并在下一次
 `/retrospective` 上提出其经验教训。
 
 使用 `AskUserQuestion`：

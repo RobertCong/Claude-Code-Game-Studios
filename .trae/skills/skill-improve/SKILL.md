@@ -3,15 +3,13 @@ name: skill-improve
 description: "通过测试—修复—复测循环改进技能 —— 静态检查、定向修复、按分数变化决定保留或回退。"
 argument-hint: "[skill-name]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Bash(bash "*/.claude/skills/skill-improve/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation`
 
 **自动化模式**：解析 `modes.automation`（`project.local.yaml` →
 `project.yaml` → 默认 `collaborative`）。每次 `AskUserQuestion` 调用与
-每次文件写入都遵循 `.claude/docs/automation-modes.md`
+每次文件写入都遵循 `.trae/docs/automation-modes.md`
 （collaborative 总是询问 · guided 仅重大事项 · autonomous 记录后继续；
 `automation_always_ask` 类别总是询问）。
 
@@ -34,7 +32,7 @@ Usage: /skill-improve [skill-name]
 Example: /skill-improve tech-debt
 ```
 
-验证 `.claude/skills/[name]/SKILL.md` 存在。若不存在，停止并提示：
+验证 `.trae/skills/[name]/SKILL.md` 存在。若不存在，停止并提示：
 "未找到技能 '[name]'。"
 
 Glob `CCGS Skill Testing Framework/catalog.yaml`。当它存在时，先说明这一点：
@@ -90,7 +88,7 @@ Category baseline: [N] failures, [M] warnings  ([category] rubric)
 
 ## Phase 3: 诊断
 
-读取完整技能：`.claude/skills/[name]/SKILL.md`，以及其 `references/` 文件夹中的每个文件
+读取完整技能：`.trae/skills/[name]/SKILL.md`，以及其 `references/` 文件夹中的每个文件
 （若有）—— 最长的技能会把每个阶段的内容放在那里。指明每个缺口位于哪个文件。
 
 对每个失败或警告的**静态**检查，识别确切的缺口：
@@ -98,7 +96,7 @@ Category baseline: [N] failures, [M] warnings  ([category] rubric)
 - **Check 1 失败** → 缺少哪个 frontmatter 字段
 - **Check 2 失败** → 找到多少个阶段，对照最低要求
 - **Check 3 失败** → 技能正文中任何地方都没有结论关键字
-- **Check 4 失败** → allowed-tools 中有 Write 或 Edit，但没有写入前询问的措辞
+- **Check 4 失败** → 技能正文承诺写入文件，但没有写入前询问的措辞
 - **Check 5 警告** → 末尾没有后续操作或下一步章节
 - **Check 6 警告** → 设置了 `context: fork`，但找到的阶段少于 5 个
 - **Check 7 警告** → argument-hint 为空，或与已记录的模式不符
@@ -121,7 +119,7 @@ Category baseline: [N] failures, [M] warnings  ([category] rubric)
 不要重写已通过的章节。在带有 `references/` 文件夹的技能中，对某个阶段步骤的修复写入该阶段的
 `references/` 文件，而不是放回 `SKILL.md`；下面的问题随后要指出修复改动的每个文件。
 
-询问："我可以把这个改进版本写入 `.claude/skills/[name]/SKILL.md` 吗？"
+询问："我可以把这个改进版本写入 `.trae/skills/[name]/SKILL.md` 吗？"
 
 若用户回答否，就此停止。
 
@@ -131,7 +129,7 @@ Category baseline: [N] failures, [M] warnings  ([category] rubric)
 
 记录修复所改动的每个文件的当前内容 —— 精确文本，保留在本对话中 —— 以便 Phase 6 恢复。
 
-把改进后的技能写入 `.claude/skills/[name]/SKILL.md`，以及修复所改动的每个 `references/`
+把改进后的技能写入 `.trae/skills/[name]/SKILL.md`，以及修复所改动的每个 `references/`
 文件。
 
 重新运行 `/skill-test static [name]` 并记录新的静态分数 —— 以该次运行测得的为准，绝不依据
@@ -163,7 +161,7 @@ Combined: [before] → [after] (improved / no change / worse)
 **如果合并分数相同或更差：**
 报告："合并分数未改善。"
 展示改动内容以及它可能为何没有帮助。
-询问："我可以把 `.claude/skills/[name]/SKILL.md` 恢复到此轮运行前的内容吗？"
+询问："我可以把 `.trae/skills/[name]/SKILL.md` 恢复到此轮运行前的内容吗？"
 —— 并指明 Phase 5 写入的每个文件。
 若同意：用 Write 把 Phase 5 记录的内容写回每个文件；若不同意，保持文件为写入后的状态。绝不要
 对它执行 `git checkout` —— 那会返回最后一次*已提交*的版本，并丢弃本次运行之前尚未提交的任何

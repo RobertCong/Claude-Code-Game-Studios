@@ -1,7 +1,7 @@
 # 编码标准
 
 - 所有游戏代码的公共 API 都必须包含文档注释
-- 架构决策以 ADR 形式记录在 `docs/architecture/` 中。**要记录多少由 `modes.workflow` 决定** —— `full` 下记录全部 ADR，`standard` 下只记录*关键* ADR，`minimal` 下不作要求，此时由决策日志和 `design/game-brief.md` 承载理由。参见 `.claude/docs/workflow-modes.md`。
+- 架构决策以 ADR 形式记录在 `docs/architecture/` 中。**要记录多少由 `modes.workflow` 决定** —— `full` 下记录全部 ADR，`standard` 下只记录*关键* ADR，`minimal` 下不作要求，此时由决策日志和 `design/game-brief.md` 承载理由。参见 `.trae/docs/workflow-modes.md`。
 - 玩法数值必须数据驱动（外部配置），绝不硬编码
 - 所有公共方法都必须可进行单元测试（用依赖注入替代单例）
 - 提交（commit）必须引用相关的设计文档或任务 ID
@@ -11,7 +11,7 @@
   每次实现都应当有一种能证明其有效的方式。
 - **解析检查不等于实际运行。** 每个改变了玩家可观察内容的故事在关闭前都必须启动并观察，
   且观察结果要是保留在 `production/qa/evidence/` 中的截图。各引擎的操作流程见
-  `.claude/docs/run-and-observe.md`。在 `qa.level: minimal` 下也不豁免 —— 可以豁免的是测试，不是实际观察。
+  `.trae/docs/run-and-observe.md`。在 `qa.level: minimal` 下也不豁免 —— 可以豁免的是测试，不是实际观察。
 
 # 设计文档标准
 
@@ -22,7 +22,7 @@
   曲线、阈值、成本 —— 时再加 Formulas；系统的 `Category` 只是提示，不是判断依据），
   而 `minimal` 下完全不需要
   GDD，此时 `design/game-brief.md` 就是设计记录。
-  参见 `.claude/docs/workflow-modes.md`。这 8 个章节为：
+  参见 `.trae/docs/workflow-modes.md`。这 8 个章节为：
   1. **Overview** —— 一段话概述
   2. **Player Fantasy** —— 预期的感受与体验
   3. **Detailed Rules** —— 无歧义的机制
@@ -55,7 +55,7 @@
 
 ## 自动化测试规则
 
-- **命名**：按引擎而定 —— `.claude/rules/test-standards.md`
+- **命名**：按引擎而定 —— `.trae/rules/test-standards.md`
 - **确定性**：测试每次运行都必须产生相同结果 —— 不使用随机种子，不使用依赖时间的断言
 - **隔离**：每个测试自行建立和清理自己的状态；测试不得依赖执行顺序
 - **无硬编码数据**：测试夹具使用常量文件或工厂函数，而不是内联魔术数字

@@ -14,7 +14,7 @@ Phase 2 在询问任何内容之前先读取上下文：游戏概念（或游戏
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] 具有必填的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 至少包含 2 个阶段标题
 - [ ] 包含结论关键词：`COMPLETE`
 - [ ] 包含每个小节的 “May I write” 用语，以及针对骨架的 “May I create”
@@ -31,7 +31,7 @@ Phase 2 在询问任何内容之前先读取上下文：游戏概念（或游戏
 
 ## Fixture Defaults
 
-除非某个案例自身的 Fixture 另有说明，每个案例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见 `studio-tests/CLAUDE.md` § Fixture defaults。
+除非某个案例自身的 Fixture 另有说明，每个案例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见 `studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 
@@ -53,7 +53,7 @@ Phase 2 在询问任何内容之前先读取上下文：游戏概念（或游戏
 3. 输入方式从 `platform` 块推导（键盘/鼠标和手柄）——不询问用户
 4. 展示上下文摘要，然后询问 “Anything else I should read before we start, or shall we proceed?”
 5. 没有现有文件，因此询问：“May I create the skeleton file at `design/ux/hud.md`?”——用户同意后，写入 HUD 骨架并更新 `production/session-state/active.md`。骨架包含 `/ux-review` 的 HUD 检查清单要求的所有小节，使完成的规格能够通过该评审
-6. Phase 4 读取 `.claude/skills/ux-design/references/sections-hud.md`，绝不读取另外两份按模式的指导文件（`sections-ux-spec.md`、`sections-patterns.md`）；若某个小节需要深入，HUD 设计指南会一次读取一个小节，绝不整份读取
+6. Phase 4 读取 `.trae/skills/ux-design/references/sections-hud.md`，绝不读取另外两份按模式的指导文件（`sections-ux-spec.md`、`sections-patterns.md`）；若某个小节需要深入，HUD 设计指南会一次读取一个小节，绝不整份读取
 7. 每个小节：起草 → “Does this capture the [section name] correctly?” → “May I write the [section name] section to `design/ux/hud.md`?” → 用 Edit 替换该小节的占位符
 8. Phase 5 展示交叉引用检查（Cross-Reference Check）结果
 9. Phase 6 说明规格在实现前应用 `/ux-review` 验证，然后以四个选项询问（立即运行 `/ux-review` / 设计另一个屏幕 / 更新模式库 / 停止）；结论 `COMPLETE`
@@ -108,7 +108,7 @@ Phase 2 在询问任何内容之前先读取上下文：游戏概念（或游戏
 1. 技能警告：“No game concept found. Run `/brainstorm` first to establish the game's foundation before designing UX.”，并且只有在用户要求时才继续
 2. 它指出缺少旅程：“No player journey map found at `design/player-journey.md`. Designing without it means we'll be making assumptions about player context…”
 3. 上下文摘要显示 “Journey phase(s): unknown — no journey map”
-4. 规格的 Open Questions 小节记录：“Player journey map not yet created. Author it from the template at `.claude/docs/templates/player-journey.md`…”
+4. 规格的 Open Questions 小节记录：“Player journey map not yet created. Author it from the template at `.trae/docs/templates/player-journey.md`…”
 5. 技能绝不告诉用户去运行 `/ux-design` Phase 2b 来创建旅程图
 
 **Assertions:**

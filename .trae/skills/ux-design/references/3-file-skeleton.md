@@ -283,7 +283,7 @@
 
 ### 无障碍要求的骨架
 
-小节列表与 `.claude/docs/templates/accessibility-requirements.md` 保持一致 — 如果
+小节列表与 `.trae/docs/templates/accessibility-requirements.md` 保持一致 — 如果
 模板增加或删除了某个小节，这个骨架会跟随它，而不是反过来。
 
 ```markdown

@@ -10,7 +10,7 @@
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 具备 ≥2 个 phase 标题
 - [ ] 包含结论关键词：COMPLETE、BLOCKED
 - [ ] 包含 "May I write" 措辞（技能会写入冲刺文件）
@@ -24,13 +24,13 @@
 |-----------|----------------------------------------------------|---------------------------|
 | PR-SPRINT | After the draft is presented, before write approval | full only (not lean/solo) |
 
-PR-SPRINT 结论：REALISTIC / CONCERNS / UNREALISTIC——或 NOT ASSESSED [missing input]（`.claude/docs/director-gates.md`），后者绝不被视作 REALISTIC。
+PR-SPRINT 结论：REALISTIC / CONCERNS / UNREALISTIC——或 NOT ASSESSED [missing input]（`.trae/docs/director-gates.md`），后者绝不被视作 REALISTIC。
 
 ---
 
 ## Fixture Defaults
 
-除非该用例自己的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
+除非该用例自己的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 

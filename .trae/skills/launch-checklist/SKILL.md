@@ -4,18 +4,16 @@ description: "覆盖各部门的上线就绪度：代码、内容、商店、市
 argument-hint: "[launch-date or 'dry-run']"
 user-invocable: true
 disable-model-invocation: true
-allowed-tools: Read, Glob, Grep, Write, AskUserQuestion, Bash(bash "*/.claude/skills/launch-checklist/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys rigor,workflow,project.stage,cert_tier,automation`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys rigor,workflow,project.stage,cert_tier,automation`
 
 **自动化模式**：解析 `modes.automation`（`project.local.yaml` →
 `project.yaml` → 默认 `collaborative`）。每一次 `AskUserQuestion` 调用和
-每一次文件写入都遵循 `.claude/docs/automation-modes.md`
+每一次文件写入都遵循 `.trae/docs/automation-modes.md`
 （collaborative 每次必问 · guided 仅重大事项 · autonomous 记录日志并继续；
 `automation_always_ask` 类别始终提示）。
 
-以上已解析——直接使用。无配置块 → 使用 `.claude/docs/config-resolution.md` 中的默认值。
+以上命令的输出已解析——直接使用。无配置块 → 使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 # 上线检查清单
 
@@ -23,7 +21,7 @@ model: sonnet
 
 - **`project.stage`** —— 本项目尚未到达的阶段对应条目不在范围内；应当说明这一点，而不是把它们列为未勾选条目。
 - **`modes.rigor`** —— 在 `minimal` 下，删除那些唯一理由是本项目已选择放弃的流程负担的条目。
-- **`platform.cert_tier`** —— **仅**为项目所针对的层级（tier）输出认证条目。如果它是**未设置**的，**询问哪些平台在范围内**，而不是把全部输出——未设置的值是一个问题，而不是输出所有认证轨道的许可。答案映射到下面四个值，就是本次运行的层级。如果无法确定，就把该节标记为 **`NOT ASSESSED — cert tier unknown`**。**未设置不等于 `none`：** `none` 是一个决定，未设置是缺失的决定，两者不得产生相同的输出。按**该键的四个取值**分支——`none | itch | steam | console` ——而不是按平台名称。完整的需求表是 `.claude/docs/effects-map.md` 的 `## platform.cert_tier` 节——**只读那一节**（Grep 它的标题，然后做一次有边界的 Read）；整个文件不是运行时输入。
+- **`platform.cert_tier`** —— **仅**为项目所针对的层级（tier）输出认证条目。如果它是**未设置**的，**询问哪些平台在范围内**，而不是把全部输出——未设置的值是一个问题，而不是输出所有认证轨道的许可。答案映射到下面四个值，就是本次运行的层级。如果无法确定，就把该节标记为 **`NOT ASSESSED — cert tier unknown`**。**未设置不等于 `none`：** `none` 是一个决定，未设置是缺失的决定，两者不得产生相同的输出。按**该键的四个取值**分支——`none | itch | steam | console` ——而不是按平台名称。完整的需求表是 `.trae/docs/effects-map.md` 的 `## platform.cert_tier` 节——**只读那一节**（Grep 它的标题，然后做一次有边界的 Read）；整个文件不是运行时输入。
   - `none` —— **完全不输出认证章节。** 内部发布、alpha 或 game jam 游戏。说明该章节已省略以及原因；不要让它留空。
   - `itch` —— 仅 itch.io 上传要求：构建体积、页面设置、年龄标签。**没有主机条目，也没有 Steamworks 条目。**
   - `steam` —— Steamworks：商店页面、depot 构建、成就、系统需求、通用内容规则。**没有主机认证条目。**
@@ -46,7 +44,7 @@ model: sonnet
 
 ## Phase 2: 收集项目上下文
 
-- 读取 `CLAUDE.md`，获取技术栈、目标平台和团队结构
+- 读取 `AGENTS.md`，获取技术栈、目标平台和团队结构
 - 读取 `production/milestones/` 中最近的里程碑
 - 读取 `production/releases/` 中已有的发布检查清单
 - 如果存在，读取 `design/live-ops/content-calendar.md` 中的内容日历
@@ -61,7 +59,7 @@ model: sonnet
 > `scanned [N] files, [M] hits`，要么写
 > `NOT ASSESSED — [code root unresolved | no source files | no asset folder | directory empty]`。
 > 绝不要只给一个勾。代码根（code root）按引擎为 `src/`、`Assets/` 或 `Source/`
-> （按 `.claude/docs/code-root-resolution.md` 解析）；资源位于
+> （按 `.trae/docs/code-root-resolution.md` 解析）；资源位于
 > `assets/`、`Assets/` 或 `Content/`。
 >
 > 这适用于下面的全部四个要点：每一个都以同样的方式搜索占位资源、TODO、调试输出和硬编码测试值，而每一个在空或缺席的根目录上都会返回零命中。例如，没有 `assets/` 目录时，占位资源扫描返回零命中，而一个裸勾会把"所有占位美术已替换"标成绿色。

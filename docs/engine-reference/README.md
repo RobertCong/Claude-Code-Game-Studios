@@ -5,7 +5,7 @@
 
 ## Why This Exists
 
-Claude 的训练数据存在知识截止日期（目前为 2025 年 5 月）。Godot、Unity 和 Unreal
+模型的训练数据存在知识截止日期（目前为 2025 年 5 月）。Godot、Unity 和 Unreal
 等游戏引擎发布的更新会引入破坏性 API 变更、新功能以及已弃用的模式。
 如果没有这些参考资料，agent 会给出过时的代码。
 

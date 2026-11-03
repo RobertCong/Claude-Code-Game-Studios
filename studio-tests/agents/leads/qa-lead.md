@@ -9,11 +9,11 @@
 
 ## Static Assertions (Structural)
 
-通过读取该代理的 `.claude/agents/qa-lead.md` frontmatter 进行验证：
+通过读取该代理的 `.trae/agents/qa-lead.md` frontmatter 进行验证：
 
 - [ ] `description:` 字段存在且针对具体领域（提及测试策略、故事就绪度、覆盖率、缺陷分级——而非泛泛而谈）
 - [ ] `tools:` 包含用于故事文件、测试文件和 coding-standards 的 Read；Bash 用于在每次 QA 交接前运行 `/smoke-check`；Write/Edit 用于它产出的 QA 计划和签署报告，每次写入都在其协作协议中由用户批准把关
-- [ ] 模型档位为 `inherit`——frontmatter `model:` 恰为 `inherit`（档位：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 代理定义未声称对实现决策或游戏设计拥有决定权
 
 ---
@@ -21,7 +21,7 @@
 ## Test Cases
 
 ### Case 1: 领域内请求——适当的输出格式
-**Scenario:** 一个 Logic 类型的「玩家受到危险地块伤害」故事被提交进行就绪度检查。闸门上下文传入了 `.claude/docs/director-gates/ql-story-ready.md` 指定的每一项输入：故事文件路径（`production/epics/hazards/story-002-hazard-damage.md`）、故事类型（Logic）、逐字验收标准——(1) 玩家生命值按危险的伤害值减少，(2) 发出携带伤害量的 `damaged` 事件，(3) 玩家在 0.5 秒模拟时间内不能再次受伤（无敌窗口）——以及故事覆盖的 GDD 需求（`TR-hazards-002`：「危险地块在接触时对玩家造成伤害；每次命中给予 0.5 秒无敌」）。全部三条 AC 都可测量且具体。请求标记为 QL-STORY-READY。
+**Scenario:** 一个 Logic 类型的「玩家受到危险地块伤害」故事被提交进行就绪度检查。闸门上下文传入了 `.trae/docs/director-gates/ql-story-ready.md` 指定的每一项输入：故事文件路径（`production/epics/hazards/story-002-hazard-damage.md`）、故事类型（Logic）、逐字验收标准——(1) 玩家生命值按危险的伤害值减少，(2) 发出携带伤害量的 `damaged` 事件，(3) 玩家在 0.5 秒模拟时间内不能再次受伤（无敌窗口）——以及故事覆盖的 GDD 需求（`TR-hazards-002`：「危险地块在接触时对玩家造成伤害；每次命中给予 0.5 秒无敌」）。全部三条 AC 都可测量且具体。请求标记为 QL-STORY-READY。
 **Expected:** 返回结论 ADEQUATE，理由确认全部三条 AC 都具体且每条都可由自动化测试验证。
 **Assertions:**
 - [ ] 结论恰为 ADEQUATE / GAPS / INADEQUATE 之一（QL-STORY-READY 的结论词汇）——闸门指定的每项输入都已提供，因此 NOT ASSESSED 不适用

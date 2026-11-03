@@ -2,8 +2,8 @@
 
 ## Skill Summary
 
-`/skill-test` 校验技能（`.claude/skills/*/SKILL.md`）与代理
-（`.claude/agents/*.md`）。它有四种模式：
+`/skill-test` 校验技能（`.trae/skills/*/SKILL.md`）与代理
+（`.trae/agents/*.md`）。它有四种模式：
 
 - **static** `[name | all]`：对技能运行 7 项结构检查（frontmatter、
   阶段、结论关键字、写前询问措辞、下一步交接、分叉
@@ -11,14 +11,14 @@
   `references/` 文件的技能会被整体读取（`SKILL.md` 与每个 references 文件）以进行
   检查 2-5；frontmatter 检查（1、6、7）只读 `SKILL.md`。每个技能的结果为
   COMPLIANT、WARNINGS、NON-COMPLIANT 或 NOT ASSESSED。它还会运行
-  `.claude/scripts/agent-check.sh`，把其中的代理与委派行作为
+  `.trae/scripts/agent-check.sh`，把其中的代理与委派行作为
   从不改变结论的观察报告出来，并运行
-  `.claude/scripts/compat-inventory.sh`，按特性以同样方式报告文件依赖了
-  只有 Claude Code 才提供的功能之处；给定代理
+  `.trae/scripts/trae-compat-check.sh`，按类别以同样方式报告文件仍然带有
+  Trae 不会按 Claude Code 方式执行的构造；给定代理
   名称时，它只报告这些观察，不给结论。不写入任何内容。
 - **spec** `[skill-or-agent-name]`：通过
   `studio-tests/catalog.yaml` 解析名称，读取文件与该条目 `spec:` 路径上的
-  规格，以及 `CLAUDE.md` 与其用 `@path` 导入的每个文件，
+  规格，以及 `AGENTS.md` 与其按路径引用的标准文件，
   并标记每条断言 —— 包括规格的 Static Assertions，技能
   与代理一视同仁 —— 为 PASS / PARTIAL / FAIL / NOT ASSESSED。用例结论与整体
   结论取其下最差的结果（FAIL、PARTIAL、NOT ASSESSED、
@@ -38,7 +38,7 @@
 
 由 `/skill-test spec` 对照 SKILL.md 检查 —— 无需夹具。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 至少有 2 个阶段标题
 - [ ] 包含结论：COMPLIANT、WARNINGS、NON-COMPLIANT、NOT ASSESSED（static 模式）；PASS、PARTIAL、FAIL、NOT ASSESSED（spec 模式）
 - [ ] 在写入 spec 结果前包含 "May I write"，在把 category 检查记录到 `catalog.yaml` 前包含 "May I update"
@@ -56,7 +56,7 @@
 
 除非用例自身的夹具另有说明，每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有
-`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
+`project.local.yaml`。规则见：`studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 
@@ -65,7 +65,7 @@
 ### Case 1: Static Mode — Well-formed skill, all 7 checks pass, COMPLIANT
 
 **Fixture:**
-- `.claude/skills/brainstorm/SKILL.md` 存在且满足全部 7 项检查：
+- `.trae/skills/brainstorm/SKILL.md` 存在且满足全部 7 项检查：
   - 具备全部 5 个必需 frontmatter 字段
   - 至少有 2 个阶段标题
   - 具备结论关键字
@@ -77,7 +77,7 @@
 **Input:** `/skill-test static brainstorm`
 
 **Expected behavior:**
-1. 技能完整读取 `.claude/skills/brainstorm/SKILL.md`
+1. 技能完整读取 `.trae/skills/brainstorm/SKILL.md`
 2. 技能运行全部 7 项结构检查
 3. 输出为单技能区块 `=== Skill Static Check: /brainstorm ===`，
    列出 Check 1 – Check 7，每项均为 PASS
@@ -92,10 +92,10 @@
 
 ---
 
-### Case 2: Static Mode — Skill Missing Ask-Before-Write Despite Write Tool in allowed-tools
+### Case 2: Static Mode — Skill Missing Ask-Before-Write Despite Write in Body
 
 **Fixture:**
-- `.claude/skills/some-skill/SKILL.md` 的 `allowed-tools` frontmatter 中含 `Write`
+- `.trae/skills/some-skill/SKILL.md` 的 正文提到 `Write`
 - 正文没有任何检查 4 可接受形式的写前询问措辞：
   没有 "May I write"，写入指令附近没有 "before writing"/"approval"，
   同一节中没有同时出现 "ask" 与 "write"
@@ -104,14 +104,14 @@
 
 **Expected behavior:**
 1. 技能读取 `some-skill/SKILL.md`
-2. 检查 4（协作协议）为 FAIL —— `Write` 在 `allowed-tools` 中，
+2. 检查 4（协作协议）为 FAIL —— 正文承诺写入，
    且未找到写前询问措辞
 3. 其余六项检查各自列出结果
 4. 结论为 NON-COMPLIANT，并附一行 Recommended 指出修复方式
 
 **Assertions:**
-- [ ] 检查 4 标记为 FAIL（不是 WARN —— Write 在 allowed-tools 中）
-- [ ] 检查 4 行或 Recommended 行指出不匹配（有 Write 工具却没有写前询问措辞）
+- [ ] 检查 4 标记为 FAIL（不是 WARN —— 正文承诺写入）
+- [ ] 检查 4 行或 Recommended 行指出不匹配（正文承诺写入却没有写前询问措辞）
 - [ ] 结论为 NON-COMPLIANT
 - [ ] 其他检查也被展示（不只是失败项）
 
@@ -125,9 +125,9 @@
 - 沙箱中该规格的副本是现行版本（9 个测试用例与一份 Static
   Assertions 清单），但新增了一条 Static Assertion："Balance values link to
   their source formula or rationale" —— 仅由
-  `.claude/docs/coding-standards.md`（被 `CLAUDE.md` 导入）满足，而不由技能
+  `.trae/docs/coding-standards.md`（被 `AGENTS.md` 导入）满足，而不由技能
   或其闸门文件本身满足。现行规格没有这一行，因此该副本为此用例做了修改
-- `.claude/skills/gate-check/` 含 `SKILL.md` 与 12 个 `references/` 文件
+- `.trae/skills/gate-check/` 含 `SKILL.md` 与 12 个 `references/` 文件
   （6 个阶段文件、6 个闸门文件）
 - 用户拒绝写入结果
 
@@ -137,7 +137,7 @@
 1. 技能通过 catalog 把 `gate-check` 解析为技能，并从其 `spec:` 字段取得规格
    路径
 2. 技能读取该技能 —— `SKILL.md` 与全部 12 个 `references/` 文件 —— 以及
-   规格、`CLAUDE.md` 与其 `@` 导入的文件
+   规格、`AGENTS.md` 与其 `@` 导入的文件
 3. 规格的 Static Assertions 在 Case 1 之前于一个
    `Static Assertions:` 区块中对照 `SKILL.md` 及其
    `references/` 文件接受检查
@@ -164,7 +164,7 @@
 ### Case 4: Audit Mode — Coverage Table of All Skills and Agents
 
 **Fixture:**
-- `.claude/skills/` 含 74 个技能目录；73 个在其 catalog 条目指定的路径上有
+- `.trae/skills/` 含 74 个技能目录；73 个在其 catalog 条目指定的路径上有
   规格（在沙箱中，一个技能的 catalog `spec:` 被清空且其规格文件被移除 —— 现行
   每个技能都有规格）
 - `catalog.yaml` 有一个 `agents:` 区块，含 49 个条目，全部都有规格
@@ -174,7 +174,7 @@
 **Expected behavior:**
 1. 两种输入都运行 audit 模式 —— 无参数是 audit 默认行为，不是用法
    消息
-2. 技能用 glob `.claude/skills/*/SKILL.md` 枚举技能，并读取 catalog 的
+2. 技能用 glob `.trae/skills/*/SKILL.md` 枚举技能，并读取 catalog 的
    `agents:` 区块获取代理
 3. 对每个技能：Has Spec（来自 catalog `spec:` 路径，或在
    `studio-tests/skills/` 下 glob）、最近 static/category 日期与
@@ -199,7 +199,7 @@
 - `studio-tests/quality-rubric.md` 有一个 `### gate` 章节，含
   指标 G1–G5
 - `catalog.yaml` 给 `gate-check` 设定 `category: gate`
-- `.claude/skills/gate-check/SKILL.md` 满足除 G2 外的每个指标 —— Director
+- `.trae/skills/gate-check/SKILL.md` 满足除 G2 外的每个指标 —— Director
   panel 宽度（`workflow: full` 下只派生 CD-PHASE-GATE）
 - 用户批准 catalog 更新
 
@@ -207,7 +207,7 @@
 
 **Expected behavior:**
 1. 技能从 catalog 读取 `category:`，然后读取评分表的 `### gate` 章节
-2. 技能读取该技能与 `CLAUDE.md` 上下文，并评估 G1–G5
+2. 技能读取该技能与 `AGENTS.md` 上下文，并评估 G1–G5
 3. 每个指标标记为 PASS、FAIL 或 WARN；G2 为 FAIL 并附引用的 Gap 行
 4. 报告以 `Verdict: FAIL (1 failure, 0 warnings)` 与一行 Fix 结尾
 5. 技能询问 "May I update `studio-tests/catalog.yaml` to record
@@ -226,8 +226,8 @@
 **Fixture:**
 - `catalog.yaml` 在 `agents:` 下列出 `creative-director`，其
   `spec: studio-tests/agents/directors/creative-director.md`
-- `.claude/agents/creative-director.md` 声明 `model: opus`；不存在
-  `.claude/skills/creative-director/`
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
+  `.trae/skills/creative-director/`
 - 规格断言 "Model tier is `opus`"
 - 假设一个规格用例是重定向：要求代理选择项目的
   引擎。代理的 "What This Agent Must NOT Do" 清单说 "Make engine or
@@ -240,9 +240,9 @@
 1. 技能通过 catalog 的 `agents:` 区块解析名称 —— 它不会
    报告 "Skill 'creative-director' not found"
 2. 技能读取代理文件与代理规格
-3. 静态断言与 frontmatter 精确比较："Model tier is
-   `opus`" 对照 `model: opus` 为 PASS，而对照
-   `model: inherit` 会为 FAIL（不是 PARTIAL）
+3. 静态断言与 frontmatter 精确比较：例如 "tools includes
+   Read" 对照 `tools: Read, Glob` 为 PASS，而对照
+   `tools: Glob` 会为 FAIL（不是 PARTIAL）
 4. 测试用例对照代理的指令评估；Protocol
    Compliance 使用规格自身的清单
 5. 重定向用例满足：已加载的 `coordination-rules.md` 规则 2 覆盖
@@ -262,7 +262,7 @@
 ### Case 7: Static All — an unreadable skill is NOT ASSESSED and counted
 
 **Fixture:**
-- `.claude/skills/` 含 74 个技能目录；有一个 `SKILL.md` 无法
+- `.trae/skills/` 含 74 个技能目录；有一个 `SKILL.md` 无法
   读取（Read 调用失败 —— 权限被拒），因此其检查均无法
   开始。（能读取但 frontmatter 无法解析的文件是
   另一种情况：检查 1 失败，结果为 NON-COMPLIANT。）
@@ -286,7 +286,7 @@
 ### Case 8: Spec Mode — an unevaluable assertion makes the run NOT ASSESSED
 
 **Fixture:**
-- `.claude/skills/brainstorm/SKILL.md` 及其规格存在
+- `.trae/skills/brainstorm/SKILL.md` 及其规格存在
 - 规格中除一条外所有断言都通过，该条点名了一个
   规格从未定义的夹具文件
 - 用户批准写入结果
@@ -330,11 +330,11 @@
 ### Case 10: Static Mode — a split skill is read whole, but its frontmatter comes from SKILL.md
 
 **Fixture:**
-- `.claude/skills/split-skill/SKILL.md` 具备全部五个 frontmatter 字段，没有
+- `.trae/skills/split-skill/SKILL.md` 具备全部五个 frontmatter 字段，没有
   `context:` 键，且有两个阶段标题（`## Phase 1: Gather`、`## Phase 2: Report`），
   各自说 "Read `references/N-name.md` now and follow it"。它本身没有结论
   关键字、没有写前询问措辞、也没有下一步交接
-- `.claude/skills/split-skill/references/2-report.md` 含 `Verdict: **COMPLETE**`、
+- `.trae/skills/split-skill/references/2-report.md` 含 `Verdict: **COMPLETE**`、
   一行 "May I write this report to `production/qa/report.md`?" 以及结尾的
   "Next step: `/gate-check`"；`references/1-gather.md` 只有指令
 - 运行 A：如上。运行 B：同一技能，但 `argument-hint:` 从
@@ -386,4 +386,4 @@
 - audit 模式的计数是近似值 —— 技能与代理的确切数量会
   随系统增长而变化；夹具中的数字仅作示例。
 - 点名总监闸门 ID 的规格用例会让代理对照
-  `.claude/docs/director-gates/[gate-id].md` 接受评估；未单独做夹具测试。
+  `.trae/docs/director-gates/[gate-id].md` 接受评估；未单独做夹具测试。

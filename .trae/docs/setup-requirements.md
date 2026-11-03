@@ -10,15 +10,15 @@
 | 工具 | 用途 | 安装 |
 | ---- | ---- | ---- |
 | **Git** | 版本控制、分支管理 | [git-scm.com](https://git-scm.com/) |
-| **Claude Code** | AI agent CLI | 原生安装器：`curl -fsSL https://claude.ai/install.sh \| bash`（macOS、Linux、WSL）或 `irm https://claude.ai/install.ps1 \| iex`（Windows PowerShell）。npm 也可用：`npm install -g @anthropic-ai/claude-code`（Node.js 22+）。见 [code.claude.com/docs/en/setup](https://code.claude.com/docs/en/setup) |
+| **Trae CN** | AI agent IDE | [docs.trae.cn](https://docs.trae.cn/)。需要支持 Skills / Subagents / Hooks 的版本 |
 | **Python 3** | 每个技能和钩子都通过它读取 `project.yaml` | [python.org](https://www.python.org/)。没有它，每项设置都会静默回退到默认值，且暂存数据 JSON 的提交会因为无法验证而被阻塞 |
-| **Bash** | 运行每个钩子 | macOS 和 Linux 内置。在 Windows 上，安装 [Git for Windows](https://git-scm.com/downloads/win)——Claude Code 没有它也能运行，但不会有任何 CCGS 钩子运行 |
+| **Bash** | 运行每个钩子 | macOS 和 Linux 内置。在 Windows 上，安装 [Git for Windows](https://git-scm.com/downloads/win)，并在 Trae 中把默认终端设为 Git Bash |
 
 ## 推荐
 
 | 工具 | 使用方 | 用途 | 安装 |
 | ---- | ---- | ---- | ---- |
-| **jq** | 钩子（12 个中的 8 个） | 提交/推送/资源/agent 钩子中的 JSON 解析 | 见下文 |
+| **jq** | 钩子（14 个中的 9 个） | 提交/推送/资源钩子中的 JSON 解析 | 见下文 |
 
 ### 安装 jq
 
@@ -41,20 +41,23 @@ sudo dnf install jq     # Fedora
 sudo pacman -S jq       # Arch
 ```
 
+## Trae 中的一次性设置
+
+1. **设置 > Beta > Subagents**：打开「启用 Subagents 目录」，否则 `.trae/agents/` 不会被加载。
+2. **设置 > Hooks**：选择「项目」，启用 `.trae/hooks.json`。
+3. **设置 > Hooks > 运行方式**：选择「本地自动运行」，否则沙箱可能阻止钩子写入 `production/session-state/`。
+4. **设置 > 规则**：确认「将 AGENTS.md 包含在上下文中」已打开。
+
 ## 平台说明
 
 ### Windows
-- Git for Windows 包含 **Git Bash**，它提供 `settings.json` 中所有钩子
-  使用的 `bash` 命令
-- 如果 Claude Code 找不到 Git Bash，请在设置的 `env` 块中把
-  `CLAUDE_CODE_GIT_BASH_PATH` 设置为其 `bash.exe`（例如
-  JSON 中的 `C:\\Program Files\\Git\\bin\\bash.exe`）
-- 钩子使用 `bash .claude/hooks/[name].sh`——这在 Windows 上可行，因为
-  Claude Code 通过一个能找到 `bash.exe` 的 shell 调用命令
+- Git for Windows 包含 **Git Bash**，它提供 `.trae/hooks.json` 中所有钩子使用的 `bash` 命令。
+- 在 Trae 中把默认终端配置为 Git Bash；若 Trae 找不到 `bash`，钩子会静默失效。
+- `notify.sh` 使用 PowerShell 显示通知。
 
 ### macOS / Linux
-- Bash 原生可用
-- 通过你的包管理器安装 `jq`，以获得完整的钩子支持
+- Bash 原生可用。
+- 通过你的包管理器安装 `jq`，以获得完整的钩子支持。
 
 ## 验证安装
 
@@ -64,7 +67,7 @@ sudo pacman -S jq       # Arch
 git --version          # Should show git version
 bash --version         # Should show bash version
 jq --version           # Should show jq version (optional)
-python --version       # Required: Python 3 (python3 or py also work)
+python3 --version      # Required: Python 3 (python or py also work)
 ```
 
 ## 缺少可选工具时会发生什么
@@ -77,54 +80,28 @@ python --version       # Required: Python 3 (python3 or py also work)
 
 ## 可选性能设置
 
-CCGS 有意不为以下设置提供**任何**值。每一项的最佳值都取决于你的机器、你的 Claude 套餐以及你的工作方式，因此在这里提交一个值就会成为每个用户
-不知不觉继承的猜测。在 `.claude/settings.local.json` 中设置你需要的项，该文件被 git 忽略，且仅属于你。
+CCGS 有意不为以下设置提供**任何**值。每一项的最佳值都取决于你的机器、你的套餐以及你的工作方式，因此在这里提交一个值就会成为每个用户
+不知不觉继承的猜测。请在 Trae 的用户设置中调整，这些设置不随项目仓库分发。
 
 | 设置 | 作用 | 何时更改 |
 | ---- | ---- | ---- |
-| `promptCacheTtl` | 主对话的提示缓存存活多久。 | 如果你在长会话中间有间断，请调高它；缓存在中断后仍存活可避免重新发送上下文。 |
-| `subagentPromptCacheTtl` | 同上，适用于子代理和其他对话外请求。 | 对于像此项目这样的 49 个 agent 项目，`team-*` 技能会反复生成，值得调高。 |
-| `autoCompactWindow` | 上下文达到多满时 Claude Code 会压缩它。 | 如果压缩总是在任务中途让你措手不及，请调低；如果你更愿意减少压缩频率并保留更多历史，请调高。 |
-| `skillListingBudgetFraction` | 技能列表可占用的上下文比例。 | CCGS 提供 74 个技能，所以列表并不小。如果你想要更多工作空间，请调低；`skillListingMaxDescChars` 则改为裁剪每个描述。 |
+| 上下文压缩阈值 | 上下文达到多满时 Trae 会压缩它。 | 如果压缩总是在任务中途让你措手不及，请调低；如果你更愿意减少压缩频率并保留更多历史，请调高。 |
+| 模型选择 | Agent 与子代理使用哪个模型。 | 子代理默认继承当前会话模型；需要更强推理时在 Trae 中切换。 |
+| 技能列表展示 | 技能描述占用的上下文。 | CCGS 提供 74 个技能，列表并不小；如果你想要更多工作空间，可在 Trae 中收紧技能描述展示。 |
 
-`sandbox.enabled` 会把 shell 命令与你的文件系统和网络隔离。它
-值得开启，但仅在 **macOS、Linux 和 WSL2** 上运行——它在原生
-Windows 上不可用，而 Windows 是 CCGS 的主要平台。
+## 安全与审批
 
-### CCGS 确实提供的一项设置
+Trae 没有项目级的 `settings.json` 权限模式。本仓库的行为由两层保证：
 
-`permissions.defaultMode` 在 `.claude/settings.json` 中被设置为 `default`，
-这是有意为之。**在项目根目录**启动的终端会话随后会以
-Claude Code 的先询问模式启动，因此文件编辑会等待你的批准，即使你
-自己的配置设置了 `acceptEdits` 或 `auto`。
+- **`.trae/hooks/deny-rules.json` + `validate-deny.sh`**：在每次 RunCommand 前
+  执行 130 条 deny 规则（force push、`rm -rf`、读取 `.env` 等）。
+- **协作协议**：写文件前的「我可以把它写入 [filepath] 吗？」是模型必须遵守的
+  指令；在 Trae 的自动模式或减少询问模式下，它不是硬停止点。
 
-它设置的是会话启动时所用的模式。它是兜底，而非保证，且
-以下途径会绕过它：
-
-- **在子文件夹中启动**，例如 `design/` 或代码根目录（`src/`、
-  `Assets/` 或 `Source/`，取决于引擎）。Claude Code 只从启动时所在的文件夹加载
-  `.claude/settings.json`，因此该会话
-  没有此项目的任何钩子、拒绝规则或权限模式。请从根目录启动。
-- **恢复会话。** 恢复的会话保持其结束时的模式。
-- **会话期间切换**：Shift+Tab、回答 "Yes, and switch to auto
-  mode"，或允许本次会话的所有编辑。
-- **命令行上的 `claude --permission-mode auto`**。
-- **VS Code 扩展**，它从不读取项目的 `.claude/settings.json`
-  来获取对话启动时的模式。在你的 VS Code 用户设置中把 `claudeCode.initialPermissionMode`
-  设置为 `default`，以获得相同行为。
-- **桌面应用**，它会记住你上次为某个文件夹选择的模式，
-  并改用该模式。
-
-在任何无需询问就接受编辑的模式下，框架的 "May I write?" 是
-对模型的指令，而不是停止点。
-
-若要以其他模式启动终端会话，请在
-`.claude/settings.local.json` 中设置 `permissions.defaultMode`，它具有更高优先级。终端会话接受其中除 `auto` 和 `bypassPermissions` 之外的任何模式。
-请先理解你正在关闭什么。
+请从**项目根目录**打开 Trae。只从 `design/`、`src/` 或 `Assets/` 等子目录打开时，
+`.trae/rules`、`.trae/hooks.json` 和先询问模式都不会加载。
 
 ## 推荐 IDE
 
-Claude Code 可与任何编辑器配合使用，但该模板针对以下环境做了优化：
-- **VS Code** 搭配 Claude Code 扩展
-- **Cursor**（兼容 Claude Code）
-- 基于终端的 Claude Code CLI
+- **Trae CN**（本模板的默认环境）
+- 任何能编辑 Markdown / Bash 的编辑器，用于手工维护技能与钩子

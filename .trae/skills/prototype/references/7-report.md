@@ -5,7 +5,7 @@
 
 ## Phase 7: 生成原型报告
 
-阅读 `.claude/docs/templates/prototype-report.md` 以获取报告结构。
+阅读 `.trae/docs/templates/prototype-report.md` 以获取报告结构。
 根据本次会话中观察到的内容填写每一节。用真实观察替换所有
 占位文本——不要通用填充。
 

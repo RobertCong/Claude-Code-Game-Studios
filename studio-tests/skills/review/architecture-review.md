@@ -5,7 +5,7 @@
 `/architecture-review` 是一个 Opus 层级技能，用于检查整套架构决策是否覆盖了
 游戏的设计。它从每份 GDD 中提取技术需求（TR-ID），在可追溯性矩阵中把每一条
 映射到覆盖它的 ADR，检测跨 ADR 冲突，按依赖排序 ADR（通过
-`.claude/scripts/adr-dep-graph.sh`），对照 `docs/engine-reference/` 审计引擎
+`.trae/scripts/adr-dep-graph.sh`），对照 `docs/engine-reference/` 审计引擎
 兼容性，咨询主引擎专家，并检查 `docs/architecture/architecture.md` 对系统索引
 的覆盖。它产生 PASS / CONCERNS / NOT ASSESSED / FAIL 结论。
 
@@ -21,10 +21,10 @@ Pre-Production 之间的质量闸门。
 
 由 `/skill-test spec` 对照 SKILL.md 检查 —— 无需 fixture。
 
-- [ ] 具备必需的前置字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 具备 ≥2 个阶段标题
 - [ ] 包含结论关键词：PASS、CONCERNS、NOT ASSESSED、FAIL
-- [ ] `allowed-tools` 包含 Write，因此存在写入批准措辞（"May I update the systems index?"、"May I update `docs/architecture/tr-registry.yaml`…"）
+- [ ] 技能正文承诺写入，因此存在写入批准措辞（"May I update the systems index?"、"May I update `docs/architecture/tr-registry.yaml`…"）
 - [ ] 结尾有下一步交接（Phase 9）
 - [ ] 记录了参数模式：`full`、`coverage`、`consistency`、`engine`、`single-gdd [path]`、`rtm`
 
@@ -42,7 +42,7 @@ Pre-Production 之间的质量闸门。
 
 除非用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有
-`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
+`project.local.yaml`。规则见：`studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 
@@ -72,7 +72,7 @@ Pre-Production 之间的质量闸门。
 2. 技能统计分母（N_gdd、N_adr），用定向 Grep（而非整个文件）加载所需小节，并报告
    "Loaded [N] GDDs, [M] ADRs, engine: Godot 4.6"
 3. 技能提取 TR-ID（复用已有的 `tr-registry.yaml` ID）并构建矩阵
-4. 技能运行 `bash .claude/scripts/adr-dep-graph.sh`，并从其 `ORDER:` 行打印推荐的实现顺序
+4. 技能运行 `bash .trae/scripts/adr-dep-graph.sh`，并从其 `ORDER:` 行打印推荐的实现顺序
 5. 技能运行引擎审计并咨询 `godot-specialist`
 6. 报告以 `### Verdict: PASS` 结尾
 7. Phase 8 询问要写入什么；Phase 9 提供 `/gate-check pre-production`

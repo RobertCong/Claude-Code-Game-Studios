@@ -7,12 +7,12 @@
 # Replaces the hand-run test command, `timeout`, exit-code reading and "looks
 # like success and is not" cases.
 #
-# OBSERVATIONS, NOT A VERDICT (CLAUDE.md, "Helpers in .claude/scripts/"). The
+# OBSERVATIONS, NOT A VERDICT (AGENTS.md, "Helpers in .trae/scripts/"). The
 # `rule` row says which row of the ladder the exit code and output fall on, in
 # plain words; PASS, FAIL, NOT ASSESSED and "PASS WITH WARNINGS" stay with
 # /smoke-check, which also decides what an unmatched exit code means.
 #
-# Usage: bash .claude/scripts/test-run.sh <engine> [options]
+# Usage: bash .trae/scripts/test-run.sh <engine> [options]
 #   <engine>            godot, unity or unreal (any case)
 #   --cmd COMMAND       the test command to run, instead of project.yaml's
 #                       commands.test or the engine's default

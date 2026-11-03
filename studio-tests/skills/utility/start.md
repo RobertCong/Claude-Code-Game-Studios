@@ -14,7 +14,7 @@ Phase 6 打印对应 rigor 的路径（包含 Path D 的已有工作路径；在
 
 由 `/skill-test spec` 对照 SKILL.md 检查，无需 fixture。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 有 ≥2 个 phase 标题
 - [ ] 包含结论关键词：COMPLETE
 - [ ] 为每一次写入说明写入规则：阶段与推断出的 rigor 只在用户对保存问题明确回答是之后写入，且该问题需指明 `project.yaml` 与 `production/stage.txt`；`modes.automation` 按用户选择写入，且当保存被拒绝时绝不写入
@@ -30,7 +30,7 @@ Phase 6 打印对应 rigor 的路径（包含 Path D 的已有工作路径；在
 
 ## Fixture Defaults
 
-除非某个用例自己的 Fixture 另有说明，否则每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/CLAUDE.md` §
+除非某个用例自己的 Fixture 另有说明，否则每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/AGENTS.md` §
 Fixture defaults。
 
 ---

@@ -24,13 +24,13 @@ localization-lead、performance-analyst 与 community-manager。Phase 0 解析
 
 ## Static Assertions (Structural)
 
-- [ ] 具备必需的前置元数据（frontmatter）字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 至少包含 2 个 Phase 标题
 - [ ] 包含结论关键词：COMPLETE、BLOCKED
 - [ ] File Write Protocol 区分子代理（有界例外：指定路径、`production/`、`docs/` 或 `tests/` 下的新产出物、处于闸门内的阶段 —— 无逐次写入提示）与子技能（常规协议 —— 写入前先询问），并要求对标签、推送、构建与商店页面变更进行显式确认
 - [ ] File Write Protocol 章节说明编排器不直接写文件
 - [ ] 为每个代理指定目标位置，使任意两个并行代理不共用文件：`production/releases/release-plan-[version].md`、`release-checklist-[version].md`、`qa-gate-[version].md`、`build-[version].md`、`security-signoff-[version].md`、`netcode-signoff-[version].md`、`localization-signoff-[version].md`、`performance-signoff-[version].md`、`analytics-signoff-[version].md`、`go-no-go-[version].md`、`announcement-[version].md`、`release-report-[version].md`，以及 `docs/patch-notes/[version].md`
-- [ ] 存在 Error Recovery Protocol 章节：核实指定产出物在磁盘上、立即呈现 BLOCKED、始终产出部分报告，完整流程（呈现 / 评估 / 提供选项 / 部分报告）见 `.claude/docs/error-recovery-protocol.md`
+- [ ] 存在 Error Recovery Protocol 章节：核实指定产出物在磁盘上、立即呈现 BLOCKED、始终产出部分报告，完整流程（呈现 / 评估 / 提供选项 / 部分报告）见 `.trae/docs/error-recovery-protocol.md`
 - [ ] Phase 0 解析 `project.stage`，Phase 1 之前的阶段检查在其不为 `Release` 时停止（"run `/gate-check release` first"），不启动任何代理；唯一越过它的方式是显式 `AskUserQuestion` 覆盖，在任何 `automation` 模式下都会询问，并作为 `Stage override:` 行记录在 go/no-go 记录与最终报告中
 - [ ] 具备指向发布后监控与 `/retrospective` 的后续步骤交接；技能本身不写 `project.stage` 或 `production/stage.txt`
 - [ ] qa-lead 按已解析 `workflow` 的发布闸门阈值检查未关闭缺陷：任何层级都查 S1，`full` 下还查 S2 与 S3
@@ -48,7 +48,7 @@ localization-lead、performance-analyst 与 community-manager。Phase 0 解析
 ## Fixture Defaults
 
 除非某个用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 与
-`modes.automation: collaborative`，且不含 `project.local.yaml`。规则见：`studio-tests/CLAUDE.md` §
+`modes.automation: collaborative`，且不含 `project.local.yaml`。规则见：`studio-tests/AGENTS.md` §
 Fixture defaults。
 
 ---

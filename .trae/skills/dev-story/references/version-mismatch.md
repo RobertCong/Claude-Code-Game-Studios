@@ -12,7 +12,7 @@ ADR 的 `version`（来自 `adr-status.sh`：其 Last Verified 日期，否则�
 How do you want to go on?” 选项：
 
 - **Re-read the changed ADR and refresh the story (Recommended).** 使用
-  `bash .claude/scripts/md-section.sh extract <adr> "Decision"` 读取 ADR 的
+  `bash .trae/scripts/md-section.sh extract <adr> "Decision"` 读取 ADR 的
   Decision、Engine Compatibility 和 ADR Dependencies 章节，另外两个同样处理。
   然后编辑故事：`ADR Version` 变为 ADR 的 `version`
   （绝不是今天的日期，否则下次运行又会不匹配），并且 ADR Decision

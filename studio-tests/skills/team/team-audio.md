@@ -17,7 +17,7 @@
 
 ## Static Assertions (Structural)
 
-- [ ] 具备必需的前置字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 具备 ≥2 个步骤/阶段标题
 - [ ] 包含结论关键词：COMPLETE、BLOCKED
 - [ ] 包含 "File Write Protocol" 小节
@@ -36,7 +36,7 @@
 - [ ] 每个代理提示词都以返回契约结尾：写入的路径、≤5 条摘要、BLOCKED/CONCERNS 项各一行
 - [ ] 结尾有下一步交接（引用 `/dev-story`、`/asset-audit`）
 - [ ] 存在 Error Recovery Protocol 小节：在把某步骤视为完成前，确认指定产出物已落盘；立即
-  上报 BLOCKED；始终产出部分报告；完整流程见 `.claude/docs/error-recovery-protocol.md`
+  上报 BLOCKED；始终产出部分报告；完整流程见 `.trae/docs/error-recovery-protocol.md`
 - [ ] 在步骤转换处使用 `AskUserQuestion` 后才继续（`collaborative` 模式）
 - [ ] Phase 0 解析 `review_mode`、`automation` 和 `team.size`，并要求 Step 1 之前有一行
   活跃集声明
@@ -55,7 +55,7 @@
 
 除非用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有
-`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` §
+`project.local.yaml`。规则见：`studio-tests/AGENTS.md` §
 Fixture defaults。
 
 ---
@@ -195,7 +195,7 @@ Fixture defaults。
 3. 流水线在没有声音圣经作为输入的情况下正常走完四个步骤
 4. Step 1 的 audio-director 被告知不存在声音圣经，必须仅依据功能 GDD 建立声音标识
 5. Next Steps 建议创建声音圣经并说明由谁编写：`audio-director` 代理从
-   `.claude/docs/templates/sound-bible.md` 起草 `design/audio/sound-bible.md`，以本次运行
+   `.trae/docs/templates/sound-bible.md` 起草 `design/audio/sound-bible.md`，以本次运行
    Step 1 的方向为起点，并在写入前询问
 
 **断言：**
@@ -204,7 +204,7 @@ Fixture defaults。
 - [ ] 流水线不因缺少声音圣经而停止
 - [ ] audio-director 在其提示词上下文中被告知不存在声音圣经
 - [ ] Next Steps 建议创建声音圣经并点名其作者——`audio-director`，从
-  `.claude/docs/templates/sound-bible.md` 起草
+  `.trae/docs/templates/sound-bible.md` 起草
 - [ ] 技能在本次运行中不自行写入 `design/audio/sound-bible.md`
 - [ ] 若其他所有步骤成功，结论仍为 COMPLETE
 
@@ -214,7 +214,7 @@ Fixture defaults。
 
 **测试夹具：**
 - 已解析配置块：`team.size: studio`、`automation: collaborative`
-- `project.yaml` 中的 `engine.name` 未设置，且 `.claude/docs/technical-preferences.md`
+- `project.yaml` 中的 `engine.name` 未设置，且 `.trae/docs/technical-preferences.md`
   没有 Primary 引擎专家（显示 `[TO BE CONFIGURED]`）
 - 目标功能的 GDD 存在
 - 声音圣经可能存在也可能不存在

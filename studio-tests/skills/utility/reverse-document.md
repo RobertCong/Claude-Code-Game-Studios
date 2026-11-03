@@ -23,7 +23,7 @@
 
 由 `/skill-test spec` 对照 SKILL.md 检查 —— 无需夹具。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 至少有 2 个阶段标题
 - [ ] 包含结论关键字：COMPLETE、BLOCKED
 - [ ] 在写入文档前包含 "May I write" 协作协议措辞
@@ -41,7 +41,7 @@
 
 除非用例自身的夹具另有说明，每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有
-`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
+`project.local.yaml`。规则见：`studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 
@@ -206,7 +206,7 @@
 **Expected behavior:**
 1. 层级由配置块解析为 `minimal`，而非假定
 2. 在任何草稿之前呈现并回答发现结果
-3. 草稿采用 `.claude/docs/templates/game-brief.md`
+3. 草稿采用 `.trae/docs/templates/game-brief.md`
    格式，是针对这一个系统的一页游戏简报 —— 而非 GDD
 4. 来源横幅直接位于标题下方
 5. 技能询问 "May I write this to `design/health-system-brief.md`?" —— 不是
@@ -234,7 +234,7 @@
 **Expected behavior:**
 1. 层级由配置块解析为 `minimal`；路径就是代码根目录，因此目标是整款游戏，而非单个系统
 2. 在任何草稿之前呈现并回答发现结果
-3. 草稿采用 `.claude/docs/templates/game-brief.md` 格式，是覆盖整款游戏（提案、核心循环、已构建内容）的一页游戏简报，而不是 GDD，也不是单个系统的简报
+3. 草稿采用 `.trae/docs/templates/game-brief.md` 格式，是覆盖整款游戏（提案、核心循环、已构建内容）的一页游戏简报，而不是 GDD，也不是单个系统的简报
 4. 来源横幅直接位于标题下方
 5. 技能询问 "May I write this to `design/game-brief.md`?" —— 不是 `design/gdd/`，也不是 `design/[system-name]-brief.md` 路径
 6. 批准后写入文件；结论为 COMPLETE

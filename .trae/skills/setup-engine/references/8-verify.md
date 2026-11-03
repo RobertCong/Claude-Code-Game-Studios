@@ -3,13 +3,13 @@
 > 属于 `/setup-engine` 的一部分。`SKILL.md` 指明何时读取本文件；它解析出的
 > 设置及其后续标题下的规则在此仍然适用。
 
-## 8. 验证 CLAUDE.md 导入
+## 8. 验证 AGENTS.md 导入
 
 **此导入已在第 4 节写入 — 不要再次编辑，也不要再次
-询问。** 第 4 节已将其作为同一次 CLAUDE.md 写入的一部分设置，锚定在
+询问。** 第 4 节已将其作为同一次 AGENTS.md 写入的一部分设置，锚定在
 `ENGINE-REFERENCE-IMPORT` 标记上。本步骤只确认结果。
 
-读取 `CLAUDE.md`，确认标记下方的行内容为：
+读取 `AGENTS.md`，确认标记下方的行内容为：
 
 ```markdown
 @docs/engine-reference/<engine>/VERSION.md
@@ -36,7 +36,7 @@
 通过在写入后验证文件来同时捕获两者：
 
 ```bash
-bash .claude/scripts/project-coherence.sh
+bash .trae/scripts/project-coherence.sh
 ```
 
 它会将 `project.yaml` 与 `docs/engine-reference/<engine>/VERSION.md`、
@@ -56,7 +56,7 @@ bash .claude/scripts/project-coherence.sh
 比较 -- 缺少二进制文件、缺少 `project.godot`。说明哪些情况
 适用。未能执行的比较并未确立一致性。
 
-按照 CLAUDE.md 中的约定，脚本只输出观察结果，从不给出结论。
+按照 AGENTS.md 中的约定，脚本只输出观察结果，从不给出结论。
 判断由你和用户做出。
 
 ---

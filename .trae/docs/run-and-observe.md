@@ -5,7 +5,7 @@
 **解析检查不等于运行，没人看过的用户故事不能关闭。**
 本文件说明如何去看。
 
-`.claude/docs/coding-standards.md` 是「用户故事需要什么证据」的权威依据。
+`.trae/docs/coding-standards.md` 是「用户故事需要什么证据」的权威依据。
 本文件是「如何产出其中视觉部分」的流程。
 
 ## 规则
@@ -14,7 +14,7 @@
 **保留的截图**，存放在 `production/qa/evidence/`。编译只能证明代码能加载。测试只能
 证明逻辑。两者都不能证明文字是否放得进框里。
 
-代理能看图片：Claude Code 的 `Read` 工具可以渲染 PNG。整个问题在于如何无人值守地
+代理能看图片：Trae 的 `Read` 工具可以渲染 PNG。整个问题在于如何无人值守地
 从引擎里拿到一张图片，而每个受支持的引擎都有原生方式。
 
 ## 流程
@@ -36,7 +36,7 @@
    例如 `production/epics/core/story-003-light-pickup.md` 对应
    `story-003-light-pickup`。在证据文档中引用该图片。截了又丢弃的截图只是断言，
    不是证据。同时在旁边为它证明的文件打上戳记：
-   `bash .claude/scripts/review-receipts.sh hash <each file the story changed> > production/qa/evidence/[story-slug]/stamp.txt`。
+   `bash .trae/scripts/review-receipts.sh hash <each file the story changed> > production/qa/evidence/[story-slug]/stamp.txt`。
    之后若其中一个文件被修改，证据就会显示得比代码更旧。
 6. 在实现总结中**报告**一行 `Run result:` — 词汇见下文。
 
@@ -139,7 +139,7 @@ MSYS_NO_PATHCONV=1 timeout 60 "<UE root>/Engine/Binaries/Win64/UnrealEditor.exe"
 
 `-game` 以独立模式运行，不带编辑器 UI。地图是**紧跟在 `.uproject` 之后的位置参数
 URL** — 不是控制台命令。**在 Windows 上必须加 `MSYS_NO_PATHCONV=1` 前缀：**
-Claude Code 在 Git Bash 中运行命令，Git Bash 会把任何以 `/` 开头的参数改写为
+Trae 在 Git Bash 中运行命令，Git Bash 会把任何以 `/` 开头的参数改写为
 Windows 路径，因此 `/Game/Maps/Shop` 到达引擎时变成
 `C:/Program Files/Git/Game/Maps/Shop`，游戏会停在没人能看到的 "map not found"
 对话框上。备选方案是通过 `-ExecCmds="open /Game/Maps/Shop"` 传入地图，它不会被

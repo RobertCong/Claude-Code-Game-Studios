@@ -3,19 +3,17 @@ name: test-evidence-review
 description: "对测试文件与证据进行质量评审 —— 不止于检查是否存在，还评估断言覆盖率。按用户故事给出 ADEQUATE/INCOMPLETE/MISSING/NOT ASSESSED 结论。"
 argument-hint: "[story-path | sprint | system-name]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Bash(bash "*/.claude/skills/test-evidence-review/../../hooks/yaml-helper.sh" resolve_config *), Bash(bash .claude/scripts/review-receipts.sh check *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow,qa.level,testing.strict`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow,qa.level,testing.strict`
 
 **自动化模式**：解析 `modes.automation`（`project.local.yaml` →
 `project.yaml` → 默认 `collaborative`）。每次 `AskUserQuestion` 调用和
-每次文件写入都遵循 `.claude/docs/automation-modes.md`
+每次文件写入都遵循 `.trae/docs/automation-modes.md`
 （collaborative 总是询问 · guided 仅重大事项询问 · autonomous 记录后继续；
 `automation_always_ask` 类别始终提示）。
 
-**`qa.level` 和 `testing.strict`**（已在上方解析）决定本次评审可以把什么
+**`qa.level` 和 `testing.strict`**（已在上一步解析）决定本次评审可以把什么
 称为阻塞项 —— 与 `/story-done` 关闭用户故事所依据的规则相同，因此这里的
 BLOCKING 项就是会阻止 `/story-done` 的项：
 - **`qa.level: minimal`** 免测。Logic、Integration 或 Config/Data 类型的用户故事
@@ -27,7 +25,7 @@ BLOCKING 项就是会阻止 `/story-done` 的项：
   （Logic→`logic`，Integration→`integration`，Visual/Feel→`visual`，
   UI→`ui`，Config/Data→`config`）：`true` → BLOCKING，`false` → ADVISORY，`unset`
   → 则适用纯布尔形式的 `testing.strict: true|false`（旧式写法）于所有
-  类型；否则使用 `.claude/docs/coding-standards.md` 中的默认闸门级别
+  类型；否则使用 `.trae/docs/coding-standards.md` 中的默认闸门级别
   （Logic、Integration、Visual/Feel 和 UI 为 BLOCKING；Config/Data 为
   ADVISORY）。下文所有 "BLOCKING" 均指该用户故事类型的闸门级别。
 
@@ -109,9 +107,9 @@ Grep pattern="## Acceptance Criteria" glob="production/epics/**/story-*.md" outp
 
 **Logic 用户故事**：搜索引擎的单元测试根目录 —— `tests/unit/[system]/`
 （Godot）、`Assets/Tests/EditMode/`（Unity）、`Source/<Module>/Private/Tests/`
-（Unreal）；参见 `.claude/docs/directory-structure.md` —— 查找文件名
+（Unreal）；参见 `.trae/docs/directory-structure.md` —— 查找文件名
 包含用户故事标识或其系统名的文件。测试文件的命名遵循
-`.claude/rules/test-standards.md`，不一定叫 `[story-slug]_test.*`。
+`.trae/rules/test-standards.md`，不一定叫 `[story-slug]_test.*`。
 
 **Integration 用户故事**：同上，位于集成测试根目录（`tests/integration/[system]/`、
 `Assets/Tests/PlayMode/` 或 Unreal 的测试根目录）
@@ -160,7 +158,7 @@ check、verify 或引擎特有断言模式的行）。断言数量低是一个
 ### 命名质量
 
 测试函数名应描述：场景 + 预期结果。
-各引擎的模式（`.claude/rules/test-standards.md`）：Godot
+各引擎的模式（`.trae/rules/test-standards.md`）：Godot
 `test_[scenario]_[expected]`，Unity `[Scenario]_[Expected]`，Unreal
 `<Project>.[System].[Scenario]`。
 
@@ -196,7 +194,7 @@ check、verify 或引擎特有断言模式的行）。断言数量低是一个
 ### 签核完整性
 
 什么能关闭用户故事遵循
-`.claude/docs/coding-standards.md` 中的证据表 —— 与 `/story-done` 在每种
+`.trae/docs/coding-standards.md` 中的证据表 —— 与 `/story-done` 在每种
 `qa.level` 下应用的规则相同：
 - **Visual/Feel**：证据文档（来自 test-evidence 模板）必须有
   每一行签核为 `[x] Approved`。空白或缺失的行即为 INCOMPLETE。
@@ -216,7 +214,7 @@ check、verify 或引擎特有断言模式的行）。断言数量低是一个
 ### 证据早于其代码
 
 对每个有保留图片的用户故事，运行
-`bash .claude/scripts/review-receipts.sh check production/qa/evidence/[story-slug]/stamp.txt`。
+`bash .trae/scripts/review-receipts.sh check production/qa/evidence/[story-slug]/stamp.txt`。
 将每个 `CHANGED:` 或 `GONE:` 文件列为 POTENTIALLY STALE —— 它在证据
 捕获之后发生了更改。`RECEIPT: NONE`：说明"无时间戳"并使用下面的日期检查。
 这仅是报告中的一行：它从不改变用户故事的结论。
@@ -248,7 +246,7 @@ check、verify 或引擎特有断言模式的行）。断言数量低是一个
 > 不能用于 *我无法查看*，这根本不是关于用户故事的发现。在以下情况使用 `NOT ASSESSED`：
 >
 > - 用户故事的**类型无法确定**，因此所需证据
->   未知（`.claude/docs/coding-standards.md` 中的类型→证据映射
+>   未知（`.trae/docs/coding-standards.md` 中的类型→证据映射
 >   正是使任何其他结论有意义的基础）；
 > - 证据路径已指明但**不可读或超出本次运行范围**；
 > - 用户故事文件本身无法解析。

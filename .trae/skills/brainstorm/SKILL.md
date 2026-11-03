@@ -3,13 +3,11 @@ name: brainstorm
 description: "引导用户发现并选定游戏概念。当用户想要游戏创意、新概念、game jam 创意，或想探索其他方向（包括放弃当前想法从头开始）时使用。"
 argument-hint: "[genre or theme hint, or 'open'] [--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, WebSearch, Agent, AskUserQuestion, Bash(bash "*/.claude/skills/brainstorm/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,docs.density,workflow`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation,docs.density,workflow`
 
-以上已解析；直接使用。无配置块 → 使用 `.claude/docs/config-resolution.md`
+以上命令的输出已解析；直接使用。无配置块 → 使用 `.trae/docs/config-resolution.md`
 中的默认值（`workflow: minimal`、`review_mode: solo`、`automation: collaborative`、`docs.density: terse`），
 并说明这些设置未被读取。
 
@@ -21,15 +19,15 @@ model: sonnet
 - **`minimal`：** 走下面的精简简报（Lean Brief）流程：写一页 `design/game-brief.md`，然后停止。不做
   探索性问题、游戏支柱（pillar）、总监质量闸门（director gate），也不写 `game-concept.md`，并且不要加载
   `references/full-concept.md`。
-- **`standard` 或 `full`：** 读取 `references/full-concept.md` 并遵循它。它依据 `.claude/docs/templates/game-concept.md`
+- **`standard` 或 `full`：** 读取 `references/full-concept.md` 并遵循它。它依据 `.trae/docs/templates/game-concept.md`
   写出 `design/gdd/game-concept.md`。它的质量闸门（gate）遵循
-  `.claude/docs/director-gates.md`；每个总监代理（director agent）会拿到自己的闸门文件，
-  `.claude/docs/director-gates/<gate-id in lower case>.md`（`cd-pillars.md`、
+  `.trae/docs/director-gates.md`；每个总监代理（director agent）会拿到自己的闸门文件，
+  `.trae/docs/director-gates/<gate-id in lower case>.md`（`cd-pillars.md`、
   `ad-concept-visual.md`、`td-feasibility.md`、`pr-scope.md`），你不要自己去读这些文件。
 
 技能名之后输入的文本中的 `--review` 会覆盖本次运行的 `review_mode`。
 `docs.density` 设定每节的深度：`terse` = 要点列表；`balanced` = 附简要理由；
-`thorough` = 理由与备选方案。提问遵循 `.claude/docs/automation-modes.md`
+`thorough` = 理由与备选方案。提问遵循 `.trae/docs/automation-modes.md`
 （collaborative 会问，guided 只问重大决策，autonomous 记录日志并继续；
 always-ask 类别始终会问）。
 
@@ -39,7 +37,7 @@ always-ask 类别始终会问）。
 ## 精简简报流程（`workflow: minimal`）
 
 几次交流，而不是十五次：把支撑这款游戏的想法浓缩到一页，然后进入
-编码。依据模板 `.claude/docs/templates/game-brief.md` 撰写（六个必填字段、三个
+编码。依据模板 `.trae/docs/templates/game-brief.md` 撰写（六个必填字段、三个
 单行项）。如果 `design/game-brief.md` 已存在，读取并完善它，而不是从头开始。
 
 1. **概念。** 根据技能名之后输入的提示（若没有提示，则问一个简短的开放式问题），提出 **2 或 3 个单行概念**（以动词开头，或类型与主题的混搭），而不是

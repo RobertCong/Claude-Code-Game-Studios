@@ -3,8 +3,6 @@ name: scope-check
 description: "范围蔓延检查——对比当前范围与原始计划。标记新增内容、量化膨胀、建议削减。『有范围蔓延吗？』"
 argument-hint: "[feature-name or sprint-N]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Bash(git log *)
-model: haiku
 ---
 
 # 范围检查

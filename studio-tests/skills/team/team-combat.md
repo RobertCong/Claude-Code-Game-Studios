@@ -19,7 +19,7 @@ COMPLETE / NEEDS WORK / BLOCKED，并交接至 `/code-review`、
 
 ## Static Assertions (Structural)
 
-- [ ] 具备必需的前置字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 具备 ≥2 个阶段标题（Phase 1 至 Phase 6 均存在）
 - [ ] 包含结论关键词：COMPLETE、NEEDS WORK、BLOCKED
 - [ ] 包含 "File Write Protocol"——子代理草稿与 QA 产出物留在有界例外之内，而实现文件
@@ -35,7 +35,7 @@ COMPLETE / NEEDS WORK / BLOCKED，并交接至 `/code-review`、
 - [ ] 结尾有下一步交接（引用 `/code-review`、`/balance-check`、`/team-polish`）
 - [ ] 存在 Error Recovery Protocol 小节：在把某个阶段视为完成前，确认指定产出物已落盘；
   立即上报 BLOCKED；始终产出部分报告；完整流程（surface → assess → options → partial
-  report）见 `.claude/docs/error-recovery-protocol.md`
+  report）见 `.trae/docs/error-recovery-protocol.md`
 - [ ] 在阶段转换处使用 `AskUserQuestion` 征求用户批准后再继续（`collaborative` 模式）
 - [ ] Phase 0 解析 `team.size`，且技能要求 Phase 1 之前有一行活跃集（active set）声明
 - [ ] Phase 0 解析 `workflow`，Phase 1 据此确定 GDD 体量：`full` 下为 `## Summary` 加全部
@@ -43,7 +43,7 @@ COMPLETE / NEEDS WORK / BLOCKED，并交接至 `/code-review`、
   （以游戏简报为记录）
 - [ ] Phase 3 明确标记为并行（gameplay-programmer、ai-programmer、technical-artist、sound-designer）
 - [ ] Phase 2 包含启动主要引擎专家，依据 `project.yaml` 中的 `engine.name` 推导
-  （Godot → `godot-specialist`），回退到 `.claude/docs/technical-preferences.md` 中的
+  （Godot → `godot-specialist`），回退到 `.trae/docs/technical-preferences.md` 中的
   Primary 行
 - [ ] Team Composition 列出全部七个角色（game-designer、gameplay-programmer、ai-programmer、
   technical-artist、sound-designer、引擎专家、qa-tester）
@@ -54,7 +54,7 @@ COMPLETE / NEEDS WORK / BLOCKED，并交接至 `/code-review`、
 
 除非用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有
-`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` §
+`project.local.yaml`。规则见：`studio-tests/AGENTS.md` §
 Fixture defaults。
 
 ---
@@ -202,7 +202,7 @@ Fixture defaults。
 
 **测试夹具（变体 B——未配置引擎）：**
 - 同变体 A，但 `project.yaml` 中的 `engine.name` 未设置，且
-  `.claude/docs/technical-preferences.md` 没有 Primary 引擎专家（显示
+  `.trae/docs/technical-preferences.md` 没有 Primary 引擎专家（显示
   `[TO BE CONFIGURED]`）
 
 **输入：** `/team-combat parry and riposte system`

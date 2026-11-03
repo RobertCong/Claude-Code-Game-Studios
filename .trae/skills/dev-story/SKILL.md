@@ -4,14 +4,12 @@ description: "在代码中实现单个用户故事并编写测试，遵循其 AD
 argument-hint: "[story-path]"
 user-invocable: true
 disable-model-invocation: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, Bash(bash "*/.claude/skills/dev-story/../../hooks/yaml-helper.sh" resolve_config *), Bash(bash .claude/scripts/story-facts.sh *), Bash(bash .claude/scripts/adr-status.sh *), Bash(bash .claude/scripts/md-section.sh *), Bash(bash .claude/scripts/session-state.sh *), Bash(bash .claude/scripts/review-receipts.sh hash *), Bash(godot *), Bash(mkdir -p production/qa/evidence/*)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow,qa.level,gate_level,engine_values,specialists,perf_budgets,system_overrides`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow,qa.level,gate_level,engine_values,specialists,perf_budgets,system_overrides`
 
-上述内容已解析完成——请直接使用。若没有解析块 → 使用
-`.claude/docs/config-resolution.md` 中的默认值。
+上一步命令的输出已解析完成——请直接使用。若没有解析块 → 使用
+`.trae/docs/config-resolution.md` 中的默认值。
 
 使用提问工具提问。若没有提问工具，就把选项编号列出并结束本轮
 以等待回答。被跳过或忽略的问题不算回答：请用纯文本再次询问。
@@ -25,12 +23,12 @@ model: sonnet
 **写入**（每次都在点明它的问题之后）：故事的 `Status`、`Last Updated`
 和 `## Files`，以及它在 `production/sprint-status.yaml` 中的条目。程序员 agent
 在代码根目录和测试根目录下编写代码和测试
-（`.claude/docs/code-root-resolution.md`）。会话检查点和证据
+（`.trae/docs/code-root-resolution.md`）。会话检查点和证据
 戳记无需询问即可写入。
 **下一步：** `/story-done [story-path]`；在 `standard` 和 `full` 下，先
 `/code-review [files]`。
 
-询问遵循 `.claude/docs/automation-modes.md`（协作模式总是询问，引导模式
+询问遵循 `.trae/docs/automation-modes.md`（协作模式总是询问，引导模式
 在重大选择时询问，自主模式记录并继续；`automation_always_ask`
 类别总是询问）。
 
@@ -51,11 +49,11 @@ model: sonnet
 技能名之后输入的文本就是故事路径。如果没有输入，就取
 `production/session-state/active.md` 检查点中指定的故事并确认：
 “继续处理 [title]——对吗？” 若那里没有：询问“我们要实现哪个用户故事？”
-并把 `bash .claude/scripts/story-facts.sh --all` 的 `TODO` 行
+并把 `bash .trae/scripts/story-facts.sh --all` 的 `TODO` 行
 作为选项。如果 `production/epics/` 下完全没有故事文件：以如下信息停止：
 “No stories found in `production/epics/` — run `/create-stories [epic-slug]` to make them (at `standard` and `full`, run `/create-epics` first if there is no epic yet).”
 
-`bash .claude/scripts/story-facts.sh <story-path>` 给出它的类型、层、TR-ID、
+`bash .trae/scripts/story-facts.sh <story-path>` 给出它的类型、层、TR-ID、
 ADR 和依赖。然后完整阅读该用户故事。
 
 **层级（Tier）。** 故事所属系统的 `workflow`，依据其
@@ -74,7 +72,7 @@ ADR 和依赖。然后完整阅读该用户故事。
 
 如果故事的 ADR 字段为 `N/A — [reason]`，表示它没有指定 ADR。
 
-**ADR。** `bash .claude/scripts/adr-status.sh <ADR id>` 给出其状态和
+**ADR。** `bash .trae/scripts/adr-status.sh <ADR id>` 给出其状态和
 `version`。停止消息：`Proposed` ——“ADR-NNNN is still Proposed. Accept it with
 `/architecture-decision accept ADR-NNNN` before implementing.” `Deprecated` 或
 `Superseded` ——“ADR-NNNN is [status]; point the story at [successor] (edit its ADR
@@ -98,7 +96,7 @@ story's ADR field.”
 故事的比较。若不同：阅读 `references/version-mismatch.md`。
 
 **依赖。** 对故事 Depends on 行上的每个路径，运行
-`bash .claude/scripts/story-facts.sh <path>`。如果不是 `COMPLETE`：询问“[this story]
+`bash .trae/scripts/story-facts.sh <path>`。如果不是 `COMPLETE`：询问“[this story]
 depends on [dependency], which is [status], not Complete. How do you want to go
 on?” 选项：Proceed anyway — I accept the risk / Stop — I'll finish the
 dependency first / It is done, the status was never updated — mark it Complete。
@@ -116,7 +114,7 @@ and at the end lists the files changed under its `## Files`.” 如果冲刺文�
 就把它排除在问题之外。把接下来要做的事放在
 问题之前：问题应是回复中的最后内容。若同意：
 
-- `bash .claude/scripts/md-section.sh set-field <story> Status "In Progress"`，然后
+- `bash .trae/scripts/md-section.sh set-field <story> Status "In Progress"`，然后
   `set-field <story> "Last Updated" <YYYY-MM-DD> --after Status`。在 `minimal` 下，
   故事文件是唯一的进度记录。
 - `production/sprint-status.yaml`：该故事的条目设为 `status: in-progress`，
@@ -170,7 +168,7 @@ I write [data file]?”，然后编辑它。转到 Phase 6。
     在 agent 看来是一样的。
   - `standard`：“Write the test at [path] with the code. Each acceptance criterion
     needs at least one test function.” 按引擎命名，见
-    `.claude/rules/test-standards.md`。不使用随机种子、不使用依赖时间的
+    `.trae/rules/test-standards.md`。不使用随机种子、不使用依赖时间的
     断言、不使用外部 I/O。
   - `full`：同上，并加上“every criterion must be covered: `/story-done` blocks on
     any untested one.”
@@ -205,7 +203,7 @@ the acceptance criteria and the [GDD | brief].`
 就是失败的步骤，无论报告多么流畅：恢复 agent 并点明缺失的
 文件。报告为 BLOCKED、错误或“cannot complete”：立即说明，不要
 越过它阻塞的范围继续，并给出部分报告
-（`.claude/docs/error-recovery-protocol.md`）。范围太大：用
+（`.trae/docs/error-recovery-protocol.md`）。范围太大：用
 `/create-stories` 拆分。ADR 与故事不一致：报告冲突；绝不猜测。
 
 **测试在那里吗？** 在 `qa.level: standard` 和 `full` 下，对于 Logic 或 Integration
@@ -218,7 +216,7 @@ BLOCKING 级别，标记“story unverifiable — test required before
 命令、退出码和任何错误行：
 
 - **Godot：** 先运行一次 `godot --headless --path . --import`，然后
-  `godot --headless --path . -s res://.claude/scripts/godot-parse-check.gd -- res://<each changed .gd>`。
+  `godot --headless --path . -s res://.trae/scripts/godot-parse-check.gd -- res://<each changed .gd>`。
   退出码 1 表示某个脚本未能加载；其 `PARSE FAIL:` 行会点名它。绝不使用
   `--check-only`，仅 `--import` 不是解析检查。可执行文件优先取
   `commands.test` 在其文件名标明 godot 时指定的那个（像 `bash
@@ -228,12 +226,12 @@ BLOCKING 级别，标记“story unverifiable — test required before
 - **没有引擎可执行文件：** `parse NOT VERIFIED — engine binary not available`。
   绝不通过阅读代码推断它能解析。
 
-**运行并观察**（`.claude/docs/run-and-observe.md`）。对于玩家能看到的每个故事
+**运行并观察**（`.trae/docs/run-and-observe.md`）。对于玩家能看到的每个故事
 （每个 Visual/Feel 和 UI 故事，以及任何其他有可见界面的故事）：直接启动到
 故事触及的场景，将截图直接捕获到
 `production/qa/evidence/[story-slug]/`（`[story-slug]` 是故事文件名
 去掉 `.md`；先用 `mkdir -p` 创建文件夹），用
-`bash .claude/scripts/review-receipts.sh hash <each changed file> > production/qa/evidence/[story-slug]/stamp.txt`
+`bash .trae/scripts/review-receipts.sh hash <each changed file> > production/qa/evidence/[story-slug]/stamp.txt`
 为其打戳记，然后打开图片并与验收标准比较。在 `qa.level:
 minimal` 下不豁免。只报告一行纯文本，以 `Run result:` 开头（不加粗：
 `/story-done` 按原样读取）：
@@ -249,7 +247,7 @@ Visual/Feel 验收标准中只有手感那一半（时机、重量）DEFERRED �
 
 本技能预批准 PATH 上的 `godot`。通过 `engine.path` 或
 `commands.test` 指定的可执行文件运行的引擎会先询问：用户批准一次，或
-把 `Bash(<that executable> *)` 加入 `.claude/settings.local.json`。
+把 `Bash(<that executable> *)` 加入 `.trae/settings.local.json`。
 
 ## Phase 7: 总结、文件、检查点
 
@@ -279,13 +277,13 @@ Visual/Feel，`production/qa/evidence/[story-slug]-evidence.md` 中的签核）�
 
 **`## Files`。** 按 Phase 3 询问所述，将本节正文替换为变更的代码和测试
 文件列表，每行一个：
-通过 stdin 把列表传给 `bash .claude/scripts/md-section.sh replace <story> "Files"`。
+通过 stdin 把列表传给 `bash .trae/scripts/md-section.sh replace <story> "Files"`。
 没有该节的故事：用文件编辑在其末尾添加 `## Files` 和列表，
 绝不用 shell 命令（shell 写入会跳过项目的写入检查）。如果 Phase 3 的询问
 被拒绝，跳过这一步。
 
 **检查点**，在每种结果下都执行。把该块通过管道传给
-`bash .claude/scripts/session-state.sh checkpoint`，它会替换旧的检查点：
+`bash .trae/scripts/session-state.sh checkpoint`，它会替换旧的检查点：
 
 ```
 **Updated:** [date]

@@ -3,14 +3,12 @@ name: propagate-design-change
 description: "查找因 GDD 变更而失效的架构决策（ADR），并逐一引导处理。当用户改动了 GDD 中的某个数字或规则、并询问哪些 ADR 或架构决策现在已过时，使用本技能。"
 argument-hint: "[path/to/changed-gdd.md] [--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, Bash(bash "*/.claude/skills/propagate-design-change/../../hooks/yaml-helper.sh" resolve_config *), Bash(git diff *), Bash(git log *), Bash(bash .claude/scripts/adr-status.sh*), Bash(bash .claude/scripts/md-section.sh *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,review_gate,automation,automation_always_ask,workflow,system_overrides`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,review_gate,automation,automation_always_ask,workflow,system_overrides`
 
-以上已解析 —— 直接使用；本次运行中 `--review` 会覆盖 `review_mode`。没有对应配置块 →
-使用 `.claude/docs/config-resolution.md` 中的默认值。
+以上命令的输出已解析 —— 直接使用；本次运行中 `--review` 会覆盖 `review_mode`。没有对应配置块 →
+使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 使用提问工具发问。若没有该工具，将选项编号列出，并结束本轮以等待回答。跳过或关闭的问题
 不算回答：请改用纯文本再次提问。
@@ -22,7 +20,7 @@ ADR，比对 ADR 当时的假设与 GDD 现在的表述，并逐一引导用户�
 
 **示例：** `/propagate-design-change design/gdd/combat-system.md`
 
-所有提问遵循 `.claude/docs/automation-modes.md`（collaborative 总是询问，guided 仅在重大
+所有提问遵循 `.trae/docs/automation-modes.md`（collaborative 总是询问，guided 仅在重大
 选择时询问，autonomous 记录后继续；`automation_always_ask` 类别总是询问：此处的 ADR 影响
 属于 `schema_changes` 与 `architecture_decisions`）。
 
@@ -54,7 +52,7 @@ git diff HEAD -- design/gdd/[filename].md
 
 从各个 hunk 看：`@@` 头部标出了每处变更所在的章节，因此变更章节列表直接来自 diff 本身。
 没有 hunk 的章节按构造即未变更。仅当某个 hunk 无法单独理解时（例如改动的数字，其含义依赖
-于它上方的规则）才读取周边章节，且只读该章节：`bash .claude/scripts/md-section.sh extract design/gdd/[file].md "[Section]"`。
+于它上方的规则）才读取周边章节，且只读该章节：`bash .trae/scripts/md-section.sh extract design/gdd/[file].md "[Section]"`。
 
 ## Phase 3: 变更摘要
 
@@ -80,7 +78,7 @@ Key changes affecting architecture:
 
 ## Phase 4: 范围内的 ADR
 
-`bash .claude/scripts/adr-status.sh` 会列出每个 ADR 及其状态、层与缺失章节。
+`bash .trae/scripts/adr-status.sh` 会列出每个 ADR 及其状态、层与缺失章节。
 
 - **`full`：** 每一个 ADR。
 - **`standard`：** 关键的那些（`layer` 列为 Foundation，或没有层：存疑时按关键处理）以及
@@ -94,7 +92,7 @@ Key changes affecting architecture:
 **哪些引用了本 GDD。** 无需通读整个 ADR：
 
 1. 每个 ADR 的 GDD Requirements Addressed 章节
-   （`bash .claude/scripts/md-section.sh extract <adr> "GDD Requirements Addressed"`），
+   （`bash .trae/scripts/md-section.sh extract <adr> "GDD Requirements Addressed"`），
    查找点名了被变更 GDD 的行；
 2. 在所有 ADR 中搜索被变更 GDD 的文件名，以捕获在正文中引用它、却没有表格行的 ADR。
 
@@ -168,7 +166,7 @@ ADRs referencing this GDD: [M]
 
 **技术评审。** 读取上方的 `review_gate` 行。`skill-gates=skip`（solo 或 lean）：不调用
 agent；注明 `TD-CHANGE-IMPACT skipped — [Solo | Lean] mode`。`skill-gates=run`：将评审交给
-`technical-director` agent，质量闸门为 **TD-CHANGE-IMPACT**（`.claude/docs/director-gates/td-change-impact.md`；
+`technical-director` agent，质量闸门为 **TD-CHANGE-IMPACT**（`.trae/docs/director-gates/td-change-impact.md`；
 该 agent 会自行读取该文件）。简报：
 
 - **目标：** 在用户据此行动之前，检查影响报告。
@@ -183,7 +181,7 @@ agent；注明 `TD-CHANGE-IMPACT skipped — [Solo | Lean] mode`。`skill-gates=
 - **CONCERNS：** 展示被标记的 ADR 或操作，并询问："你希望如何继续？"选项：修订影响评估 /
   带已知关注项接受 / 进一步讨论。
 - **REJECT：** 不要进入 Phase 7；先重新分析影响。
-- **NOT ASSESSED：** 这不是批准（`.claude/docs/director-gates.md`）。指出缺失了什么，然后
+- **NOT ASSESSED：** 这不是批准（`.trae/docs/director-gates.md`）。指出缺失了什么，然后
   补齐并重新运行评审；或者，当用户选择在没有它的情况下继续时，进入 Phase 7，并在报告与
   最终结论行中注明 `TD-CHANGE-IMPACT: NOT ASSESSED — [input]`。
 
@@ -201,7 +199,7 @@ agent；注明 `TD-CHANGE-IMPACT skipped — [Solo | Lean] mode`。`skill-gates=
 只替换其 `## Status` 章节的正文：
 
 ```
-bash .claude/scripts/md-section.sh replace docs/architecture/[adr-file].md "Status" <<'EOF'
+bash .trae/scripts/md-section.sh replace docs/architecture/[adr-file].md "Status" <<'EOF'
 Superseded — replacement pending (see docs/architecture/change-impact-[date]-[system-slug].md)
 EOF
 ```

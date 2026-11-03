@@ -3,11 +3,9 @@ name: quick-design
 description: "面向小改动的轻量级规格——调参调整、小型机制。直接嵌入用户故事，跳过完整 GDD。"
 argument-hint: "[brief description of the change]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Bash(bash "*/.claude/skills/quick-design/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow`
 
 
 
@@ -21,7 +19,7 @@ model: sonnet
 
 ---
 
-每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+每次 `AskUserQuestion` 调用都遵循 `.trae/docs/automation-modes.md`
 （协作模式总是询问 · 引导模式仅大项询问 · 自主模式记录后继续；
 `automation_always_ask` 类别始终提示）。
 

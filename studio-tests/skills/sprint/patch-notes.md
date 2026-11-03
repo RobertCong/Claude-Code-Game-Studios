@@ -2,7 +2,7 @@
 
 ## Skill Summary
 
-`/patch-notes` 是一个 Sonnet 档技能，它把一次发布的变更转化为面向玩家的补丁说明。在读取任何历史记录之前，它把近期提交归类为 Game 或 Framework / maintenance（Unclear 计入 Framework），只使用 Game 提交，并说明用了多少个、总共多少个。它从 `production/releases/[version]/changelog.md`、`docs/CHANGELOG.md` 中该版本的条目，以及作为回退的、自上个发布标签以来的 `git log` 收集变更数据。它检查语气指南（`.claude/docs/technical-preferences.md`、`docs/PATCH-NOTES-STYLE.md`、`design/community/tone-guide.md`）和补丁说明模板（`docs/patch-notes-template.md`、`.claude/docs/templates/patch-notes-template.md`），移除仅内部使用的变更，并把其余部分翻译成玩家语言，采用 Brief、Detailed（默认）或 Full 风格——若存在模板则改用该模板的结构，并说明用了哪个模板。不使用总监闸门。技能询问“May I write these patch notes to `docs/patch-notes/[version].md`, and an archive copy to `production/releases/[version]/patch-notes.md`?”——指名两个文件——并在批准后写入两者。结论：COMPLETE（说明已生成并保存）或 BLOCKED（没有变更日志数据且没有 git 历史，或历史中没有 Game 提交）。
+`/patch-notes` 是一个 Sonnet 档技能，它把一次发布的变更转化为面向玩家的补丁说明。在读取任何历史记录之前，它把近期提交归类为 Game 或 Framework / maintenance（Unclear 计入 Framework），只使用 Game 提交，并说明用了多少个、总共多少个。它从 `production/releases/[version]/changelog.md`、`docs/CHANGELOG.md` 中该版本的条目，以及作为回退的、自上个发布标签以来的 `git log` 收集变更数据。它检查语气指南（`.trae/docs/technical-preferences.md`、`docs/PATCH-NOTES-STYLE.md`、`design/community/tone-guide.md`）和补丁说明模板（`docs/patch-notes-template.md`、`.trae/docs/templates/patch-notes-template.md`），移除仅内部使用的变更，并把其余部分翻译成玩家语言，采用 Brief、Detailed（默认）或 Full 风格——若存在模板则改用该模板的结构，并说明用了哪个模板。不使用总监闸门。技能询问“May I write these patch notes to `docs/patch-notes/[version].md`, and an archive copy to `production/releases/[version]/patch-notes.md`?”——指名两个文件——并在批准后写入两者。结论：COMPLETE（说明已生成并保存）或 BLOCKED（没有变更日志数据且没有 git 历史，或历史中没有 Game 提交）。
 
 ---
 
@@ -10,7 +10,7 @@
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 具备 ≥2 个 phase 标题
 - [ ] 包含结论关键词：COMPLETE、BLOCKED
 - [ ] 包含 "May I write" 措辞（技能会写入补丁说明文件）
@@ -26,7 +26,7 @@
 
 ## Fixture Defaults
 
-除非该用例自己的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
+除非该用例自己的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 
@@ -94,7 +94,7 @@
 **Fixture:**
 - `docs/CHANGELOG.md` 有一个 `v0.4.0` 条目，包含面向玩家的事项；git 历史包含对应的 Game 提交
 - `design/community/tone-guide.md` 存在，含指导：“upbeat, encouraging tone; avoid passive voice”
-- `docs/PATCH-NOTES-STYLE.md` 不存在，且 `.claude/docs/technical-preferences.md` 没有语气、语态或风格字段
+- `docs/PATCH-NOTES-STYLE.md` 不存在，且 `.trae/docs/technical-preferences.md` 没有语气、语态或风格字段
 - 不存在补丁说明模板
 
 **Input:** `/patch-notes v0.4.0`
@@ -117,13 +117,13 @@
 ### Case 4: 存在补丁说明模板 —— 代替内置风格使用
 
 **Fixture:**
-- `.claude/docs/templates/patch-notes-template.md` 存在，包含一个头部块、`## New`、`## Fixed` 和 `## Known Issues` 小节，以及一个页脚
+- `.trae/docs/templates/patch-notes-template.md` 存在，包含一个头部块、`## New`、`## Fixed` 和 `## Known Issues` 小节，以及一个页脚
 - `docs/CHANGELOG.md` 有一个 `v0.4.0` 条目，包含一个新功能和一个缺陷修复，两者都面向玩家；git 历史包含对应的 Game 提交
 
 **Input:** `/patch-notes v0.4.0 --style full`
 
 **Expected behavior:**
-1. 技能对 `docs/patch-notes-template.md` 和 `.claude/docs/templates/patch-notes-template.md` 做 glob；找到并读取后者
+1. 技能对 `docs/patch-notes-template.md` 和 `.trae/docs/templates/patch-notes-template.md` 做 glob；找到并读取后者
 2. 技能把该模板用作输出结构，而非内置的 Brief / Detailed / Full 模板——即便传入了 `--style full`
 3. 新功能归入 `## New` 下，修复归入 `## Fixed` 下
 4. 模板的头部和页脚被保留
@@ -135,7 +135,7 @@
 - [ ] 模板的结构取代内置风格——尽管有 `--style full`，也不出现 Full 风格的“Developer Commentary”小节
 - [ ] 新功能置于 `## New` 下，修复置于 `## Fixed` 下
 - [ ] 输出中保留模板的头部和页脚
-- [ ] 输出注明使用了 `.claude/docs/templates/patch-notes-template.md`，且它取代了所请求的 `--style full`
+- [ ] 输出注明使用了 `.trae/docs/templates/patch-notes-template.md`，且它取代了所请求的 `--style full`
 
 ---
 
@@ -211,7 +211,7 @@
 - [ ] 用通俗语言改写条目，不含内部 ID
 - [ ] 写入补丁说明之前始终询问“May I write”
 - [ ] 不调用任何总监闸门
-- [ ] 声明 `model: sonnet`——它撰写面向玩家的文案
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 
 ---
 

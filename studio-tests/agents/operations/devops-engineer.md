@@ -1,7 +1,7 @@
 # Agent Test Spec: devops-engineer
 
 ## Agent Summary
-- **Domain**: CI/CD 流水线配置、构建脚本、版本控制工作流与分支策略（基于主干的开发，依据 `CLAUDE.md`）、发布标签方案、CI 中的自动化测试集成、产物管理、环境管理
+- **Domain**: CI/CD 流水线配置、构建脚本、版本控制工作流与分支策略（基于主干的开发，依据 `AGENTS.md`）、发布标签方案、CI 中的自动化测试集成、产物管理、环境管理
 - **Does NOT own**: 游戏代码或资源、技术栈决策与服务器基础设施变更（由 technical-director 批准）、安全审计（security-engineer）、QA 测试策略（qa-lead）、游戏网络逻辑（network-programmer）
 - **Gate IDs**: None；向 technical-director 汇报，并将构建时长与基础设施方面的顾虑上报到那里
 
@@ -11,7 +11,7 @@
 
 - [ ] `description:` 字段存在且限定于本领域（引用 CI/CD、构建、部署、版本控制）
 - [ ] `tools:` 为 `Read, Glob, Grep, Write, Edit, Bash` —— Bash 用于运行构建和流水线；游戏代码与资源由正文的「What This Agent Must NOT Do」清单排除，而非工具清单
-- [ ] 模型档位为 `sonnet` —— frontmatter `model:` 精确为 `sonnet`（档位见：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 代理定义未声称对游戏逻辑、安全审计或 QA 测试设计拥有权限
 - [ ] 其 Implementation Workflow 的问题都是流水线问题（CI 构建哪些平台、引擎版本和导出预设；构建密钥与签名密钥存放何处）—— 没有一个询问游戏代码应如何组织
 
@@ -48,11 +48,11 @@
 ### Case 4: 分支策略冲突
 **Input**: "一半团队想用 GitFlow 和长期存活的特性分支。另一半想用基于主干的开发。我们该如何搭建？"
 **Expected behavior**:
-- 推荐基于主干的开发，因为 `CLAUDE.md` 在 Version Control 下列出了它（「Git with trunk-based development」），并说明这是其遵循的模式
+- 推荐基于主干的开发，因为 `AGENTS.md` 在 Version Control 下列出了它（「Git with trunk-based development」），并说明这是其遵循的模式
 - 按其 Branching Strategy 一节的描述解释该模式：`main` 是始终可交付的主干，由 CI 在每次推送和拉取请求时构建与测试；工作在短生命周期分支上进行，在一两天内通过通过 CI 的拉取请求合并回去；未完成的工作以功能开关（feature flag）形式暗发布
 - 明确拒绝 GitFlow 的长期存活分支 —— 除 `main` 外没有长期存活的集成分支
 - 按同一节说明发布与热修复：发布是 `main` 上的一个标签；仅在需要稳定发布时才切出 `release/*` 分支（只做缺陷修复，每个修复也同时落到 `main`）；`hotfix/*` 分支从发布标签（或其 `release/*` 分支，若存在）开始，并合并回 `main`，且仅在 `release/*` 分支存在时合并到该分支
-- 不将其呈现为 50/50 的选择，也不凭自身权限采用 GitFlow —— 该模式来自 `CLAUDE.md` 的 Version Control 行，因此切换意味着修改该行
+- 不将其呈现为 50/50 的选择，也不凭自身权限采用 GitFlow —— 该模式来自 `AGENTS.md` 的 Version Control 行，因此切换意味着修改该行
 
 ### Case 5: Context pass — 平台专属构建矩阵
 **Input context**: 项目目标平台为 PC（Windows、Linux）、Nintendo Switch 和 PlayStation 5。CI 运行在 GitHub 托管的运行器上，这些运行器未安装主机导出模板或 SDK。
@@ -69,7 +69,7 @@
 
 - [ ] 保持在声明领域内（CI/CD、构建脚本、版本控制、产物、环境）
 - [ ] 拒绝游戏代码与网络请求，并指明由谁承担（`lead-programmer` / `technical-director`，或所属程序员）
-- [ ] 分支策略有争议时推荐基于主干的开发，并引用 `CLAUDE.md` 的 Version Control 行
+- [ ] 分支策略有争议时推荐基于主干的开发，并引用 `AGENTS.md` 的 Version Control 行
 - [ ] 返回结构化流水线配置（YAML、脚本），而非自由建议，并在写入前询问
 - [ ] 绝不为获得绿色构建而跳过 CI 或测试步骤，并将基础设施变更交由 technical-director 批准
 

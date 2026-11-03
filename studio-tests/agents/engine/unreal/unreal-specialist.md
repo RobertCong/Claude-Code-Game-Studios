@@ -11,7 +11,7 @@
 
 - [ ] `description:` 字段存在且限定于本领域（引用 Unreal Engine）
 - [ ] `tools:` 为 Read、Glob、Grep、Write、Edit、Bash 和 `Agent`，且其正文要求它只启动四个子专家（ue-gas、ue-blueprint、ue-replication、ue-umg），因为子代理 `tools` 中的类型列表会被忽略
-- [ ] 模型档位为 `inherit` —— frontmatter `model:` 精确为 `inherit`（档位见：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 代理定义未声称在声明领域之外拥有权限（不含美术、不含服务器基础设施）
 
 ---
@@ -78,5 +78,5 @@
 ## Coverage Notes
 - 代理行为测试没有自动运行器 —— 需手动审查或通过 `/skill-test`
 - 版本感知（Case 3、Case 5）是该代理风险最高的失败模式；引擎版本变化时应定期测试
-- Case 3 和 Case 5 只有在代理被引导到 `docs/engine-reference/unreal/` 时才会通过；`CLAUDE.md` 仅在 `/setup-engine` 选择 Unreal 后导入 Unreal 的 `VERSION.md`，因此代理自身文件必须包含该指引
+- Case 3 和 Case 5 只有在代理被引导到 `docs/engine-reference/unreal/` 时才会通过；`AGENTS.md` 仅在 `/setup-engine` 选择 Unreal 后导入 Unreal 的 `VERSION.md`，因此代理自身文件必须包含该指引
 - Case 4 与 lead-programmer 的集成是协调测试，而非技术正确性测试

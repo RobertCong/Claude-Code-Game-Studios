@@ -17,7 +17,7 @@
 - 统计 GDD 文件数：`design/gdd/*.md`（排除 game-concept.md 和 systems-index.md）
 - 统计 ADR 文件数：`docs/architecture/adr-*.md`
 - 统计用户故事文件数：`production/epics/**/*.md`（排除 EPIC.md）
-- `project.yaml`（`engine.name`）/ `.claude/docs/technical-preferences.md` — 引擎是否已配置？
+- `project.yaml`（`engine.name`）/ `.trae/docs/technical-preferences.md` — 引擎是否已配置？
 - `docs/engine-reference/` — 是否存在引擎参考文档？
 - Glob `docs/adoption-plan-*.md` — 如有任何既有计划，记下最近一份的文件名
 
@@ -42,7 +42,7 @@
 **如果他们选择“帮我找到它们”**，先搜索，再询问其他任何内容：
 
 1. 搜索他们指定的文件夹（若指定了）；否则搜索整个
-   项目，跳过 `.claude/`、`.git/`、`docs/engine-reference/`、
+   项目，跳过 `.trae/`、`.git/`、`docs/engine-reference/`、
    `studio-tests/`、`node_modules/` 以及引擎的构建和
    缓存文件夹。
 2. 在其中 Glob `**/*.md`，然后对匹配结果 Grep 各产出物

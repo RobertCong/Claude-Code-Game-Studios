@@ -79,7 +79,7 @@ timeout 1800 "<UE root>/Engine/Binaries/Linux/UnrealEditor" "$(pwd -W 2>/dev/nul
 - 任何其他非零退出（`Project file not found`、`The game module … could not be found`）→ FAIL：没有测试运行。例外：编辑器从未启动（退出 126 或 127，`command not found`）— 那是运行器不可用，见下文，为 `NOT ASSESSED`。
 
 **未知引擎 / 未配置：**
-"Engine not configured in `project.yaml` or `.claude/docs/technical-preferences.md`. Run `/setup-engine` to specify the engine, then re-run `/smoke-check`."
+"Engine not configured in `project.yaml` or `.trae/docs/technical-preferences.md`. Run `/setup-engine` to specify the engine, then re-run `/smoke-check`."
 
 **如果测试运行器在此环境中不可用**（Phase 1 第 3 步未解析出编辑器可执行文件、找不到运行器脚本等），请清楚地报告：
 

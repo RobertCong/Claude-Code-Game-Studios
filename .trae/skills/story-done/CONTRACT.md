@@ -51,7 +51,7 @@
 | `production/epics/**/*.md`（用户故事文件） | `Status: Complete`、`## Completion Notes` 块（日期、标准数量、偏差、测试证据路径、代码评审状态、Reviewed by） | 在用户明确批准后更新 |
 | `production/sprint-status.yaml` | `status: done`、`completed: [date]`、顶层 `updated` 字段 | 若文件存在，则与用户故事文件一并静默更新 |
 | `docs/tech-debt-register.md` | 建议性偏差条目（若用户确认） | 若存在建议性偏差且用户同意则追加 |
-| `production/session-state/active.md` | `<!-- CHECKPOINT -->` 块：当前任务（用户故事路径、结论、已关闭或仍开放）、下一步（下一个用户故事，或结论所指的修复）、阻塞项、技术债数量 | 由 `session-state.sh checkpoint` 在每次运行、每个结论下写入，无论是否关闭：该块被替换，绝不追加（若文件不存在则从 `.claude/docs/templates/session-state.md` 创建） |
+| `production/session-state/active.md` | `<!-- CHECKPOINT -->` 块：当前任务（用户故事路径、结论、已关闭或仍开放）、下一步（下一个用户故事，或结论所指的修复）、阻塞项、技术债数量 | 由 `session-state.sh checkpoint` 在每次运行、每个结论下写入，无论是否关闭：该块被替换，绝不追加（若文件不存在则从 `.trae/docs/templates/session-state.md` 创建） |
 
 ### 输出保证
 - `Status: Complete` 仅在用户明确批准后写入：在 COMPLETE 或 COMPLETE WITH NOTES 结论下，或 — 在 BLOCKED 或 NOT ASSESSED 结论下 — 仅当用户明确要求仍然关闭时（Phase 7 的覆盖，始终作为 `scope_changes` 决策弹出询问），并将覆盖风险记录在 `## Completion Notes` 中

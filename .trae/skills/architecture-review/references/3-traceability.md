@@ -84,7 +84,7 @@ Grep pattern="TR-" glob="production/epics/**/story-*.md" output_mode="content"
 
 ### Step 3b-2 — 加载测试文件
 
-Glob 引擎的测试根目录（`.claude/docs/directory-structure.md`）：Godot
+Glob 引擎的测试根目录（`.trae/docs/directory-structure.md`）：Godot
 `tests/unit/**/*_test.*` 与 `tests/integration/**/*_test.*`；Unity
 `Assets/Tests/**/*Tests.cs`；Unreal `Source/*/Private/Tests/**/*.cpp`。未配置引擎时，
 要说明测试索引无法构建，而不是把空的 glob 读作"没有测试"。构建索引：系统 → [测试文件路径]。

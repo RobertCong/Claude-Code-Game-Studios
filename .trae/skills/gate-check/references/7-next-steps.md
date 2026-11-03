@@ -100,8 +100,8 @@ Gate passed. What would you like to do next?
 - **测试失败？** → 委托给 `lead-programmer` 或 `qa-tester`
 - **没有试玩数据？** → `/playtest-report`
 - **试玩测试会话未超过最低要求？** → 更多会话能提供更可靠的信号。投入完整团队前推荐总计 3 次以上。用 `/playtest-report` 整理发现。
-- **没有难度曲线文档？** → 按 `.claude/docs/templates/difficulty-curve.md` 的模板手工撰写 `design/difficulty-curve.md`。（`/quick-design` 是相关的会话，但写入 `design/quick-specs/`，而不是这个路径——可以用它把曲线想清楚，再把结果复制到这里。）
-- **没有玩家旅程地图？** → 按 `.claude/docs/templates/player-journey.md` 的模板手工撰写 `design/player-journey.md`。
+- **没有难度曲线文档？** → 按 `.trae/docs/templates/difficulty-curve.md` 的模板手工撰写 `design/difficulty-curve.md`。（`/quick-design` 是相关的会话，但写入 `design/quick-specs/`，而不是这个路径——可以用它把曲线想清楚，再把结果复制到这里。）
+- **没有玩家旅程地图？** → 按 `.trae/docs/templates/player-journey.md` 的模板手工撰写 `design/player-journey.md`。
 
 > **这两者都没有负责写入的技能——不要点名任何技能。**
 > “`/ux-design` Phase 2b” 是*读取* `design/player-journey.md` 的步骤，

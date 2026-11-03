@@ -3,11 +3,9 @@ name: consistency-check
 description: "对照实体注册表扫描 GDD，查找跨文档冲突。采用 Grep 优先的方法，定位冲突的节与不同的数值。"
 argument-hint: "[full | since-last-review | entity:<name> | item:<name>]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Bash(bash "*/.claude/skills/consistency-check/../../hooks/yaml-helper.sh" resolve_config *), Bash(git log *), Bash(bash .claude/scripts/registry.sh validate*)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow,system_overrides`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow,system_overrides`
 
 
 
@@ -31,11 +29,11 @@ model: sonnet
 
 ---
 
-每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+每次 `AskUserQuestion` 调用都遵循 `.trae/docs/automation-modes.md`
 （collaborative 总是询问 · guided 仅重大事项询问 · autonomous 记录后继续；
 `automation_always_ask` 类别始终提示）。
 
-**`workflow`**（见 `.claude/docs/workflow-modes.md`），按每份 GDD 的
+**`workflow`**（见 `.trae/docs/workflow-modes.md`），按每份 GDD 的
 **生效**层级应用 —— 当该块列出对应行时，使用该 GDD 所属系统的 `system_overrides` 行
 （以其文件名主干为准），否则使用项目值：
 - `full` —— 对所有 GDD 节进行完整的实体注册表交叉检查。
@@ -293,7 +291,7 @@ Verdict: PASS | CONFLICTS FOUND | NOT ASSESSED
 
 **绝不删除注册表条目。** 如果某个条目从所有 GDD 中移除，设置 `status: deprecated`。
 
-写入之后，运行 `bash .claude/scripts/registry.sh validate`，并在给出结论前
+写入之后，运行 `bash .trae/scripts/registry.sh validate`，并在给出结论前
 修复其中关于本次写入新增或更改条目的每一行（DUPLICATE、STATUS 或 LAYOUT 行，
 或针对其所指名路径的 PATH_MISSING 行）；关于其他条目的行
 向用户说明，而不是未经询问就修复。如果脚本

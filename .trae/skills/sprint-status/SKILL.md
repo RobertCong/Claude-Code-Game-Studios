@@ -3,11 +3,9 @@ name: sprint-status
 description: "快速、简洁的冲刺快照——燃尽情况与新兴风险，用于态势感知。回答'冲刺进展如何？'"
 argument-hint: "[sprint-number or blank for current]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Bash(bash "*/.claude/skills/sprint-status/../../hooks/yaml-helper.sh" resolve_config *), Bash(bash "*/.claude/skills/sprint-status/../../scripts/story-status.sh"), Bash(bash .claude/scripts/story-status.sh*)
-model: haiku
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys story_granularity,workflow`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys story_granularity,workflow`
 
 
 
@@ -34,10 +32,10 @@ model: haiku
 - 若 `production/sprints/` 不存在或为空：
   - **在 `workflow: minimal` 下按设计没有冲刺**——简报的
     构建顺序就是计划，用户故事文件承载它。改为报告该构建顺序的进度，然后停止：
-    1. 下方列表由 `.claude/scripts/story-status.sh` 在你读取本技能之前打印：每个未完成用户故事一行，已按路线的顺序排列（先是 `IN_REVIEW`，再是 `IN_PROGRESS`，然后是 `TODO`——即 `Ready` 或 `Not Started` 的用户故事——按构建顺序），随后是 `BLOCKED`、`OTHER`、
+    1. 下方列表由 `.trae/scripts/story-status.sh` 在你读取本技能之前打印：每个未完成用户故事一行，已按路线的顺序排列（先是 `IN_REVIEW`，再是 `IN_PROGRESS`，然后是 `TODO`——即 `Ready` 或 `Not Started` 的用户故事——按构建顺序），随后是 `BLOCKED`、`OTHER`、
        `NO_STATUS` 以及 `COMPLETE` 计数：
 
-!`bash "${CLAUDE_SKILL_DIR}/../../scripts/story-status.sh"`
+       **运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../scripts/story-status.sh"`
 
     2. 在 15 行以内打印：`Build order: [N] of [M] stories complete`，取自 `COMPLETE` 行（只计 `Complete` 与 `Done` 的用户故事——`In Review` 不算完成），然后输出 **Next**：第一个 `IN_REVIEW`、`IN_PROGRESS` 或 `TODO` 行上的用户故事。列表已是
        最新的；不要再次运行脚本，也不要重新排序用户故事文件——`In Review` 的用户故事要先关闭，之后 `In Progress` 的那个才继续：它的工作已经写好了。推荐

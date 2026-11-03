@@ -14,7 +14,7 @@
 - 引擎专家路由
 - 协作步骤
 
-更新 CLAUDE.md 之后，创建或更新 `.claude/docs/technical-preferences.md`，
+更新 AGENTS.md 之后，创建或更新 `.trae/docs/technical-preferences.md`，
 填入符合引擎的默认值。先读取现有模板，然后填写：
 
 ### 引擎与语言章节
@@ -97,7 +97,7 @@
   Unity 用 NUnit，Unreal 用 Automation Spec — 并在添加前询问。
   > **必须与第 5.5.1 节中的 `commands.test` 一致，后者写入 gdUnit4 自己的
   > 运行器（`res://addons/gdUnit4/bin/GdUnitCmdTool.gd`），也必须与
-  > `.claude/docs/coding-standards.md` 一致，其中引用了同一个运行器。** 如果在这里写 GUT，
+  > `.trae/docs/coding-standards.md` 一致，其中引用了同一个运行器。** 如果在这里写 GUT，
   > 就会导致该技能在同一次运行中推荐一个框架，却配置了另一个。
 - **Forbidden Patterns**（禁止模式）：保留占位符 — 不要预先填充。
 - **Allowed Libraries**（允许的库）：保留占位符 — 不要预先填充项目当前不需要的依赖。只有当某个库正在被实际集成时才添加到此处，而不是推测性地添加。
@@ -157,7 +157,7 @@
 
 ### 协作步骤
 向用户展示已填写的偏好。对于 Godot，说明所选语言，并指出完整命名约定和路由表的所在位置：
-> "以下是 [engine]（Godot 时为 [language]）的默认技术偏好。命名约定和专家路由位于本技能的 references 目录中 — 我将应用 [GDScript/C#/Both] 变体。想要自定义其中任何一项，还是可以保存到 `.claude/docs/technical-preferences.md`？"
+> "以下是 [engine]（Godot 时为 [language]）的默认技术偏好。命名约定和专家路由位于本技能的 references 目录中 — 我将应用 [GDScript/C#/Both] 变体。想要自定义其中任何一项，还是可以保存到 `.trae/docs/technical-preferences.md`？"
 
 对于所有其他引擎，直接展示默认值，不引用附录。
 

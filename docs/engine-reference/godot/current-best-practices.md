@@ -206,7 +206,7 @@ found`，以及首次导入之前为 1。
 - `--check-only` 配合 `-s <file>` 对引用了自动加载（autoload）的有效代码会以 1 退出
   （`Identifier not found`），而 `--import` / `--quit-after` 在解析错误时以 0 退出
   ——两者都不是解析检查。框架的解析检查是
-  `godot --headless --path . -s res://.claude/scripts/godot-parse-check.gd -- res://<file>.gd …`
+  `godot --headless --path . -s res://.trae/scripts/godot-parse-check.gd -- res://<file>.gd …`
   （脚本无法加载时退出 1）。
 - 在 Windows 上，编辑器带引号的完整路径（`"C:/Program Files/Godot/…exe"`）
   可从 Git Bash 运行，且 stdout 和退出码保持不变。

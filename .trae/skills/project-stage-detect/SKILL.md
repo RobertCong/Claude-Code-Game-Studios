@@ -3,8 +3,6 @@ name: project-stage-detect
 description: "分析项目状态、检测阶段、识别缺口并推荐后续步骤。回答'我们开发到哪一步了？'"
 argument-hint: "[optional: role filter like 'programmer' or 'designer']"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Bash(bash "*/.claude/skills/project-stage-detect/../../hooks/yaml-helper.sh" resolve_config *), Bash(bash .claude/scripts/artifact-check.sh), Bash(bash ".claude/scripts/artifact-check.sh"), Bash(bash ./.claude/scripts/artifact-check.sh), Bash(bash .claude/scripts/artifact-check.sh *), Bash(bash ".claude/scripts/artifact-check.sh" *), Bash(bash ./.claude/scripts/artifact-check.sh *)
-model: haiku
 # Read-only diagnostic skill — no specialist agent delegation needed
 ---
 
@@ -20,30 +18,30 @@ model: haiku
 
 ## 工作流（Workflow）
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys workflow,automation`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys workflow,automation`
 
 **自动化模式**：解析 `modes.automation`（`project.local.yaml` →
 `project.yaml` → 默认 `collaborative`）。每次 `AskUserQuestion` 调用与
-每次文件写入都遵循 `.claude/docs/automation-modes.md`
+每次文件写入都遵循 `.trae/docs/automation-modes.md`
 （协作模式总是询问 · 引导模式仅大项询问 · 自主模式记录后继续；
 `automation_always_ask` 类别始终提示）。
 
-已在上方解析——直接使用。若无输出块 → 使用
-`.claude/docs/config-resolution.md` 中的默认值。
+已在上一步解析——直接使用。若无输出块 → 使用
+`.trae/docs/config-resolution.md` 中的默认值。
 
 > **解析层级——不要假设它。** 层级决定了什么才算缺口：
 > 在 `full` 下每份缺失文档都算；在 `minimal` 下都不算，
 > 因为"一份简报加一个引擎"就是正常状态，代码才是预期的下一步。猜高了会告诉一个 Game Jam 项目它缺少 GDD、美术圣经
 > 和 ADR——这正是 `modes.rigor` 存在要防止的"流程与我的项目不匹配"体验。
 
-**`workflow`**（按 `.claude/docs/workflow-modes.md`）。层级决定哪些缺失文档算作缺口（step 3）——低于 `full` 时，可选文档不被标记。
+**`workflow`**（按 `.trae/docs/workflow-modes.md`）。层级决定哪些缺失文档算作缺口（step 3）——低于 `full` 时，可选文档不被标记。
 
 ### 1. 扫描关键目录
 
 **先做确定性的一遍——一次调用即可回答所有已编目产出物"存在什么"：**
 
 ```
-Bash: bash .claude/scripts/artifact-check.sh
+Bash: bash .trae/scripts/artifact-check.sh
 ```
 
 严格按所写运行——从项目根目录、相对路径、无参数、无 `cd`、无 `2>&1`。本技能的权限授予匹配该形式；其他形式会要求用户批准。
@@ -64,7 +62,7 @@ Bash: bash .claude/scripts/artifact-check.sh
 - 统计 `design/narrative/` 中的叙事文档数
 - 统计 `design/levels/` 中的关卡设计数
 
-**源代码**（代码根——Godot 为 `src/`，Unity 为 `Assets/`，Unreal 为 `Source/`；按 `.claude/docs/code-root-resolution.md` 解析）：
+**源代码**（代码根——Godot 为 `src/`，Unity 为 `Assets/`，Unreal 为 `Source/`；按 `.trae/docs/code-root-resolution.md` 解析）：
 - 统计源文件（与语言无关）
 - 识别主要系统（含 5 个以上文件的目录）
 - 检查 core/、gameplay/、ai/、networking/、ui/ 目录
@@ -139,7 +137,7 @@ Bash: bash .claude/scripts/artifact-check.sh
 
 ### 4. 生成阶段报告
 
-使用模板：`.claude/docs/templates/project-stage-report.md`
+使用模板：`.trae/docs/templates/project-stage-report.md`
 
 **报告结构**：
 ```markdown

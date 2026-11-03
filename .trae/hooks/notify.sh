@@ -11,26 +11,26 @@
 # project, not this one. Resolving to the script's own location first would
 # override them. So, in order:
 #   1. cwd holds project.yaml   -> cwd   (a project root)
-#   2. cwd holds .claude/       -> cwd   (a project root not yet configured),
-#      unless cwd is itself named .claude: a stray .claude/.claude/ would
-#      make .claude/ a root, and the hooks would write .claude/production/
-#   3. CLAUDE_PROJECT_DIR       -> that  (populated in the hook environment),
-#      unless it names a .claude folder, for the same reason as rule 2
-#   4. this script's location   -> <root>/.claude/hooks/../.. by construction
+#   2. cwd holds .trae/       -> cwd   (a project root not yet configured),
+#      unless cwd is itself named .trae: a stray .trae/.trae/ would
+#      make .trae/ a root, and the hooks would write .trae/production/
+#   3. TRAE_PROJECT_DIR       -> that  (populated in the hook environment),
+#      unless it names a .trae folder, for the same reason as rule 2
+#   4. this script's location   -> <root>/.trae/hooks/../.. by construction
 # Rule 4 always works and needs no environment at all; rules 1-2 stop it from
 # overriding a caller that legitimately means somewhere else.
 #
 # NOT an upward search: that resolves a nested project to its parent's config.
-if [ -f "project.yaml" ] || { [ -d ".claude" ] && [ "${PWD##*/}" != ".claude" ]; }; then
+if [ -f "project.yaml" ] || { [ -d ".trae" ] && [ "${PWD##*/}" != ".trae" ]; }; then
   CCGS_ROOT="$PWD"
-elif [ -n "${CLAUDE_PROJECT_DIR:-}" ] && [ -d "${CLAUDE_PROJECT_DIR}" ] && case "${CLAUDE_PROJECT_DIR%/}" in */.claude|*\\.claude) false ;; *) true ;; esac; then
-  CCGS_ROOT="$CLAUDE_PROJECT_DIR"
+elif [ -n "${TRAE_PROJECT_DIR:-}" ] && [ -d "${TRAE_PROJECT_DIR}" ] && case "${TRAE_PROJECT_DIR%/}" in */.trae|*\\.trae) false ;; *) true ;; esac; then
+  CCGS_ROOT="$TRAE_PROJECT_DIR"
 else
   CCGS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." 2>/dev/null && pwd)"
 fi
 [ -n "$CCGS_ROOT" ] && cd "$CCGS_ROOT" 2>/dev/null || true
 
-# Notification hook — fires when Claude Code sends a notification
+# Notification hook — fires when Trae sends a notification
 # Shows a Windows toast via PowerShell
 
 # Read notification JSON from stdin
@@ -49,7 +49,7 @@ if [ -z "${MESSAGE:-}" ]; then
             | head -1 | sed 's/"message"[[:space:]]*:[[:space:]]*"//;s/"$//')
 fi
 if [ -z "$MESSAGE" ]; then
-  MESSAGE="Claude Code needs your attention"
+  MESSAGE="Trae needs your attention"
 fi
 
 # TRUNCATE FIRST, then escape. Escaping doubles each `'` into `''`, so cutting
@@ -64,7 +64,7 @@ powershell.exe -NonInteractive -WindowStyle Hidden -Command "
   Add-Type -AssemblyName System.Windows.Forms
   \$notify = New-Object System.Windows.Forms.NotifyIcon
   \$notify.Icon = [System.Drawing.SystemIcons]::Information
-  \$notify.BalloonTipTitle = 'Claude Code'
+  \$notify.BalloonTipTitle = 'Trae'
   \$notify.BalloonTipText = '$MESSAGE_SAFE'
   \$notify.Visible = \$true
   \$notify.ShowBalloonTip(5000)

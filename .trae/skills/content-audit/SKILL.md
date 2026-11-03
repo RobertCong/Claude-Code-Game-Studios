@@ -3,19 +3,17 @@ name: content-audit
 description: "对照实际实现审计 GDD 的内容数量 —— 计划 vs 已构建。"
 argument-hint: "[system-name | --summary | (no arg = full audit)]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Bash(bash "*/.claude/skills/content-audit/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys workflow,automation`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys workflow,automation`
 
 **自动化模式**：解析 `modes.automation`（`project.local.yaml` →
 `project.yaml` → 默认 `collaborative`）。每次 `AskUserQuestion` 调用和
-每次文件写入都遵循 `.claude/docs/automation-modes.md`
+每次文件写入都遵循 `.trae/docs/automation-modes.md`
 （collaborative 总是询问 · guided 仅重大事项询问 · autonomous 记录后继续；
 `automation_always_ask` 类别始终提示）。
 
-已在上方解析 —— 直接使用。无解析块 → 使用 `.claude/docs/config-resolution.md` 中的默认值。
+已在上一步解析 —— 直接使用。无解析块 → 使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 # 内容审计
 
@@ -36,7 +34,7 @@ model: sonnet
 
 ---
 
-**`workflow`**（见 `.claude/docs/workflow-modes.md`）：
+**`workflow`**（见 `.trae/docs/workflow-modes.md`）：
 - `full` —— 对照所有 GDD 规格的完整内容数量审计。
 - `standard` —— 仅审计必需节中的规格；将那些节之外发现的任何数量
   列为在该层级未审计。
@@ -130,7 +128,7 @@ model: sonnet
    整文件 Read 会被拒绝。
 
 5. **对每份 GDD，提取明确的内容数量或列表**，并注明每个条目所在的 `##` 节 —— 在 `standard` 下，
-   必需节（`.claude/docs/workflow-modes.md`）之外的数量会进入
+   必需节（`.trae/docs/workflow-modes.md`）之外的数量会进入
    "Not audited at this tier" 列表，绝不进入清单。查找类似
    以下模式：
    - "N enemies" / "enemy types:" / 具名敌人列表
@@ -163,7 +161,7 @@ model: sonnet
 Unreal 项目上找到零个关卡并报告为 NOT STARTED。
 
 **在 Unity 上，内容位于 `Assets/` 下**（精确比较大小写 ——
-`.claude/docs/code-root-resolution.md`），很少放在 `data/` 文件夹中。因此在
+`.trae/docs/code-root-resolution.md`），很少放在 `data/` 文件夹中。因此在
 Unity 上，下面每个 `assets/…` glob 还会在 `Assets/` 下运行，无需
 `data/` 段 —— 对于物品，`Assets/**/items/**`、`Assets/**/Items/**` 和
 `Assets/**/*Item*.asset` —— 且数据文件包括 `.asset`（ScriptableObject）
@@ -173,7 +171,7 @@ Unity 上，下面每个 `assets/…` glob 还会在 `Assets/` 下运行，无�
 **关卡 / 区域 / 地图：**
 - Glob `assets/**/*.tscn`、`assets/**/*.unity`、`assets/**/*.umap`
 - 在**代码根目录**中 Glob 场景文件：`*.tscn`（Godot）、`*.unity`（Unity）；在 Unreal 上，
-  改用 `Content/**/*.umap`（见上文）。按 `.claude/docs/code-root-resolution.md` 解析该根目录。**如果代码根目录无法解析，报告 `NOT ASSESSED — code root unresolved`，而不是零命中。**
+  改用 `Content/**/*.umap`（见上文）。按 `.trae/docs/code-root-resolution.md` 解析该根目录。**如果代码根目录无法解析，报告 `NOT ASSESSED — code root unresolved`，而不是零命中。**
 - 在名为 `levels/`、`areas/`、`maps/`、
   `worlds/`、`stages/` 的子目录中查找场景文件
 - 统计看起来是关卡/场景定义（而非 UI 场景）的唯一文件

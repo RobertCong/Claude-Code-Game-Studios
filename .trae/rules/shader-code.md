@@ -1,10 +1,6 @@
 ---
-paths:
-  - "assets/shaders/**"
-  - "**/*.gdshader"
-  - "Assets/**/*.{shader,hlsl,cginc,compute,shadergraph}"
-  - "Shaders/**"
-  - "**/*.{usf,ush}"
+alwaysApply: false
+globs: assets/shaders/**,**/*.gdshader,Assets/**/*.shader,Assets/**/*.hlsl,Assets/**/*.cginc,Assets/**/*.compute,Assets/**/*.shadergraph,Shaders/**,**/*.usf,**/*.ush
 ---
 
 # 着色器代码标准

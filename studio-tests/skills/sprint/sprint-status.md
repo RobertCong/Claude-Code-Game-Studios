@@ -10,7 +10,7 @@
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 具备 ≥2 个 phase 标题或编号检查小节
 - [ ] 包含燃尽结论关键词：On Track、At Risk、Behind
 - [ ] 不要求 "May I write" 措辞（只读技能）
@@ -26,7 +26,7 @@
 
 ## Fixture Defaults
 
-除非该用例自己的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
+除非该用例自己的 Fixture 另有说明，每个用例的 `project.yaml` 都设置 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有 `project.local.yaml`。规则见：`studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 
@@ -217,7 +217,7 @@
 - [ ] 在燃尽结论之前展示用户故事状态表
 - [ ] 不请求批准
 - [ ] 以最多一条推荐的下一步结束
-- [ ] 声明 `model: haiku`（当使用已声明的档位时：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 
 ---
 

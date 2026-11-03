@@ -15,7 +15,7 @@ NOT ASSESSED / CONCERNS / FAIL 结论，并且仅在用户批准后才写入
 每个阶段都是一个 `references/N-*.md` 文件，技能在执行该阶段之前读取它，并在
 该阶段期间会话被压缩时再读一次。参数选择聚焦点：`full`（默认）、`consistency`、
 `design-theory`，或 `since-last-review`（其范围取自
-`.claude/scripts/review-scope.sh`）。
+`.trae/scripts/review-scope.sh`）。
 
 它在各 GDD 分别获批之后、架构工作之前被调用。它不启动任何总监闸门代理。
 在 `workflow: minimal` 下它不适用（没有 GDD），因此下面每个 fixture 都设置
@@ -27,10 +27,10 @@ NOT ASSESSED / CONCERNS / FAIL 结论，并且仅在用户批准后才写入
 
 由 `/skill-test spec` 对照 SKILL.md 检查 —— 无需 fixture。
 
-- [ ] 具备必需的前置字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 具备 ≥5 个阶段标题（复杂多阶段技能）
 - [ ] 包含结论关键词：PASS、NOT ASSESSED、CONCERNS、FAIL
-- [ ] `allowed-tools` 包含 Write，因此存在 "May I write" 措辞（Phase 6 报告写入）
+- [ ] 技能正文承诺写入，因此存在 "May I write" 措辞（Phase 6 报告写入）
 - [ ] 结尾有下一步交接
 - [ ] 记录了 Phase 2（一致性）与 Phase 3（设计理论）的并行启动
 
@@ -47,7 +47,7 @@ NOT ASSESSED / CONCERNS / FAIL 结论，并且仅在用户批准后才写入
 
 除非用例自身的 Fixture 另有说明，每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 和 `modes.automation: collaborative`，且没有
-`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
+`project.local.yaml`。规则见：`studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 
@@ -269,14 +269,14 @@ system-b 的条目。永远不会有任何东西定义它。
 - 自该报告提交以来只有 `combat.md` 被修改；其 `## Dependencies` 小节点名
   `inventory.md`
 - `crafting.md` 和 `status-effects.md` 未变，且没有变更的 GDD 点名它们
-- `.claude/scripts/review-scope.sh` 打印
+- `.trae/scripts/review-scope.sh` 打印
   `PRIOR_REVIEW: design/gdd/gdd-cross-review-2025-01-15.md`、带
   `design/gdd/combat.md` 的 `CHANGED:`，以及一行 `DEPS`：`combat.md -> inventory.md`
 
 **输入：** `/review-all-gdds since-last-review`
 
 **预期行为：**
-1. 在清单之后，运行执行 `bash .claude/scripts/review-scope.sh`，而不是自行从
+1. 在清单之后，运行执行 `bash .trae/scripts/review-scope.sh`，而不是自行从
    `git log` 或 `git diff` 推算变更集
 2. 范围是 `CHANGED` 集合加 `DEPS` 行列出的 GDD：`combat.md` 和 `inventory.md`；
    运行在任何完整读取之前向用户展示范围内的 GDD
@@ -286,7 +286,7 @@ system-b 的条目。永远不会有任何东西定义它。
 5. Phase 2 和 Phase 3 照常对这两份范围内的 GDD 运行
 
 **断言：**
-- [ ] 执行 `bash .claude/scripts/review-scope.sh`，且其 `CHANGED` 和 `DEPS` 列表按打印内容作为范围使用
+- [ ] 执行 `bash .trae/scripts/review-scope.sh`，且其 `CHANGED` 和 `DEPS` 列表按打印内容作为范围使用
 - [ ] 运行不通过自己的 git 历史搜索推导变更集
 - [ ] `inventory.md` 在范围内，尽管它没有变更，因为 `combat.md` 声明它为自己的依赖
 - [ ] 未变更、未被声明的 GDD 不被加载，也不计为已评审：报告写 `GDDs reviewed: 2 of 4 present`

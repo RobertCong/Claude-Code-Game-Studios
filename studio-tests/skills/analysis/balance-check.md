@@ -26,7 +26,7 @@ CRITICAL ISSUES、CONCERNS、NOT ASSESSED、HEALTHY。
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 有 ≥2 个 phase 标题
 - [ ] 包含结论关键词：HEALTHY、CONCERNS、CRITICAL ISSUES、NOT ASSESSED
 - [ ] 有先询问后写入的措辞：保存是一个 `AskUserQuestion` 选项，并指明其目标路径，且只有选择该选项时才发生 Write
@@ -44,7 +44,7 @@ CRITICAL ISSUES、CONCERNS、NOT ASSESSED、HEALTHY。
 
 除非某个用例自己的 Fixture 另有说明，否则每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。
-规则见：`studio-tests/CLAUDE.md` §
+规则见：`studio-tests/AGENTS.md` §
 Fixture defaults。
 
 ---

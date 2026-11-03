@@ -3,11 +3,9 @@ name: asset-spec
 description: "基于 GDD 和角色档案生成逐资源的视觉规格以及 AI 生成提示词。请在美术圣经之后进行。"
 argument-hint: "[system:<name> | level:<name> | character:<name>] [--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, Bash(bash "*/.claude/skills/asset-spec/../../hooks/yaml-helper.sh" resolve_config *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,automation`
 
 # Asset Spec（资源规格）
 
@@ -22,7 +20,7 @@ model: sonnet
 
 ---
 
-每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`（collaborative 总是询问 · guided 仅询问重大决策 · autonomous 记录并继续；`automation_always_ask` 类别始终提示）。**注意**：实际调用外部图像生成器（调用图像 API）无论 `modes.automation` 如何都会提示——这是不可逆的外部操作，会被无条件拦截，与 `external_calls` 是否列在 `automation_always_ask` 中无关。（目前此技能只输出生成提示词的*文本*；若将来接入实时生成，该防护仍然适用。）
+每次 `AskUserQuestion` 调用都遵循 `.trae/docs/automation-modes.md`（collaborative 总是询问 · guided 仅询问重大决策 · autonomous 记录并继续；`automation_always_ask` 类别始终提示）。**注意**：实际调用外部图像生成器（调用图像 API）无论 `modes.automation` 如何都会提示——这是不可逆的外部操作，会被无条件拦截，与 `external_calls` 是否列在 `automation_always_ask` 中无关。（目前此技能只输出生成提示词的*文本*；若将来接入实时生成，该防护仍然适用。）
 
 ## Phase 0b: 实体与界面清单（在无参数且无现有清单时运行）
 
@@ -140,7 +138,7 @@ Other
   写入的规格遵循相同的锚点：其头部使用 `> **Art direction**: design/game-brief.md (Art & audio direction) — no art bible` 代替 `> **Art Bible**:` 行，每个资源使用 `**Brief anchor:** [the brief line applied]` 代替 **Art Bible Anchors** 块，且任何规格都不引用 Art Bible 章节或 §8 层级。
   提取：视觉识别陈述、色彩系统（语义颜色）、形状语言、资源标准（美术圣经第 8 节——尺寸、格式、多边形预算、纹理分辨率层级）。
 
-- **项目配置**：从 `project.yaml` 读取 `performance.*` 和 `naming.*`；对于任何缺失或为空的键（包括 `project.yaml` 没有 `performance` 或 `naming` 块的情况），回退到 `.claude/docs/technical-preferences.md`。提取性能预算和命名规范。
+- **项目配置**：从 `project.yaml` 读取 `performance.*` 和 `naming.*`；对于任何缺失或为空的键（包括 `project.yaml` 没有 `performance` 或 `naming` 块的情况），回退到 `.trae/docs/technical-preferences.md`。提取性能预算和命名规范。
 
 ### 源文档读取（按目标类型）：
 - **system**：读取 `design/gdd/[target-name].md`。提取 **Visual/Audio Requirements** 章节。如果该章节不存在或写着 `[To be designed]`：
@@ -360,7 +358,7 @@ Grep pattern="ASSET-" path="design/assets/asset-manifest.md"
 
 ## 协作协议
 
-**适用于 `collaborative` 模式（默认）。** 对于 `guided` 和 `autonomous` 模式，请参阅 `.claude/docs/automation-modes.md`——下文规则描述的是 collaborative 模式的要求，而非通用行为。
+**适用于 `collaborative` 模式（默认）。** 对于 `guided` 和 `autonomous` 模式，请参阅 `.trae/docs/automation-modes.md`——下文规则描述的是 collaborative 模式的要求，而非通用行为。
 
 每个阶段都遵循：**识别 → 确认 → 生成 → 评审 → 批准 → 写入**
 

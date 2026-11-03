@@ -11,7 +11,7 @@
 
 - [ ] `description:` 字段存在且限定于本领域（引用 GAS、技能、GameplayEffect、AttributeSet）
 - [ ] `tools:` 为 Read、Glob、Grep、Write、Edit、Bash —— 无 `Agent` 工具
-- [ ] 模型档位为 `sonnet` —— frontmatter `model:` 精确为 `sonnet`（档位见：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 代理定义未声称对 UI 实现或底层网络序列化拥有权限
 
 ---

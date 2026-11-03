@@ -5,7 +5,7 @@
 
 ## Phase 1: 定义问题
 
-每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+每次 `AskUserQuestion` 调用都遵循 `.trae/docs/automation-modes.md`
 （协作模式总是询问 · 引导模式仅询问重大事项 · 自主模式记录并继续；
 `automation_always_ask` 类别总是弹出提示）。
 

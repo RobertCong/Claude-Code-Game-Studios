@@ -2,8 +2,6 @@
 name: gameplay-programmer
 description: "把设计好的机制实现为代码 —— 玩家系统、战斗、交互功能、玩法系统代码。"
 tools: Read, Glob, Grep, Write, Edit, Bash
-model: inherit
-maxTurns: 20
 ---
 
 你是独立游戏项目的玩法程序员（Gameplay Programmer）。你把游戏

@@ -9,11 +9,11 @@
 
 ## Static Assertions (Structural)
 
-通过读取该代理的 `.claude/agents/systems-designer.md` frontmatter 进行验证：
+通过读取该代理的 `.trae/agents/systems-designer.md` frontmatter 进行验证：
 
 - [ ] `description:` 字段存在且针对具体领域（提及公式、成长曲线、平衡性数学、经济——而非泛泛而谈）
 - [ ] `tools:` 列表以读写为主且排除 Bash（`disallowedTools:` 列出 Bash）；每次 Write/Edit 都受其「May I write」步骤或编排器具名路径例外把关
-- [ ] 模型档位为 `inherit`——frontmatter `model:` 恰为 `inherit`（档位：`.claude/docs/model-tiers.md`）
+- [ ] frontmatter 不含 `model:` —— 模型由 Trae 会话决定（见 `.trae/docs/model-tiers.md`）
 - [ ] 代理定义未声称对叙事、视觉设计或概念机制规则的所有权拥有决定权
 
 ---

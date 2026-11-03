@@ -22,7 +22,7 @@
 Formulas），仅此而已：它不是因为某个章节看起来可选就删掉它的许可，而 §4 也无法填写
 §3 从未创建的章节。
 
-使用 `.claude/docs/templates/game-design-document.md` 中的模板结构：
+使用 `.trae/docs/templates/game-design-document.md` 中的模板结构：
 
 ```markdown
 # [System Name]

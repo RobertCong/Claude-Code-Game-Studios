@@ -75,11 +75,11 @@ derived from the game concept, GDDs, and technical preferences]
 - `lean` → 两者都跳过（二者都不是 PHASE-GATE）。注明："TD-ARCHITECTURE and LP-FEASIBILITY skipped — Lean mode." 转到第 4 步，将两者记录为跳过，然后进入 Phase 8。
 - `full` → 并行生成两者。
 
-**第 1 步 —— 使用质量闸门 TD-ARCHITECTURE（`.claude/docs/director-gates/td-architecture.md`）通过 `Agent` 生成 `technical-director`：**
+**第 1 步 —— 使用质量闸门 TD-ARCHITECTURE（`.trae/docs/director-gates/td-architecture.md`）通过 `Agent` 生成 `technical-director`：**
 
 传入：架构文档路径（`docs/architecture/architecture.md`）、技术需求基线（TR-ID 与数量）、带状态的 ADR 列表，以及 Phase 0d 的引擎知识缺口清单。在等待任一结果之前，先发出此调用和第 2 步的调用。
 
-**第 2 步 —— 使用质量闸门 LP-FEASIBILITY（`.claude/docs/director-gates/lp-feasibility.md`）通过 `Agent` 生成 `lead-programmer`：**
+**第 2 步 —— 使用质量闸门 LP-FEASIBILITY（`.trae/docs/director-gates/lp-feasibility.md`）通过 `Agent` 生成 `lead-programmer`：**
 
 传入：架构文档路径、技术需求基线摘要、ADR 列表。
 

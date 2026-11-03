@@ -8,13 +8,13 @@
 
 **本文件内容：**
 
-- A1. CLAUDE.md 技术栈模板
+- A1. AGENTS.md 技术栈模板
 - A2. 命名约定
 - A3. 引擎专家路由
 
 ---
 
-### A1. CLAUDE.md 技术栈模板
+### A1. AGENTS.md 技术栈模板
 
 **GDScript：**
 ```markdown

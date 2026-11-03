@@ -23,7 +23,7 @@ SUGGESTIONS、APPROVED。它仅从 Bash 授予 `git log`。Phase 9
 
 由 `/skill-test spec` 对照 SKILL.md 检查——无需 fixture。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] 有 ≥2 个 phase 标题
 - [ ] 包含结论关键词：APPROVED、APPROVED WITH SUGGESTIONS、CHANGES REQUIRED、NOT ASSESSED
 - [ ] 不要求 "May I write" 措辞（只读；声明不写入任何文件）
@@ -42,7 +42,7 @@ SUGGESTIONS、APPROVED。它仅从 Bash 授予 `git log`。Phase 9
 
 除非某个用例自己的 Fixture 另有说明，否则每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有 `project.local.yaml`。
-规则见：`studio-tests/CLAUDE.md` §
+规则见：`studio-tests/AGENTS.md` §
 Fixture defaults。
 
 ---
@@ -170,7 +170,7 @@ Fixture defaults。
 ### Case 5: No Engine Configured — 被跳过的专家会说明自身；无闸门
 
 **Fixture:**
-- `project.yaml` 有 `modes.review_mode: full` 且没有 `engine.name`；`.claude/docs/technical-preferences.md` 显示 `[TO BE CONFIGURED]`
+- `project.yaml` 有 `modes.review_mode: full` 且没有 `engine.name`；`.trae/docs/technical-preferences.md` 显示 `[TO BE CONFIGURED]`
 - `src/gameplay/loot_system.gd` 在第 31 行硬编码掉落率 `0.05`；其他一切均满足标准
 
 **Input:** `/code-review src/gameplay/loot_system.gd`
@@ -197,7 +197,7 @@ Fixture defaults。
 ### Case 5b: No Engine Configured, Clean File — NOT ASSESSED，绝不 APPROVED
 
 **Fixture:**
-- `project.yaml` 没有 `engine.name`；`.claude/docs/technical-preferences.md` 显示 `[TO BE CONFIGURED]`
+- `project.yaml` 没有 `engine.name`；`.trae/docs/technical-preferences.md` 显示 `[TO BE CONFIGURED]`
 - `src/gameplay/loot_table.gd` 满足 Phase 4 的全部六项检查，且不引发架构、SOLID 或游戏特定关注点
 
 **Input:** `/code-review src/gameplay/loot_table.gd`
@@ -245,7 +245,7 @@ Fixture defaults。
 - [ ] 不编辑任何源文件（只读技能）
 - [ ] 不调用任何总监闸门
 - [ ] 结论，首个匹配：CHANGES REQUIRED、NOT ASSESSED、APPROVED WITH SUGGESTIONS、APPROVED——当引擎专家评审未运行或任何报告章节显示 NOT ASSESSED 时绝不给出批准
-- [ ] `allowed-tools` 授予 `Bash(git log *)` 与受限的 `yaml-helper.sh resolve_config` 模式，而非裸 `Bash`——技能为只读：它运行 `git log` 与配置解析器，别无其他
+- [ ] 技能正文只运行 `git log` 与 `yaml-helper.sh resolve_config`，不启动其他命令
 - [ ] Phase 9 的提示与选项分支使用与 Phase 8 报告相同的结论词汇
 
 ---

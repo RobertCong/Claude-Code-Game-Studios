@@ -3,17 +3,15 @@ name: retrospective
 description: "基于已完成工作、速度和阻塞项生成冲刺或里程碑回顾。为下一个迭代提供可执行的洞察。"
 argument-hint: "[sprint-N|milestone-name]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, AskUserQuestion, Bash(bash "*/.claude/skills/retrospective/../../hooks/yaml-helper.sh" resolve_config *), Bash(git log *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow,qa.level`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys automation,workflow,qa.level`
 
 # 回顾（Retrospective）
 
 
 
-每次 `AskUserQuestion` 调用都遵循 `.claude/docs/automation-modes.md`
+每次 `AskUserQuestion` 调用都遵循 `.trae/docs/automation-modes.md`
 （协作模式总是询问 · 引导模式仅大项询问 · 自主模式记录后继续；
 `automation_always_ask` 类别始终提示）。
 
@@ -74,8 +72,8 @@ model: sonnet
 > "未找到 [sprint/milestone] 的冲刺数据。运行 `/sprint-plan new` 创建一个
 > 冲刺（`/sprint-status` 只会读取冲刺），或手动提供冲刺详情。"
 
-在 `workflow: minimal`（已在上方解析）下没有冲刺：改为提供回顾迄今已关闭用户故事的选项（`production/epics/*/story-*.md` 且 `Status: Complete`）。
-在 `qa.level: minimal`（已在上方解析）下测试被豁免，因此一个未附测试就关闭的用户故事不算发现项；但一个未附保留截图的视觉/手感或 UI 用户故事仍算。
+在 `workflow: minimal`（已在上一步解析）下没有冲刺：改为提供回顾迄今已关闭用户故事的选项（`production/epics/*/story-*.md` 且 `Status: Complete`）。
+在 `qa.level: minimal`（已在上一步解析）下测试被豁免，因此一个未附测试就关闭的用户故事不算发现项；但一个未附保留截图的视觉/手感或 UI 用户故事仍算。
 
 然后使用 `AskUserQuestion` 呈现这些选项（[C] 仅在 `workflow: minimal` 下）：
 
@@ -244,7 +242,7 @@ the single most important thing to change going forward?]
 
 ## Phase 6: 后续步骤
 
-在 `workflow: minimal`（已在上方解析）下没有冲刺，跳过此问题：
+在 `workflow: minimal`（已在上一步解析）下没有冲刺，跳过此问题：
 指向回顾文件，并说明其行动项进入简报的构建顺序。
 
 否则，使用 `AskUserQuestion`：

@@ -1,6 +1,6 @@
 # Agent Roster
 
-以下 agent 均可使用。每个 agent 在 `.claude/agents/` 中都有专属定义文件。请使用最适合当前任务的 agent。当任务跨越多个领域时，负责协调的 agent（通常是 `producer` 或领域主管）应把工作委派给专家。
+以下 agent 均可使用。每个 agent 在 `.trae/agents/` 中都有专属定义文件。请使用最适合当前任务的 agent。当任务跨越多个领域时，负责协调的 agent（通常是 `producer` 或领域主管）应把工作委派给专家。
 
 这里的每个 agent 都是 `model: inherit` —— 全部 49 个都在会话所用模型上运行，没有一个固定指定模型。这一点不同于发行版本集：后者把三个固定为 `opus`、十六个固定为 `sonnet`；`model-tiers.md` 记录了有哪些变动以及为何重要。
 

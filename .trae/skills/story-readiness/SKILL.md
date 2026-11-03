@@ -3,14 +3,12 @@ name: story-readiness
 description: "检查用户故事是否已准备好实现：验收标准清晰、没有未决问题、ADR 和依赖有效。当用户询问某个故事或冲刺中的故事是否已准备好开始或构建时使用。"
 argument-hint: "[story-file-path or 'all' or 'sprint'] [--review full|lean|solo]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, AskUserQuestion, Agent, Bash(bash "*/.claude/skills/story-readiness/../../hooks/yaml-helper.sh" resolve_config *), Bash(bash .claude/scripts/story-facts.sh *), Bash(bash .claude/scripts/adr-status.sh *)
-model: sonnet
 ---
 
-!`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,review_gate,automation,workflow,qa.level,gate_level,story_granularity,system_overrides`
+**运行并读取输出：** `bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys review_mode,review_gate,automation,workflow,qa.level,gate_level,story_granularity,system_overrides`
 
-上述内容已解析完成——请直接使用；`--review` 会覆盖 `review_mode`。若没有解析块 →
-使用 `.claude/docs/config-resolution.md` 中的默认值。
+上一步命令的输出已解析完成——请直接使用；`--review` 会覆盖 `review_mode`。若没有解析块 →
+使用 `.trae/docs/config-resolution.md` 中的默认值。
 
 使用提问工具提问。若没有提问工具，就把选项编号列出并结束本轮
 以等待回答。被跳过或忽略的问题不算回答：请用纯文本再次询问。
@@ -38,7 +36,7 @@ model: sonnet
 4. **READY**：每一项都通过、有条件地 N/A，或属于建议性。建议性的
    缺口仍会列出。
 
-询问遵循 `.claude/docs/automation-modes.md`（协作模式总是询问，引导模式
+询问遵循 `.trae/docs/automation-modes.md`（协作模式总是询问，引导模式
 在重大选择时询问，自主模式记录并继续；`automation_always_ask`
 类别总是询问）。
 
@@ -66,10 +64,10 @@ found”和“the sprint plan lists no stories”是不同的报告；要说明�
 
 ## Phase 2: 事实，本次运行读取一次
 
-1. **故事。** 在范围内运行故事辅助脚本，使用上面解析的
+1. **故事。** 在范围内运行故事辅助脚本，使用上一步命令输出中解析的
    `story_granularity`：
    ```
-   bash .claude/scripts/story-facts.sh --lint --granularity <story_granularity> [--sprint | --all | <path> ...]
+   bash .trae/scripts/story-facts.sh --lint --granularity <story_granularity> [--sprint | --all | <path> ...]
    ```
    每个 `STORY` 行给出故事的状态、类型、层、估算、TR-ID、ADR、
    验收标准数量、测试证据行和依赖。每个 `LINT` 行
@@ -80,7 +78,7 @@ found”和“the sprint plan lists no stories”是不同的报告；要说明�
    `production/sprint-status.yaml`：报告“no sprint plan found”。也要阅读每个故事文件：下面的可测试性、范围和
    资源条目需要它的文字。
 2. **ADR。** 一次调用给出每个 ADR 的状态和层：
-   `bash .claude/scripts/adr-status.sh`。`no_status` 或 `UNFILLED` 状态是
+   `bash .trae/scripts/adr-status.sh`。`no_status` 或 `UNFILLED` 状态是
    格式错误的 ADR：绝不把缺失状态当作失败状态（路由：
    `/architecture-decision retrofit [file]`）。故事引用但表中没有行的 ADR 是缺失的。
 3. **控制清单。** 只看 `docs/architecture/control-manifest.md` 中的
@@ -225,7 +223,7 @@ found”和“the sprint plan lists no stories”是不同的报告；要说明�
 
 阅读上面的 `review_gate` 行。`skill-gates=skip`（solo 或 lean）：跳过它，
 回复中说“QL-STORY-READY skipped — [Solo | Lean] mode”。`skill-gates=run`：
-阅读 `references/qa-lead-gate.md` 和 `.claude/docs/director-gates.md`，并在
+阅读 `references/qa-lead-gate.md` 和 `.trae/docs/director-gates.md`，并在
 报告之前运行它。跳过时，不要加载它。
 
 ## Phase 6: 报告并收尾

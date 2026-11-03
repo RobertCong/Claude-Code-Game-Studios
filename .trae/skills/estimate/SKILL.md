@@ -3,8 +3,6 @@ name: estimate
 description: "根据复杂度、依赖、速度和风险估算任务工作量。给出带置信度等级的结构化估算。"
 argument-hint: "[task-description]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep
-model: sonnet
 ---
 
 # 估算
@@ -13,7 +11,7 @@ model: sonnet
 
 从参数中读取任务描述。如果描述过于含糊、无法进行有意义的估算，请先请求澄清再继续。
 
-阅读 CLAUDE.md 了解项目背景：技术栈、编码规范、架构模式以及任何估算准则。
+阅读 AGENTS.md 了解项目背景：技术栈、编码规范、架构模式以及任何估算准则。
 
 如果任务涉及已记录的功能或系统，请阅读 `design/gdd/` 中相关的设计文档。按章节阅读：用 Grep 工具（模式 `^#`，content 模式）找到所需标题，再用 offset 和 limit 读取相应区间。
 

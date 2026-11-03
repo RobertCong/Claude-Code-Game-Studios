@@ -35,7 +35,7 @@ fixes? [BUG-ID → files]" —— 之后才做任何代码改动，并由 `qa-te
 
 由 `/skill-test spec` 对照 SKILL.md 检查 —— 无需夹具。
 
-- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`、`allowed-tools`
+- [ ] 具备必需的 frontmatter 字段：`name`、`description`、`argument-hint`、`user-invocable`，且不含 `allowed-tools` / `model`
 - [ ] frontmatter 设置 `disable-model-invocation: true`
 - [ ] 至少有 2 个阶段标题
 - [ ] 包含结论关键字：PASS、PASS WITH WARNINGS、NOT ASSESSED、FAIL
@@ -58,7 +58,7 @@ producer、art-director）。该技能派生工作代理 ——
 
 除非用例自身的夹具另有说明，每个用例的 `project.yaml` 都设置
 `modes.rigor: minimal` 与 `modes.automation: collaborative`，且没有
-`project.local.yaml`。规则见：`studio-tests/CLAUDE.md` § Fixture defaults。
+`project.local.yaml`。规则见：`studio-tests/AGENTS.md` § Fixture defaults。
 
 ---
 
